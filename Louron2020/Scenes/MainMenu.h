@@ -7,7 +7,7 @@
 #include "Scene 2.h"
 #include "Scene 3.h"
 
-#include "../imgui/imgui.h"
+#include "../Headers/imgui/imgui.h"
 #include "../Headers/SceneState.h"
 #include "../Headers/Input.h"
 

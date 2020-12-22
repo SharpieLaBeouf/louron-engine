@@ -91,42 +91,42 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="imgui\imgui.cpp" />
-    <ClCompile Include="imgui\imgui_demo.cpp" />
-    <ClCompile Include="imgui\imgui_draw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Headers\imgui\imgui.cpp" />
+    <ClCompile Include="Headers\imgui\imgui_demo.cpp" />
+    <ClCompile Include="Headers\imgui\imgui_draw.cpp" />
+    <ClCompile Include="Headers\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="Headers\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="Headers\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Source\Engine.cpp" />
     <ClCompile Include="Source\Input.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game States\Scene 2.h" />
-    <ClInclude Include="Game States\Scene 1.h" />
-    <ClInclude Include="Game States\Scene 3.h" />
+    <ClInclude Include="Scenes\Scene 2.h" />
+    <ClInclude Include="Scenes\Scene 1.h" />
+    <ClInclude Include="Scenes\Scene 3.h" />
     <ClInclude Include="Headers\Engine.h" />
     <ClInclude Include="Headers\SceneState.h" />
     <ClInclude Include="Headers\Input.h" />
-    <ClInclude Include="Game States\MainMenu.h" />
+    <ClInclude Include="Scenes\MainMenu.h" />
     <ClInclude Include="Headers\Shader.h" />
     <ClInclude Include="Headers\stb_image.h" />
     <ClInclude Include="Headers\Window.h" />
-    <ClInclude Include="imgui\imconfig.h" />
-    <ClInclude Include="imgui\imgui.h" />
-    <ClInclude Include="imgui\imgui_impl_glfw.h" />
-    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
-    <ClInclude Include="imgui\imgui_internal.h" />
-    <ClInclude Include="imgui\imstb_rectpack.h" />
-    <ClInclude Include="imgui\imstb_textedit.h" />
-    <ClInclude Include="imgui\imstb_truetype.h" />
+    <ClInclude Include="Headers\imgui\imconfig.h" />
+    <ClInclude Include="Headers\imgui\imgui.h" />
+    <ClInclude Include="Headers\imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="Headers\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="Headers\imgui\imgui_internal.h" />
+    <ClInclude Include="Headers\imgui\imstb_rectpack.h" />
+    <ClInclude Include="Headers\imgui\imstb_textedit.h" />
+    <ClInclude Include="Headers\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Images\Main Menu.png" />
+    <Image Include="Resources\Images\Main Menu.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\triangle.glsl" />
+    <None Include="Resources\Shaders\triangle.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

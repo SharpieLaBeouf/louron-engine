@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stack>
 
-#include "../imgui/imgui.h"
+#include "../Headers/imgui/imgui.h"
 #include "../Headers/SceneState.h"
 #include "../Headers/Input.h"
 #include "../Headers/Shader.h"
@@ -38,7 +38,7 @@ namespace State {
 		Scene1(std::stack<std::unique_ptr<State::GameState>>* gameStates) : m_States(gameStates) {
 			std::cout << "[L20] Opening Scene 1..." << std::endl;
 			
-			triangleShader = new Shader("Shaders/triangle.glsl");
+			triangleShader = new Shader("Resources/Shaders/triangle.glsl");
 
 			glGenVertexArrays(1, &triangleVAO);
 			glGenBuffers(1, &triangleVBO);

@@ -18,10 +18,10 @@
 // CUSTOM HEADERS
 #include "Window.h"
 #include "Input.h"
-#include "../Game States/MainMenu.h"
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
+#include "../Scenes/MainMenu.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 class Engine {
 

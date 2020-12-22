@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include "../imgui/imgui.h"
+#include "imgui/imgui.h"
 #include <string>
 
 const int MAX_KEYS = 1024;
