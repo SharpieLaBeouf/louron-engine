@@ -13,11 +13,11 @@
 
 namespace State {
 
-	class MainMenu : public GameState {
+	class MainMenu : public SceneState {
 
 	public:
 		
-		MainMenu(std::stack<std::unique_ptr<State::GameState>>* gameStates) : m_States(gameStates) {
+		MainMenu(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
 			std::cout << std::endl << "[L20] Linked Game States -> Opening Main Menu..." << std::endl;
 		}
 		~MainMenu() override {
@@ -59,7 +59,7 @@ namespace State {
 
 	private:
 
-		std::stack<std::unique_ptr<State::GameState>>* m_States;
+		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 		InputManager m_Input;
 	};
 

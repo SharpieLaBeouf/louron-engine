@@ -9,11 +9,11 @@
 
 namespace State {
 
-	class Scene2 : public GameState {
+	class Scene2 : public SceneState {
 
 	public:
 
-		Scene2(std::stack<std::unique_ptr<State::GameState>>* gameStates) : m_States(gameStates) {
+		Scene2(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
 			std::cout << "[L20] Opening Scene 2..." << std::endl;
 		}
 
@@ -34,7 +34,7 @@ namespace State {
 
 	private:
 
-		std::stack<std::unique_ptr<State::GameState>>* m_States;
+		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 		InputManager m_Input;
 	};
 

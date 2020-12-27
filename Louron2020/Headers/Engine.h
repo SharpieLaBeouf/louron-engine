@@ -41,5 +41,5 @@ private:
 
 	bool m_fpsToggled = true;
 
-	std::stack<std::unique_ptr<State::GameState>> m_States;
+	std::stack<std::unique_ptr<State::SceneState>> m_States;
 };

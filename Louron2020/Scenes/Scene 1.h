@@ -10,9 +10,12 @@
 
 namespace State {
 
-	class Scene1 : public GameState {
+	class Scene1 : public SceneState {
 
 	private:
+
+		InputManager m_Input;
+		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 
 		float back_colour[4] = { 0.75f, 0.90f, 1.0f, 1.0f };
 		float fore_colour[4] = { 1.0f, 0.65f, 1.0f, 1.0f };
@@ -35,7 +38,7 @@ namespace State {
 
 	public:
 
-		Scene1(std::stack<std::unique_ptr<State::GameState>>* gameStates) : m_States(gameStates) {
+		Scene1(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
 			std::cout << "[L20] Opening Scene 1..." << std::endl;
 			
 			triangleShader = new Shader("Resources/Shaders/triangle.glsl");
@@ -73,26 +76,10 @@ namespace State {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
 
+
 		void draw() override {
-			ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
-			ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
-			ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
-			ImGui::SetWindowSize(ImVec2(300.0f, 400.0f));
-
-			ImGui::Text("F9 = Toggle FPS\nF10 = Toggle Console\nF11 = Toggle Fullscreen");
-
-			static bool wireFrame = false;
-			ImGui::Checkbox("Wireframe Mode", &wireFrame);
-			if(!wireFrame) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-			ImGui::Separator();
-
-			ImGui::ColorPicker4("Background", back_colour);
-			ImGui::ColorPicker4("Triangles", fore_colour);
-
-			glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
-
-			ImGui::End();
+			
+			processGUI();
 
 			glClear(GL_COLOR_BUFFER_BIT);
 
@@ -105,8 +92,30 @@ namespace State {
 
 	private:
 
-		std::stack<std::unique_ptr<State::GameState>>* m_States;
-		InputManager m_Input;
-	};
 
+		void processGUI() {
+
+			ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
+			ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
+			ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
+			ImGui::SetWindowSize(ImVec2(300.0f, 400.0f));
+
+			ImGui::Text("F9 = Toggle FPS\nF10 = Toggle Console\nF11 = Toggle Fullscreen");
+
+			static bool wireFrame = false;
+			ImGui::Checkbox("Wireframe Mode", &wireFrame);
+			if (!wireFrame) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+			ImGui::Separator();
+
+			ImGui::ColorPicker4("Background", back_colour);
+			ImGui::ColorPicker4("Triangles", fore_colour);
+
+			glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
+
+			ImGui::End();
+		}
+	
+	
+	};
 }

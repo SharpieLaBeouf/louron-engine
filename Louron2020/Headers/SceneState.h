@@ -4,13 +4,13 @@
 
 namespace State {
 
-	class GameState {
+	class SceneState {
 
 	public:
 		virtual void update(Window* wnd) = 0;
 		virtual void draw() = 0;
 
-		virtual ~GameState() { };
+		virtual ~SceneState() { };
 	};
 
 }
