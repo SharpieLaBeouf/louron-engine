@@ -26,7 +26,7 @@ Engine::Engine()
 			else break;
 		else break;
 	}*/
-	m_Window = new Window("Louron 2020", 800, 600, screenMode);
+	m_Window = new Window("Louron 2020", 800, 800, screenMode);
 	m_Window->init();
 	m_Input = m_Window->getInput();
 	glfwSetWindowSizeCallback(m_Window->getWindow(), windowSizeCallBack);

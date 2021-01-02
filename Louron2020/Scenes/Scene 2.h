@@ -14,15 +14,12 @@ namespace State {
 
 	class Scene2 : public SceneState {
 
+	//Private Setup Variables
 	private:
-
-		float back_colour[4] = { 0.992f, 0.992f, 0.588f, 1.0f };
-		float fore_colour[4] = { 1.0f  , 1.0f  , 1.0f  , 1.0f };
 
 		InputManager m_Input;
 		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 
-		Transform trans;
 		unsigned int VAO = NULL;
 		unsigned int VBO = NULL;
 		unsigned int EBO = NULL;
@@ -37,10 +34,8 @@ namespace State {
 			1, 2, 3
 		};
 
-		Shader* textureShader = nullptr;
-		Texture* texture = nullptr;
 
-
+	//Constructors
 	public:
 
 		Scene2(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
@@ -71,7 +66,6 @@ namespace State {
 			textureShader = new Shader("Resources/Shaders/basic_texture.glsl");
 			textureShader->setInt("ourTexture", 0);
 		}
-
 		~Scene2() override
 		{
 			std::cout << "[L20] Closing Scene 2..." << std::endl;
@@ -80,13 +74,24 @@ namespace State {
 			glDeleteBuffers(1, &EBO);
 		}
 
+
+	//Private Scene Variables
 	private:
 		float currentTime;
 		float deltaTime;
 		float lastTime = 0;
+		int speed = 1;
 
+		float back_colour[4] = { 0.992f, 0.992f, 0.588f, 1.0f };
+		float fore_colour[4] = { 1.0f  , 1.0f  , 1.0f  , 1.0f };
+
+		TransformComponent trans;
+		Texture* texture = nullptr;
+		Shader* textureShader = nullptr;
+
+
+	//Public Functions
 	public:
-
 
 		void update(Window* wnd) override {
 			currentTime = glfwGetTime();
@@ -99,7 +104,7 @@ namespace State {
 			processGUI();
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			trans.Rotation.z += deltaTime;
+			trans.rotation.z += deltaTime * speed;
 
 			textureShader->setMat4("transform", trans.getTransform());
 			textureShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
@@ -114,12 +119,17 @@ namespace State {
 
 		}
 
+
+	//Private Functions
 	private:
 		void processGUI() {
 
 			ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 			
-			ImGui::Text("Z Value: %f", trans.Rotation.z);
+			ImGui::InputInt("Speed", &speed);
+			ImGui::DragFloat3("Translate", glm::value_ptr(trans.position), 0.01f, 0, 0, "%.2f");
+			ImGui::DragFloat3("Rotate", glm::value_ptr(trans.rotation), 1.0f, 0, 0, "%.2f");
+			ImGui::DragFloat3("Scale", glm::value_ptr(trans.scale), 0.01f, 0, 0, "%.2f");
 
 			ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
 			ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
@@ -140,7 +150,5 @@ namespace State {
 
 			ImGui::End();
 		}
-
 	};
-
 }

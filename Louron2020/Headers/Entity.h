@@ -7,37 +7,41 @@
 #include <glm/gtx/quaternion.hpp>
 
 
-class Transform {
+struct TransformComponent {
 	
 public:
 
-	glm::vec3 Translation = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 Rotation = { 0.0f, 0.0f, 0.0f };
-	glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
+	glm::vec3 position = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 rotation = { 0.0f, 0.0f, 0.0f };
+	glm::vec3 scale = { 1.0f, 1.0f, 1.0f };
 
 public:
 
-	Transform() = default;
-	Transform(const Transform&) = default;
-	Transform(const glm::vec3 & translation) : Translation(translation) {}
+	TransformComponent() = default;
+	TransformComponent(const TransformComponent&) = default;
+	TransformComponent(const glm::vec3 & translation) : position(translation) {}
 
-	void translate(glm::vec3 vector) { Translation += vector; }
-	void rotate(glm::vec3 vector) { Rotation += vector; }
-	void scale(glm::vec3 vector) { Scale += vector; }
+	operator glm::mat4 () { return this->getTransform(); }
+
+	void Translate(glm::vec3 vector) { position += vector; }
+	void Rotate(glm::vec3 vector) { rotation += vector; }
+	void Scale(glm::vec3 vector) { scale += vector; }
 
 	glm::mat4 getTransform() const
 	{
-		glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
-
-		return glm::translate(glm::mat4(1.0f), Translation)
-			* rotation
-			* glm::scale(glm::mat4(1.0f), Scale);
+		return glm::translate(glm::mat4(1.0f), position)
+			* glm::toMat4(glm::quat(glm::radians(rotation)))
+			* glm::scale(glm::mat4(1.0f), scale);
 	}
 };
 
 
 class Entity {
 
+public:
+
+
+private:
 
 
 };
