@@ -47,11 +47,11 @@ namespace State {
 				
 				ImGui::Text("Main Menu");
 				ImGui::Separator();
-				if (ImGui::Button(" 1. Scene One   "))
+				if (ImGui::Button(" 1. Basic Triangles "))
 					m_States->push(std::make_unique<State::Scene1>(m_States));
-				if (ImGui::Button(" 2. Scene Two   ")) 
+				if (ImGui::Button(" 2. Basic Texture   ")) 
 					m_States->push(std::make_unique<State::Scene2>(m_States));
-				if (ImGui::Button(" 3. Scene Three ")) 
+				if (ImGui::Button(" 3. Scene Three     ")) 
 					m_States->push(std::make_unique<State::Scene3>(m_States));
 			}
 			ImGui::End();

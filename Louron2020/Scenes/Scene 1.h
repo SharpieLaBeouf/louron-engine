@@ -41,7 +41,7 @@ namespace State {
 		Scene1(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
 			std::cout << "[L20] Opening Scene 1..." << std::endl;
 			
-			triangleShader = new Shader("Resources/Shaders/triangle.glsl");
+			triangleShader = new Shader("Resources/Shaders/basic.glsl");
 
 			glGenVertexArrays(1, &triangleVAO);
 			glGenBuffers(1, &triangleVBO);
@@ -80,14 +80,15 @@ namespace State {
 		void draw() override {
 			
 			processGUI();
-
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			triangleShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
-
 			triangleShader->Bind();
+
 			glBindVertexArray(triangleVAO);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+			triangleShader->UnBind();
 		}
 
 	private:

@@ -98,11 +98,14 @@
     <ClCompile Include="Headers\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Headers\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Source\Engine.cpp" />
+    <ClCompile Include="Source\Entity.cpp" />
     <ClCompile Include="Source\Input.cpp" />
     <ClCompile Include="Source\Main.cpp" />
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Headers\Entity.h" />
+    <ClInclude Include="Headers\Texture.h" />
     <ClInclude Include="Scenes\Scene 2.h" />
     <ClInclude Include="Scenes\Scene 1.h" />
     <ClInclude Include="Scenes\Scene 3.h" />
@@ -123,10 +126,11 @@
     <ClInclude Include="Headers\imgui\imstb_truetype.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\Images\Main Menu.png" />
+    <Image Include="Resources\Images\carbon_fibre_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\triangle.glsl" />
+    <None Include="Resources\Shaders\basic.glsl" />
+    <None Include="Resources\Shaders\basic_texture.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

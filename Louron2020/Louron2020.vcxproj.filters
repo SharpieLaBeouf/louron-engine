@@ -54,6 +54,9 @@
     <ClCompile Include="Headers\imgui\imgui_widgets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Engine.h">
@@ -110,12 +113,19 @@
     <ClInclude Include="Scenes\Scene 3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\triangle.glsl" />
+    <None Include="Resources\Shaders\basic.glsl" />
+    <None Include="Resources\Shaders\basic_texture.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\Images\Main Menu.png">
+    <Image Include="Resources\Images\carbon_fibre_texture.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
