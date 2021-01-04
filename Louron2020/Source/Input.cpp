@@ -1,5 +1,8 @@
 #include "../Headers/input.h"
 
+double InputManager::m_MouseX;
+double InputManager::m_MouseY;
+
 bool InputManager::mKeys[MAX_KEYS][2];
 bool InputManager::mButtons[MAX_BUTTONS][2];
 
@@ -16,6 +19,12 @@ void mouseCallback(GLFWwindow* window, int button, int action, int mods)
 		InputManager::mButtons[button][0] = false;
 		InputManager::mButtons[button][1] = true;
 	}
+}
+
+void cursorCallback(GLFWwindow* window, double xpos, double ypos)
+{
+	InputManager::m_MouseX = xpos;
+	InputManager::m_MouseY = ypos;
 }
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -43,6 +52,7 @@ int InputManager::init(GLFWwindow* window)
 {
 	glfwSetKeyCallback(window, keyCallback);
 	glfwSetMouseButtonCallback(window, mouseCallback);
+	glfwSetCursorPosCallback(window, cursorCallback);
 	glfwSetWindowUserPointer(window, this);
 
 	for (int i = 0; i < MAX_KEYS; i++)
@@ -105,3 +115,14 @@ bool InputManager::GetMouseButtonUp(int glfwButtonCode)
 	}
 	return false;
 }
+
+float InputManager::GetMouseX()
+{
+	return (float)m_MouseX;
+}
+
+float InputManager::GetMouseY()
+{
+	return (float)m_MouseY;
+}
+

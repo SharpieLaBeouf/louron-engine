@@ -82,79 +82,67 @@ public:
 	{
 		glUseProgram(m_Program);
 		glUniform1i(glGetUniformLocation(m_Program, name), (int)value);
-		glUseProgram(0);
 	}
 
 	void setInt(const GLchar* name, int value) const
 	{
 		glUseProgram(m_Program);
 		glUniform1i(glGetUniformLocation(m_Program, name), value);
-		glUseProgram(0);
 	}
 
 	void setFloat(const GLchar* name, float value) const
 	{
 		glUseProgram(m_Program);
 		glUniform1f(glGetUniformLocation(m_Program, name), value);
-		glUseProgram(0);
 	}
 
 	void setVec2(const GLchar* name, const glm::vec2& value) const
 	{
 		glUseProgram(m_Program);
 		glUniform2fv(glGetUniformLocation(m_Program, name), 1, &value[0]);
-		glUseProgram(0);
 	}
 	void setVec2(const GLchar* name, float x, float y) const
 	{
 		glUseProgram(m_Program);
 		glUniform2f(glGetUniformLocation(m_Program, name), x, y);
-		glUseProgram(0);
 	}
 
 	void setVec3(const GLchar* name, const glm::vec3& value) const
 	{
 		glUseProgram(m_Program);
 		glUniform3fv(glGetUniformLocation(m_Program, name), 1, &value[0]);
-		glUseProgram(0);
 	}
 	void setVec3(const GLchar* name, float x, float y, float z) const
 	{
 		glUseProgram(m_Program);
 		glUniform3f(glGetUniformLocation(m_Program, name), x, y, z);
-		glUseProgram(0);
 	}
 
 	void setVec4(const GLchar* name, const glm::vec4& value) const
 	{
 		glUseProgram(m_Program);
 		glUniform4fv(glGetUniformLocation(m_Program, name), 1, &value[0]);
-		glUseProgram(0);
 	}
 	void setVec4(const GLchar* name, float x, float y, float z, float w)
 	{
 		glUseProgram(m_Program);
 		glUniform4f(glGetUniformLocation(m_Program, name), x, y, z, w);
-		glUseProgram(0);
 	}
 
 	void setMat2(const GLchar* name, const glm::mat2& mat) const
 	{
 		glUseProgram(m_Program);
 		glUniformMatrix2fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]);
-		glUseProgram(0);
 	}
 	void setMat3(const GLchar* name, const glm::mat3& mat) const
 	{
 		glUseProgram(m_Program);
 		glUniformMatrix3fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]);
-		glUseProgram(0);
 	}
 	void setMat4(const GLchar* name, const glm::mat4& mat) const
 	{
 		glUseProgram(m_Program);
 		glUniformMatrix4fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]);
-		glUseProgram(0);
 	}
 
 private:

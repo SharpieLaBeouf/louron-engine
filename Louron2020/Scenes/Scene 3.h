@@ -9,6 +9,7 @@
 #include "../Headers/Shader.h"
 #include "../Headers/Texture.h"
 #include "../Headers/Entity.h"
+#include "../Headers/Camera.h"
 
 namespace State {
 
@@ -17,7 +18,7 @@ namespace State {
 		//Private Setup Variables
 	private:
 
-		InputManager m_Input;
+		Window* m_Window;
 		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 
 		unsigned int VAO = NULL;
@@ -78,7 +79,8 @@ namespace State {
 		//Constructors
 	public:
 
-		Scene3(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
+		Scene3(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates) {
+			m_Window = wnd;
 
 			glEnable(GL_DEPTH_TEST);
 			
@@ -105,9 +107,7 @@ namespace State {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 			
-			delete &vertices[0];
-
-			texture = new Texture("Resources/Images/carbon_fibre_texture.jpg");
+			texture = new Texture("Resources/Images/cube_texture.jpg");
 			textureShader = new Shader("Resources/Shaders/basic_cube.glsl");
 			textureShader->setInt("ourTexture", 0);
 
@@ -140,24 +140,22 @@ namespace State {
 		//Public Functions
 	public:
 
-		void update(Window* wnd) override {
-			currentTime = glfwGetTime();
+		void update() override {
+			currentTime = (float)glfwGetTime();
 			deltaTime = currentTime - lastTime;
 			lastTime = currentTime;
 		}
 
-		void draw(Window* wnd) override {
+		void draw() override {
 
 			processGUI();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			trans.rotation.z += deltaTime * speed;
 			
-			glm::mat4 MVP = glm::perspective(glm::radians(60.0f), wnd->getWidth() / wnd->getHeight(), 0.1f, 100.0f) 
-				* glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -5))
-				* trans.getTransform();
-
-			textureShader->setMat4("MVP", MVP);
+			textureShader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
+			textureShader->setMat4("view", glm::lookAt(glm::vec3(0.0f, 1.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+			textureShader->setMat4("model", trans.getTransform());
 			textureShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
 			textureShader->Bind();
 

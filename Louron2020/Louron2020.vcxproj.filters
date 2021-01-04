@@ -57,9 +57,6 @@
     <ClCompile Include="Source\Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Camera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Engine.h">
@@ -135,7 +132,10 @@
     <None Include="Resources\Shaders\basic_cube.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\Images\carbon_fibre_texture.jpg">
+    <Image Include="Resources\Images\cube_texture.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Images\grass_texture.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -33,7 +33,7 @@ Engine::Engine()
 
 	// 2. Init GLEW
 	GLenum err = glewInit();
-	glViewport(0, 0, m_Window->getWidth(), m_Window->getHeight());
+	glViewport(0, 0, (GLsizei)m_Window->getWidth(), (GLsizei)m_Window->getHeight());
 	
 	std::cout << "[L20] GLEW Initialised " << ((err == GLEW_OK) ? "Successfully!" : (const char*)glewGetErrorString(err)) << std::endl;
 	std::cout << "[L20] OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
@@ -60,20 +60,20 @@ Engine::~Engine()
 	glfwDestroyWindow(m_Window->getWindow());
 	glfwTerminate();
 }
-
 int Engine::run()
 {
 	ImGuiIO& io = ImGui::GetIO();
-	m_States.push(std::make_unique<State::MainMenu>(&m_States));
+	m_States.push(std::make_unique<State::MainMenu>(&m_States, m_Window));
 
+	bool demoGUI = false;
 	while (!glfwWindowShouldClose(m_Window->getWindow()))
 	{
 		glfwPollEvents();
 
 		int width, height;
 		glfwGetWindowSize(m_Window->getWindow(), &width, &height);
-		m_Window->setWidth(width);
-		m_Window->setHeight(height);
+		m_Window->setWidth((float)width);
+		m_Window->setHeight((float)height);
 		
 		if (m_Input->GetKeyUp(GLFW_KEY_ESCAPE)) m_States.pop();
 		if (m_Input->GetKeyUp(GLFW_KEY_F11)) m_Window->toggleFullscreen();
@@ -85,12 +85,15 @@ int Engine::run()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		if (m_Input->GetKeyUp(GLFW_KEY_F1)) demoGUI = !demoGUI;
+		if (demoGUI) ImGui::ShowDemoWindow();
+
 		// Run Scene At Top Of Game State Stack
 		if (!m_States.empty())
 		{
-			m_States.top()->update(m_Window);
-			m_States.top()->draw(m_Window);
-		} else break;
+			m_States.top()->update();
+			m_States.top()->draw();
+		} else glfwSetWindowShouldClose(m_Window->getWindow(), GLFW_TRUE);
 
 		if (m_fpsToggled)
 		{

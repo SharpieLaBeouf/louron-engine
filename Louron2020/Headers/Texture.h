@@ -13,7 +13,6 @@ public:
 	Texture() = default;
 	Texture(const char* texturePath) {
 
-		std::cout << "[L20] Loading Texture: " << texturePath << std::endl;
 
 		glGenTextures(1, &m_TextureID);
 		glBindTexture(GL_TEXTURE_2D, m_TextureID);
@@ -33,6 +32,7 @@ public:
 		}
 		else std::cout << "[L20] Failed to load texture!" << std::endl;
 
+		std::cout << "[L20] Loaded Texture: " << texturePath << std::endl;
 		stbi_image_free(textureData);
 	}
 	~Texture() {

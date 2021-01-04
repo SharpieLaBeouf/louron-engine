@@ -5,27 +5,33 @@ Window::Window() :
 	m_Height(600),
 	m_Title("Game Window"),
 	m_ScreenMode(0),
-	m_Window(NULL)
+	m_Window(NULL),
+	m_ConsoleToggled(false),
+	m_Input(nullptr)
 {
 
 }
 
 Window::Window(int width, int height) : 
-	m_Width(width), 
-	m_Height(height),
+	m_Width((float)width), 
+	m_Height((float)height),
 	m_Title("Game Window"),
 	m_ScreenMode(0),
-	m_Window(NULL)
+	m_Window(NULL),
+	m_ConsoleToggled(false),
+	m_Input(nullptr)
 {
 
 }
 
 Window::Window(const char* title, int width, int height) :
-	m_Width(width),
-	m_Height(height),
+	m_Width((float)width),
+	m_Height((float)height),
 	m_Title(title),
 	m_ScreenMode(0),
-	m_Window(NULL)
+	m_Window(NULL),
+	m_ConsoleToggled(false),
+	m_Input(nullptr)
 {
 }
 
@@ -34,11 +40,13 @@ Window::Window(const char* title, int width, int height) :
 /// <param name="screenMode"> Windowed = 0, Windowed Borderless Fullscreen = 1, Fullscreen = 2, Windowed Borderless = 3</param>
 /// <returns></returns>
 Window::Window(const char* title, int width, int height, int screenMode) :
-	m_Width(width),
-	m_Height(height),
+	m_Width((float)width),
+	m_Height((float)height),
 	m_Title(title),
 	m_ScreenMode(screenMode),
-	m_Window(NULL)
+	m_Window(NULL),
+	m_ConsoleToggled(false),
+	m_Input(nullptr)
 {
 }
 
@@ -56,7 +64,7 @@ int Window::init()
 	switch (m_ScreenMode)
 	{
 		case 0:
-			m_Window = glfwCreateWindow(m_Width, m_Height, m_Title, NULL, NULL);
+			m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, NULL, NULL);
 		break;
 
 		case 1:
@@ -68,12 +76,12 @@ int Window::init()
 		break;
 
 		case 2:
-			m_Window = glfwCreateWindow(m_Width, m_Height, m_Title, monitor, NULL);
+			m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, monitor, NULL);
 		break;
 
 		case 3:
 			glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-			m_Window = glfwCreateWindow(m_Width, m_Height, m_Title, NULL, NULL);
+			m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, NULL, NULL);
 		break;
 	}
 
@@ -112,9 +120,9 @@ void Window::toggleFullscreen() {
 	}
 	else if (m_ScreenMode == 2){
 		std::cout << "[L20] GLFW Changing to Windowed" << std::endl;
-		m_Width = 800;
-		m_Height = 800;
-		glfwSetWindowMonitor(m_Window, NULL, mode->width / 2 - m_Width / 2, mode->height / 2 - m_Height / 2, m_Width, m_Height, mode->refreshRate);
+		m_Width = 800.0f;
+		m_Height = 800.0f;
+		glfwSetWindowMonitor(m_Window, NULL, mode->width / 2 - (int)m_Width / 2, mode->height / 2 - (int)m_Height / 2, (int)m_Width, (int)m_Height, mode->refreshRate);
 		m_ScreenMode = 0;
 	}
 }

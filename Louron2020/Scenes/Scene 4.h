@@ -3,12 +3,13 @@
 #include <iostream>
 #include <stack>
 
-#include "../Headers/imgui/imgui.h"
-#include "../Headers/SceneState.h"
 #include "../Headers/Input.h"
+#include "../Headers/Entity.h"
+#include "../Headers/Camera.h"
 #include "../Headers/Shader.h"
 #include "../Headers/Texture.h"
-#include "../Headers/Entity.h"
+#include "../Headers/SceneState.h"
+#include "../Headers/imgui/imgui.h"
 
 namespace State {
 
@@ -17,22 +18,36 @@ namespace State {
 		//Private Setup Variables
 	private:
 
-		InputManager m_Input;
+		Window* m_Window;
 		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 
-		unsigned int VAO = NULL;
-		unsigned int VBO = NULL;
-		unsigned int EBO = NULL;
-		float vertices[120] = {
+		unsigned int plane_VAO = NULL;
+		unsigned int plane_VBO = NULL;
+		unsigned int plane_EBO = NULL;
+		float plane_vertices[20] = {
+			 0.5f, 0.0f,  0.5f, 1.0f, 1.0f,
+			 0.5f, 0.0f, -0.5f, 1.0f, 0.0f,
+			-0.5f, 0.0f, -0.5f, 0.0f, 0.0f,
+			-0.5f, 0.0f,  0.5f, 0.0f, 1.0f 
+		};
+		unsigned int plane_indices[6] = {
+			0, 1, 3,
+			1, 2, 3
+		};
+
+		unsigned int cube_VAO = NULL;
+		unsigned int cube_VBO = NULL;
+		unsigned int cube_EBO = NULL;
+		float cube_vertices[120] = {
 			 0.5f,  0.5f, 0.5f,  1.0f, 1.0f,   // front top right
 			 0.5f, -0.5f, 0.5f,  1.0f, 0.0f,   // front bottom right
 			-0.5f, -0.5f, 0.5f,  0.0f, 0.0f,   // front bottom left
 			-0.5f,  0.5f, 0.5f,  0.0f, 1.0f,   // front top left
 
-			 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  // back top right
-			 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  // back bottom right
-			-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  // back bottom left
-			-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  // back top left
+			 0.5f,  0.5f, -0.5f, 1.0f, 1.0f,  // back top right
+			 0.5f, -0.5f, -0.5f, 1.0f, 0.0f,  // back bottom right
+			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,  // back bottom left
+			-0.5f,  0.5f, -0.5f, 0.0f, 1.0f,  // back top left
 
 			 0.5f,  0.5f,  0.5f, 1.0f, 1.0f,   // right top right
 			 0.5f,  0.5f, -0.5f, 1.0f, 0.0f,   // right bottom right
@@ -54,7 +69,7 @@ namespace State {
 			-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,   // bottom bottom left
 			-0.5f, -0.5f,  0.5f, 0.0f, 1.0f    // bottom top left 
 		};
-		unsigned int indices[36] = {
+		unsigned int cube_indices[36] = {
 			0, 1, 3,
 			1, 2, 3,
 
@@ -78,23 +93,25 @@ namespace State {
 		//Constructors
 	public:
 
-		Scene4(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
+		Scene4(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates) {
+			std::cout << "[L20] Opening Scene 4..." << std::endl;
+			m_Window = wnd;
 
 			glEnable(GL_DEPTH_TEST);
+			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-			std::cout << "[L20] Opening Scene 4..." << std::endl;
+			// Init Plane VAO
+			glGenVertexArrays(1, &plane_VAO);
+			glGenBuffers(1, &plane_VBO);
+			glGenBuffers(1, &plane_EBO);
 
-			glGenVertexArrays(1, &VAO);
-			glGenBuffers(1, &VBO);
-			glGenBuffers(1, &EBO);
+			glBindVertexArray(plane_VAO);
 
-			glBindVertexArray(VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, plane_VBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(plane_vertices), plane_vertices, GL_STATIC_DRAW);
 
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, plane_EBO);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(plane_indices), plane_indices, GL_STATIC_DRAW);
 
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (void*)0);
 			glEnableVertexAttribArray(0);
@@ -102,97 +119,180 @@ namespace State {
 			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (void*)(3 * sizeof(GL_FLOAT)));
 			glEnableVertexAttribArray(1);
 
+			// Init Cube VAO
+			glGenVertexArrays(1, &cube_VAO);
+			glGenBuffers(1, &cube_VBO);
+			glGenBuffers(1, &cube_EBO);
+
+			glBindVertexArray(cube_VAO);
+
+			glBindBuffer(GL_ARRAY_BUFFER, cube_VBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(cube_vertices), cube_vertices, GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cube_EBO);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(cube_indices), cube_indices, GL_STATIC_DRAW);
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (void*)0);
+			glEnableVertexAttribArray(0);
+
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GL_FLOAT), (void*)(3 * sizeof(GL_FLOAT)));
+			glEnableVertexAttribArray(1);
+
+
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 
-			texture = new Texture("Resources/Images/carbon_fibre_texture.jpg");
+			sceneCamera = new Camera(wnd, glm::vec3(0.0f, 10.0f, 25.0f));
+
+			cube_texture = new Texture("Resources/Images/cube_texture.jpg");
+			flatShader = new Shader("Resources/Shaders/basic.glsl");
 			textureShader = new Shader("Resources/Shaders/basic_cube.glsl");
 			textureShader->setInt("ourTexture", 0);
+
+			plane_trans.position.y = -0.6f;
+			plane_trans.scale = glm::vec3(40.0f, 0.0f, 40.0f);
 		}
 		~Scene4() override
 		{
 			std::cout << "[L20] Closing Scene 4..." << std::endl;
 			glDisable(GL_DEPTH_TEST);
-			glDeleteVertexArrays(1, &VAO);
-			glDeleteBuffers(1, &VBO);
-			glDeleteBuffers(1, &EBO);
+			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			glDeleteVertexArrays(1, &cube_VAO);
+			glDeleteBuffers(1, &cube_VBO);
+			glDeleteBuffers(1, &cube_EBO);
 		}
 
 
 		//Private Scene Variables
 	private:
+
+		float back_colour[4] = { 0.992f, 0.325f, 0.325f, 1.0f };
+		float box_colour[4] = { 1.0f  , 1.0f  , 1.0f  , 1.0f };
+		float plane_colour[4] = { 1.0f  , 0.784f  , 0.313f  , 1.0f };
 		float currentTime = 0;
 		float deltaTime = 0;
 		float lastTime = 0;
-		int speed = 0;
 
-		float back_colour[4] = { 0.992f, 0.325f, 0.325f, 1.0f };
-		float fore_colour[4] = { 1.0f  , 1.0f  , 1.0f  , 1.0f };
+		Camera* sceneCamera = nullptr;
+		Texture* cube_texture = nullptr;
 
-		Texture* texture = nullptr;
+		Shader* flatShader = nullptr;
 		Shader* textureShader = nullptr;
 
-		TransformComponent trans;
+		TransformComponent cube_trans;
+		TransformComponent plane_trans;
+		
+		int waveSize = 20;
+		int waveHeight = 10;
+		float waveSpeed = 5;
 
 		//Public Functions
 	public:
 
-		void update(Window* wnd) override {
-			currentTime = glfwGetTime();
+		void update() override {
+
+			currentTime = (float)glfwGetTime();
 			deltaTime = currentTime - lastTime;
 			lastTime = currentTime;
+			
+			sceneCamera->Update(deltaTime);
+
+			if (m_Window->getInput()->GetKeyUp(GLFW_KEY_LEFT_ALT)) {
+				sceneCamera->MouseToggledOff = !sceneCamera->MouseToggledOff;
+				if(sceneCamera->MouseToggledOff)
+					glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				else if(!sceneCamera->MouseToggledOff)
+					glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			}
+			
 		}
 
-		void draw(Window* wnd) override {
+		void draw() override {
 
-			processGUI();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			trans.rotation.z += deltaTime * speed;
 
-			glm::mat4 MVP = glm::perspective(glm::radians(60.0f), wnd->getWidth() / wnd->getHeight(), 0.1f, 100.0f)
-				* glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -5))
-				* trans.getTransform();
+			// DRAW PLANE BENEATH
+			glBindVertexArray(plane_VAO);
 
-			textureShader->setMat4("MVP", MVP);
-			textureShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
+			flatShader->Bind();
+			flatShader->setMat4("model", plane_trans.getTransform());
+			flatShader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
+			flatShader->setMat4("view", sceneCamera->getViewMatrix());
+			flatShader->setVec4("ourColour", plane_colour[0], plane_colour[1], plane_colour[2], plane_colour[3]);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+
+			// DRAW CUBES ABOVE
+			glBindVertexArray(cube_VAO);
+			glBindTexture(GL_TEXTURE_2D, cube_texture->getID());
+
 			textureShader->Bind();
+			textureShader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
+			textureShader->setMat4("view", sceneCamera->getViewMatrix());
+			textureShader->setVec4("ourColour", box_colour[0], box_colour[1], box_colour[2], box_colour[3]);
 
-			glBindVertexArray(VAO);
-			glBindTexture(GL_TEXTURE_2D, texture->getID());
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);	
-			glBindTexture(GL_TEXTURE_2D, 0);
+			glm::vec3 pos = glm::vec3(0.0f);
+			for (int x = 1; x <= waveSize; x++)
+			{
+				pos.x = -waveSize / 2 + x - cube_trans.scale.x / 2;
+				for (int z = 1; z <= waveSize; z++)
+				{
+					pos.z = -waveSize / 2 + z - cube_trans.scale.z / 2;
+					for (int y = 1; y <= waveSize; y++)
+					{
+						double time = glfwGetTime();
+						pos.y = (float)sin((time * waveSpeed + floor(x - waveSize) + floor(z - waveSize))) / waveSize * waveHeight;
+					}
+					textureShader->setMat4("model", glm::translate(cube_trans.getTransform(), pos));
+					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+				}
+			}
 
 			textureShader->UnBind();
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			processGUI();
 
 		}
 
-
-		//Private Functions
 	private:
+
 		void processGUI() {
 
-			ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
+			static bool wireFrame = false;
 
-			ImGui::InputInt("Speed", &speed);
-			ImGui::DragFloat3("Translate", glm::value_ptr(trans.position), 0.01f, 0, 0, "%.2f");
-			ImGui::DragFloat3("Rotate", glm::value_ptr(trans.rotation), 1.0f, 0, 0, "%.2f");
-			ImGui::DragFloat3("Scale", glm::value_ptr(trans.scale), 0.01f, 0, 0, "%.2f");
+			ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 
 			ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
 			ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
 			ImGui::SetWindowSize(ImVec2(300.0f, 400.0f));
 
-			ImGui::Text("F9 = Toggle FPS\nF10 = Toggle Console\nF11 = Toggle Fullscreen");
+			ImGui::DragInt("Cube Amount", &waveSize, 1.0f, 0, 100);
+			ImGui::DragInt("Wave Height", &waveHeight, 1.0f, 0, 100);
+			ImGui::DragFloat("Wave Speed", &waveSpeed, 0.1f);
+			ImGui::DragFloat3("Translate", glm::value_ptr(cube_trans.position), 0.01f, 0, 0, "%.2f");
+			ImGui::DragFloat3("Rotate", glm::value_ptr(cube_trans.rotation), 1.0f, 0, 0, "%.2f");
+			ImGui::DragFloat3("Scale", glm::value_ptr(cube_trans.scale), 0.01f, 0, 0, "%.2f");
+			ImGui::DragFloat3("Plane Scale", glm::value_ptr(plane_trans.scale), 0.01f, 0, 0, "%.2f");
 
-			static bool wireFrame = false;
+			ImGui::Text("F9 = Toggle FPS\nF10 = Toggle Console\nF11 = Toggle Fullscreen");
 			ImGui::Checkbox("Wireframe Mode", &wireFrame);
-			if (!wireFrame) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+			if (!wireFrame) 
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); 
+			else 
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 			ImGui::Separator();
 
-			ImGui::ColorPicker4("Background", back_colour);
-			ImGui::ColorPicker4("Triangles", fore_colour);
+			if (ImGui::TreeNode("Colours"))
+			{
+				ImGui::ColorPicker4("Background", back_colour);
+				ImGui::ColorPicker4("Box", box_colour);
+				ImGui::ColorPicker4("Plane", plane_colour);
+				ImGui::TreePop();
+			}
 
 			glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 

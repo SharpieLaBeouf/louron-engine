@@ -14,7 +14,7 @@ namespace State {
 
 	private:
 
-		InputManager m_Input;
+		Window* m_Window;
 		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 
 		float back_colour[4] = { 0.75f, 0.90f, 1.0f, 1.0f };
@@ -38,8 +38,9 @@ namespace State {
 
 	public:
 
-		Scene1(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
+		Scene1(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates) {
 			std::cout << "[L20] Opening Scene 1..." << std::endl;
+			m_Window = wnd;
 			
 			triangleShader = new Shader("Resources/Shaders/basic.glsl");
 
@@ -69,21 +70,24 @@ namespace State {
 			glDeleteBuffers(1, &triangleEBO);
 		}
 
-		void update(Window* wnd) override {
-			if (wnd->getInput()->GetKeyDown(GLFW_KEY_F))
+		void update() override {
+			if (m_Window->getInput()->GetKeyDown(GLFW_KEY_F))
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			else if (wnd->getInput()->GetKeyDown(GLFW_KEY_W))
+			else if (m_Window->getInput()->GetKeyDown(GLFW_KEY_W))
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
 
 
-		void draw(Window* wnd) override {
+		void draw() override {
 			
 			processGUI();
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			triangleShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
 			triangleShader->Bind();
+			triangleShader->setMat4("model", glm::mat4(1.0f));
+			triangleShader->setMat4("proj", glm::mat4(1.0f));
+			triangleShader->setMat4("view", glm::mat4(1.0f));
+			triangleShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
 
 			glBindVertexArray(triangleVAO);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);

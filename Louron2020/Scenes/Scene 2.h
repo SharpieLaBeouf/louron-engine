@@ -17,7 +17,7 @@ namespace State {
 	//Private Setup Variables
 	private:
 
-		InputManager m_Input;
+		Window* m_Window;
 		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 
 		unsigned int VAO = NULL;
@@ -38,8 +38,9 @@ namespace State {
 	//Constructors
 	public:
 
-		Scene2(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
+		Scene2(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates) {
 			std::cout << "[L20] Opening Scene 2..." << std::endl;
+			m_Window = wnd;
 
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);
@@ -62,7 +63,7 @@ namespace State {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 
-			texture = new Texture("Resources/Images/carbon_fibre_texture.jpg");
+			texture = new Texture("Resources/Images/cube_texture.jpg");
 			textureShader = new Shader("Resources/Shaders/basic_texture.glsl");
 			textureShader->setInt("ourTexture", 0);
 		}
@@ -77,8 +78,8 @@ namespace State {
 
 	//Private Scene Variables
 	private:
-		float currentTime;
-		float deltaTime;
+		float currentTime = 0;
+		float deltaTime = 0;
 		float lastTime = 0;
 		int speed = 1;
 
@@ -94,20 +95,20 @@ namespace State {
 	//Public Functions
 	public:
 
-		void update(Window* wnd) override {
-			currentTime = glfwGetTime();
+		void update() override {
+			currentTime = (float)glfwGetTime();
 			deltaTime = currentTime - lastTime;
 			lastTime = currentTime;
 		}
 
-		void draw(Window* wnd) override {
+		void draw() override {
 
 			processGUI();
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			trans.rotation.y += deltaTime * speed;
 
-			textureShader->setMat4("MVP", glm::perspective(glm::radians(45.0f), wnd->getWidth() / wnd->getHeight(), 0.1f, 100.0f)
+			textureShader->setMat4("MVP", glm::perspective(glm::radians(45.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f)
 				* glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -5.0f)) 
 				* trans.getTransform());
 			textureShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
