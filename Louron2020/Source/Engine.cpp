@@ -1,6 +1,6 @@
 #include "../Headers/Engine.h"
 
-void windowSizeCallBack(GLFWwindow* window, int w, int h) { glViewport(0, 0, w, h); }
+
 
 Engine::Engine()
 {
@@ -29,7 +29,6 @@ Engine::Engine()
 	m_Window = new Window("Louron 2020", 800, 800, screenMode);
 	m_Window->init();
 	m_Input = m_Window->getInput();
-	glfwSetWindowSizeCallback(m_Window->getWindow(), windowSizeCallBack);
 	std::cout << std::endl;
 
 	// 2. Init GLEW
@@ -70,6 +69,11 @@ int Engine::run()
 	while (!glfwWindowShouldClose(m_Window->getWindow()))
 	{
 		glfwPollEvents();
+
+		int width, height;
+		glfwGetWindowSize(m_Window->getWindow(), &width, &height);
+		m_Window->setWidth(width);
+		m_Window->setHeight(height);
 		
 		if (m_Input->GetKeyUp(GLFW_KEY_ESCAPE)) m_States.pop();
 		if (m_Input->GetKeyUp(GLFW_KEY_F11)) m_Window->toggleFullscreen();
@@ -85,7 +89,7 @@ int Engine::run()
 		if (!m_States.empty())
 		{
 			m_States.top()->update(m_Window);
-			m_States.top()->draw();
+			m_States.top()->draw(m_Window);
 		} else break;
 
 		if (m_fpsToggled)

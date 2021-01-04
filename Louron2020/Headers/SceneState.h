@@ -8,7 +8,7 @@ namespace State {
 
 	public:
 		virtual void update(Window* wnd) = 0;
-		virtual void draw() = 0;
+		virtual void draw(Window* wnd) = 0;
 
 		virtual ~SceneState() { };
 	};

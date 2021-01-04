@@ -97,6 +97,7 @@
     <ClCompile Include="Headers\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="Headers\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="Headers\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="Source\Camera.cpp" />
     <ClCompile Include="Source\Engine.cpp" />
     <ClCompile Include="Source\Entity.cpp" />
     <ClCompile Include="Source\Input.cpp" />
@@ -104,6 +105,7 @@
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Headers\Camera.h" />
     <ClInclude Include="Headers\Entity.h" />
     <ClInclude Include="Headers\Texture.h" />
     <ClInclude Include="Scenes\Scene 2.h" />
@@ -124,12 +126,14 @@
     <ClInclude Include="Headers\imgui\imstb_rectpack.h" />
     <ClInclude Include="Headers\imgui\imstb_textedit.h" />
     <ClInclude Include="Headers\imgui\imstb_truetype.h" />
+    <ClInclude Include="Scenes\Scene 4.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Images\carbon_fibre_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\basic.glsl" />
+    <None Include="Resources\Shaders\basic_cube.glsl" />
     <None Include="Resources\Shaders\basic_texture.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

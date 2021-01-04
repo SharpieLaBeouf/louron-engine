@@ -77,7 +77,7 @@ namespace State {
 		}
 
 
-		void draw() override {
+		void draw(Window* wnd) override {
 			
 			processGUI();
 			glClear(GL_COLOR_BUFFER_BIT);

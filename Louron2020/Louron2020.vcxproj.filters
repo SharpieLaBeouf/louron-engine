@@ -57,6 +57,9 @@
     <ClCompile Include="Source\Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Engine.h">
@@ -119,10 +122,17 @@
     <ClInclude Include="Headers\Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\Scene 4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\basic.glsl" />
     <None Include="Resources\Shaders\basic_texture.glsl" />
+    <None Include="Resources\Shaders\basic_cube.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Images\carbon_fibre_texture.jpg">

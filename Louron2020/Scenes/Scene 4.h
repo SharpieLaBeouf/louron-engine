@@ -12,7 +12,7 @@
 
 namespace State {
 
-	class Scene3 : public SceneState {
+	class Scene4 : public SceneState {
 
 		//Private Setup Variables
 	private:
@@ -23,7 +23,7 @@ namespace State {
 		unsigned int VAO = NULL;
 		unsigned int VBO = NULL;
 		unsigned int EBO = NULL;
-		float vertices[120]{
+		float vertices[120] = {
 			 0.5f,  0.5f, 0.5f,  1.0f, 1.0f,   // front top right
 			 0.5f, -0.5f, 0.5f,  1.0f, 0.0f,   // front bottom right
 			-0.5f, -0.5f, 0.5f,  0.0f, 0.0f,   // front bottom left
@@ -78,11 +78,11 @@ namespace State {
 		//Constructors
 	public:
 
-		Scene3(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
+		Scene4(std::stack<std::unique_ptr<State::SceneState>>* SceneStates) : m_States(SceneStates) {
 
 			glEnable(GL_DEPTH_TEST);
-			
-			std::cout << "[L20] Opening Scene 3..." << std::endl;
+
+			std::cout << "[L20] Opening Scene 4..." << std::endl;
 
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);
@@ -104,17 +104,14 @@ namespace State {
 
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
-			
-			delete &vertices[0];
 
 			texture = new Texture("Resources/Images/carbon_fibre_texture.jpg");
 			textureShader = new Shader("Resources/Shaders/basic_cube.glsl");
 			textureShader->setInt("ourTexture", 0);
-
 		}
-		~Scene3() override
+		~Scene4() override
 		{
-			std::cout << "[L20] Closing Scene 3..." << std::endl;
+			std::cout << "[L20] Closing Scene 4..." << std::endl;
 			glDisable(GL_DEPTH_TEST);
 			glDeleteVertexArrays(1, &VAO);
 			glDeleteBuffers(1, &VBO);
@@ -129,7 +126,7 @@ namespace State {
 		float lastTime = 0;
 		int speed = 0;
 
-		float back_colour[4] = { 0.674f, 0.992f, 0.588f, 1.0f };
+		float back_colour[4] = { 0.992f, 0.325f, 0.325f, 1.0f };
 		float fore_colour[4] = { 1.0f  , 1.0f  , 1.0f  , 1.0f };
 
 		Texture* texture = nullptr;
@@ -152,8 +149,8 @@ namespace State {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			trans.rotation.z += deltaTime * speed;
-			
-			glm::mat4 MVP = glm::perspective(glm::radians(60.0f), wnd->getWidth() / wnd->getHeight(), 0.1f, 100.0f) 
+
+			glm::mat4 MVP = glm::perspective(glm::radians(60.0f), wnd->getWidth() / wnd->getHeight(), 0.1f, 100.0f)
 				* glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -5))
 				* trans.getTransform();
 
@@ -163,7 +160,7 @@ namespace State {
 
 			glBindVertexArray(VAO);
 			glBindTexture(GL_TEXTURE_2D, texture->getID());
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);	
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			textureShader->UnBind();

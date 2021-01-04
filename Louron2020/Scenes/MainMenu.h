@@ -6,6 +6,7 @@
 #include "Scene 1.h"
 #include "Scene 2.h"
 #include "Scene 3.h"
+#include "Scene 4.h"
 
 #include "../Headers/imgui/imgui.h"
 #include "../Headers/SceneState.h"
@@ -28,7 +29,7 @@ namespace State {
 
 		}
 
-		void draw() override {
+		void draw(Window* wnd) override {
 			// Set Background Colour (211, 238, 255, 1)
 			glClearColor(211.0f / 255.0f, 238.0f / 255.0f, 255.0f / 255.0f, 1);
 			glClear(GL_COLOR_BUFFER_BIT);
@@ -51,8 +52,10 @@ namespace State {
 					m_States->push(std::make_unique<State::Scene1>(m_States));
 				if (ImGui::Button(" 2. Basic Texture   ")) 
 					m_States->push(std::make_unique<State::Scene2>(m_States));
-				if (ImGui::Button(" 3. Scene Three     ")) 
+				if (ImGui::Button(" 3. Basic Cube      ")) 
 					m_States->push(std::make_unique<State::Scene3>(m_States));
+				if (ImGui::Button(" 3. Basic Camera    "))
+					m_States->push(std::make_unique<State::Scene4>(m_States));
 			}
 			ImGui::End();
         }

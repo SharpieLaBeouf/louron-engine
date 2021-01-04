@@ -78,6 +78,7 @@ int Window::init()
 	}
 
 	glfwMakeContextCurrent(m_Window);
+	glfwSetWindowSizeCallback(m_Window, windowSizeCallBack);
 
 	if (m_Window == NULL)
 		return -1;
@@ -111,6 +112,8 @@ void Window::toggleFullscreen() {
 	}
 	else if (m_ScreenMode == 2){
 		std::cout << "[L20] GLFW Changing to Windowed" << std::endl;
+		m_Width = 800;
+		m_Height = 800;
 		glfwSetWindowMonitor(m_Window, NULL, mode->width / 2 - m_Width / 2, mode->height / 2 - m_Height / 2, m_Width, m_Height, mode->refreshRate);
 		m_ScreenMode = 0;
 	}
@@ -139,12 +142,22 @@ InputManager* Window::getInput()
 	return m_Input;
 }
 
-int Window::getWidth()
+float Window::getWidth()
 {
 	return m_Width;
 }
 
-int Window::getHeight()
+float Window::getHeight()
 {
 	return m_Height;
+}
+
+void Window::setWidth(float width)
+{
+	m_Width = width;
+}
+
+void Window::setHeight(float height)
+{
+	m_Height = height;
 }

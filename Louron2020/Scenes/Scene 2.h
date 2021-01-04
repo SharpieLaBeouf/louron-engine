@@ -85,10 +85,11 @@ namespace State {
 		float back_colour[4] = { 0.992f, 0.992f, 0.588f, 1.0f };
 		float fore_colour[4] = { 1.0f  , 1.0f  , 1.0f  , 1.0f };
 
-		TransformComponent trans;
 		Texture* texture = nullptr;
 		Shader* textureShader = nullptr;
 
+		TransformComponent trans;
+		
 
 	//Public Functions
 	public:
@@ -99,14 +100,16 @@ namespace State {
 			lastTime = currentTime;
 		}
 
-		void draw() override {
+		void draw(Window* wnd) override {
 
 			processGUI();
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			trans.rotation.z += deltaTime * speed;
+			trans.rotation.y += deltaTime * speed;
 
-			textureShader->setMat4("transform", trans.getTransform());
+			textureShader->setMat4("MVP", glm::perspective(glm::radians(45.0f), wnd->getWidth() / wnd->getHeight(), 0.1f, 100.0f)
+				* glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -5.0f)) 
+				* trans.getTransform());
 			textureShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
 			textureShader->Bind();
 
