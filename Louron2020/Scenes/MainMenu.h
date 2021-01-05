@@ -7,6 +7,7 @@
 #include "Scene 2.h"
 #include "Scene 3.h"
 #include "Scene 4.h"
+#include "Scene 5.h"
 
 #include "../Headers/imgui/imgui.h"
 #include "../Headers/SceneState.h"
@@ -55,8 +56,10 @@ namespace State {
 					m_States->push(std::make_unique<State::Scene2>(m_States, m_Window));
 				if (ImGui::Button(" 3. Basic Cube      ")) 
 					m_States->push(std::make_unique<State::Scene3>(m_States, m_Window));
-				if (ImGui::Button(" 3. Basic Camera    "))
+				if (ImGui::Button(" 4. Basic Camera    "))
 					m_States->push(std::make_unique<State::Scene4>(m_States, m_Window));
+				if (ImGui::Button(" 5. Basic Lighting  "))
+					m_States->push(std::make_unique<State::Scene5>(m_States, m_Window));
 			}
 			ImGui::End();
         }

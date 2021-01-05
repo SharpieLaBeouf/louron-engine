@@ -125,11 +125,15 @@
     <ClInclude Include="Scenes\Scene 4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scenes\Scene 5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\basic.glsl" />
     <None Include="Resources\Shaders\basic_texture.glsl" />
     <None Include="Resources\Shaders\basic_cube.glsl" />
+    <None Include="Resources\Shaders\basic_phong.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Images\cube_texture.jpg">

@@ -26,6 +26,7 @@ public:
 	~Camera() { }
 
 	glm::mat4 getViewMatrix() { return glm::lookAt(m_CameraPos, m_CameraPos + m_CameraFront, m_CameraUp); }
+	glm::vec3 getPosition() { return m_CameraPos; }
 
 	void Update(float deltaTime) {
 		processKeyboard(deltaTime);

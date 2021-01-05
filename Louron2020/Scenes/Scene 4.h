@@ -157,6 +157,11 @@ namespace State {
 			std::cout << "[L20] Closing Scene 4..." << std::endl;
 			glDisable(GL_DEPTH_TEST);
 			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+			glDeleteVertexArrays(1, &plane_VAO);
+			glDeleteBuffers(1, &plane_VBO);
+			glDeleteBuffers(1, &plane_EBO);
+
 			glDeleteVertexArrays(1, &cube_VAO);
 			glDeleteBuffers(1, &cube_VBO);
 			glDeleteBuffers(1, &cube_EBO);
