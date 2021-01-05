@@ -1011,21 +1011,21 @@ static int stbi__mad4sizes_valid(int a, int b, int c, int d, int add)
 static void* stbi__malloc_mad2(int a, int b, int add)
 {
     if (!stbi__mad2sizes_valid(a, b, add)) return NULL;
-    return stbi__malloc(a * b + add);
+    return stbi__malloc((size_t)a * b + add);
 }
 #endif
 
 static void* stbi__malloc_mad3(int a, int b, int c, int add)
 {
     if (!stbi__mad3sizes_valid(a, b, c, add)) return NULL;
-    return stbi__malloc(a * b * c + add);
+    return stbi__malloc((size_t)a * b * c + add);
 }
 
 #if !defined(STBI_NO_LINEAR) || !defined(STBI_NO_HDR)
 static void* stbi__malloc_mad4(int a, int b, int c, int d, int add)
 {
     if (!stbi__mad4sizes_valid(a, b, c, d, add)) return NULL;
-    return stbi__malloc(a * b * c * d + add);
+    return stbi__malloc((size_t)a * b * c * d + add);
 }
 #endif
 
@@ -1149,7 +1149,7 @@ static stbi__uint16* stbi__convert_8_to_16(stbi_uc* orig, int w, int h, int chan
     int img_len = w * h * channels;
     stbi__uint16* enlarged;
 
-    enlarged = (stbi__uint16*)stbi__malloc(img_len * 2);
+    enlarged = (stbi__uint16*)stbi__malloc((size_t)img_len * 2);
     if (enlarged == NULL) return (stbi__uint16*)stbi__errpuc("outofmem", "Out of memory");
 
     for (i = 0; i < img_len; ++i)
@@ -1168,7 +1168,7 @@ static void stbi__vertical_flip(void* image, int w, int h, int bytes_per_pixel)
 
     for (row = 0; row < (h >> 1); row++) {
         stbi_uc* row0 = bytes + row * bytes_per_row;
-        stbi_uc* row1 = bytes + (h - row - 1) * bytes_per_row;
+        stbi_uc* row1 = bytes + (int)(h - row - 1) * bytes_per_row;
         // swap row0 with row1
         size_t bytes_left = bytes_per_row;
         while (bytes_left) {

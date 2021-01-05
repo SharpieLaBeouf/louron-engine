@@ -1,8 +1,9 @@
 #pragma once
+#include <string>
 
 #include <GLFW/glfw3.h>
+
 #include "imgui/imgui.h"
-#include <string>
 
 const int MAX_KEYS = 1024;
 const int MAX_BUTTONS = 32;

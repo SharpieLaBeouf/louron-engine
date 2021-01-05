@@ -5,23 +5,25 @@
 #include <Windows.h>
 #endif
 
-// C++ STD LIBRARIES
+// STD LIBRARIES
 #include <iostream>
 #include <conio.h>
 #include <stack>
 #include <memory>
 
-// OPENGL LIBRARIES
+// GL LIBRARIES
 #include <GLEW/glew.h>
 #include <GLFW/glfw3.h>
+
+// VENDER LIBRARIES
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
  
 // CUSTOM HEADERS
 #include "Window.h"
 #include "Input.h"
 #include "../Scenes/MainMenu.h"
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
 
 class Engine {
 

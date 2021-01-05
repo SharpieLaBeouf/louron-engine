@@ -70,6 +70,8 @@ int Engine::run()
 	{
 		glfwPollEvents();
 
+		
+
 		int width, height;
 		glfwGetWindowSize(m_Window->getWindow(), &width, &height);
 		m_Window->setWidth((float)width);
