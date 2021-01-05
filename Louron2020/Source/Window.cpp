@@ -6,7 +6,6 @@ Window::Window() :
 	m_Title("Game Window"),
 	m_ScreenMode(0),
 	m_Window(NULL),
-	m_ConsoleToggled(false),
 	m_Input(nullptr)
 {
 
@@ -18,7 +17,6 @@ Window::Window(int width, int height) :
 	m_Title("Game Window"),
 	m_ScreenMode(0),
 	m_Window(NULL),
-	m_ConsoleToggled(false),
 	m_Input(nullptr)
 {
 
@@ -30,7 +28,6 @@ Window::Window(const char* title, int width, int height) :
 	m_Title(title),
 	m_ScreenMode(0),
 	m_Window(NULL),
-	m_ConsoleToggled(false),
 	m_Input(nullptr)
 {
 }
@@ -45,7 +42,6 @@ Window::Window(const char* title, int width, int height, int screenMode) :
 	m_Title(title),
 	m_ScreenMode(screenMode),
 	m_Window(NULL),
-	m_ConsoleToggled(false),
 	m_Input(nullptr)
 {
 }
@@ -99,14 +95,6 @@ int Window::init()
 	m_Input = new InputManager();
 	m_Input->init(m_Window);
 
-
-#ifdef _DEBUG
-	m_ConsoleToggled = true;
-#endif 
-#ifndef _DEBUG
-	m_ConsoleToggled = false;
-#endif
-		
 	return 0;
 }
 
@@ -125,19 +113,6 @@ void Window::toggleFullscreen() {
 		glfwSetWindowMonitor(m_Window, NULL, mode->width / 2 - (int)m_Width / 2, mode->height / 2 - (int)m_Height / 2, (int)m_Width, (int)m_Height, mode->refreshRate);
 		m_ScreenMode = 0;
 	}
-}
-
-void Window::toggleConsole()
-{
-	std::cout << "[L20] Toggling Console" << std::endl;
-
-#if defined _WIN64 || defined _WIN32
-	if (m_ConsoleToggled)
-		ShowWindow(GetConsoleWindow(), SW_HIDE);
-	else if (!m_ConsoleToggled)
-		ShowWindow(GetConsoleWindow(), SW_RESTORE);
-#endif
-	m_ConsoleToggled = !m_ConsoleToggled;
 }
 
 GLFWwindow* Window::getWindow()

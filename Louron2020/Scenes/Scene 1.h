@@ -3,10 +3,12 @@
 #include <iostream>
 #include <stack>
 
-#include "../Headers/imgui/imgui.h"
-#include "../Headers/SceneState.h"
+#include "../Vendor/imgui/imgui.h"
+
 #include "../Headers/Input.h"
-#include "../Headers/Shader.h"
+#include "../Headers/SceneState.h"
+
+#include "../Headers/Abstracted GL/Shader.h"
 
 namespace State {
 

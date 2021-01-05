@@ -3,13 +3,15 @@
 #include <iostream>
 #include <stack>
 
-#include "../Headers/imgui/imgui.h"
-#include "../Headers/SceneState.h"
+#include "../Vendor/imgui/imgui.h"
+
 #include "../Headers/Input.h"
-#include "../Headers/Shader.h"
-#include "../Headers/Texture.h"
 #include "../Headers/Entity.h"
 #include "../Headers/Camera.h"
+#include "../Headers/SceneState.h"
+
+#include "../Headers/Abstracted GL/Shader.h"
+#include "../Headers/Abstracted GL/Texture.h"
 
 namespace State {
 
@@ -135,7 +137,7 @@ namespace State {
 		Texture* texture = nullptr;
 		Shader* textureShader = nullptr;
 
-		TransformComponent trans;
+		Transform trans;
 
 		//Public Functions
 	public:
@@ -152,20 +154,17 @@ namespace State {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			trans.rotation.z += deltaTime * speed;
-			
+
+			textureShader->Bind();
 			textureShader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
 			textureShader->setMat4("view", glm::lookAt(glm::vec3(0.0f, 1.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
 			textureShader->setMat4("model", trans.getTransform());
 			textureShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
-			textureShader->Bind();
 
 			glBindVertexArray(VAO);
 			glBindTexture(GL_TEXTURE_2D, texture->getID());
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			glBindTexture(GL_TEXTURE_2D, 0);
-
-			textureShader->UnBind();
-
 		}
 
 

@@ -6,7 +6,7 @@
 
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION    
-#include "../Headers/stb_image.h"
+#include "../../Vendor/stb_image.h"
 
 class Texture {
 

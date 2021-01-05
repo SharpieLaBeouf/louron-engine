@@ -3,13 +3,15 @@
 #include <iostream>
 #include <stack>
 
+#include "../Vendor/imgui/imgui.h"
+
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
 #include "../Headers/Camera.h"
-#include "../Headers/Shader.h"
-#include "../Headers/Texture.h"
 #include "../Headers/SceneState.h"
-#include "../Headers/imgui/imgui.h"
+
+#include "../Headers/Abstracted GL/Shader.h"
+#include "../Headers/Abstracted GL/Texture.h"
 
 namespace State {
 
@@ -147,6 +149,7 @@ namespace State {
 			cube_texture = new Texture("Resources/Images/cube_texture.jpg");
 			flatShader = new Shader("Resources/Shaders/basic.glsl");
 			textureShader = new Shader("Resources/Shaders/basic_cube.glsl");
+			textureShader->Bind();
 			textureShader->setInt("ourTexture", 0);
 
 			plane_trans.position.y = -0.6f;
@@ -184,8 +187,8 @@ namespace State {
 		Shader* flatShader = nullptr;
 		Shader* textureShader = nullptr;
 
-		TransformComponent cube_trans;
-		TransformComponent plane_trans;
+		Transform cube_trans;
+		Transform plane_trans;
 		
 		int waveSize = 20;
 		int waveHeight = 10;
@@ -254,7 +257,6 @@ namespace State {
 				}
 			}
 
-			textureShader->UnBind();
 			glBindTexture(GL_TEXTURE_2D, 0);
 
 			processGUI();

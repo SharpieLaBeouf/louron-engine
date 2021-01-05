@@ -12,20 +12,6 @@ Engine::Engine()
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
 	int screenMode = 0;
-	/*while (true)
-	{
-		std::cout << "[L20] GLFW Enter a ScreenMode: ";
-		std::cin >> screenMode;
-		if (screenMode != 0)
-			if (screenMode != 1)
-				if (screenMode != 2)
-					if (screenMode != 3)
-						std::cout << "[L20] GLFW Please Enter a Correct ScreenMode!" << std::endl;
-					else break;
-				else break;
-			else break;
-		else break;
-	}*/
 	m_Window = new Window("Louron 2020", 800, 800, screenMode);
 	m_Window->init();
 	m_Input = m_Window->getInput();
@@ -79,7 +65,6 @@ int Engine::run()
 		
 		if (m_Input->GetKeyUp(GLFW_KEY_ESCAPE)) m_States.pop();
 		if (m_Input->GetKeyUp(GLFW_KEY_F11)) m_Window->toggleFullscreen();
-		if (m_Input->GetKeyDown(GLFW_KEY_F10)) m_Window->toggleConsole();
 		if (m_Input->GetKeyUp(GLFW_KEY_F9)) m_fpsToggled = !m_fpsToggled;
 
 		// Create New GUI Frame

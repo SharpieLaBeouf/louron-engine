@@ -1,4 +1,4 @@
-#include "../Headers/Shader.h"
+#include "../Headers/Abstracted GL/Shader.h"
 
 void Shader::Bind() { glUseProgram(m_Program); }
 void Shader::UnBind() { glUseProgram(0); }

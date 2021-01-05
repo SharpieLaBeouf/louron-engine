@@ -1,10 +1,5 @@
 #pragma once
 
-// WINDOWS LIBRARIES
-#if defined _WIN64 || defined _WIN32
-#include <Windows.h>
-#endif
-
 #include <iostream>
 #include <GLFW/glfw3.h>
 
@@ -22,7 +17,6 @@ public:
 	int init();
 
 	void toggleFullscreen();
-	void toggleConsole();
 
 	GLFWwindow* getWindow();
 	InputManager* getInput();
@@ -35,7 +29,6 @@ public:
 
 private:
 	int m_ScreenMode;
-	bool m_ConsoleToggled;
 	float m_Width, m_Height;
 	const char* m_Title;
 	GLFWwindow* m_Window;

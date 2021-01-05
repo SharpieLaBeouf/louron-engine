@@ -3,13 +3,15 @@
 #include <iostream>
 #include <stack>
 
+#include "../Vendor/imgui/imgui.h"
+
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
 #include "../Headers/Camera.h"
-#include "../Headers/Shader.h"
-#include "../Headers/Texture.h"
 #include "../Headers/SceneState.h"
-#include "../Headers/imgui/imgui.h"
+
+#include "../Headers/Abstracted GL/Shader.h"
+#include "../Headers/Abstracted GL/Texture.h"
 
 namespace State {
 
@@ -80,7 +82,7 @@ namespace State {
 
 	public:
 
-		Scene5(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates) {
+		explicit Scene5(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates)  {
 			std::cout << "[L20] Opening Scene 5..." << std::endl;
 			m_Window = wnd;
 			m_Input = m_Window->getInput();
@@ -133,7 +135,7 @@ namespace State {
 
 			light_trans.position = glm::vec3(0.0f, 10.0f, 0.0f);
 			cube_trans.scale = glm::vec3(5.0f, 1.0f, 5.0f);
-		
+					
 		}
 		~Scene5() override
 		{
@@ -152,8 +154,8 @@ namespace State {
 		float box_colour[4] = { 0.992f, 0.325f, 0.325f, 1.0f };
 		float back_colour[4] = { 120.0f / 255.0f, 200.0f / 255.0f, 255.0f, 1.0f };
 
-		TransformComponent cube_trans;
-		TransformComponent light_trans;
+		Transform cube_trans;
+		Transform light_trans;
 
 		Camera* m_SceneCamera = nullptr;
 
@@ -188,25 +190,25 @@ namespace State {
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Update Shader View & Proj Matrices
 			glm::mat4 view = m_SceneCamera->getViewMatrix();
 			glm::mat4 proj = glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f);
-			lightShader->setMat4("view", view);
-			lightShader->setMat4("proj", proj);
-			cubeShader->setMat4("view", view);
-			cubeShader->setMat4("proj", proj);
 
 			// Draw Light Source
 			glBindVertexArray(light_VAO);
-			
+
+			lightShader->Bind();
+			lightShader->setMat4("view", view);
+			lightShader->setMat4("proj", proj);
 			lightShader->setVec4("ourColour", glm::vec4(1.0f));
 			lightShader->setMat4("model", light_trans.getTransform());
-			lightShader->Bind();
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 			// Draw Cube
 			glBindVertexArray(cube_VAO);
 
+			cubeShader->Bind();
+			cubeShader->setMat4("view", view);
+			cubeShader->setMat4("proj", proj);
 			cubeShader->setMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.getTransform()))));
 			cubeShader->setVec3("viewPos", m_SceneCamera->getPosition());
 			cubeShader->setVec3("lightPos", light_trans.position);

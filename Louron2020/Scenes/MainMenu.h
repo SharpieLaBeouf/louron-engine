@@ -9,9 +9,10 @@
 #include "Scene 4.h"
 #include "Scene 5.h"
 
-#include "../Headers/imgui/imgui.h"
-#include "../Headers/SceneState.h"
+#include "../Vendor/imgui/imgui.h"
+
 #include "../Headers/Input.h"
+#include "../Headers/SceneState.h"
 
 namespace State {
 

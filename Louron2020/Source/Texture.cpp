@@ -1,4 +1,4 @@
-#include "../Headers/Texture.h"
+#include "../Headers/Abstracted GL/Texture.h"
 
 Texture::Texture(const char* texturePath) {
 

@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "imgui/imgui.h"
+#include "../Vendor/imgui/imgui.h"
 
 const int MAX_KEYS = 1024;
 const int MAX_BUTTONS = 32;

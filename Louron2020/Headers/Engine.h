@@ -1,10 +1,5 @@
 #pragma once
 
-// WINDOWS LIBRARIES
-#if defined _WIN64 || defined _WIN32
-#include <Windows.h>
-#endif
-
 // STD LIBRARIES
 #include <iostream>
 #include <conio.h>
@@ -16,9 +11,9 @@
 #include <GLFW/glfw3.h>
 
 // VENDER LIBRARIES
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "../Vendor/imgui/imgui.h"
+#include "../Vendor/imgui/imgui_impl_glfw.h"
+#include "../Vendor/imgui/imgui_impl_opengl3.h"
  
 // CUSTOM HEADERS
 #include "Window.h"
