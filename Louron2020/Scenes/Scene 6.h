@@ -79,7 +79,7 @@ namespace State {
 	public:
 
 		explicit Scene6(SceneManager* scnMgr)
-			: m_States(SceneStates), m_SceneManager(scnMgr)
+			: m_SceneManager(scnMgr)
 		{
 			std::cout << "[L20] Opening Scene 6..." << std::endl;
 			m_Window = m_SceneManager->getWindowInstance();
