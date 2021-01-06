@@ -42,6 +42,4 @@ private:
 	ShaderLibrary* m_ShaderLib = nullptr;
 	std::vector<std::unique_ptr<State::SceneState>> m_States;
 
-	bool m_fpsToggled = true;
-
 };

@@ -1,5 +1,9 @@
 #include "../Headers/Abstracted GL/Texture.h"
 
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION    
+#include "../Vendor/stb_image.h"
+
 Texture::Texture(const char* texturePath) {
 
 

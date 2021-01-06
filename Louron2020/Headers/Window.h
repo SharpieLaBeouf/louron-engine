@@ -29,13 +29,10 @@ public:
 
 private:
 	int m_ScreenMode;
-	float m_Width, m_Height;
 	const char* m_Title;
 	GLFWwindow* m_Window;
 	InputManager* m_Input;
+	static float m_Width, m_Height;
 
-	static void windowSizeCallBack(GLFWwindow* window, int w, int h)
-	{
-		glViewport(0, 0, w, h);
-	}
+	friend static void windowSizeCallBack(GLFWwindow* window, int w, int h);
 };

@@ -1,35 +1,47 @@
 #include "../Headers/Window.h"
 
+#define STB_IMAGE_STATIC
+#define STB_IMAGE_IMPLEMENTATION    
+#include "../Vendor/stb_image.h"
+
+float Window::m_Width;
+float Window::m_Height;
+
+void windowSizeCallBack(GLFWwindow* window, int w, int h) {
+	Window::m_Width = (w == 0) ? 1 : (float)w;
+	Window::m_Height = (h == 0) ? 1 : (float)h;
+	glViewport(0, 0, w, h);
+}
+
 Window::Window() : 
-	m_Width(800), 
-	m_Height(600),
 	m_Title("Game Window"),
 	m_ScreenMode(0),
 	m_Window(NULL),
 	m_Input(nullptr)
 {
-
+	m_Width = 800.0f;
+	m_Height = 600.0f;
 }
 
 Window::Window(int width, int height) : 
-	m_Width((float)width), 
-	m_Height((float)height),
+	
 	m_Title("Game Window"),
 	m_ScreenMode(0),
 	m_Window(NULL),
 	m_Input(nullptr)
 {
-
+	m_Width = (float)width;
+	m_Height = (float)height;
 }
 
 Window::Window(const char* title, int width, int height) :
-	m_Width((float)width),
-	m_Height((float)height),
 	m_Title(title),
 	m_ScreenMode(0),
 	m_Window(NULL),
 	m_Input(nullptr)
 {
+	m_Width = (float)width;
+	m_Height = (float)height;
 }
 
 /// <summary>
@@ -37,13 +49,13 @@ Window::Window(const char* title, int width, int height) :
 /// <param name="screenMode"> Windowed = 0, Windowed Borderless Fullscreen = 1, Fullscreen = 2, Windowed Borderless = 3</param>
 /// <returns></returns>
 Window::Window(const char* title, int width, int height, int screenMode) :
-	m_Width((float)width),
-	m_Height((float)height),
 	m_Title(title),
 	m_ScreenMode(screenMode),
 	m_Window(NULL),
 	m_Input(nullptr)
 {
+	m_Width = (float)width;
+	m_Height = (float)height;
 }
 
 Window::~Window()
@@ -82,7 +94,7 @@ int Window::init()
 	}
 
 	glfwMakeContextCurrent(m_Window);
-	glfwSetWindowSizeCallback(m_Window, windowSizeCallBack);
+	glfwSetFramebufferSizeCallback(m_Window, windowSizeCallBack);
 
 	if (m_Window == NULL)
 		return -1;
@@ -94,6 +106,11 @@ int Window::init()
 	
 	m_Input = new InputManager();
 	m_Input->init(m_Window);
+
+	GLFWimage icon; int nrChannels;
+	icon.pixels = stbi_load("Resources/Images/L20 Icon.png", &icon.width, &icon.height, &nrChannels, 0);
+	glfwSetWindowIcon(m_Window, 1, &icon);
+	stbi_image_free(icon.pixels);
 
 	return 0;
 }

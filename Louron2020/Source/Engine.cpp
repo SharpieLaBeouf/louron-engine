@@ -39,11 +39,6 @@ Engine::Engine()
 
 	// 5. Init Global Scene Manager
 	m_SceneManager = new State::SceneManager(m_Window, m_Input, m_ShaderLib, &m_States);
-	
-
-#ifndef _DEBUG
-	m_fpsToggled = false;
-#endif
 
 }
 
@@ -66,16 +61,13 @@ int Engine::run()
 	{
 		glfwPollEvents();
 
-		
-
-		int width, height;
-		glfwGetWindowSize(m_Window->getWindow(), &width, &height);
-		m_Window->setWidth((float)width);
-		m_Window->setHeight((float)height);
+		//int width, height;
+		//glfwGetWindowSize(m_Window->getWindow(), &width, &height);
+		//m_Window->setWidth((float)width);
+		//m_Window->setHeight((float)height);
 		
 		if (m_Input->GetKeyUp(GLFW_KEY_ESCAPE)) m_States.pop_back();
 		if (m_Input->GetKeyUp(GLFW_KEY_F11)) m_Window->toggleFullscreen();
-		if (m_Input->GetKeyUp(GLFW_KEY_F9)) m_fpsToggled = !m_fpsToggled;
 
 		// Create New GUI Frame
 		ImGui_ImplOpenGL3_NewFrame();
@@ -85,34 +77,32 @@ int Engine::run()
 		if (m_Input->GetKeyUp(GLFW_KEY_F1)) demoGUI = !demoGUI;
 		if (demoGUI) ImGui::ShowDemoWindow();
 
-		// Run Scene At Top Of Game State Stack
+		// Run Scene At Top Of Game State Vector
 		if (!m_States.empty())
 		{
 			m_States.back()->update();
 			m_States.back()->draw();
 		} else glfwSetWindowShouldClose(m_Window->getWindow(), GLFW_TRUE);
 
-		if (m_fpsToggled)
-		{
-			ImGuiWindowFlags window_flags =
-				ImGuiWindowFlags_NoDecoration |
-				ImGuiWindowFlags_AlwaysAutoResize |
-				ImGuiWindowFlags_NoSavedSettings |
-				ImGuiWindowFlags_NoFocusOnAppearing |
-				ImGuiWindowFlags_NoNav |
-				ImGuiWindowFlags_NoMove;
-			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 10.0f, io.DisplaySize.y - 10.0f), ImGuiCond_Always, ImVec2(1.0f, 1.0f));
-			ImGui::SetNextWindowSize(ImVec2(100.0f, 50.0f), ImGuiCond_Always);
-			ImGui::SetNextWindowBgAlpha(0.35f); // Transparent background
+		// Simple FPS Counter
+		ImGuiWindowFlags window_flags =
+			ImGuiWindowFlags_NoDecoration |
+			ImGuiWindowFlags_AlwaysAutoResize |
+			ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoFocusOnAppearing |
+			ImGuiWindowFlags_NoNav |
+			ImGuiWindowFlags_NoMove;
+		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 10.0f, io.DisplaySize.y - 10.0f), ImGuiCond_Always, ImVec2(1.0f, 1.0f));
+		ImGui::SetNextWindowSize(ImVec2(100.0f, 50.0f), ImGuiCond_Always);
+		ImGui::SetNextWindowBgAlpha(0.35f); 
 
-			if (ImGui::Begin("Simple FPS Overlay", (bool*)0, window_flags))
-			{
-				ImGui::Text("FPS Counter");
-				ImGui::Separator();
-				ImGui::Text("%.0f", io.Framerate);
-			}
-			ImGui::End();
+		if (ImGui::Begin("Simple FPS Overlay", (bool*)0, window_flags))
+		{
+			ImGui::Text("FPS Counter");
+			ImGui::Separator();
+			ImGui::Text("%.0f", io.Framerate);
 		}
+		ImGui::End();
 
 
 		// Render GUI
