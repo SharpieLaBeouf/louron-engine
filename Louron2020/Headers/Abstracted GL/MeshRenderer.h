@@ -25,11 +25,11 @@ public:
 
 	MeshFilter(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Material> materials);
 	
-	void Draw();
+	void Draw() { }
 
 private:
 
-	void setupMesh();
+	void setupMesh() { }
 };
 
 class MeshRenderer : public Entity {

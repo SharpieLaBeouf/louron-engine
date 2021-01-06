@@ -8,7 +8,7 @@
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
 #include "../Headers/Camera.h"
-#include "../Headers/SceneState.h"
+#include "../Headers/SceneManager.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
 #include "../Headers/Abstracted GL/Texture.h"
@@ -20,9 +20,11 @@ namespace State {
 		//Private Setup Variables
 	private:
 
+		State::SceneManager* m_SceneManager;
+
 		Window* m_Window;
 		InputManager* m_Input;
-		std::stack<std::unique_ptr<State::SceneState>>* m_States;
+		ShaderLibrary* m_ShaderLib;
 
 		unsigned int light_VAO = NULL;
 		unsigned int cube_VAO = NULL;
@@ -82,10 +84,13 @@ namespace State {
 
 	public:
 
-		explicit Scene5(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates)  {
+		explicit Scene5(SceneManager* scnMgr)
+			: m_SceneManager(scnMgr)
+		{
 			std::cout << "[L20] Opening Scene 5..." << std::endl;
-			m_Window = wnd;
-			m_Input = m_Window->getInput();
+			m_Window = m_SceneManager->getWindowInstance();
+			m_Input = m_SceneManager->getInputInstance();
+			m_ShaderLib = m_SceneManager->getShaderLibInstance();
 
 			glEnable(GL_DEPTH_TEST);
 			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -129,10 +134,6 @@ namespace State {
 			m_SceneCamera->MovementSpeed = 10.0f;
 			m_SceneCamera->MovementYDamp = 0.65f;
 
-			lightShader = new Shader("Resources/Shaders/basic.glsl");
-			cubeShader = new Shader("Resources/Shaders/basic_phong.glsl");
-			cubeShader->setInt("ourTexture", 0);
-
 			light_trans.position = glm::vec3(0.0f, 10.0f, 0.0f);
 			cube_trans.scale = glm::vec3(5.0f, 1.0f, 5.0f);
 					
@@ -159,8 +160,6 @@ namespace State {
 
 		Camera* m_SceneCamera = nullptr;
 
-		Shader* cubeShader = nullptr;
-		Shader* lightShader = nullptr;
 
 		float currentTime = 0;
 		float lastTime = 0;
@@ -175,7 +174,7 @@ namespace State {
 			lastTime = currentTime;
 
 			m_SceneCamera->Update(deltaTime);
-			if (m_Window->getInput()->GetKeyUp(GLFW_KEY_LEFT_ALT)) {
+			if (m_Input->GetKeyUp(GLFW_KEY_LEFT_ALT)) {
 				m_SceneCamera->MouseToggledOff = !m_SceneCamera->MouseToggledOff;
 				if (m_SceneCamera->MouseToggledOff)
 					glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -194,41 +193,47 @@ namespace State {
 			glm::mat4 proj = glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f);
 
 			// Draw Light Source
-			glBindVertexArray(light_VAO);
+			Shader* shader = m_ShaderLib->getShader("basic");
+			if (shader) {
+				glBindVertexArray(light_VAO);
 
-			lightShader->Bind();
-			lightShader->setMat4("view", view);
-			lightShader->setMat4("proj", proj);
-			lightShader->setVec4("ourColour", glm::vec4(1.0f));
-			lightShader->setMat4("model", light_trans.getTransform());
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+				shader->Bind();
+				shader->setMat4("view", view);
+				shader->setMat4("proj", proj);
+				shader->setVec4("ourColour", glm::vec4(1.0f));
+				shader->setMat4("model", light_trans.getTransform());
+				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+			}
 
 			// Draw Cube
-			glBindVertexArray(cube_VAO);
+			shader = m_ShaderLib->getShader("basic_phong");
+			if (shader) {
+				glBindVertexArray(cube_VAO);
 
-			cubeShader->Bind();
-			cubeShader->setMat4("view", view);
-			cubeShader->setMat4("proj", proj);
-			cubeShader->setMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.getTransform()))));
-			cubeShader->setVec3("viewPos", m_SceneCamera->getPosition());
-			cubeShader->setVec3("lightPos", light_trans.position);
-			cubeShader->setVec4("lightColour", glm::vec4(1.0f));
+				shader->Bind();
+				shader->setMat4("view", view);
+				shader->setMat4("proj", proj);
+				shader->setMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.getTransform()))));
+				shader->setVec3("viewPos", m_SceneCamera->getPosition());
+				shader->setVec3("lightPos", light_trans.position);
+				shader->setVec4("lightColour", glm::vec4(1.0f));
+				shader->setVec4("targetColour", glm::vec4(box_colour[0], box_colour[1], box_colour[2], box_colour[3]));
 
-			cubeShader->setVec4("targetColour", glm::vec4(box_colour[0], box_colour[1], box_colour[2], box_colour[3]));
-			glm::vec3 pos = glm::vec3(0.0f);
-			for (int x = 1; x <= 10; x++)
-			{
-				pos.x = -10 / 2 + x - cube_trans.scale.x / 2;
-				for (int z = 1; z <= 10; z++)
+				glm::vec3 pos = glm::vec3(0.0f);
+				for (int x = 1; x <= 10; x++)
 				{
-					pos.z = -10 / 2 + z - cube_trans.scale.z / 2;
-					for (int y = 1; y <= 10; y++)
+					pos.x = -10 / 2 + x - cube_trans.scale.x / 2;
+					for (int z = 1; z <= 10; z++)
 					{
-						double time = glfwGetTime();
-						pos.y = (float)sin((time * 8 + floor(x - 10) + floor(z - 10))) / 10 * 10;
+						pos.z = -10 / 2 + z - cube_trans.scale.z / 2;
+						for (int y = 1; y <= 10; y++)
+						{
+							double time = glfwGetTime();
+							pos.y = (float)sin((time * 8 + floor(x - 10) + floor(z - 10))) / 10 * 10;
+						}
+						shader->setMat4("model", glm::translate(cube_trans.getTransform(), pos));
+						glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 					}
-					cubeShader->setMat4("model", glm::translate(cube_trans.getTransform(), pos));
-					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				}
 			}
 

@@ -8,7 +8,7 @@
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
 #include "../Headers/Camera.h"
-#include "../Headers/SceneState.h"
+#include "../Headers/SceneManager.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
 #include "../Headers/Abstracted GL/Texture.h"
@@ -20,8 +20,10 @@ namespace State {
 		//Private Setup Variables
 	private:
 
+		State::SceneManager* m_SceneManager;
+
 		Window* m_Window;
-		std::stack<std::unique_ptr<State::SceneState>>* m_States;
+		InputManager* m_Input;
 
 		unsigned int plane_VAO = NULL;
 		unsigned int plane_VBO = NULL;
@@ -95,9 +97,12 @@ namespace State {
 		//Constructors
 	public:
 
-		Scene4(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates) {
+		Scene4(SceneManager* scnMgr)
+			: m_SceneManager(scnMgr)
+		{
 			std::cout << "[L20] Opening Scene 4..." << std::endl;
-			m_Window = wnd;
+			m_Window = m_SceneManager->getWindowInstance();
+			m_Input = m_SceneManager->getInputInstance();
 
 			glEnable(GL_DEPTH_TEST);
 			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -144,7 +149,7 @@ namespace State {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 
-			sceneCamera = new Camera(wnd, glm::vec3(0.0f, 10.0f, 25.0f));
+			sceneCamera = new Camera(m_Window, glm::vec3(0.0f, 10.0f, 25.0f));
 
 			cube_texture = new Texture("Resources/Images/cube_texture.jpg");
 			flatShader = new Shader("Resources/Shaders/basic.glsl");
@@ -174,9 +179,9 @@ namespace State {
 		//Private Scene Variables
 	private:
 
-		float back_colour[4] = { 0.992f, 0.325f, 0.325f, 1.0f };
-		float box_colour[4] = { 1.0f  , 1.0f  , 1.0f  , 1.0f };
-		float plane_colour[4] = { 1.0f  , 0.784f  , 0.313f  , 1.0f };
+		glm::vec4 back_colour	= glm::vec4(0.992f, 0.325f, 0.325f, 1.0f);
+		glm::vec4 box_colour	= glm::vec4(1.0f  , 1.0f  , 1.0f  , 1.0f);
+		glm::vec4 plane_colour	= glm::vec4(1.0f  , 0.784f, 0.313f, 1.0f);
 		float currentTime = 0;
 		float deltaTime = 0;
 		float lastTime = 0;
@@ -205,7 +210,7 @@ namespace State {
 			
 			sceneCamera->Update(deltaTime);
 
-			if (m_Window->getInput()->GetKeyUp(GLFW_KEY_LEFT_ALT)) {
+			if (m_Input->GetKeyUp(GLFW_KEY_LEFT_ALT)) {
 				sceneCamera->MouseToggledOff = !sceneCamera->MouseToggledOff;
 				if(sceneCamera->MouseToggledOff)
 					glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -227,7 +232,7 @@ namespace State {
 			flatShader->setMat4("model", plane_trans.getTransform());
 			flatShader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
 			flatShader->setMat4("view", sceneCamera->getViewMatrix());
-			flatShader->setVec4("ourColour", plane_colour[0], plane_colour[1], plane_colour[2], plane_colour[3]);
+			flatShader->setVec4("ourColour", plane_colour);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
 
@@ -238,7 +243,7 @@ namespace State {
 			textureShader->Bind();
 			textureShader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
 			textureShader->setMat4("view", sceneCamera->getViewMatrix());
-			textureShader->setVec4("ourColour", box_colour[0], box_colour[1], box_colour[2], box_colour[3]);
+			textureShader->setVec4("ourColour", box_colour);
 
 			glm::vec3 pos = glm::vec3(0.0f);
 			for (int x = 1; x <= waveSize; x++)
@@ -295,9 +300,9 @@ namespace State {
 
 			if (ImGui::TreeNode("Colours"))
 			{
-				ImGui::ColorPicker4("Background", back_colour);
-				ImGui::ColorPicker4("Box", box_colour);
-				ImGui::ColorPicker4("Plane", plane_colour);
+				ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
+				ImGui::ColorPicker4("Box", glm::value_ptr(box_colour));
+				ImGui::ColorPicker4("Plane", glm::value_ptr(plane_colour));
 				ImGui::TreePop();
 			}
 

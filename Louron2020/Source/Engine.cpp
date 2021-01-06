@@ -1,7 +1,5 @@
 #include "../Headers/Engine.h"
 
-
-
 Engine::Engine()
 {
 	// 1. Init GLFW
@@ -31,6 +29,18 @@ Engine::Engine()
 	bool imGuiGLEWErr = ImGui_ImplOpenGL3_Init("#version 150");
 	std::cout << "[L20] ImGui Initialised " << ((imGuiGLFWErr && imGuiGLEWErr) ? "Successfully!" : "Unsuccessfully!") << std::endl;
 
+	// 4. Load Shader Library
+	m_ShaderLib = new ShaderLibrary();
+	m_ShaderLib->loadShader("Resources/Shaders/basic.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/basic_cube.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/basic_material_phong.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/basic_phong.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/basic_texture.glsl");
+
+	// 5. Init Global Scene Manager
+	m_SceneManager = new State::SceneManager(m_Window, m_Input, m_ShaderLib, &m_States);
+	
+
 #ifndef _DEBUG
 	m_fpsToggled = false;
 #endif
@@ -49,7 +59,7 @@ Engine::~Engine()
 int Engine::run()
 {
 	ImGuiIO& io = ImGui::GetIO();
-	m_States.push(std::make_unique<State::MainMenu>(&m_States, m_Window));
+	m_States.push_back(std::make_unique<State::MainMenu>(m_SceneManager));
 
 	bool demoGUI = false;
 	while (!glfwWindowShouldClose(m_Window->getWindow()))
@@ -63,7 +73,7 @@ int Engine::run()
 		m_Window->setWidth((float)width);
 		m_Window->setHeight((float)height);
 		
-		if (m_Input->GetKeyUp(GLFW_KEY_ESCAPE)) m_States.pop();
+		if (m_Input->GetKeyUp(GLFW_KEY_ESCAPE)) m_States.pop_back();
 		if (m_Input->GetKeyUp(GLFW_KEY_F11)) m_Window->toggleFullscreen();
 		if (m_Input->GetKeyUp(GLFW_KEY_F9)) m_fpsToggled = !m_fpsToggled;
 
@@ -78,8 +88,8 @@ int Engine::run()
 		// Run Scene At Top Of Game State Stack
 		if (!m_States.empty())
 		{
-			m_States.top()->update();
-			m_States.top()->draw();
+			m_States.back()->update();
+			m_States.back()->draw();
 		} else glfwSetWindowShouldClose(m_Window->getWindow(), GLFW_TRUE);
 
 		if (m_fpsToggled)

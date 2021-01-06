@@ -7,7 +7,7 @@
 
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
-#include "../Headers/SceneState.h"
+#include "../Headers/SceneManager.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
 #include "../Headers/Abstracted GL/Texture.h"
@@ -19,8 +19,9 @@ namespace State {
 	//Private Setup Variables
 	private:
 
+		State::SceneManager* m_SceneManager;
+
 		Window* m_Window;
-		std::stack<std::unique_ptr<State::SceneState>>* m_States;
 
 		unsigned int VAO = NULL;
 		unsigned int VBO = NULL;
@@ -40,9 +41,11 @@ namespace State {
 	//Constructors
 	public:
 
-		Scene2(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates) {
+		Scene2(SceneManager* scnMgr)
+			: m_SceneManager(scnMgr)
+		{
 			std::cout << "[L20] Opening Scene 2..." << std::endl;
-			m_Window = wnd;
+			m_Window = scnMgr->getWindowInstance();
 
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);
@@ -85,8 +88,8 @@ namespace State {
 		float lastTime = 0;
 		int speed = 1;
 
-		float back_colour[4] = { 0.992f, 0.992f, 0.588f, 1.0f };
-		float fore_colour[4] = { 1.0f  , 1.0f  , 1.0f  , 1.0f };
+		glm::vec4 back_colour = glm::vec4( 0.992f, 0.992f, 0.588f, 1.0f );
+		glm::vec4 fore_colour = glm::vec4( 1.0f  , 1.0f  , 1.0f  , 1.0f );
 
 		Texture* texture = nullptr;
 		Shader* textureShader = nullptr;
@@ -114,7 +117,7 @@ namespace State {
 			textureShader->setMat4("MVP", glm::perspective(glm::radians(45.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f)
 				* glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, -5.0f)) 
 				* trans.getTransform());
-			textureShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
+			textureShader->setVec4("ourColour", fore_colour);
 
 			glBindVertexArray(VAO);
 			glBindTexture(GL_TEXTURE_2D, texture->getID());
@@ -146,8 +149,8 @@ namespace State {
 
 			ImGui::Separator();
 
-			ImGui::ColorPicker4("Background", back_colour);
-			ImGui::ColorPicker4("Triangles", fore_colour);
+			ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
+			ImGui::ColorPicker4("Triangles", glm::value_ptr(fore_colour));
 
 			glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 

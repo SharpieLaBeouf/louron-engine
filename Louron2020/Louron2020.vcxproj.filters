@@ -83,9 +83,6 @@
     <ClInclude Include="Headers\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\SceneState.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Scenes\MainMenu.h">
       <Filter>Game States</Filter>
     </ClInclude>
@@ -146,6 +143,12 @@
     <ClInclude Include="Headers\Abstracted GL\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scenes\Scene 6.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\SceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Shaders\basic.glsl" />
@@ -153,6 +156,7 @@
     <None Include="Resources\Shaders\basic_cube.glsl" />
     <None Include="Resources\Shaders\basic_phong.glsl" />
     <None Include="Resources\Shaders\basic_material_phong.glsl" />
+    <None Include="assimp.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Images\cube_texture.jpg">

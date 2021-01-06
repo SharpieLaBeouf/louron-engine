@@ -18,7 +18,8 @@ void main() {
 
 #version 330 core
 
-out vec4 fragColour;
+layout(location = 0) out vec4 fragColour;
+
 uniform vec4 ourColour;
 
 void main() {

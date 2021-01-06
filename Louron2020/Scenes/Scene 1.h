@@ -6,7 +6,7 @@
 #include "../Vendor/imgui/imgui.h"
 
 #include "../Headers/Input.h"
-#include "../Headers/SceneState.h"
+#include "../Headers/SceneManager.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
 
@@ -16,11 +16,12 @@ namespace State {
 
 	private:
 
-		Window* m_Window;
-		std::stack<std::unique_ptr<State::SceneState>>* m_States;
+		State::SceneManager* m_SceneManager;
 
-		float back_colour[4] = { 0.75f, 0.90f, 1.0f, 1.0f };
-		float fore_colour[4] = { 1.0f, 0.65f, 1.0f, 1.0f };
+		InputManager* m_Input;
+
+		glm::vec4 back_colour = glm::vec4( 0.75f, 0.90f, 1.0f, 1.0f );
+		glm::vec4 fore_colour = glm::vec4( 1.00f, 0.65f, 1.0f, 1.0f );
 
 		unsigned int triangleVAO = NULL;
 		unsigned int triangleVBO = NULL;
@@ -40,9 +41,11 @@ namespace State {
 
 	public:
 
-		Scene1(std::stack<std::unique_ptr<State::SceneState>>* SceneStates, Window* wnd) : m_States(SceneStates) {
+		Scene1(SceneManager* scnMgr)
+			: m_SceneManager(scnMgr)
+		{
 			std::cout << "[L20] Opening Scene 1..." << std::endl;
-			m_Window = wnd;
+			m_Input = m_SceneManager->getInputInstance();
 			
 			triangleShader = new Shader("Resources/Shaders/basic.glsl");
 
@@ -73,9 +76,9 @@ namespace State {
 		}
 
 		void update() override {
-			if (m_Window->getInput()->GetKeyDown(GLFW_KEY_F))
+			if (m_Input->GetKeyDown(GLFW_KEY_F))
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			else if (m_Window->getInput()->GetKeyDown(GLFW_KEY_W))
+			else if (m_Input->GetKeyDown(GLFW_KEY_W))
 				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
 
@@ -89,7 +92,7 @@ namespace State {
 			triangleShader->setMat4("model", glm::mat4(1.0f));
 			triangleShader->setMat4("proj", glm::mat4(1.0f));
 			triangleShader->setMat4("view", glm::mat4(1.0f));
-			triangleShader->setVec4("ourColour", fore_colour[0], fore_colour[1], fore_colour[2], fore_colour[3]);
+			triangleShader->setVec4("ourColour", fore_colour);
 
 			glBindVertexArray(triangleVAO);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -115,8 +118,8 @@ namespace State {
 
 			ImGui::Separator();
 
-			ImGui::ColorPicker4("Background", back_colour);
-			ImGui::ColorPicker4("Triangles", fore_colour);
+			ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
+			ImGui::ColorPicker4("Triangles", glm::value_ptr(fore_colour));
 
 			glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 

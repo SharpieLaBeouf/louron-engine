@@ -118,10 +118,11 @@
     <ClInclude Include="Scenes\Scene 1.h" />
     <ClInclude Include="Scenes\Scene 3.h" />
     <ClInclude Include="Headers\Engine.h" />
-    <ClInclude Include="Headers\SceneState.h" />
+    <ClInclude Include="Headers\SceneManager.h" />
     <ClInclude Include="Headers\Input.h" />
     <ClInclude Include="Scenes\MainMenu.h" />
     <ClInclude Include="Headers\Abstracted GL\Shader.h" />
+    <ClInclude Include="Scenes\Scene 6.h" />
     <ClInclude Include="Vendor\stb_image.h" />
     <ClInclude Include="Headers\Window.h" />
     <ClInclude Include="Vendor\imgui\imconfig.h" />
@@ -140,6 +141,7 @@
     <Image Include="Resources\Images\grass_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assimp.dll" />
     <None Include="Resources\Shaders\basic.glsl" />
     <None Include="Resources\Shaders\basic_cube.glsl" />
     <None Include="Resources\Shaders\basic_material_phong.glsl" />

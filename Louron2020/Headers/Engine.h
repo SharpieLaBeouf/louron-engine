@@ -18,6 +18,8 @@
 // CUSTOM HEADERS
 #include "Window.h"
 #include "Input.h"
+
+#include "SceneManager.h"
 #include "../Scenes/MainMenu.h"
 
 class Engine {
@@ -33,10 +35,13 @@ public:
 
 private:
 
-	Window* m_Window;
-	InputManager* m_Input;
+	State::SceneManager* m_SceneManager = nullptr;
+
+	Window* m_Window = nullptr;
+	InputManager* m_Input = nullptr;
+	ShaderLibrary* m_ShaderLib = nullptr;
+	std::vector<std::unique_ptr<State::SceneState>> m_States;
 
 	bool m_fpsToggled = true;
 
-	std::stack<std::unique_ptr<State::SceneState>> m_States;
 };
