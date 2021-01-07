@@ -72,6 +72,9 @@
     <ClCompile Include="Vendor\imgui\imgui_widgets.cpp">
       <Filter>Vendor\ImGUI</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Engine.h">
@@ -149,30 +152,34 @@
     <ClInclude Include="Scenes\Scene 6.h">
       <Filter>Scenes</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Abstracted GL\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp.dll" />
-    <None Include="Resources\Shaders\basic_texture.glsl">
+    <None Include="Resources\Shaders\Basic\basic.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\basic.glsl">
+    <None Include="Resources\Shaders\Basic\basic_phong.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\basic_cube.glsl">
+    <None Include="Resources\Shaders\Basic\basic_texture.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\basic_material_phong.glsl">
+    <None Include="Resources\Shaders\Materials\material_shader_phong.glsl">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="Resources\Shaders\basic_phong.glsl">
-      <Filter>Resource Files</Filter>
-    </None>
+    <None Include="Resources\Shaders\Materials\material_shader_flat.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Resources\Images\grass_texture.jpg">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\Images\cube_texture.jpg">
+    <Image Include="Resources\Images\cube_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Resources\Images\cube_texture_specular.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

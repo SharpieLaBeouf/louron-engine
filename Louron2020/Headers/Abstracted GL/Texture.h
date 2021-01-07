@@ -15,7 +15,7 @@ public:
 	void Bind();
 	void UnBind();
 
-	Texture() = default;
+	Texture();
 	Texture(const char* texturePath);
 	~Texture();
 
@@ -37,7 +37,7 @@ private:
 public:
 	void UnBind();
 
-	TextureLibrary() = default;
+	TextureLibrary();
 
 	void Add(Texture* texture);
 	void Add(const std::string & textureName, Texture* texture);

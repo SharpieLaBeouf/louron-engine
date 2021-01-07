@@ -1,5 +1,8 @@
 #pragma once
 #include "../Entity.h"
+#include "../SceneManager.h"
+
+#include "Material.h"
 
 #include <vector>
 
@@ -20,12 +23,16 @@ public:
 	std::vector<Vertex> m_Vertices;
 	std::vector<GLuint> m_Indices;
 
-	Shader* m_Shader = nullptr;
-	std::vector<Material> m_Materials;
+	Material m_Material;
 
-	MeshFilter(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Material> materials);
+	MeshFilter(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material material);
 	
-	void Draw() { }
+	/// <summary>
+	/// 1. DrawElements for the entire mesh using the singular material
+	/// </summary>
+	void Draw() { 
+		
+	}
 
 private:
 
@@ -38,7 +45,12 @@ public:
 	explicit MeshRenderer() = default;
 	explicit MeshRenderer(const MeshRenderer&) = default;
 
-	MeshRenderer(const char* filePath) {
+	MeshRenderer(State::SceneManager* scnMgr, bool active = true) : m_Active(active) {
+
+	}
+
+	int loadModel(const char* filePath) {
+
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filePath,
 			aiProcess_CalcTangentSpace |
@@ -48,6 +60,19 @@ public:
 		if (!scene) {
 			std::cout << "[L20] Error Reading File: " << importer.GetErrorString() << std::endl;
 		}
+	}
+
+	/// <summary>
+	/// 1. Sorts all meshfilters based on material
+	/// 2. Loops all different types of materials
+	///		-> Bind Material00 (set uniforms, etc.)
+	///			-> Loop render all meshes with bound material00
+	///		-> Bind Material01 (set uniforms, etc.)
+	///			-> Loop render all meshes with bound material01
+	///		-> etc ... foreach groupings of material
+	/// </summary>
+	void Draw() {
+
 	}
 
 private:

@@ -61,6 +61,8 @@ Shader::Shader(const GLchar* shaderFile)
 	auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
 	name = name.substr(lastSlash, count);
 	m_Name = name.c_str();
+
+	std::cout << "[L20] Loaded Shader: " << shaderFile << std::endl;
 }
 Shader::~Shader() { glDeleteProgram(m_Program); }
 

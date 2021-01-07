@@ -5,6 +5,13 @@
 
 #include "../Headers/Input.h"
 
+enum WindowScreenMode {
+	L20_WINDOW_WINDOWED				 = 0,
+	L20_WINDOW_BORDERLESS_FULLSCREEN = 1,
+	L20_WINDOW_FULLSCREEN			 = 2,
+	L20_WINDOW_WINDOWED_BORDERLESS	 = 3
+};
+
 class Window {
 
 public:

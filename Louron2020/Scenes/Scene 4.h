@@ -89,8 +89,8 @@ namespace State {
 
 			sceneCamera = new Camera(m_Window, glm::vec3(0.0f, 10.0f, 25.0f));
 			
-			m_ShaderLib->getShader("basic_cube")->Bind();
-			m_ShaderLib->getShader("basic_cube")->setInt("ourTexture", 0);
+			m_ShaderLib->getShader("basic_texture")->Bind();
+			m_ShaderLib->getShader("basic_texture")->setInt("ourTexture", 0);
 		}
 		~Scene4() override
 		{
@@ -168,7 +168,7 @@ namespace State {
 				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			}
 
-			shader = m_ShaderLib->getShader("basic_cube");
+			shader = m_ShaderLib->getShader("basic_texture");
 			if (shader)
 			{
 				// DRAW CUBES ABOVE

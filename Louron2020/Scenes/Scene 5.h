@@ -148,6 +148,8 @@ namespace State {
 			glDeleteVertexArrays(1, &cube_VAO);
 			glDeleteBuffers(1, &cube_VBO);
 			glDeleteBuffers(1, &cube_EBO);
+
+			delete m_SceneCamera;
 		}
 
 	private:
@@ -217,18 +219,25 @@ namespace State {
 				shader->setVec3("viewPos", m_SceneCamera->getPosition());
 				shader->setVec3("lightPos", light_trans.position);
 				shader->setVec4("lightColour", glm::vec4(1.0f));
-				shader->setVec4("targetColour", glm::vec4(box_colour[0], box_colour[1], box_colour[2], box_colour[3]));
 
 				glm::vec3 pos = glm::vec3(0.0f);
-				for (int x = 1; x <= 10; x++)
+				for (int x = 1; x <= 9; x++)
 				{
-					pos.x = -10 / 2 + x - cube_trans.scale.x / 2;
-					for (int z = 1; z <= 10; z++)
+					pos.x = -9 / 2 + x - cube_trans.scale.x / 2;
+					for (int z = 1; z <= 9; z++)
 					{
-						pos.z = -10 / 2 + z - cube_trans.scale.z / 2; 
+						pos.z = -9 / 2 + z - cube_trans.scale.z / 2; 
 						
 						double time = glfwGetTime();
-						pos.y = (float)sin((time * 8 + floor(x - 10) + floor(z - 10))) / 10 * 10;
+						pos.y = (float)sin((time * 8 + floor(x - 9) + floor(z - 9))) / 9 * 9;
+
+						if (z % 2 != 0 || x % 2 != 0)
+						{
+							shader->setVec4("targetColour", glm::vec4(box_colour[0], box_colour[1], box_colour[2], box_colour[3]));
+						}
+						else {
+							shader->setVec4("targetColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+						}
 
 						shader->setMat4("model", glm::translate(cube_trans.getTransform(), pos));
 						glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);

@@ -19,6 +19,7 @@ namespace State {
 		State::SceneManager* m_SceneManager;
 
 		InputManager* m_Input;
+		ShaderLibrary* m_ShaderLib;
 
 		glm::vec4 back_colour = glm::vec4( 0.75f, 0.90f, 1.0f, 1.0f );
 		glm::vec4 fore_colour = glm::vec4( 1.00f, 0.65f, 1.0f, 1.0f );
@@ -37,8 +38,6 @@ namespace State {
 			1, 2, 3
 		};
 
-		Shader* triangleShader = nullptr;
-
 	public:
 
 		Scene1(SceneManager* scnMgr)
@@ -46,9 +45,8 @@ namespace State {
 		{
 			std::cout << "[L20] Opening Scene 1..." << std::endl;
 			m_Input = m_SceneManager->getInputInstance();
+			m_ShaderLib = m_SceneManager->getShaderLibInstance();
 			
-			triangleShader = new Shader("Resources/Shaders/basic.glsl");
-
 			glGenVertexArrays(1, &triangleVAO);
 			glGenBuffers(1, &triangleVBO);
 			glGenBuffers(1, &triangleEBO);
@@ -88,16 +86,21 @@ namespace State {
 			processGUI();
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			triangleShader->Bind();
-			triangleShader->setMat4("model", glm::mat4(1.0f));
-			triangleShader->setMat4("proj", glm::mat4(1.0f));
-			triangleShader->setMat4("view", glm::mat4(1.0f));
-			triangleShader->setVec4("ourColour", fore_colour);
+			Shader* shader = m_ShaderLib->getShader("basic");
+			if (shader)
+			{
+				glBindVertexArray(triangleVAO);
 
-			glBindVertexArray(triangleVAO);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+				shader->Bind();
+				shader->setMat4("model", glm::mat4(1.0f));
+				shader->setMat4("proj", glm::mat4(1.0f));
+				shader->setMat4("view", glm::mat4(1.0f));
+				shader->setVec4("ourColour", fore_colour);
+				glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			}
 
-			triangleShader->UnBind();
+
+			shader->UnBind();
 		}
 
 	private:

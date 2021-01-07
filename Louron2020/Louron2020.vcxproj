@@ -92,6 +92,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Material.cpp" />
     <ClCompile Include="Source\MeshRenderer.cpp" />
     <ClCompile Include="Headers\Abstracted GL\MeshRenderer.h" />
     <ClCompile Include="Vendor\imgui\imgui.cpp" />
@@ -110,6 +111,7 @@
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Headers\Abstracted GL\Light.h" />
     <ClInclude Include="Headers\Abstracted GL\Material.h" />
     <ClInclude Include="Headers\Camera.h" />
     <ClInclude Include="Headers\Entity.h" />
@@ -137,16 +139,17 @@
     <ClInclude Include="Scenes\Scene 5.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\Images\cube_texture.jpg" />
+    <Image Include="Resources\Images\cube_texture.png" />
+    <Image Include="Resources\Images\cube_texture_specular.png" />
     <Image Include="Resources\Images\grass_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp.dll" />
-    <None Include="Resources\Shaders\basic.glsl" />
-    <None Include="Resources\Shaders\basic_cube.glsl" />
-    <None Include="Resources\Shaders\basic_material_phong.glsl" />
-    <None Include="Resources\Shaders\basic_phong.glsl" />
-    <None Include="Resources\Shaders\basic_texture.glsl" />
+    <None Include="Resources\Shaders\Basic\basic.glsl" />
+    <None Include="Resources\Shaders\Materials\material_shader_phong.glsl" />
+    <None Include="Resources\Shaders\Basic\basic_phong.glsl" />
+    <None Include="Resources\Shaders\Basic\basic_texture.glsl" />
+    <None Include="Resources\Shaders\Materials\material_shader_flat.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

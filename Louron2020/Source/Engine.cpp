@@ -5,12 +5,11 @@ Engine::Engine()
 	// 1. Init GLFW
 	std::cout << "[L20] GLFW Initialised " << ((glfwInit() == GLFW_TRUE) ? "Successfully!" : "Unsuccessfully!") << std::endl;
 	
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
-	int screenMode = 0;
-	m_Window = new Window("Louron 2020", 800, 800, screenMode);
+	m_Window = new Window("Louron 2020", 800, 800, WindowScreenMode::L20_WINDOW_WINDOWED);
 	m_Window->init();
 	m_Input = m_Window->getInput();
 	std::cout << std::endl;
@@ -27,18 +26,19 @@ Engine::Engine()
 	ImGui::StyleColorsDark();
 	bool imGuiGLFWErr = ImGui_ImplGlfw_InitForOpenGL(m_Window->getWindow(), true);
 	bool imGuiGLEWErr = ImGui_ImplOpenGL3_Init("#version 150");
-	std::cout << "[L20] ImGui Initialised " << ((imGuiGLFWErr && imGuiGLEWErr) ? "Successfully!" : "Unsuccessfully!") << std::endl;
+	std::cout << "[L20] ImGui Initialised " << ((imGuiGLFWErr && imGuiGLEWErr) ? "Successfully!" : "Unsuccessfully!") << std::endl << std::endl;
 
 	// 4. Load Shader and Texture Library
 	m_ShaderLib = new ShaderLibrary();
-	m_ShaderLib->loadShader("Resources/Shaders/basic.glsl");
-	m_ShaderLib->loadShader("Resources/Shaders/basic_cube.glsl");
-	m_ShaderLib->loadShader("Resources/Shaders/basic_material_phong.glsl");
-	m_ShaderLib->loadShader("Resources/Shaders/basic_phong.glsl");
-	m_ShaderLib->loadShader("Resources/Shaders/basic_texture.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/Basic/basic.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/Basic/basic_phong.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/Basic/basic_texture.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/Materials/material_shader_flat.glsl");
+	m_ShaderLib->loadShader("Resources/Shaders/Materials/material_shader_phong.glsl");
 
 	m_TextureLib = new TextureLibrary();
-	m_TextureLib->loadTexture("Resources/Images/cube_texture.jpg");
+	m_TextureLib->loadTexture("Resources/Images/cube_texture.png");
+	m_TextureLib->loadTexture("Resources/Images/cube_texture_specular.png");
 	m_TextureLib->loadTexture("Resources/Images/grass_texture.jpg");
 
 	// 5. Init Global Scene Manager

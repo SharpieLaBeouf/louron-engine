@@ -62,8 +62,8 @@ namespace State {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 			
-			textureShader = m_ShaderLib->getShader("basic_cube");
-			textureShader->setInt("ourTexture", 0);
+			m_ShaderLib->getShader("basic_texture")->Bind();
+			m_ShaderLib->getShader("basic_texture")->setInt("ourTexture", 0);
 
 		}
 		~Scene3() override
@@ -84,7 +84,6 @@ namespace State {
 		int speed = 0;
 
 		Transform trans;
-		Shader* textureShader = nullptr;
 
 		glm::vec4 back_colour = glm::vec4(0.674f, 0.992f, 0.588f, 1.0f);
 		glm::vec4 fore_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -105,16 +104,22 @@ namespace State {
 
 			trans.rotation.z += deltaTime * speed;
 
-			textureShader->Bind();
-			textureShader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
-			textureShader->setMat4("view", glm::lookAt(glm::vec3(0.0f, 1.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-			textureShader->setMat4("model", trans.getTransform());
-			textureShader->setVec4("ourColour", fore_colour);
+			Shader* shader = m_ShaderLib->getShader("basic_texture");
+			if (shader)
+			{
+				glBindVertexArray(VAO);
 
-			glBindVertexArray(VAO);
-			m_TexLib->getTexture("cube_texture")->Bind();
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-			m_TexLib->UnBind();
+				shader->Bind();
+				shader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
+				shader->setMat4("view", glm::lookAt(glm::vec3(0.0f, 1.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+				shader->setMat4("model", trans.getTransform());
+				shader->setVec4("ourColour", fore_colour);
+
+				m_TexLib->getTexture("cube_texture")->Bind();
+				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+				m_TexLib->UnBind();
+			}
+			shader->UnBind();
 		}
 
 
