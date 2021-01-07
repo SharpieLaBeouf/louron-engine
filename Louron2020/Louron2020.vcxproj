@@ -139,7 +139,6 @@
   <ItemGroup>
     <Image Include="Resources\Images\cube_texture.jpg" />
     <Image Include="Resources\Images\grass_texture.jpg" />
-    <Image Include="Resources\Images\L20 Icon.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assimp.dll" />

@@ -57,6 +57,8 @@ private:
 
 public:
 
+	void UnBind();
+
 	ShaderLibrary() = default;
 
 	void Add(Shader* shader);

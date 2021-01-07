@@ -107,11 +107,6 @@ int Window::init()
 	m_Input = new InputManager();
 	m_Input->init(m_Window);
 
-	GLFWimage icon; int nrChannels;
-	icon.pixels = stbi_load("Resources/Images/L20 Icon.png", &icon.width, &icon.height, &nrChannels, 0);
-	glfwSetWindowIcon(m_Window, 1, &icon);
-	stbi_image_free(icon.pixels);
-
 	return 0;
 }
 

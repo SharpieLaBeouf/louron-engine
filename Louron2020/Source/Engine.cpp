@@ -29,7 +29,7 @@ Engine::Engine()
 	bool imGuiGLEWErr = ImGui_ImplOpenGL3_Init("#version 150");
 	std::cout << "[L20] ImGui Initialised " << ((imGuiGLFWErr && imGuiGLEWErr) ? "Successfully!" : "Unsuccessfully!") << std::endl;
 
-	// 4. Load Shader Library
+	// 4. Load Shader and Texture Library
 	m_ShaderLib = new ShaderLibrary();
 	m_ShaderLib->loadShader("Resources/Shaders/basic.glsl");
 	m_ShaderLib->loadShader("Resources/Shaders/basic_cube.glsl");
@@ -37,8 +37,12 @@ Engine::Engine()
 	m_ShaderLib->loadShader("Resources/Shaders/basic_phong.glsl");
 	m_ShaderLib->loadShader("Resources/Shaders/basic_texture.glsl");
 
+	m_TextureLib = new TextureLibrary();
+	m_TextureLib->loadTexture("Resources/Images/cube_texture.jpg");
+	m_TextureLib->loadTexture("Resources/Images/grass_texture.jpg");
+
 	// 5. Init Global Scene Manager
-	m_SceneManager = new State::SceneManager(m_Window, m_Input, m_ShaderLib, &m_States);
+	m_SceneManager = new State::SceneManager(m_Window, m_Input, m_ShaderLib, m_TextureLib, &m_States);
 
 }
 
@@ -60,12 +64,7 @@ int Engine::run()
 	while (!glfwWindowShouldClose(m_Window->getWindow()))
 	{
 		glfwPollEvents();
-
-		//int width, height;
-		//glfwGetWindowSize(m_Window->getWindow(), &width, &height);
-		//m_Window->setWidth((float)width);
-		//m_Window->setHeight((float)height);
-		
+				
 		if (m_Input->GetKeyUp(GLFW_KEY_ESCAPE)) m_States.pop_back();
 		if (m_Input->GetKeyUp(GLFW_KEY_F11)) m_Window->toggleFullscreen();
 

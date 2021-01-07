@@ -40,6 +40,7 @@ private:
 	Window* m_Window = nullptr;
 	InputManager* m_Input = nullptr;
 	ShaderLibrary* m_ShaderLib = nullptr;
+	TextureLibrary* m_TextureLib = nullptr;
 	std::vector<std::unique_ptr<State::SceneState>> m_States;
 
 };

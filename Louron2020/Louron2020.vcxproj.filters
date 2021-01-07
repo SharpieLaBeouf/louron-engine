@@ -172,9 +172,6 @@
     <Image Include="Resources\Images\grass_texture.jpg">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="Resources\Images\L20 Icon.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="Resources\Images\cube_texture.jpg">
       <Filter>Resource Files</Filter>
     </Image>

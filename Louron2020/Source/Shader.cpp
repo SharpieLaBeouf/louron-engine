@@ -100,14 +100,16 @@ void Shader::checkCompileErrors(unsigned int shader, std::string type) {
 	}
 }
 
-void ShaderLibrary::Add(Shader* shader) { 
+void ShaderLibrary::UnBind() { glUseProgram(0); }
+
+void ShaderLibrary::Add(Shader* shader) {
 	Add(shader->getName(), shader); 
 }
 
 void ShaderLibrary::Add(const std::string& shaderName, Shader* shader) {
 	if (shaderExists(shaderName)) {
 
-		std::cout << "[L20] Shader Already Loaded!" << std::endl;
+		std::cout << "[L20] Shader Already Loaded! " << shaderName << std::endl;
 	}
 	else {
 		m_Shaders[shaderName] = shader;
@@ -128,7 +130,7 @@ Shader* ShaderLibrary::loadShader(const std::string& shaderFile, const std::stri
 
 Shader* ShaderLibrary::getShader(const std::string& shaderName) {
 	if (!shaderExists(shaderName))
-		std::cout << "[L20] Shader Not Loaded!" << std::endl;
+		std::cout << "[L20] Shader Not Loaded! " << shaderName << std::endl;
 	else
 		return m_Shaders[shaderName];
 	return nullptr;

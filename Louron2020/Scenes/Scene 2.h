@@ -19,33 +19,22 @@ namespace State {
 	//Private Setup Variables
 	private:
 
-		State::SceneManager* m_SceneManager;
+		State::SceneManager* m_SceneManager = nullptr;
 
-		Window* m_Window;
-
-		unsigned int VAO = NULL;
-		unsigned int VBO = NULL;
-		unsigned int EBO = NULL;
-		float vertices[20] = {
-			 0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right
-			 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
-			-0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // bottom left
-			-0.5f,  0.5f, 0.0f,  0.0f, 1.0f  // top left 
-		};
-		unsigned int indices[6] = {
-			0, 1, 3,
-			1, 2, 3
-		};
-
+		Window* m_Window = nullptr;
+		ShaderLibrary* m_ShaderLib = nullptr;
+		TextureLibrary* m_TexLib = nullptr;
 
 	//Constructors
 	public:
 
-		Scene2(SceneManager* scnMgr)
+		explicit Scene2(SceneManager* scnMgr)
 			: m_SceneManager(scnMgr)
 		{
 			std::cout << "[L20] Opening Scene 2..." << std::endl;
 			m_Window = scnMgr->getWindowInstance();
+			m_ShaderLib = scnMgr->getShaderLibInstance();
+			m_TexLib = scnMgr->getTextureLibInstance();
 
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);
@@ -68,8 +57,7 @@ namespace State {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 
-			texture = new Texture("Resources/Images/cube_texture.jpg");
-			textureShader = new Shader("Resources/Shaders/basic_texture.glsl");
+			textureShader = m_ShaderLib->getShader("basic_texture");
 			textureShader->setInt("ourTexture", 0);
 		}
 		~Scene2() override
@@ -91,12 +79,10 @@ namespace State {
 		glm::vec4 back_colour = glm::vec4( 0.992f, 0.992f, 0.588f, 1.0f );
 		glm::vec4 fore_colour = glm::vec4( 1.0f  , 1.0f  , 1.0f  , 1.0f );
 
-		Texture* texture = nullptr;
 		Shader* textureShader = nullptr;
 
 		Transform trans;
 		
-
 	//Public Functions
 	public:
 
@@ -120,13 +106,13 @@ namespace State {
 			textureShader->setVec4("ourColour", fore_colour);
 
 			glBindVertexArray(VAO);
-			glBindTexture(GL_TEXTURE_2D, texture->getID());
+			m_TexLib->getTexture("cube_texture")->Bind();
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			m_TexLib->getTexture("cube_texture")->UnBind();
 		}
 
 
-	//Private Functions
+	//Private
 	private:
 		void processGUI() {
 
@@ -156,5 +142,20 @@ namespace State {
 
 			ImGui::End();
 		}
+
+		unsigned int VAO = NULL;
+		unsigned int VBO = NULL;
+		unsigned int EBO = NULL;
+		float vertices[20] = {
+			 0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right
+			 0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
+			-0.5f, -0.5f, 0.0f,  0.0f, 0.0f, // bottom left
+			-0.5f,  0.5f, 0.0f,  0.0f, 1.0f  // top left 
+		};
+		unsigned int indices[6] = {
+			0, 1, 3,
+			1, 2, 3
+		};
+
 	};
 }

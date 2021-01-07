@@ -225,12 +225,11 @@ namespace State {
 					pos.x = -10 / 2 + x - cube_trans.scale.x / 2;
 					for (int z = 1; z <= 10; z++)
 					{
-						pos.z = -10 / 2 + z - cube_trans.scale.z / 2;
-						for (int y = 1; y <= 10; y++)
-						{
-							double time = glfwGetTime();
-							pos.y = (float)sin((time * 8 + floor(x - 10) + floor(z - 10))) / 10 * 10;
-						}
+						pos.z = -10 / 2 + z - cube_trans.scale.z / 2; 
+						
+						double time = glfwGetTime();
+						pos.y = (float)sin((time * 8 + floor(x - 10) + floor(z - 10))) / 10 * 10;
+
 						shader->setMat4("model", glm::translate(cube_trans.getTransform(), pos));
 						glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 					}

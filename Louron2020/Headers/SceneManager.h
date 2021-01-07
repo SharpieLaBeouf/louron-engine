@@ -4,6 +4,7 @@
 #include "../Headers/Input.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
+#include "../Headers/Abstracted GL/Texture.h"
 
 namespace State {
 
@@ -23,13 +24,14 @@ namespace State {
 	
 	public:
 
-		SceneManager(Window* wnd, InputManager* inp, ShaderLibrary* shaderLib, std::vector<std::unique_ptr<State::SceneState>>* states)
-			: m_Window(wnd), m_Input(inp), m_ShaderLib(shaderLib), m_States(states) { }
+		SceneManager(Window* wnd, InputManager* inp, ShaderLibrary* shaderLib, TextureLibrary* texLib, std::vector<std::unique_ptr<State::SceneState>>* states)
+			: m_Window(wnd), m_Input(inp), m_ShaderLib(shaderLib), m_TextureLib(texLib), m_States(states) { }
 		~SceneManager() = default;
 
 		Window* getWindowInstance() { return m_Window; }
 		InputManager* getInputInstance() { return m_Input; }
 		ShaderLibrary* getShaderLibInstance() { return m_ShaderLib; }
+		TextureLibrary* getTextureLibInstance() { return m_TextureLib; }
 
 		std::vector<std::unique_ptr<State::SceneState>>* getStatesInstance() { return m_States; }
 
@@ -38,6 +40,7 @@ namespace State {
 		Window* m_Window;
 		InputManager* m_Input;
 		ShaderLibrary* m_ShaderLib;
+		TextureLibrary* m_TextureLib;
 		std::vector<std::unique_ptr<State::SceneState>>* m_States;
 	};
 
