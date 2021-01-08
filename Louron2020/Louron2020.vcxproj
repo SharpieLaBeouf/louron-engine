@@ -92,6 +92,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Source\Buffer.cpp" />
     <ClCompile Include="Source\Material.cpp" />
     <ClCompile Include="Source\MeshRenderer.cpp" />
     <ClCompile Include="Headers\Abstracted GL\MeshRenderer.h" />
@@ -111,8 +112,10 @@
     <ClCompile Include="Source\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Headers\Abstracted GL\Buffer.h" />
     <ClInclude Include="Headers\Abstracted GL\Light.h" />
     <ClInclude Include="Headers\Abstracted GL\Material.h" />
+    <ClInclude Include="Headers\Abstracted GL\Vertex Array.h" />
     <ClInclude Include="Headers\Camera.h" />
     <ClInclude Include="Headers\Entity.h" />
     <ClInclude Include="Headers\Abstracted GL\Texture.h" />
