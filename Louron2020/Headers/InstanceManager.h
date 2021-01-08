@@ -20,13 +20,13 @@ namespace State {
 
 	};
 
-	class SceneManager {
+	class InstanceManager {
 	
 	public:
 
-		SceneManager(Window* wnd, InputManager* inp, ShaderLibrary* shaderLib, TextureLibrary* texLib, std::vector<std::unique_ptr<State::SceneState>>* states)
+		InstanceManager(Window* wnd, InputManager* inp, ShaderLibrary* shaderLib, TextureLibrary* texLib, std::vector<std::unique_ptr<State::SceneState>>* states)
 			: m_Window(wnd), m_Input(inp), m_ShaderLib(shaderLib), m_TextureLib(texLib), m_States(states) { }
-		~SceneManager() = default;
+		~InstanceManager() = default;
 
 		Window* getWindowInstance() { return m_Window; }
 		InputManager* getInputInstance() { return m_Input; }

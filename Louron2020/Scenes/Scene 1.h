@@ -6,7 +6,7 @@
 #include "../Vendor/imgui/imgui.h"
 
 #include "../Headers/Input.h"
-#include "../Headers/SceneManager.h"
+#include "../Headers/InstanceManager.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
 
@@ -16,7 +16,7 @@ namespace State {
 
 	private:
 
-		State::SceneManager* m_SceneManager;
+		State::InstanceManager* m_InstanceManager;
 
 		InputManager* m_Input;
 		ShaderLibrary* m_ShaderLib;
@@ -40,12 +40,12 @@ namespace State {
 
 	public:
 
-		Scene1(SceneManager* scnMgr)
-			: m_SceneManager(scnMgr)
+		Scene1(InstanceManager* instanceManager)
+			: m_InstanceManager(instanceManager)
 		{
 			std::cout << "[L20] Opening Scene 1..." << std::endl;
-			m_Input = m_SceneManager->getInputInstance();
-			m_ShaderLib = m_SceneManager->getShaderLibInstance();
+			m_Input = m_InstanceManager->getInputInstance();
+			m_ShaderLib = m_InstanceManager->getShaderLibInstance();
 			
 			glGenVertexArrays(1, &triangleVAO);
 			glGenBuffers(1, &triangleVBO);

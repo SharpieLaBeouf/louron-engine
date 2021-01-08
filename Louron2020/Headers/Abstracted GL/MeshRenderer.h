@@ -1,6 +1,6 @@
 #pragma once
 #include "../Entity.h"
-#include "../SceneManager.h"
+#include "../InstanceManager.h"
 
 #include "Material.h"
 
@@ -23,9 +23,9 @@ public:
 	std::vector<Vertex> m_Vertices;
 	std::vector<GLuint> m_Indices;
 
-	Material m_Material;
+	Material* m_Material;
 
-	MeshFilter(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material material);
+	MeshFilter(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material* material);
 	
 	/// <summary>
 	/// 1. DrawElements for the entire mesh using the singular material
@@ -45,7 +45,7 @@ public:
 	explicit MeshRenderer() = default;
 	explicit MeshRenderer(const MeshRenderer&) = default;
 
-	MeshRenderer(State::SceneManager* scnMgr, bool active = true) : m_Active(active) {
+	MeshRenderer(State::InstanceManager* instanceManager, bool active = true) : m_Active(active) {
 
 	}
 

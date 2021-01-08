@@ -8,7 +8,7 @@
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
 #include "../Headers/Camera.h"
-#include "../Headers/SceneManager.h"
+#include "../Headers/InstanceManager.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
 #include "../Headers/Abstracted GL/Texture.h"
@@ -20,7 +20,7 @@ namespace State {
 		//Private Setup Variables
 	private:
 
-		State::SceneManager* m_SceneManager;
+		State::InstanceManager* m_InstanceManager;
 
 		Window* m_Window;
 		ShaderLibrary* m_ShaderLib;
@@ -30,12 +30,12 @@ namespace State {
 		//Constructors
 	public:
 
-		Scene3(SceneManager* scnMgr)
-			: m_SceneManager(scnMgr)
+		Scene3(InstanceManager* instanceManager)
+			: m_InstanceManager(instanceManager)
 		{
-			m_Window = m_SceneManager->getWindowInstance();
-			m_ShaderLib = m_SceneManager->getShaderLibInstance();
-			m_TexLib = m_SceneManager->getTextureLibInstance();
+			m_Window = m_InstanceManager->getWindowInstance();
+			m_ShaderLib = m_InstanceManager->getShaderLibInstance();
+			m_TexLib = m_InstanceManager->getTextureLibInstance();
 
 			glEnable(GL_DEPTH_TEST);
 			

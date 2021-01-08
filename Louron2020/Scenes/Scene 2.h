@@ -7,7 +7,7 @@
 
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
-#include "../Headers/SceneManager.h"
+#include "../Headers/InstanceManager.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
 #include "../Headers/Abstracted GL/Texture.h"
@@ -19,7 +19,7 @@ namespace State {
 	//Private Setup Variables
 	private:
 
-		State::SceneManager* m_SceneManager = nullptr;
+		State::InstanceManager* m_InstanceManager = nullptr;
 
 		Window* m_Window = nullptr;
 		ShaderLibrary* m_ShaderLib = nullptr;
@@ -28,13 +28,13 @@ namespace State {
 	//Constructors
 	public:
 
-		explicit Scene2(SceneManager* scnMgr)
-			: m_SceneManager(scnMgr)
+		explicit Scene2(InstanceManager* instanceManager)
+			: m_InstanceManager(instanceManager)
 		{
 			std::cout << "[L20] Opening Scene 2..." << std::endl;
-			m_Window = scnMgr->getWindowInstance();
-			m_ShaderLib = scnMgr->getShaderLibInstance();
-			m_TexLib = scnMgr->getTextureLibInstance();
+			m_Window = m_InstanceManager->getWindowInstance();
+			m_ShaderLib = m_InstanceManager->getShaderLibInstance();
+			m_TexLib = m_InstanceManager->getTextureLibInstance();
 
 			glGenVertexArrays(1, &VAO);
 			glGenBuffers(1, &VBO);

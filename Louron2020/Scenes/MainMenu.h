@@ -13,7 +13,7 @@
 #include "../Vendor/imgui/imgui.h"
 
 #include "../Headers/Input.h"
-#include "../Headers/SceneManager.h"
+#include "../Headers/InstanceManager.h"
 
 namespace State {
 
@@ -21,14 +21,14 @@ namespace State {
 
 	private:
 
-		State::SceneManager* m_SceneManager;
+		State::InstanceManager* m_InstanceManager;
 		std::vector<std::unique_ptr<State::SceneState>>* m_States;
 
 	public:
 		
-		MainMenu(SceneManager* scnMgr) : m_SceneManager(scnMgr) {
+		MainMenu(InstanceManager* instanceManager) : m_InstanceManager(instanceManager) {
 			std::cout << std::endl << "[L20] Opening Main Menu..." << std::endl;
-			m_States = m_SceneManager->getStatesInstance();
+			m_States = m_InstanceManager->getStatesInstance();
 		}
 		~MainMenu() override {
 			std::cout << "[L20] Closing Main Menu!" << std::endl;
@@ -58,17 +58,17 @@ namespace State {
 				ImGui::Text("Main Menu");
 				ImGui::Separator();
 				if (ImGui::Button(" 1. Basic Triangles "))
-					m_States->push_back(std::make_unique<State::Scene1>(m_SceneManager));
+					m_States->push_back(std::make_unique<State::Scene1>(m_InstanceManager));
 				if (ImGui::Button(" 2. Basic Texture   ")) 
-					m_States->push_back(std::make_unique<State::Scene2>(m_SceneManager));
+					m_States->push_back(std::make_unique<State::Scene2>(m_InstanceManager));
 				if (ImGui::Button(" 3. Basic Cube      ")) 
-					m_States->push_back(std::make_unique<State::Scene3>(m_SceneManager));
+					m_States->push_back(std::make_unique<State::Scene3>(m_InstanceManager));
 				if (ImGui::Button(" 4. Basic Camera    "))
-					m_States->push_back(std::make_unique<State::Scene4>(m_SceneManager));
+					m_States->push_back(std::make_unique<State::Scene4>(m_InstanceManager));
 				if (ImGui::Button(" 5. Basic Lighting  "))
-					m_States->push_back(std::make_unique<State::Scene5>(m_SceneManager));
+					m_States->push_back(std::make_unique<State::Scene5>(m_InstanceManager));
 				if (ImGui::Button(" 6. Basic Material  "))
-					m_States->push_back(std::make_unique<State::Scene6>(m_SceneManager));
+					m_States->push_back(std::make_unique<State::Scene6>(m_InstanceManager));
 			}
 			ImGui::End();
         }

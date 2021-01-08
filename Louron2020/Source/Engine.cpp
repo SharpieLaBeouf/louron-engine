@@ -2,6 +2,14 @@
 
 Engine::Engine()
 {
+	std::cout << "<---------------------------------------------->" << std::endl;
+	std::cout << "<                                              >" << std::endl;
+	std::cout << "<              Louron Engine 2020              >" << std::endl;
+	std::cout << "<                     [L20]                    >" << std::endl;
+	std::cout << "<                  Aaron Sharp                 >" << std::endl;
+	std::cout << "<                                              >" << std::endl;
+	std::cout << "<---------------------------------------------->" << std::endl << std::endl;
+
 	// 1. Init GLFW
 	std::cout << "[L20] GLFW Initialised " << ((glfwInit() == GLFW_TRUE) ? "Successfully!" : "Unsuccessfully!") << std::endl;
 	
@@ -42,7 +50,7 @@ Engine::Engine()
 	m_TextureLib->loadTexture("Resources/Images/grass_texture.jpg");
 
 	// 5. Init Global Scene Manager
-	m_SceneManager = new State::SceneManager(m_Window, m_Input, m_ShaderLib, m_TextureLib, &m_States);
+	m_InstanceManager = new State::InstanceManager(m_Window, m_Input, m_ShaderLib, m_TextureLib, &m_States);
 
 }
 
@@ -58,7 +66,7 @@ Engine::~Engine()
 int Engine::run()
 {
 	ImGuiIO& io = ImGui::GetIO();
-	m_States.push_back(std::make_unique<State::MainMenu>(m_SceneManager));
+	m_States.push_back(std::make_unique<State::MainMenu>(m_InstanceManager));
 
 	bool demoGUI = false;
 	while (!glfwWindowShouldClose(m_Window->getWindow()))

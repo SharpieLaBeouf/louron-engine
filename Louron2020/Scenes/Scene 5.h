@@ -8,7 +8,7 @@
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
 #include "../Headers/Camera.h"
-#include "../Headers/SceneManager.h"
+#include "../Headers/InstanceManager.h"
 
 #include "../Headers/Abstracted GL/Shader.h"
 #include "../Headers/Abstracted GL/Texture.h"
@@ -20,7 +20,7 @@ namespace State {
 		//Private Setup Variables
 	private:
 
-		State::SceneManager* m_SceneManager;
+		State::InstanceManager* m_InstanceManager;
 
 		Window* m_Window;
 		InputManager* m_Input;
@@ -84,13 +84,13 @@ namespace State {
 
 	public:
 
-		explicit Scene5(SceneManager* scnMgr)
-			: m_SceneManager(scnMgr)
+		explicit Scene5(InstanceManager* instanceManager)
+			: m_InstanceManager(instanceManager)
 		{
 			std::cout << "[L20] Opening Scene 5..." << std::endl;
-			m_Window = m_SceneManager->getWindowInstance();
-			m_Input = m_SceneManager->getInputInstance();
-			m_ShaderLib = m_SceneManager->getShaderLibInstance();
+			m_Window = m_InstanceManager->getWindowInstance();
+			m_Input = m_InstanceManager->getInputInstance();
+			m_ShaderLib = m_InstanceManager->getShaderLibInstance();
 
 			glEnable(GL_DEPTH_TEST);
 			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);

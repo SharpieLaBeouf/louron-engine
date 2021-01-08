@@ -8,7 +8,7 @@
 #include "../Headers/Input.h"
 #include "../Headers/Entity.h"
 #include "../Headers/Camera.h"
-#include "../Headers/SceneManager.h"
+#include "../Headers/InstanceManager.h"
 
 #include "../Headers/Abstracted GL/Light.h"
 #include "../Headers/Abstracted GL/Shader.h"
@@ -21,7 +21,7 @@ namespace State {
 		//Private Setup Variables
 	private:
 
-		State::SceneManager* m_SceneManager;
+		State::InstanceManager* m_InstanceManager;
 
 		Window* m_Window;
 		InputManager* m_Input;
@@ -36,14 +36,14 @@ namespace State {
 
 	public:
 
-		explicit Scene6(SceneManager* scnMgr)
-			: m_SceneManager(scnMgr)
+		explicit Scene6(InstanceManager* instanceManager)
+			: m_InstanceManager(instanceManager)
 		{
 			std::cout << "[L20] Opening Scene 6..." << std::endl;
-			m_Window = m_SceneManager->getWindowInstance();
-			m_Input = m_SceneManager->getInputInstance();
-			m_ShaderLib = m_SceneManager->getShaderLibInstance();
-			m_TextureLib = m_SceneManager->getTextureLibInstance();
+			m_Window = m_InstanceManager->getWindowInstance();
+			m_Input = m_InstanceManager->getInputInstance();
+			m_ShaderLib = m_InstanceManager->getShaderLibInstance();
+			m_TextureLib = m_InstanceManager->getTextureLibInstance();
 
 			{
 				glEnable(GL_DEPTH_TEST);
@@ -128,7 +128,7 @@ namespace State {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-			if (flat_cube_mat->shaderActive())
+			if (flat_cube_mat->Bind())
 			{
 				glBindVertexArray(cube_VAO);
 
@@ -144,7 +144,7 @@ namespace State {
 				flat_cube_mat->UnBind();
 			}
 
-			if (phong_cube_mat->shaderActive()) {
+			if (phong_cube_mat->Bind()) {
 				phong_cube_mat->setUniforms();
 				phong_cube_mat->getShader()->setMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
 				phong_cube_mat->getShader()->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));

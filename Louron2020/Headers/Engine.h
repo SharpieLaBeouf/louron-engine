@@ -19,7 +19,7 @@
 #include "Window.h"
 #include "Input.h"
 
-#include "SceneManager.h"
+#include "InstanceManager.h"
 #include "../Scenes/MainMenu.h"
 
 class Engine {
@@ -35,7 +35,7 @@ public:
 
 private:
 
-	State::SceneManager* m_SceneManager = nullptr;
+	State::InstanceManager* m_InstanceManager = nullptr;
 
 	Window* m_Window = nullptr;
 	InputManager* m_Input = nullptr;

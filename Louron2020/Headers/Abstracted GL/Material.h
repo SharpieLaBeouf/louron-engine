@@ -13,30 +13,27 @@
 #include <glm/gtx/quaternion.hpp>
 
 enum TextureMapType {
-	L20_TOTAL_ELEMENTS			= 4,
+	L20_TOTAL_ELEMENTS			= 3,
 	L20_TEXTURE_DIFFUSE_MAP		= 0,
 	L20_TEXTURE_SPECULAR_MAP	= 1,
-	L20_TEXTURE_NORMAL_MAP		= 2,
-	L20_TEXTURE_HEIGHT_MAP		= 3
+	L20_TEXTURE_NORMAL_MAP		= 2
 };
 
 class Material {
 
 public:
 
-	void Bind();
+	GLboolean Bind();
 	void UnBind();
 
 	void setUniforms();
 
-	/// <returns>If Shader is real, this will return TRUE</returns>
-	bool shaderActive();
 	Shader* getShader();
 
 	Material() = delete;
 	Material(Texture* texture);
 	Material(Shader* shader, Texture* texture);
-	Material(Shader* shader, std::unordered_map<int, Texture*>& textures);
+	Material(Shader* shader, std::unordered_map<GLint, Texture*>& textures);
 
 	glm::vec4* getAmbient ();
 	glm::vec4* getDiffuse ();
@@ -47,20 +44,24 @@ public:
 	void setSpecular(const glm::vec4& val);
 
 	/// <param name="type">Refer using TextureMapType enum.</param>
-	void AddTextureMap(int type, Texture* val);
+	void AddTextureMap(GLint type, Texture* val);
 	/// <param name="type">Refer using TextureMapType enum.</param>
-	Texture* GetTextureMap(int type);
+	Texture* GetTextureMap(GLint type);
 
 private:
 
-	float m_Shine = 32.0f;
+	GLfloat m_Shine = 32.0f;
 	glm::vec4 m_Ambient = glm::vec4(0.25f);
 	glm::vec4 m_Diffuse = glm::vec4(1.0f);
 	glm::vec4 m_Specular = glm::vec4(0.5f);
 
 	Shader* m_Shader;
 
-	std::unordered_map<int, Texture*> m_Textures;
+	std::unordered_map<GLint, Texture*> m_Textures;
 
-	std::string m_TextureUniformNames[4] = { "diffuseMap", "specularMap", "normalMap", "heightMap" };
+	std::string m_TextureUniformNames[3] = { 
+		"diffuseMap", 
+		"specularMap", 
+		"normalMap"
+	};
 };
