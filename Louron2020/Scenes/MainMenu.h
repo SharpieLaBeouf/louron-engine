@@ -9,6 +9,7 @@
 #include "Scene 4.h"
 #include "Scene 5.h"
 #include "Scene 6.h"
+#include "Scene 7.h"
 
 #include "../Vendor/imgui/imgui.h"
 
@@ -69,6 +70,8 @@ namespace State {
 					m_States->push_back(std::make_unique<State::Scene5>(m_InstanceManager));
 				if (ImGui::Button(" 6. Basic Material  "))
 					m_States->push_back(std::make_unique<State::Scene6>(m_InstanceManager));
+				if (ImGui::Button(" 7. Basic Material  "))
+					m_States->push_back(std::make_unique<State::Scene7>(m_InstanceManager));
 			}
 			ImGui::End();
         }
