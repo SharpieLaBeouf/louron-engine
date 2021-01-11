@@ -14,6 +14,13 @@ VertexBuffer::VertexBuffer(float* vertices, GLuint size) {
 	glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 }
 
+VertexBuffer::VertexBuffer(const std::vector<Vertex>& vertices, GLuint size) {
+	glCreateBuffers(1, &m_VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+}
+
 VertexBuffer::~VertexBuffer() {
 	glDeleteBuffers(1, &m_VBO);
 }
@@ -37,6 +44,12 @@ IndexBuffer::IndexBuffer(GLuint* indices, GLuint count) : m_Count(count) {
 	glCreateBuffers(1, &m_IBO);
 	glBindBuffer(GL_ARRAY_BUFFER, m_IBO);
 	glBufferData(GL_ARRAY_BUFFER, count * sizeof(GLuint), indices, GL_STATIC_DRAW);
+}
+
+IndexBuffer::IndexBuffer(const std::vector<GLuint>& indices, GLuint count) : m_Count(count) {
+	glCreateBuffers(1, &m_IBO);
+	glBindBuffer(GL_ARRAY_BUFFER, m_IBO);
+	glBufferData(GL_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
 }
 
 IndexBuffer::~IndexBuffer() {

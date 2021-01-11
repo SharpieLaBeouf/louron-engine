@@ -14,6 +14,7 @@
 #include "../Headers/Abstracted GL/Shader.h"
 #include "../Headers/Abstracted GL/Texture.h"
 #include "../Headers/Abstracted GL/Material.h"
+#include "../Headers/Abstracted GL/MeshRenderer.h"
 
 namespace State {
 	class Scene7 : public SceneState {
@@ -29,6 +30,10 @@ namespace State {
 		TextureLibrary* m_TextureLib;
 
 		Camera* scnCamera;
+		Light light_properties;
+
+		MeshRenderer* monkey;
+		MeshRenderer* back_pack;
 
 	public:
 
@@ -41,7 +46,16 @@ namespace State {
 			m_ShaderLib = m_InstanceManager->getShaderLibInstance();
 			m_TextureLib = m_InstanceManager->getTextureLibInstance();
 
-			scnCamera = new Camera(m_Window);
+			glEnable(GL_DEPTH_TEST);
+			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+			scnCamera = new Camera(m_Window, glm::vec3(0.0f, 0.0f, 10.0f));
+
+			back_pack = new MeshRenderer(m_InstanceManager);
+			back_pack->loadModel("Resources/Models/BackPack/backpack.obj", "material_shader_phong");
+
+			monkey = new MeshRenderer(m_InstanceManager);
+			monkey->loadModel("Resources/Models/Monkey/Monkey.fbx", "material_shader_phong");
 		}
 
 		~Scene7() override
@@ -50,7 +64,7 @@ namespace State {
 			glDisable(GL_DEPTH_TEST);
 			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-
+			delete monkey;
 			delete scnCamera;
 		}
 
@@ -70,12 +84,16 @@ namespace State {
 					glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			}
 
+			light_properties.position.z = sin(currentTime * 5);
 		}
 
 		void draw() override {
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			monkey->renderEntireMesh(scnCamera, &light_properties);
+
+			back_pack->renderEntireMesh(scnCamera, &light_properties);
 
 			processGUI();
 		}

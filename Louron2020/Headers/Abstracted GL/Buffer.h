@@ -7,6 +7,14 @@
 
 #include <GLEW/glew.h>
 
+#include <glm/glm.hpp>
+
+struct Vertex {
+	glm::vec3 position;
+	glm::vec3 normal;
+	glm::vec2 texCoords;
+};
+
 enum class ShaderDataType { None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool };
 static GLuint ShaderDataTypeSize(ShaderDataType type);
 
@@ -80,6 +88,7 @@ class VertexBuffer {
 public:
 	VertexBuffer(GLuint size);
 	VertexBuffer(float* vertices, GLuint size);
+	VertexBuffer(const std::vector<Vertex>& vertices, GLuint size);
 	~VertexBuffer();
 
 	void Bind() const;
@@ -89,7 +98,7 @@ public:
 
 	const BufferLayout& GetLayout() { return m_Layout; }
 	void SetLayout(const BufferLayout& layout) { m_Layout = layout; }
-
+	
 private:
 	GLuint m_VBO;
 	BufferLayout m_Layout;
@@ -99,6 +108,7 @@ class IndexBuffer {
 
 public:
 	IndexBuffer(GLuint* indices, GLuint count);
+	IndexBuffer(const std::vector<GLuint>& indices, GLuint count);
 	~IndexBuffer();
 
 	void Bind() const;

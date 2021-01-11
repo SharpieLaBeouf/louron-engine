@@ -1,66 +1,66 @@
 #pragma once
-#include "../Entity.h"
-#include "../InstanceManager.h"
 
-#include "Material.h"
-
+#include <string>
 #include <vector>
+#include <map>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-struct Vertex {
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec3 texCoords;
-};
+#include "Light.h"
+#include "Texture.h"
+#include "Material.h"
+#include "Vertex Array.h"
+
+#include "../Entity.h"
+#include "../Camera.h"
+#include "../InstanceManager.h"
+
+
+
+class MeshRenderer;
 
 class MeshFilter {
 
 public:
-	// mesh data
-	std::vector<Vertex> m_Vertices;
-	std::vector<GLuint> m_Indices;
 
-	Material* m_Material;
 
-	MeshFilter(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material* material);
-	
+	MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, State::InstanceManager* mgr);
+	~MeshFilter() { delete m_VAO; }
+
 	/// <summary>
 	/// 1. DrawElements for the entire mesh using the singular material
+	/// 
+	///   Realistically this should only take the scene heirarchy and then 
+	///   retrieve the relevant elements, or maybe be passed a struct of 
+	///   vectors which contain relevent scene details required for renderering
+	///   the current object.
+	/// 
 	/// </summary>
-	void Draw() { 
-		
-	}
+	void renderMeshFilter(Camera* mainCamera, Material* mat, Light* mainLight);
+
+	void setMaterialIndex(GLuint index) { m_MaterialIndex = index; }
+	GLuint getMaterialIndex() { return m_MaterialIndex; }
 
 private:
 
-	void setupMesh() { }
+	GLuint m_MaterialIndex;
+	State::InstanceManager* m_InstanceManager;
+
+	// OpenGL Data References
+	VertexArray* m_VAO = nullptr;
 };
 
 class MeshRenderer : public Entity {
 
 public:
-	explicit MeshRenderer() = default;
-	explicit MeshRenderer(const MeshRenderer&) = default;
+	MeshRenderer() = default;
+	MeshRenderer(const MeshRenderer&) = default;
 
-	MeshRenderer(State::InstanceManager* instanceManager, bool active = true) : m_Active(active) {
-
-	}
-
-	int loadModel(const char* filePath) {
-
-		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(filePath,
-			aiProcess_CalcTangentSpace |
-			aiProcess_Triangulate |
-			aiProcess_JoinIdenticalVertices |
-			aiProcess_SortByPType);
-		if (!scene) {
-			std::cout << "[L20] Error Reading File: " << importer.GetErrorString() << std::endl;
-		}
-	}
+	MeshRenderer(State::InstanceManager* instanceManager);
+	
+	int loadModel(const char* filePath, const char* shaderName);
 
 	/// <summary>
 	/// 1. Sorts all meshfilters based on material
@@ -71,13 +71,26 @@ public:
 	///			-> Loop render all meshes with bound material01
 	///		-> etc ... foreach groupings of material
 	/// </summary>
-	void Draw() {
+	void renderEntireMesh(Camera* mainCamera, Light* mainLight);
 
-	}
+	std::vector<MeshFilter*> getMeshes();
 
+	std::map<int, Material*>* getMaterials();
+	Material* getMaterial(int index);
+
+	void addMaterial(int index, Material* mat);
+
+	bool active = true;
 private:
-	bool m_Active;
-	std::vector<MeshFilter> m_Meshes;
+	const char* m_ShaderName;
 
+	std::string m_Directory;
 
+	GLuint m_MeshCount = 0;
+	std::vector<MeshFilter*> m_Meshes;
+	std::map<int, Material*> m_Materials;
+	State::InstanceManager* m_InstanceManager;
+
+	void processNode(aiNode* node, const aiScene* scene);
+	MeshFilter* processMesh(aiMesh* mesh, const aiScene* scene);
 };

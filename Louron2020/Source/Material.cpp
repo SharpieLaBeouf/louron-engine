@@ -49,6 +49,8 @@ void Material::setUniforms() {
 	else std::cout << "[L20] Shader Not Linked to Material - Cannot Set Uniforms!" << std::endl;
 }
 
+void Material::setShader(Shader* shader) { m_Shader = shader; }
+
 Shader* Material::getShader() { return m_Shader; }
 
 Material::Material(Texture* texture) {
@@ -67,10 +69,12 @@ Material::Material(Shader* shader, std::unordered_map<GLint, Texture*>& textures
 		m_Textures[i] = textures[i];
 }
 
+float Material::getShine() { return m_Shine; }
 glm::vec4* Material::getAmbient() { return &m_Ambient; }
 glm::vec4* Material::getDiffuse() { return &m_Diffuse; }
 glm::vec4* Material::getSpecular() { return &m_Specular; }
 
+void Material::setShine(float shine) { m_Shine = shine; }
 void Material::setAmbient(const glm::vec4& val) { m_Ambient = val; }
 void Material::setDiffuse(const glm::vec4& val) { m_Diffuse = val; }
 void Material::setSpecular(const glm::vec4& val) { m_Specular = val; }
@@ -90,5 +94,14 @@ void Material::AddTextureMap(GLint type, Texture* val) {
 
 Texture* Material::GetTextureMap(GLint type) {
 	return m_Textures[type];
+}
+
+void Material::setMaterialIndex(GLuint index) {
+	m_MaterialIndex = index;
+}
+
+GLuint Material::getMaterialIndex()
+{
+	return m_MaterialIndex;
 }
 

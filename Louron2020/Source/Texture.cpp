@@ -21,6 +21,7 @@ Texture::Texture(const char* texturePath) {
 	int width, height, nrChannels;
 	stbi_set_flip_vertically_on_load(true);
 	unsigned char* textureData = stbi_load(texturePath, &width, &height, &nrChannels, 0);
+	
 	if (textureData)
 	{
 		GLenum format = GL_RGBA;
@@ -107,12 +108,31 @@ void TextureLibrary::Add(const std::string& textureName, Texture* texture) {
 }
 
 Texture* TextureLibrary::loadTexture(const std::string& textureFile) {
+
+	std::string texture_name = textureFile;
+	auto lastSlash = texture_name.find_last_of("/\\");
+	lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+	auto lastDot = texture_name.rfind('.');
+	auto count = lastDot == std::string::npos ? texture_name.size() - lastSlash : lastDot - lastSlash;
+	texture_name = texture_name.substr(lastSlash, count);
+
+	if (textureExists(texture_name)) {
+		std::cout << "[L20] Texture Already Loaded: " << texture_name << std::endl;
+		return getTexture(texture_name);
+	}
+
 	Texture* texture = new Texture(textureFile.c_str());
 	Add(texture);
 	return texture;
 }
 
 Texture* TextureLibrary::loadTexture(const std::string& textureFile, const std::string& textureName) {
+
+	if (textureExists(textureName)) {
+		std::cout << "[L20] Texture Already Loaded: " << textureName << std::endl;
+		return getTexture(textureName);
+	}
+	
 	Texture* texture = new Texture(textureFile.c_str());
 	Add(textureName, texture);
 	return texture;

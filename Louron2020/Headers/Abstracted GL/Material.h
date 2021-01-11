@@ -28,6 +28,7 @@ public:
 
 	void setUniforms();
 
+	void setShader(Shader* shader);
 	Shader* getShader();
 
 	Material() = delete;
@@ -35,10 +36,12 @@ public:
 	Material(Shader* shader, Texture* texture);
 	Material(Shader* shader, std::unordered_map<GLint, Texture*>& textures);
 
+	float getShine();
 	glm::vec4* getAmbient ();
 	glm::vec4* getDiffuse ();
 	glm::vec4* getSpecular();
 
+	void setShine(float shine);
 	void setAmbient(const glm::vec4& val);
 	void setDiffuse(const glm::vec4& val);
 	void setSpecular(const glm::vec4& val);
@@ -48,7 +51,12 @@ public:
 	/// <param name="type">Refer using TextureMapType enum.</param>
 	Texture* GetTextureMap(GLint type);
 
+	void setMaterialIndex(GLuint index);
+	GLuint getMaterialIndex();
+
 private:
+
+	GLuint m_MaterialIndex = NULL;
 
 	GLfloat m_Shine = 32.0f;
 	glm::vec4 m_Ambient = glm::vec4(0.25f);

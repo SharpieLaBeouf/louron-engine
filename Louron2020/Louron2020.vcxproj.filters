@@ -22,6 +22,9 @@
     <Filter Include="Scenes">
       <UniqueIdentifier>{1194cd40-166d-4424-9671-1b0c43578fd8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Abstracted GL">
+      <UniqueIdentifier>{92903bdc-b85b-472f-aef7-a49017a46339}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source\Engine.cpp">
@@ -47,12 +50,6 @@
     </ClCompile>
     <ClCompile Include="Source\Texture.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Source\MeshRenderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Headers\Abstracted GL\MeshRenderer.h">
-      <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="Vendor\imgui\imgui.cpp">
       <Filter>Vendor\ImGUI</Filter>
@@ -81,6 +78,12 @@
     <ClCompile Include="Source\Vertex Array.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Headers\Abstracted GL\MeshRenderer.h">
+      <Filter>Header Files\Abstracted GL</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\MeshRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Headers\Engine.h">
@@ -98,16 +101,7 @@
     <ClInclude Include="Headers\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Abstracted GL\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Abstracted GL\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Abstracted GL\Material.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vendor\imgui\imconfig.h">
@@ -155,23 +149,32 @@
     <ClInclude Include="Scenes\Scene 6.h">
       <Filter>Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Abstracted GL\Light.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Scenes\Test\Optimal Scene Setup.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Headers\InstanceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Abstracted GL\Vertex Array.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Headers\Abstracted GL\Buffer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Scenes\Test\Optimal Scene Setup.h">
+      <Filter>Scenes</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\Scene 7.h">
-      <Filter>Header Files</Filter>
+      <Filter>Scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Abstracted GL\Buffer.h">
+      <Filter>Header Files\Abstracted GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Abstracted GL\Light.h">
+      <Filter>Header Files\Abstracted GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Abstracted GL\Material.h">
+      <Filter>Header Files\Abstracted GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Abstracted GL\Shader.h">
+      <Filter>Header Files\Abstracted GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Abstracted GL\Texture.h">
+      <Filter>Header Files\Abstracted GL</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Abstracted GL\Vertex Array.h">
+      <Filter>Header Files\Abstracted GL</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

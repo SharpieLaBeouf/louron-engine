@@ -58,19 +58,19 @@ namespace State {
 				
 				ImGui::Text("Main Menu");
 				ImGui::Separator();
-				if (ImGui::Button(" 1. Basic Triangles "))
+				if (ImGui::Button(" 1. Basic Triangles    "))
 					m_States->push_back(std::make_unique<State::Scene1>(m_InstanceManager));
-				if (ImGui::Button(" 2. Basic Texture   ")) 
+				if (ImGui::Button(" 2. Basic Texture      ")) 
 					m_States->push_back(std::make_unique<State::Scene2>(m_InstanceManager));
-				if (ImGui::Button(" 3. Basic Cube      ")) 
+				if (ImGui::Button(" 3. Basic Cube         ")) 
 					m_States->push_back(std::make_unique<State::Scene3>(m_InstanceManager));
-				if (ImGui::Button(" 4. Basic Camera    "))
+				if (ImGui::Button(" 4. Basic Camera       "))
 					m_States->push_back(std::make_unique<State::Scene4>(m_InstanceManager));
-				if (ImGui::Button(" 5. Basic Lighting  "))
+				if (ImGui::Button(" 5. Basic Lighting     "))
 					m_States->push_back(std::make_unique<State::Scene5>(m_InstanceManager));
-				if (ImGui::Button(" 6. Basic Material  "))
+				if (ImGui::Button(" 6. Basic Material     "))
 					m_States->push_back(std::make_unique<State::Scene6>(m_InstanceManager));
-				if (ImGui::Button(" 7. Basic Material  "))
+				if (ImGui::Button(" 7. Basic Model Loading"))
 					m_States->push_back(std::make_unique<State::Scene7>(m_InstanceManager));
 			}
 			ImGui::End();
