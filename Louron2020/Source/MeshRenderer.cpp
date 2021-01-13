@@ -24,7 +24,7 @@ void MeshFilter::renderMeshFilter(Camera* mainCamera, Material* mat, Light* main
 
 	if (mat->Bind()) {
 		mat->setUniforms();
-		mat->getShader()->setMat4("model",	glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+		mat->getShader()->setMat4("model",	glm::mat4(1.0f));
 		mat->getShader()->setMat4("proj",	glm::perspective(glm::radians(60.0f), m_InstanceManager->getWindowInstance()->getWidth() / m_InstanceManager->getWindowInstance()->getHeight(), 0.1f, 100.0f));
 		mat->getShader()->setMat4("view",	mainCamera->getViewMatrix());
 		mat->getShader()->setVec3("u_Light.position",	mainLight->position);
@@ -51,7 +51,7 @@ int MeshRenderer::loadModel(const char* filePath, const char* shaderName) {
 	const aiScene* scene = importer.ReadFile(filePath,
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
-		aiProcess_FlipUVs);
+		aiProcess_OptimizeMeshes);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "[L20] Error Reading File: " << importer.GetErrorString() << std::endl;
 		return GL_FALSE;
@@ -144,20 +144,25 @@ MeshFilter* MeshRenderer::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// Load any applicable texture files
 		aiString texture_str;
 		Texture* texture = nullptr;
+
+		std::string temp;
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
 			material->GetTexture(aiTextureType_DIFFUSE, 0, &texture_str);
-			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + texture_str.C_Str());
+			temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + temp);
 			mesh_material->AddTextureMap(L20_TEXTURE_DIFFUSE_MAP, texture);
 		}
 		if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
 			material->GetTexture(aiTextureType_SPECULAR, 0, &texture_str);
-			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + texture_str.C_Str());
+			temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + temp);
 			mesh_material->AddTextureMap(L20_TEXTURE_SPECULAR_MAP, texture);
 		}
 
 		if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
 			material->GetTexture(aiTextureType_NORMALS, 0, &texture_str);
-			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + texture_str.C_Str());
+			temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + temp);
 			mesh_material->AddTextureMap(L20_TEXTURE_NORMAL_MAP, texture);
 		}
 

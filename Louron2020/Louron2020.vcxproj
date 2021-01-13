@@ -152,7 +152,6 @@
     <Image Include="Resources\Images\grass_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assimp.dll" />
     <None Include="Resources\Shaders\Basic\basic.glsl" />
     <None Include="Resources\Shaders\Materials\material_shader_phong.glsl" />
     <None Include="Resources\Shaders\Basic\basic_phong.glsl" />

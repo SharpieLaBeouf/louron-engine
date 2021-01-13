@@ -178,7 +178,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assimp.dll" />
     <None Include="Resources\Shaders\Basic\basic.glsl">
       <Filter>Resource Files</Filter>
     </None>

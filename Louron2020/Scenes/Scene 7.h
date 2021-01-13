@@ -52,7 +52,7 @@ namespace State {
 			scnCamera = new Camera(m_Window, glm::vec3(0.0f, 0.0f, 10.0f));
 
 			back_pack = new MeshRenderer(m_InstanceManager);
-			back_pack->loadModel("Resources/Models/BackPack/backpack.obj", "material_shader_phong");
+			back_pack->loadModel("Resources/Models/BackPack/BackPack.fbx", "material_shader_phong");
 
 			monkey = new MeshRenderer(m_InstanceManager);
 			monkey->loadModel("Resources/Models/Monkey/Monkey.fbx", "material_shader_phong");
@@ -92,7 +92,6 @@ namespace State {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			monkey->renderEntireMesh(scnCamera, &light_properties);
-
 			back_pack->renderEntireMesh(scnCamera, &light_properties);
 
 			processGUI();
