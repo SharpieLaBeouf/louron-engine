@@ -15,6 +15,14 @@ Camera::Camera(Window* wnd, glm::vec3 position, glm::vec3 up, float yaw, float p
 void Camera::Update(float deltaTime) {
 	processKeyboard(deltaTime);
 
+	if (m_Input->GetKeyUp(GLFW_KEY_LEFT_ALT)) {
+		this->MouseToggledOff = !this->MouseToggledOff;
+		if (this->MouseToggledOff)
+			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		else if (!this->MouseToggledOff)
+			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+	}
+
 	if (MouseToggledOff) processMouse(); else if (!MouseToggledOff) m_FirstMouse = true;
 }
 

@@ -1,6 +1,6 @@
 #include "../Headers/Abstracted GL/MeshRenderer.h"
 
-MeshFilter::MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, State::InstanceManager* mgr) {
+MeshFilter::MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, InstanceManager* mgr) {
 	m_InstanceManager = mgr;
 
 	m_VAO = new VertexArray();
@@ -41,11 +41,11 @@ void MeshFilter::renderMeshFilter(Camera* mainCamera, Material* mat, Light* main
 	m_VAO->Unbind();
 }
 
-MeshRenderer::MeshRenderer(State::InstanceManager* instanceManager) : m_InstanceManager(instanceManager), m_ShaderName("material_shader_flat") {
+MeshRendererComponent::MeshRendererComponent(InstanceManager* instanceManager) : m_InstanceManager(instanceManager), m_ShaderName("material_shader_flat") {
 
 }
 
-int MeshRenderer::loadModel(const char* filePath, const char* shaderName) {
+int MeshRendererComponent::loadModel(const char* filePath, const char* shaderName) {
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filePath,
@@ -65,19 +65,19 @@ int MeshRenderer::loadModel(const char* filePath, const char* shaderName) {
 	return GL_TRUE;
 }
 
-std::vector<MeshFilter*> MeshRenderer::getMeshes() { return m_Meshes; }
+std::vector<MeshFilter*> MeshRendererComponent::getMeshes() { return m_Meshes; }
 
-std::map<int, Material*>* MeshRenderer::getMaterials() { return &m_Materials; }
-Material* MeshRenderer::getMaterial(int index) { return m_Materials[index]; }
-void MeshRenderer::addMaterial(int index, Material* mat) { m_Materials[index] = mat; }
+std::map<int, Material*>* MeshRendererComponent::getMaterials() { return &m_Materials; }
+Material* MeshRendererComponent::getMaterial(int index) { return m_Materials[index]; }
+void MeshRendererComponent::addMaterial(int index, Material* mat) { m_Materials[index] = mat; }
 
-void MeshRenderer::renderEntireMesh(Camera* mainCamera, Light* mainLight) {
+void MeshRendererComponent::renderEntireMesh(Camera* mainCamera, Light* mainLight) {
 	for (GLuint i = 0; i < m_Meshes.size(); i++) {
 		m_Meshes[i]->renderMeshFilter(mainCamera, m_Materials[m_Meshes[i]->getMaterialIndex()], mainLight);
 	}
 }
 
-void MeshRenderer::processNode(aiNode* node, const aiScene* scene) {
+void MeshRendererComponent::processNode(aiNode* node, const aiScene* scene) {
 	// process all the node's meshes (if any)
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
@@ -93,7 +93,7 @@ void MeshRenderer::processNode(aiNode* node, const aiScene* scene) {
 
 }
 
-MeshFilter* MeshRenderer::processMesh(aiMesh* mesh, const aiScene* scene) {
+MeshFilter* MeshRendererComponent::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 
 	aiString mesh_name;

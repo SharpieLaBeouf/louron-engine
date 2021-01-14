@@ -14,68 +14,64 @@
 #include "../Vendor/imgui/imgui.h"
 
 #include "../Headers/Input.h"
-#include "../Headers/InstanceManager.h"
+#include "../Headers/Scene/InstanceManager.h"
 
-namespace State {
+class MainMenu : public State {
 
-	class MainMenu : public SceneState {
+private:
 
-	private:
+	InstanceManager* m_InstanceManager;
+	std::vector<std::unique_ptr<State>>* m_States;
 
-		State::InstanceManager* m_InstanceManager;
-		std::vector<std::unique_ptr<State::SceneState>>* m_States;
-
-	public:
+public:
 		
-		MainMenu(InstanceManager* instanceManager) : m_InstanceManager(instanceManager) {
-			std::cout << std::endl << "[L20] Opening Main Menu..." << std::endl;
-			m_States = m_InstanceManager->getStatesInstance();
-		}
-		~MainMenu() override {
-			std::cout << "[L20] Closing Main Menu!" << std::endl;
-		}
+	MainMenu(InstanceManager* instanceManager) : m_InstanceManager(instanceManager) {
+		std::cout << std::endl << "[L20] Opening Main Menu..." << std::endl;
+		m_States = m_InstanceManager->getStatesInstance();
+	}
+	~MainMenu() override {
+		std::cout << "[L20] Closing Main Menu!" << std::endl;
+	}
 		
-		void update() override {
+	void update() override {
 
-		}
+	}
 
-		void draw() override {
-			// Set Background Colour (211, 238, 255, 1)
-			glClearColor(211.0f / 255.0f, 238.0f / 255.0f, 255.0f / 255.0f, 1);
-			glClear(GL_COLOR_BUFFER_BIT);
+	void draw() override {
+		// Set Background Colour (211, 238, 255, 1)
+		glClearColor(211.0f / 255.0f, 238.0f / 255.0f, 255.0f / 255.0f, 1);
+		glClear(GL_COLOR_BUFFER_BIT);
 			
-			ImGuiIO& io = ImGui::GetIO();
-			ImGui::SetNextWindowSize(ImVec2(400.0f, 200.0f), ImGuiCond_Always);
-			ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2 - 200.0f, io.DisplaySize.y / 2 - 100.0f), ImGuiCond_Always);
-			ImGui::SetNextWindowBgAlpha(1.0f);
-			if (ImGui::Begin("Main Menu", (bool *)0, 
-				ImGuiWindowFlags_NoDecoration | 
-				ImGuiWindowFlags_AlwaysAutoResize | 
-				ImGuiWindowFlags_NoSavedSettings | 
-				ImGuiWindowFlags_NoNav | 
-				ImGuiWindowFlags_NoMove))
-			{
+		ImGuiIO& io = ImGui::GetIO();
+		ImGui::SetNextWindowSize(ImVec2(400.0f, 200.0f), ImGuiCond_Always);
+		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2 - 200.0f, io.DisplaySize.y / 2 - 100.0f), ImGuiCond_Always);
+		ImGui::SetNextWindowBgAlpha(1.0f);
+		if (ImGui::Begin("Main Menu", (bool *)0, 
+			ImGuiWindowFlags_NoDecoration | 
+			ImGuiWindowFlags_AlwaysAutoResize | 
+			ImGuiWindowFlags_NoSavedSettings | 
+			ImGuiWindowFlags_NoNav | 
+			ImGuiWindowFlags_NoMove))
+		{
 				
-				ImGui::Text("Main Menu");
-				ImGui::Separator();
-				if (ImGui::Button(" 1. Basic Triangles    "))
-					m_States->push_back(std::make_unique<State::Scene1>(m_InstanceManager));
-				if (ImGui::Button(" 2. Basic Texture      ")) 
-					m_States->push_back(std::make_unique<State::Scene2>(m_InstanceManager));
-				if (ImGui::Button(" 3. Basic Cube         ")) 
-					m_States->push_back(std::make_unique<State::Scene3>(m_InstanceManager));
-				if (ImGui::Button(" 4. Basic Camera       "))
-					m_States->push_back(std::make_unique<State::Scene4>(m_InstanceManager));
-				if (ImGui::Button(" 5. Basic Lighting     "))
-					m_States->push_back(std::make_unique<State::Scene5>(m_InstanceManager));
-				if (ImGui::Button(" 6. Basic Material     "))
-					m_States->push_back(std::make_unique<State::Scene6>(m_InstanceManager));
-				if (ImGui::Button(" 7. Basic Model Loading"))
-					m_States->push_back(std::make_unique<State::Scene7>(m_InstanceManager));
-			}
-			ImGui::End();
-        }
+			ImGui::Text("Main Menu");
+			ImGui::Separator();
+			if (ImGui::Button(" 1. Basic Triangles    "))
+				m_States->push_back(std::make_unique<Scene1>(m_InstanceManager));
+			if (ImGui::Button(" 2. Basic Texture      ")) 
+				m_States->push_back(std::make_unique<Scene2>(m_InstanceManager));
+			if (ImGui::Button(" 3. Basic Cube         ")) 
+				m_States->push_back(std::make_unique<Scene3>(m_InstanceManager));
+			if (ImGui::Button(" 4. Basic Camera       "))
+				m_States->push_back(std::make_unique<Scene4>(m_InstanceManager));
+			if (ImGui::Button(" 5. Basic Lighting     "))
+				m_States->push_back(std::make_unique<Scene5>(m_InstanceManager));
+			if (ImGui::Button(" 6. Basic Material     "))
+				m_States->push_back(std::make_unique<Scene6>(m_InstanceManager));
+			if (ImGui::Button(" 7. Basic Model Loading"))
+				m_States->push_back(std::make_unique<Scene7>(m_InstanceManager));
+		}
+		ImGui::End();
+    }
 
-	};
-
-}
+};

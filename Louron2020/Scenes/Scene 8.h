@@ -8,6 +8,7 @@
 #include "../Headers/Input.h"
 #include "../Headers/Scene/Entity.h"
 #include "../Headers/Camera.h"
+#include "../Headers/Scene/SceneManager.h"
 #include "../Headers/Scene/InstanceManager.h"
 
 #include "../Headers/Abstracted GL/Light.h"
@@ -16,27 +17,23 @@
 #include "../Headers/Abstracted GL/Material.h"
 #include "../Headers/Abstracted GL/MeshRenderer.h"
 
-class Scene7 : public State {
+class Scene8 : public State {
 
 	//Private Setup Variables
 private:
 
-	InstanceManager* m_InstanceManager;
+	Scene* m_Scene = nullptr;
 
-	Window* m_Window;
-	InputManager* m_Input;
-	ShaderLibrary* m_ShaderLib;
-	TextureLibrary* m_TextureLib;
+	Window* m_Window = nullptr;
+	InputManager* m_Input = nullptr;
+	ShaderLibrary* m_ShaderLib = nullptr;
+	TextureLibrary* m_TextureLib = nullptr;
+	InstanceManager* m_InstanceManager = nullptr;
 
-	Camera* scnCamera;
-	Light light_properties;
-
-	MeshRendererComponent* monkey;
-	MeshRendererComponent* back_pack;
 
 public:
 
-	explicit Scene7(InstanceManager* instanceManager)
+	explicit Scene8(InstanceManager* instanceManager)
 		: m_InstanceManager(instanceManager)
 	{
 		std::cout << "[L20] Opening Scene 7..." << std::endl;
@@ -45,26 +42,24 @@ public:
 		m_ShaderLib = m_InstanceManager->getShaderLibInstance();
 		m_TextureLib = m_InstanceManager->getTextureLibInstance();
 
+		//scnCamera = new Camera(m_Window, glm::vec3(0.0f, 0.0f, 10.0f));
+
+		m_Scene = new Scene();
+		if (m_Scene->LoadScene("hello world")) {
+			this->~Scene8();
+		}
+
 		glEnable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-		scnCamera = new Camera(m_Window, glm::vec3(0.0f, 0.0f, 10.0f));
-
-		back_pack = new MeshRendererComponent(m_InstanceManager);
-		back_pack->loadModel("Resources/Models/BackPack/BackPack.fbx", "material_shader_phong");
-
-		monkey = new MeshRendererComponent(m_InstanceManager);
-		monkey->loadModel("Resources/Models/Monkey/Monkey.fbx", "material_shader_phong");
 	}
 
-	~Scene7() override
+	~Scene8() override
 	{
 		std::cout << "[L20] Closing Scene 7..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-		delete monkey;
-		delete scnCamera;
 	}
 
 	void update() override {
@@ -73,17 +68,14 @@ public:
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
-		scnCamera->Update(deltaTime);
+		//scnCamera->Update(deltaTime);
 
-		light_properties.position.z = sin(currentTime * 5);
 	}
 
 	void draw() override {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		monkey->renderEntireMesh(scnCamera, &light_properties);
-		back_pack->renderEntireMesh(scnCamera, &light_properties);
 
 		processGUI();
 	}

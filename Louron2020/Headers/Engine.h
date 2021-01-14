@@ -19,7 +19,7 @@
 #include "Window.h"
 #include "Input.h"
 
-#include "InstanceManager.h"
+#include "Scene/InstanceManager.h"
 #include "../Scenes/MainMenu.h"
 
 class Engine {
@@ -35,12 +35,12 @@ public:
 
 private:
 
-	State::InstanceManager* m_InstanceManager = nullptr;
+	InstanceManager* m_InstanceManager = nullptr;
 
 	Window* m_Window = nullptr;
 	InputManager* m_Input = nullptr;
 	ShaderLibrary* m_ShaderLib = nullptr;
 	TextureLibrary* m_TextureLib = nullptr;
-	std::vector<std::unique_ptr<State::SceneState>> m_States;
+	std::vector<std::unique_ptr<State>> m_States;
 
 };
