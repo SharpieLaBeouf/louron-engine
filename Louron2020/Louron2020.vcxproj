@@ -120,15 +120,18 @@
     <ClCompile Include="Headers\Abstracted GL\MeshRenderer.h" />
     <ClInclude Include="Headers\Abstracted GL\Vertex Array.h" />
     <ClInclude Include="Headers\Camera.h" />
-    <ClInclude Include="Headers\Entity.h" />
+    <ClInclude Include="Headers\Scene\Components.h" />
+    <ClInclude Include="Headers\Scene\Entity.h" />
     <ClInclude Include="Headers\Abstracted GL\Texture.h" />
+    <ClInclude Include="Headers\Scene\SceneManager.h" />
     <ClInclude Include="Scenes\Scene 7.h" />
+    <ClInclude Include="Scenes\Scene 8.h" />
     <ClInclude Include="Scenes\Test\Optimal Scene Setup.h" />
     <ClInclude Include="Scenes\Scene 2.h" />
     <ClInclude Include="Scenes\Scene 1.h" />
     <ClInclude Include="Scenes\Scene 3.h" />
     <ClInclude Include="Headers\Engine.h" />
-    <ClInclude Include="Headers\InstanceManager.h" />
+    <ClInclude Include="Headers\Scene\InstanceManager.h" />
     <ClInclude Include="Headers\Input.h" />
     <ClInclude Include="Scenes\MainMenu.h" />
     <ClInclude Include="Headers\Abstracted GL\Shader.h" />
@@ -152,7 +155,6 @@
     <Image Include="Resources\Images\grass_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="assimp.dll" />
     <None Include="Resources\Shaders\Basic\basic.glsl" />
     <None Include="Resources\Shaders\Materials\material_shader_phong.glsl" />
     <None Include="Resources\Shaders\Basic\basic_phong.glsl" />

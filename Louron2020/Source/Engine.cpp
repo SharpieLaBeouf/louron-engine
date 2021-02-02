@@ -50,7 +50,7 @@ Engine::Engine()
 	m_TextureLib->loadTexture("Resources/Images/grass_texture.jpg");
 
 	// 5. Init Global Scene Manager
-	m_InstanceManager = new State::InstanceManager(m_Window, m_Input, m_ShaderLib, m_TextureLib, &m_States);
+	m_InstanceManager = new InstanceManager(m_Window, m_Input, m_ShaderLib, m_TextureLib, &m_States);
 
 }
 
@@ -66,7 +66,7 @@ Engine::~Engine()
 int Engine::run()
 {
 	ImGuiIO& io = ImGui::GetIO();
-	m_States.push_back(std::make_unique<State::MainMenu>(m_InstanceManager));
+	m_States.push_back(std::make_unique<MainMenu>(m_InstanceManager));
 
 	bool demoGUI = false;
 	while (!glfwWindowShouldClose(m_Window->getWindow()))

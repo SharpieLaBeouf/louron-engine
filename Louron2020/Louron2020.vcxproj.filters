@@ -101,9 +101,6 @@
     <ClInclude Include="Headers\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\Entity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Vendor\imgui\imconfig.h">
       <Filter>Vendor\ImGUI</Filter>
     </ClInclude>
@@ -149,9 +146,6 @@
     <ClInclude Include="Scenes\Scene 6.h">
       <Filter>Scenes</Filter>
     </ClInclude>
-    <ClInclude Include="Headers\InstanceManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Scenes\Test\Optimal Scene Setup.h">
       <Filter>Scenes</Filter>
     </ClInclude>
@@ -176,9 +170,23 @@
     <ClInclude Include="Headers\Abstracted GL\Vertex Array.h">
       <Filter>Header Files\Abstracted GL</Filter>
     </ClInclude>
+    <ClInclude Include="Headers\Scene\InstanceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\Scene 8.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Scene\Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Scene\SceneManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Headers\Scene\Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assimp.dll" />
     <None Include="Resources\Shaders\Basic\basic.glsl">
       <Filter>Resource Files</Filter>
     </None>

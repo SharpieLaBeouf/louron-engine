@@ -6,9 +6,9 @@
 #include "../../Vendor/imgui/imgui.h"
 
 #include "../../Headers/Input.h"
-#include "../../Headers/Entity.h"
+#include "../../Headers/Scene/Entity.h"
 #include "../../Headers/Camera.h"
-#include "../../Headers/InstanceManager.h"
+#include "../../Headers/Scene/InstanceManager.h"
 #include "../../Headers/Abstracted GL/Light.h"
 #include "../../Headers/Abstracted GL/Shader.h"
 #include "../../Headers/Abstracted GL/Texture.h"
@@ -35,12 +35,12 @@
 */
 
 namespace State {
-	class OptimalScene : public SceneState {
+	class OptimalScene : public State {
 
 		//Private Setup Variables
 	private:
 
-		State::InstanceManager* m_InstanceManager;
+		InstanceManager* m_InstanceManager;
 
 		Window* m_Window;
 		InputManager* m_Input;

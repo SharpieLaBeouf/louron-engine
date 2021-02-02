@@ -1,2 +1,2 @@
-#include "../Headers/Entity.h"
+#include "../Headers/Scene/Entity.h"
 

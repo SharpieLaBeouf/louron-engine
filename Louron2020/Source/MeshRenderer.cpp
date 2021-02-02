@@ -1,6 +1,6 @@
 #include "../Headers/Abstracted GL/MeshRenderer.h"
 
-MeshFilter::MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, State::InstanceManager* mgr) {
+MeshFilter::MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, InstanceManager* mgr) {
 	m_InstanceManager = mgr;
 
 	m_VAO = new VertexArray();
@@ -24,7 +24,7 @@ void MeshFilter::renderMeshFilter(Camera* mainCamera, Material* mat, Light* main
 
 	if (mat->Bind()) {
 		mat->setUniforms();
-		mat->getShader()->setMat4("model",	glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)));
+		mat->getShader()->setMat4("model",	glm::mat4(1.0f));
 		mat->getShader()->setMat4("proj",	glm::perspective(glm::radians(60.0f), m_InstanceManager->getWindowInstance()->getWidth() / m_InstanceManager->getWindowInstance()->getHeight(), 0.1f, 100.0f));
 		mat->getShader()->setMat4("view",	mainCamera->getViewMatrix());
 		mat->getShader()->setVec3("u_Light.position",	mainLight->position);
@@ -41,17 +41,17 @@ void MeshFilter::renderMeshFilter(Camera* mainCamera, Material* mat, Light* main
 	m_VAO->Unbind();
 }
 
-MeshRenderer::MeshRenderer(State::InstanceManager* instanceManager) : m_InstanceManager(instanceManager), m_ShaderName("material_shader_flat") {
+MeshRendererComponent::MeshRendererComponent(InstanceManager* instanceManager) : m_InstanceManager(instanceManager), m_ShaderName("material_shader_flat") {
 
 }
 
-int MeshRenderer::loadModel(const char* filePath, const char* shaderName) {
+int MeshRendererComponent::loadModel(const char* filePath, const char* shaderName) {
 
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filePath,
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
-		aiProcess_FlipUVs);
+		aiProcess_OptimizeMeshes);
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
 		std::cout << "[L20] Error Reading File: " << importer.GetErrorString() << std::endl;
 		return GL_FALSE;
@@ -73,19 +73,19 @@ int MeshRenderer::loadModel(const char* filePath, const char* shaderName) {
 	return GL_TRUE;
 }
 
-std::vector<MeshFilter*> MeshRenderer::getMeshes() { return m_Meshes; }
+std::vector<MeshFilter*> MeshRendererComponent::getMeshes() { return m_Meshes; }
 
-std::map<int, Material*>* MeshRenderer::getMaterials() { return &m_Materials; }
-Material* MeshRenderer::getMaterial(int index) { return m_Materials[index]; }
-void MeshRenderer::addMaterial(int index, Material* mat) { m_Materials[index] = mat; }
+std::map<int, Material*>* MeshRendererComponent::getMaterials() { return &m_Materials; }
+Material* MeshRendererComponent::getMaterial(int index) { return m_Materials[index]; }
+void MeshRendererComponent::addMaterial(int index, Material* mat) { m_Materials[index] = mat; }
 
-void MeshRenderer::renderEntireMesh(Camera* mainCamera, Light* mainLight) {
+void MeshRendererComponent::renderEntireMesh(Camera* mainCamera, Light* mainLight) {
 	for (GLuint i = 0; i < m_Meshes.size(); i++) {
 		m_Meshes[i]->renderMeshFilter(mainCamera, m_Materials[m_Meshes[i]->getMaterialIndex()], mainLight);
 	}
 }
 
-void MeshRenderer::processNode(aiNode* node, const aiScene* scene) {
+void MeshRendererComponent::processNode(aiNode* node, const aiScene* scene) {
 	// process all the node's meshes (if any)
 	for (unsigned int i = 0; i < node->mNumMeshes; i++)
 	{
@@ -101,7 +101,7 @@ void MeshRenderer::processNode(aiNode* node, const aiScene* scene) {
 
 }
 
-MeshFilter* MeshRenderer::processMesh(aiMesh* mesh, const aiScene* scene) {
+MeshFilter* MeshRendererComponent::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 
 	// Process Vertices
@@ -148,20 +148,25 @@ MeshFilter* MeshRenderer::processMesh(aiMesh* mesh, const aiScene* scene) {
 		// Load any applicable texture files
 		aiString texture_str;
 		Texture* texture = nullptr;
+
+		std::string temp;
 		if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
 			material->GetTexture(aiTextureType_DIFFUSE, 0, &texture_str);
-			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + texture_str.C_Str());
+			temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + temp);
 			mesh_material->AddTextureMap(L20_TEXTURE_DIFFUSE_MAP, texture);
 		}
 		if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
 			material->GetTexture(aiTextureType_SPECULAR, 0, &texture_str);
-			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + texture_str.C_Str());
+			temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + temp);
 			mesh_material->AddTextureMap(L20_TEXTURE_SPECULAR_MAP, texture);
 		}
 
 		if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
 			material->GetTexture(aiTextureType_NORMALS, 0, &texture_str);
-			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + texture_str.C_Str());
+			temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+			texture = m_InstanceManager->getTextureLibInstance()->loadTexture(m_Directory + "/" + temp);
 			mesh_material->AddTextureMap(L20_TEXTURE_NORMAL_MAP, texture);
 		}
 

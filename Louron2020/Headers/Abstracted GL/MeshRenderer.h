@@ -1,5 +1,13 @@
 #pragma once
 
+#include "Light.h"
+#include "Texture.h"
+#include "Material.h"
+#include "Vertex Array.h"
+
+#include "../Camera.h"
+#include "../Scene/InstanceManager.h"
+
 #include <string>
 #include <vector>
 #include <map>
@@ -8,14 +16,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "Light.h"
-#include "Texture.h"
-#include "Material.h"
-#include "Vertex Array.h"
-
-#include "../Entity.h"
-#include "../Camera.h"
-#include "../InstanceManager.h"
 
 
 
@@ -26,7 +26,7 @@ class MeshFilter {
 public:
 
 
-	MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, State::InstanceManager* mgr);
+	MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, InstanceManager* mgr);
 	~MeshFilter() { delete m_VAO; }
 
 	/// <summary>
@@ -46,19 +46,19 @@ public:
 private:
 
 	GLuint m_MaterialIndex;
-	State::InstanceManager* m_InstanceManager;
+	InstanceManager* m_InstanceManager;
 
 	// OpenGL Data References
 	VertexArray* m_VAO = nullptr;
 };
 
-class MeshRenderer : public Entity {
+class MeshRendererComponent {
 
 public:
-	MeshRenderer() = default;
-	MeshRenderer(const MeshRenderer&) = default;
+	MeshRendererComponent() = default;
+	MeshRendererComponent(const MeshRendererComponent&) = default;
 
-	MeshRenderer(State::InstanceManager* instanceManager);
+	MeshRendererComponent(InstanceManager* instanceManager);
 	
 	int loadModel(const char* filePath, const char* shaderName);
 
@@ -89,7 +89,7 @@ private:
 	GLuint m_MeshCount = 0;
 	std::vector<MeshFilter*> m_Meshes;
 	std::map<int, Material*> m_Materials;
-	State::InstanceManager* m_InstanceManager;
+	InstanceManager* m_InstanceManager;
 
 	void processNode(aiNode* node, const aiScene* scene);
 	MeshFilter* processMesh(aiMesh* mesh, const aiScene* scene);
