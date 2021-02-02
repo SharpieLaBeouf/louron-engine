@@ -60,6 +60,14 @@ int MeshRenderer::loadModel(const char* filePath, const char* shaderName) {
 	m_Directory = m_Directory.substr(0, m_Directory.find_last_of('/'));
 	m_ShaderName = shaderName;
 
+
+	std::string mesh_name = filePath;
+	auto lastSlash = mesh_name.find_last_of("/\\");
+	lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+	auto lastDot = mesh_name.rfind('.');
+	auto count = lastDot == std::string::npos ? mesh_name.size() - lastSlash : lastDot - lastSlash;
+	mesh_name = mesh_name.substr(lastSlash, count);
+	std::cout << "[L20] Loading Mesh: " << mesh_name.c_str() << std::endl;
 	processNode(scene->mRootNode, scene);
 
 	return GL_TRUE;
@@ -95,10 +103,6 @@ void MeshRenderer::processNode(aiNode* node, const aiScene* scene) {
 
 MeshFilter* MeshRenderer::processMesh(aiMesh* mesh, const aiScene* scene) {
 
-
-	aiString mesh_name;
-	scene->mMaterials[mesh->mMaterialIndex]->Get(AI_MATKEY_NAME, mesh_name);
-	std::cout << "[L20] Loading Mesh: " << mesh_name.C_Str() << std::endl;
 
 	// Process Vertices
 	std::vector<Vertex> mesh_vertices;

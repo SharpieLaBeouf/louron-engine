@@ -86,7 +86,6 @@ void Material::AddTextureMap(GLint type, Texture* val) {
 		std::cout << "[L20] Shader Not Linked to Material - Cannot Set Texture Unit!" << std::endl;
 
 	if (type < m_Textures.size() && type > -1) {
-		std::cout << "[L20] Replacing Material Texture: " << m_TextureUniformNames[type] << std::endl;
 		m_Textures[type] = val;
 	}
 	else std::cout << "[L20] Texture Slot Out of Bounds!" << std::endl;
