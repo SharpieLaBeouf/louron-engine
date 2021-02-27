@@ -84,9 +84,6 @@
     <ClCompile Include="src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="include\glad\glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="libs\glad\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -491,5 +488,8 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="include\entt\ENTT License.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libs\assimp\assimp.lib" />
   </ItemGroup>
 </Project>
