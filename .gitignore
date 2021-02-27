@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/Louron2020/libs/assimp/assimp-vc142-mt.lib
+/Louron2020/libs/assimp/assimp-vc142-mtd.lib
