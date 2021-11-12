@@ -2,7 +2,7 @@
 
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION    
-#include "../Vendor/stb_image.h"
+#include "../include/stb_image.h"
 
 void Texture::Bind() {
 	glBindTexture(GL_TEXTURE_2D, m_TextureID);

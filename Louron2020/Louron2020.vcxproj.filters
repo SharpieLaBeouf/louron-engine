@@ -51,24 +51,6 @@
     <ClCompile Include="Source\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Vendor\imgui\imgui.cpp">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendor\imgui\imgui_demo.cpp">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendor\imgui\imgui_draw.cpp">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendor\imgui\imgui_impl_glfw.cpp">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendor\imgui\imgui_impl_opengl3.cpp">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClCompile>
-    <ClCompile Include="Vendor\imgui\imgui_widgets.cpp">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClCompile>
     <ClCompile Include="Source\Material.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -83,6 +65,24 @@
     </ClCompile>
     <ClCompile Include="Source\MeshRenderer.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui\imgui.cpp">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui\imgui_demo.cpp">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui\imgui_draw.cpp">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui\imgui_impl_glfw.cpp">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClCompile>
+    <ClCompile Include="include\imgui\imgui_widgets.cpp">
+      <Filter>Vendor\ImGUI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,33 +100,6 @@
     </ClInclude>
     <ClInclude Include="Headers\Camera.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\imgui\imconfig.h">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\imgui\imgui.h">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\imgui\imgui_impl_glfw.h">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\imgui\imgui_impl_opengl3.h">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\imgui\imgui_internal.h">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\imgui\imstb_rectpack.h">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\imgui\imstb_textedit.h">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\imgui\imstb_truetype.h">
-      <Filter>Vendor\ImGUI</Filter>
-    </ClInclude>
-    <ClInclude Include="Vendor\stb_image.h">
-      <Filter>Vendor</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\Scene 1.h">
       <Filter>Scenes</Filter>
@@ -184,6 +157,33 @@
     </ClInclude>
     <ClInclude Include="Headers\Scene\Components.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui\imconfig.h">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui\imgui.h">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui\imgui_impl_glfw.h">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui\imgui_impl_opengl3.h">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui\imgui_internal.h">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui\imstb_rectpack.h">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui\imstb_textedit.h">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\imgui\imstb_truetype.h">
+      <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="include\stb_image.h">
+      <Filter>Vendor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
