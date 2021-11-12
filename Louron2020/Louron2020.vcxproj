@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -46,15 +46,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Intermediates\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)\bin\$(Platform)\$(Configuration)\Intermediates\</IntDir>
   </PropertyGroup>
@@ -62,15 +62,16 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLEW_STATIC;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <ObjectFileName>$(IntDir)/%(RelativeDir)</ObjectFileName>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp-vc140-mt.lib;glew32s.lib;glfw3.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mtd.lib;zlibstaticd.lib;dracod.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT.lib;LIBCMT.lib;</IgnoreSpecificDefaultLibraries>
       <AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions>
     </Link>
@@ -81,7 +82,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLEW_STATIC;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <ObjectFileName>$(IntDir)/%(RelativeDir)</ObjectFileName>
     </ClCompile>
@@ -90,55 +91,141 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>Release\assimp-vc140-mt.lib;glew32s.lib;glfw3.lib;opengl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp.lib;zlibstatic.lib;draco.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMT.lib</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source\MeshRenderer.cpp" />
-    <ClCompile Include="Source\Vertex Array.cpp" />
-    <ClCompile Include="Source\Buffer.cpp" />
-    <ClCompile Include="Source\Material.cpp" />
+    <ClCompile Include="libs\glad\glad.c" />
+    <ClCompile Include="src\ECS\MeshRenderer.cpp" />
+    <ClCompile Include="src\OpenGL\Vertex Array.cpp" />
+    <ClCompile Include="src\OpenGL\Buffer.cpp" />
+    <ClCompile Include="src\OpenGL\Material.cpp" />
     <ClCompile Include="include\imgui\imgui.cpp" />
     <ClCompile Include="include\imgui\imgui_demo.cpp" />
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="Source\Camera.cpp" />
-    <ClCompile Include="Source\Engine.cpp" />
-    <ClCompile Include="Source\Entity.cpp" />
-    <ClCompile Include="Source\Input.cpp" />
-    <ClCompile Include="Source\Main.cpp" />
-    <ClCompile Include="Source\Shader.cpp" />
-    <ClCompile Include="Source\Texture.cpp" />
-    <ClCompile Include="Source\Window.cpp" />
+    <ClCompile Include="src\ECS\Camera.cpp" />
+    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\ECS\Entity.cpp" />
+    <ClCompile Include="src\Input.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\OpenGL\Shader.cpp" />
+    <ClCompile Include="src\OpenGL\Texture.cpp" />
+    <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Headers\Abstracted GL\Buffer.h" />
-    <ClInclude Include="Headers\Abstracted GL\Light.h" />
-    <ClInclude Include="Headers\Abstracted GL\Material.h" />
-    <ClCompile Include="Headers\Abstracted GL\MeshRenderer.h" />
-    <ClInclude Include="Headers\Abstracted GL\Vertex Array.h" />
-    <ClInclude Include="Headers\Camera.h" />
-    <ClInclude Include="Headers\Scene\Components.h" />
-    <ClInclude Include="Headers\Scene\Entity.h" />
-    <ClInclude Include="Headers\Abstracted GL\Texture.h" />
-    <ClInclude Include="Headers\Scene\SceneManager.h" />
-    <ClInclude Include="Scenes\Scene 7.h" />
-    <ClInclude Include="Scenes\Scene 8.h" />
-    <ClInclude Include="Scenes\Test\Optimal Scene Setup.h" />
-    <ClInclude Include="Scenes\Scene 2.h" />
-    <ClInclude Include="Scenes\Scene 1.h" />
-    <ClInclude Include="Scenes\Scene 3.h" />
-    <ClInclude Include="Headers\Engine.h" />
-    <ClInclude Include="Headers\Scene\InstanceManager.h" />
-    <ClInclude Include="Headers\Input.h" />
-    <ClInclude Include="Scenes\MainMenu.h" />
-    <ClInclude Include="Headers\Abstracted GL\Shader.h" />
-    <ClInclude Include="Scenes\Scene 6.h" />
-    <ClInclude Include="include\stb_image.h" />
-    <ClInclude Include="Headers\Window.h" />
+    <ClInclude Include="include\assimp\aabb.h" />
+    <ClInclude Include="include\assimp\ai_assert.h" />
+    <ClInclude Include="include\assimp\anim.h" />
+    <ClInclude Include="include\assimp\BaseImporter.h" />
+    <ClInclude Include="include\assimp\Bitmap.h" />
+    <ClInclude Include="include\assimp\BlobIOSystem.h" />
+    <ClInclude Include="include\assimp\ByteSwapper.h" />
+    <ClInclude Include="include\assimp\camera.h" />
+    <ClInclude Include="include\assimp\cexport.h" />
+    <ClInclude Include="include\assimp\cfileio.h" />
+    <ClInclude Include="include\assimp\cimport.h" />
+    <ClInclude Include="include\assimp\ColladaMetaData.h" />
+    <ClInclude Include="include\assimp\color4.h" />
+    <ClInclude Include="include\assimp\commonMetaData.h" />
+    <ClInclude Include="include\assimp\Compiler\poppack1.h" />
+    <ClInclude Include="include\assimp\Compiler\pstdint.h" />
+    <ClInclude Include="include\assimp\Compiler\pushpack1.h" />
+    <ClInclude Include="include\assimp\config.h" />
+    <ClInclude Include="include\assimp\CreateAnimMesh.h" />
+    <ClInclude Include="include\assimp\DefaultIOStream.h" />
+    <ClInclude Include="include\assimp\DefaultIOSystem.h" />
+    <ClInclude Include="include\assimp\DefaultLogger.hpp" />
+    <ClInclude Include="include\assimp\Defines.h" />
+    <ClInclude Include="include\assimp\defs.h" />
+    <ClInclude Include="include\assimp\Exceptional.h" />
+    <ClInclude Include="include\assimp\Exporter.hpp" />
+    <ClInclude Include="include\assimp\fast_atof.h" />
+    <ClInclude Include="include\assimp\GenericProperty.h" />
+    <ClInclude Include="include\assimp\Hash.h" />
+    <ClInclude Include="include\assimp\Importer.hpp" />
+    <ClInclude Include="include\assimp\importerdesc.h" />
+    <ClInclude Include="include\assimp\IOStream.hpp" />
+    <ClInclude Include="include\assimp\IOStreamBuffer.h" />
+    <ClInclude Include="include\assimp\IOSystem.hpp" />
+    <ClInclude Include="include\assimp\light.h" />
+    <ClInclude Include="include\assimp\LineSplitter.h" />
+    <ClInclude Include="include\assimp\LogAux.h" />
+    <ClInclude Include="include\assimp\Logger.hpp" />
+    <ClInclude Include="include\assimp\LogStream.hpp" />
+    <ClInclude Include="include\assimp\material.h" />
+    <ClInclude Include="include\assimp\MathFunctions.h" />
+    <ClInclude Include="include\assimp\matrix3x3.h" />
+    <ClInclude Include="include\assimp\matrix4x4.h" />
+    <ClInclude Include="include\assimp\MemoryIOWrapper.h" />
+    <ClInclude Include="include\assimp\mesh.h" />
+    <ClInclude Include="include\assimp\metadata.h" />
+    <ClInclude Include="include\assimp\NullLogger.hpp" />
+    <ClInclude Include="include\assimp\ParsingUtils.h" />
+    <ClInclude Include="include\assimp\pbrmaterial.h" />
+    <ClInclude Include="include\assimp\port\AndroidJNI\AndroidJNIIOSystem.h" />
+    <ClInclude Include="include\assimp\port\AndroidJNI\BundledAssetIOSystem.h" />
+    <ClInclude Include="include\assimp\postprocess.h" />
+    <ClInclude Include="include\assimp\Profiler.h" />
+    <ClInclude Include="include\assimp\ProgressHandler.hpp" />
+    <ClInclude Include="include\assimp\qnan.h" />
+    <ClInclude Include="include\assimp\quaternion.h" />
+    <ClInclude Include="include\assimp\RemoveComments.h" />
+    <ClInclude Include="include\assimp\scene.h" />
+    <ClInclude Include="include\assimp\SceneCombiner.h" />
+    <ClInclude Include="include\assimp\SGSpatialSort.h" />
+    <ClInclude Include="include\assimp\SkeletonMeshBuilder.h" />
+    <ClInclude Include="include\assimp\SmallVector.h" />
+    <ClInclude Include="include\assimp\SmoothingGroups.h" />
+    <ClInclude Include="include\assimp\SpatialSort.h" />
+    <ClInclude Include="include\assimp\StandardShapes.h" />
+    <ClInclude Include="include\assimp\StreamReader.h" />
+    <ClInclude Include="include\assimp\StreamWriter.h" />
+    <ClInclude Include="include\assimp\StringComparison.h" />
+    <ClInclude Include="include\assimp\StringUtils.h" />
+    <ClInclude Include="include\assimp\Subdivision.h" />
+    <ClInclude Include="include\assimp\texture.h" />
+    <ClInclude Include="include\assimp\TinyFormatter.h" />
+    <ClInclude Include="include\assimp\types.h" />
+    <ClInclude Include="include\assimp\vector2.h" />
+    <ClInclude Include="include\assimp\vector3.h" />
+    <ClInclude Include="include\assimp\version.h" />
+    <ClInclude Include="include\assimp\Vertex.h" />
+    <ClInclude Include="include\assimp\XmlParser.h" />
+    <ClInclude Include="include\assimp\XMLTools.h" />
+    <ClInclude Include="include\assimp\ZipArchiveIOSystem.h" />
+    <ClInclude Include="include\entt\entt.hpp" />
+    <ClInclude Include="include\glad\glad.h" />
+    <ClInclude Include="include\glfw\glfw3.h" />
+    <ClInclude Include="include\glfw\glfw3native.h" />
+    <ClInclude Include="include\khr\khrplatform.h" />
+    <ClInclude Include="src\OpenGL\Buffer.h" />
+    <ClInclude Include="src\ECS\Light.h" />
+    <ClInclude Include="src\OpenGL\Material.h" />
+    <ClCompile Include="src\ECS\MeshRenderer.h" />
+    <ClInclude Include="src\OpenGL\Vertex Array.h" />
+    <ClInclude Include="src\ECS\Camera.h" />
+    <ClInclude Include="src\ECS\Components.h" />
+    <ClInclude Include="src\ECS\Entity.h" />
+    <ClInclude Include="src\OpenGL\Texture.h" />
+    <ClInclude Include="src\ECS\SceneManager.h" />
+    <ClInclude Include="tests\Scene 7.h" />
+    <ClInclude Include="tests\Scene 8.h" />
+    <ClInclude Include="tests\Optimal Scene Setup.h" />
+    <ClInclude Include="tests\Scene 2.h" />
+    <ClInclude Include="tests\Scene 1.h" />
+    <ClInclude Include="tests\Scene 3.h" />
+    <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\InstanceManager.h" />
+    <ClInclude Include="src\Input.h" />
+    <ClInclude Include="tests\MainMenu.h" />
+    <ClInclude Include="src\OpenGL\Shader.h" />
+    <ClInclude Include="tests\Scene 6.h" />
+    <ClInclude Include="include\stb_image\stb_image.h" />
+    <ClInclude Include="src\Window.h" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
     <ClInclude Include="include\imgui\imgui_impl_glfw.h" />
@@ -147,20 +234,34 @@
     <ClInclude Include="include\imgui\imstb_rectpack.h" />
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
-    <ClInclude Include="Scenes\Scene 4.h" />
-    <ClInclude Include="Scenes\Scene 5.h" />
+    <ClInclude Include="tests\Scene 4.h" />
+    <ClInclude Include="tests\Scene 5.h" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Resources\Images\cube_texture.png" />
-    <Image Include="Resources\Images\cube_texture_specular.png" />
-    <Image Include="Resources\Images\grass_texture.jpg" />
+    <Image Include="assets\Images\cube_texture.png" />
+    <Image Include="assets\Images\cube_texture_specular.png" />
+    <Image Include="assets\Images\grass_texture.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Shaders\Basic\basic.glsl" />
-    <None Include="Resources\Shaders\Materials\material_shader_phong.glsl" />
-    <None Include="Resources\Shaders\Basic\basic_phong.glsl" />
-    <None Include="Resources\Shaders\Basic\basic_texture.glsl" />
-    <None Include="Resources\Shaders\Materials\material_shader_flat.glsl" />
+    <None Include="assets\Shaders\Basic\basic.glsl" />
+    <None Include="assets\Shaders\Materials\material_shader_phong.glsl" />
+    <None Include="assets\Shaders\Basic\basic_phong.glsl" />
+    <None Include="assets\Shaders\Basic\basic_texture.glsl" />
+    <None Include="assets\Shaders\Materials\material_shader_flat.glsl" />
+    <None Include="include\assimp\color4.inl" />
+    <None Include="include\assimp\material.inl" />
+    <None Include="include\assimp\matrix3x3.inl" />
+    <None Include="include\assimp\matrix4x4.inl" />
+    <None Include="include\assimp\quaternion.inl" />
+    <None Include="include\assimp\SmoothingGroups.inl" />
+    <None Include="include\assimp\vector2.inl" />
+    <None Include="include\assimp\vector3.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="include\entt\ENTT License.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libs\assimp\assimp.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
