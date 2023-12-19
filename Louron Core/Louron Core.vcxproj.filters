@@ -99,6 +99,9 @@
     <ClCompile Include="include\imgui\imgui_widgets.cpp">
       <Filter>Vendor\ImGUI</Filter>
     </ClCompile>
+    <ClCompile Include="src\Engine Manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\OpenGL\Buffer.h">
@@ -120,9 +123,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\SceneManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Management\InstanceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Management\Input.h">
@@ -445,6 +445,9 @@
     </ClInclude>
     <ClInclude Include="include\imgui\imstb_truetype.h">
       <Filter>Vendor\ImGUI</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Engine Manager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

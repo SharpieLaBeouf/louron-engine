@@ -103,6 +103,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="libs\glad\glad.c" />
+    <ClCompile Include="src\Engine Manager.cpp" />
     <ClCompile Include="src\Scene\MeshRenderer.cpp" />
     <ClCompile Include="src\OpenGL\Vertex Array.cpp" />
     <ClCompile Include="src\OpenGL\Buffer.cpp" />
@@ -206,6 +207,7 @@
     <ClInclude Include="include\glfw\glfw3.h" />
     <ClInclude Include="include\glfw\glfw3native.h" />
     <ClInclude Include="include\khr\khrplatform.h" />
+    <ClInclude Include="src\Engine Manager.h" />
     <ClInclude Include="src\OpenGL\Buffer.h" />
     <ClInclude Include="src\Scene\Light.h" />
     <ClInclude Include="src\OpenGL\Material.h" />
@@ -216,7 +218,6 @@
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\OpenGL\Texture.h" />
     <ClInclude Include="src\Scene\SceneManager.h" />
-    <ClInclude Include="src\Management\InstanceManager.h" />
     <ClInclude Include="src\Management\Input.h" />
     <ClInclude Include="src\OpenGL\Shader.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />

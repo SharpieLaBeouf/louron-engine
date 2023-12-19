@@ -6,7 +6,8 @@
 #include "../OpenGL/Vertex Array.h"
 
 #include "Camera.h"
-#include "../Management/InstanceManager.h"
+#include "../Management/Input.h"
+#include "../Management/Window.h"
 
 #include <string>
 #include <vector>
@@ -15,9 +16,6 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
-
-
 
 class MeshRenderer;
 

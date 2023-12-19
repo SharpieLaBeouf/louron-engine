@@ -7,8 +7,7 @@ int TestSceneApplication::init() {
 	// Display Louron Banner
 	std::cout << "<---------------------------------------------->" << std::endl;
 	std::cout << "<                                              >" << std::endl;
-	std::cout << "<              Louron Engine 2020              >" << std::endl;
-	std::cout << "<                     [L20]                    >" << std::endl;
+	std::cout << "<                 Louron Engine                >" << std::endl;
 	std::cout << "<                  Aaron Sharp                 >" << std::endl;
 	std::cout << "<                                              >" << std::endl;
 	std::cout << "<---------------------------------------------->" << std::endl << std::endl;

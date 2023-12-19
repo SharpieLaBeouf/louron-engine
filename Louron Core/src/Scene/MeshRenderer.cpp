@@ -1,5 +1,11 @@
 #include "MeshRenderer.h"
 
+/// <summary>
+/// MESH FILTER
+/// </summary>
+/// <param name="vertices"></param>
+/// <param name="indices"></param>
+/// <param name="mgr"></param>
 MeshFilter::MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, InstanceManager* mgr) {
 	m_InstanceManager = mgr;
 
@@ -41,6 +47,11 @@ void MeshFilter::renderMeshFilter(Camera* mainCamera, Material* mat, Light* main
 	m_VAO->Unbind();
 }
 
+
+/// <summary>
+/// MESH RENDERER COMPONENT
+/// </summary>
+/// <param name="instanceManager"></param>
 MeshRendererComponent::MeshRendererComponent(InstanceManager* instanceManager) : m_InstanceManager(instanceManager), m_ShaderName("material_shader_flat") {
 
 }
@@ -103,7 +114,6 @@ void MeshRendererComponent::processNode(aiNode* node, const aiScene* scene) {
 
 MeshFilter* MeshRendererComponent::processMesh(aiMesh* mesh, const aiScene* scene) {
 
-
 	// Process Vertices
 	std::vector<Vertex> mesh_vertices;
 	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -126,7 +136,6 @@ MeshFilter* MeshRendererComponent::processMesh(aiMesh* mesh, const aiScene* scen
 	}
 
 	// Create Material
-
 	for (int i = 0; i < m_Materials.size(); i++) {
 		if (m_Materials[i] != nullptr) {
 			if (m_Materials[i]->getMaterialIndex() == mesh->mMaterialIndex) {

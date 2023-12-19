@@ -19,7 +19,6 @@
 // CameraComponent
 // LightComponent
 
-
 struct TagComponent {
 
 	std::string Tag;
@@ -28,6 +27,7 @@ struct TagComponent {
 	TagComponent(const TagComponent&) = default;
 	TagComponent(const std::string& name) : Tag(name) { }
 };
+
 struct TransformComponent {
 
 	glm::vec3 position = glm::vec3(0.0f);
@@ -49,6 +49,7 @@ struct TransformComponent {
 			* glm::scale(glm::mat4(1.0f), scale);
 	}
 };
+
 struct CameraComponent {
 
 
