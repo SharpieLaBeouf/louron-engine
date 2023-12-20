@@ -2,18 +2,20 @@
 
 #include "Entity.h"
 
+namespace Louron {
 
-class Scene {
+	class Scene {
 
-public:
+	public:
 
-	Scene() = default;
-	Scene(const Scene&) = default;
-	~Scene() = default;
+		Scene() = default;
+		Scene(const Scene&) = default;
+		~Scene() = default;
 
-	bool LoadScene(const char* sceneFile) { return true; }
+		bool LoadScene(const char* sceneFile) { return true; }
 
-private:
+	private:
 
-	friend class Entity;
-};
+		friend class Entity;
+	};
+}

@@ -19,41 +19,44 @@
 // CameraComponent
 // LightComponent
 
-struct TagComponent {
+namespace Louron {
 
-	std::string Tag;
+	struct TagComponent {
 
-	TagComponent() = default;
-	TagComponent(const TagComponent&) = default;
-	TagComponent(const std::string& name) : Tag(name) { }
-};
+		std::string Tag;
 
-struct TransformComponent {
+		TagComponent() = default;
+		TagComponent(const TagComponent&) = default;
+		TagComponent(const std::string& name) : Tag(name) { }
+	};
 
-	glm::vec3 position = glm::vec3(0.0f);
-	glm::vec3 rotation = glm::vec3(0.0f);
-	glm::vec3 scale = glm::vec3(1.0f);
+	struct TransformComponent {
 
-	TransformComponent() = default;
-	TransformComponent(const TransformComponent&) = default;
-	TransformComponent(const glm::vec3& translation) : position(translation) { }
+		glm::vec3 position = glm::vec3(0.0f);
+		glm::vec3 rotation = glm::vec3(0.0f);
+		glm::vec3 scale = glm::vec3(1.0f);
 
-	void Translate(const glm::vec3& vector) { position += vector; }
-	void Rotate(const glm::vec3& vector) { rotation += vector; }
-	void Scale(const glm::vec3& vector) { scale += vector; }
+		TransformComponent() = default;
+		TransformComponent(const TransformComponent&) = default;
+		TransformComponent(const glm::vec3& translation) : position(translation) { }
 
-	operator glm::mat4() { return this->getTransform(); }
-	glm::mat4 getTransform() const {
-		return glm::translate(glm::mat4(1.0f), position)
-			* glm::toMat4(glm::quat(glm::radians(rotation)))
-			* glm::scale(glm::mat4(1.0f), scale);
-	}
-};
+		void Translate(const glm::vec3& vector) { position += vector; }
+		void Rotate(const glm::vec3& vector) { rotation += vector; }
+		void Scale(const glm::vec3& vector) { scale += vector; }
 
-struct CameraComponent {
+		operator glm::mat4() { return this->getTransform(); }
+		glm::mat4 getTransform() const {
+			return glm::translate(glm::mat4(1.0f), position)
+				* glm::toMat4(glm::quat(glm::radians(rotation)))
+				* glm::scale(glm::mat4(1.0f), scale);
+		}
+	};
+
+	struct CameraComponent {
 
 
 
 
 
-};
+	};
+}

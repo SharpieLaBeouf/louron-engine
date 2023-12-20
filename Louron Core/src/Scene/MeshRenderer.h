@@ -1,13 +1,12 @@
 #pragma once
 
+#include "Camera.h"
 #include "Light.h"
 #include "../OpenGL/Texture.h"
 #include "../OpenGL/Material.h"
 #include "../OpenGL/Vertex Array.h"
 
-#include "Camera.h"
-#include "../Management/Input.h"
-#include "../Management/Window.h"
+#include "../Core/Engine.h"
 
 #include <string>
 #include <vector>
@@ -17,78 +16,79 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-class MeshRenderer;
+namespace Louron {
 
-class MeshFilter {
+	class MeshRenderer;
 
-public:
+	class MeshFilter {
+
+	public:
 
 
-	MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices, InstanceManager* mgr);
-	~MeshFilter() { delete m_VAO; }
+		MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
+		~MeshFilter() { delete m_VAO; }
 
-	/// <summary>
-	/// 1. DrawElements for the entire mesh using the singular material
-	/// 
-	///   Realistically this should only take the scene heirarchy and then 
-	///   retrieve the relevant elements, or maybe be passed a struct of 
-	///   vectors which contain relevent scene details required for renderering
-	///   the current object.
-	/// 
-	/// </summary>
-	void renderMeshFilter(Camera* mainCamera, Material* mat, Light* mainLight);
+		/// <summary>
+		/// 1. DrawElements for the entire mesh using the singular material
+		/// 
+		///   Realistically this should only take the scene heirarchy and then 
+		///   retrieve the relevant elements, or maybe be passed a struct of 
+		///   vectors which contain relevent scene details required for renderering
+		///   the current object.
+		/// 
+		/// </summary>
+		void renderMeshFilter(Camera* mainCamera, Material* mat, Light* mainLight);
 
-	void setMaterialIndex(GLuint index) { m_MaterialIndex = index; }
-	GLuint getMaterialIndex() { return m_MaterialIndex; }
+		void setMaterialIndex(GLuint index) { m_MaterialIndex = index; }
+		GLuint getMaterialIndex() const { return m_MaterialIndex; }
 
-private:
+	private:
 
-	GLuint m_MaterialIndex;
-	InstanceManager* m_InstanceManager;
+		GLuint m_MaterialIndex;
 
-	// OpenGL Data References
-	VertexArray* m_VAO = nullptr;
-};
+		// OpenGL Data References
+		VertexArray* m_VAO = nullptr;
 
-class MeshRendererComponent {
+		Engine& engine;
+	};
 
-public:
-	MeshRendererComponent() = default;
-	MeshRendererComponent(const MeshRendererComponent&) = default;
+	class MeshRendererComponent {
 
-	MeshRendererComponent(InstanceManager* instanceManager);
-	
-	int loadModel(const char* filePath, const char* shaderName);
+	public:
+		MeshRendererComponent() = default;
+		MeshRendererComponent(const MeshRendererComponent&) = default;
 
-	/// <summary>
-	/// 1. Sorts all meshfilters based on material
-	/// 2. Loops all different types of materials
-	///		-> Bind Material00 (set uniforms, etc.)
-	///			-> Loop render all meshes with bound material00
-	///		-> Bind Material01 (set uniforms, etc.)
-	///			-> Loop render all meshes with bound material01
-	///		-> etc ... foreach groupings of material
-	/// </summary>
-	void renderEntireMesh(Camera* mainCamera, Light* mainLight);
+		int loadModel(const char* filePath, const char* shaderName);
 
-	std::vector<MeshFilter*> getMeshes();
+		/// <summary>
+		/// 1. Sorts all meshfilters based on material
+		/// 2. Loops all different types of materials
+		///		-> Bind Material00 (set uniforms, etc.)
+		///			-> Loop render all meshes with bound material00
+		///		-> Bind Material01 (set uniforms, etc.)
+		///			-> Loop render all meshes with bound material01
+		///		-> etc ... foreach groupings of material
+		/// </summary>
+		void renderEntireMesh(Camera* mainCamera, Light* mainLight);
 
-	std::map<int, Material*>* getMaterials();
-	Material* getMaterial(int index);
+		std::vector<MeshFilter*> getMeshes();
 
-	void addMaterial(int index, Material* mat);
+		std::map<int, Material*>* getMaterials();
+		Material* getMaterial(int index);
 
-	bool active = true;
-private:
-	const char* m_ShaderName;
+		void addMaterial(int index, Material* mat);
 
-	std::string m_Directory;
+		bool active = true;
+	private:
+		const char* m_ShaderName;
 
-	GLuint m_MeshCount = 0;
-	std::vector<MeshFilter*> m_Meshes;
-	std::map<int, Material*> m_Materials;
-	InstanceManager* m_InstanceManager;
+		std::string m_Directory;
 
-	void processNode(aiNode* node, const aiScene* scene);
-	MeshFilter* processMesh(aiMesh* mesh, const aiScene* scene);
-};
+		GLuint m_MeshCount = 0;
+		std::vector<MeshFilter*> m_Meshes;
+		std::map<int, Material*> m_Materials;
+
+		void processNode(aiNode* node, const aiScene* scene);
+		MeshFilter* processMesh(aiMesh* mesh, const aiScene* scene);
+	};
+}

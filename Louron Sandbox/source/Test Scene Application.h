@@ -16,9 +16,8 @@
 #include <imgui/imgui_impl_opengl3.h>
 
 // CUSTOM HEADERS
-#include "Management/Window.h"
-#include "Management/Input.h"
-#include "Management/InstanceManager.h"
+#include "Core/Window.h"
+#include "Core/Input.h"
 #include "../Tests/MainMenu.h"
 
 class TestSceneApplication {

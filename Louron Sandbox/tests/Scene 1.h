@@ -5,8 +5,8 @@
 
 #include <imgui/imgui.h>
 
-#include "Management/Input.h"
-#include "Management/InstanceManager.h"
+#include "Core/Input.h"
+#include "Core/InstanceManager.h"
 #include "OpenGL/Shader.h"
 
 class Scene1 : public State {

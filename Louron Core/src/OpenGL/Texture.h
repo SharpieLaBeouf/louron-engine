@@ -7,46 +7,47 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <glad/glad.h>
+namespace Louron {
 
-class Texture {
+	class Texture {
 
-public:
+	public:
 
-	void Bind();
-	void UnBind();
+		void Bind();
+		void UnBind();
 
-	Texture();
-	Texture(const char* texturePath);
-	~Texture();
+		Texture();
+		Texture(const char* texturePath);
+		~Texture();
 
-	GLuint getID();
-	std::string getName();
+		GLuint getID();
+		std::string getName();
 
-private:
-	GLuint m_TextureID;
-	std::string m_Name;
+	private:
+		GLuint m_TextureID;
+		std::string m_Name;
 
-};
+	};
 
-class TextureLibrary {
+	class TextureLibrary {
 
-private:
+	private:
 
-	std::unordered_map<std::string, Texture*> m_Textures;
+		std::unordered_map<std::string, Texture*> m_Textures;
 
-public:
-	void UnBind();
+	public:
+		void UnBind();
 
-	TextureLibrary();
+		TextureLibrary();
 
-	void Add(Texture* texture);
-	void Add(const std::string & textureName, Texture* texture);
+		void Add(Texture* texture);
+		void Add(const std::string& textureName, Texture* texture);
 
-	Texture* loadTexture(const std::string & textureFile);
-	Texture* loadTexture(const std::string & textureFile, const std::string & textureName);
+		Texture* loadTexture(const std::string& textureFile);
+		Texture* loadTexture(const std::string& textureFile, const std::string& textureName);
 
-	Texture* getTexture(const std::string & textureName);
+		Texture* getTexture(const std::string& textureName);
 
-	bool textureExists(const std::string & name) const;
-};
+		bool textureExists(const std::string& name) const;
+	};
+}

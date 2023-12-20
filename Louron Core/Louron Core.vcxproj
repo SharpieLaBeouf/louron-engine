@@ -48,14 +48,14 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
-    <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)</OutDir>
+    <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediates\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
-    <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)</OutDir>
+    <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediates\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -104,6 +104,10 @@
   <ItemGroup>
     <ClCompile Include="libs\glad\glad.c" />
     <ClCompile Include="src\Engine Manager.cpp" />
+    <ClCompile Include="src\Core\Engine.cpp" />
+    <ClCompile Include="src\Core\GuiLayer.cpp" />
+    <ClCompile Include="src\Core\LayerStack.cpp" />
+    <ClCompile Include="src\Core\EngineStart.cpp" />
     <ClCompile Include="src\Scene\MeshRenderer.cpp" />
     <ClCompile Include="src\OpenGL\Vertex Array.cpp" />
     <ClCompile Include="src\OpenGL\Buffer.cpp" />
@@ -116,10 +120,10 @@
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
-    <ClCompile Include="src\Management\Input.cpp" />
+    <ClCompile Include="src\Core\Input.cpp" />
     <ClCompile Include="src\OpenGL\Shader.cpp" />
     <ClCompile Include="src\OpenGL\Texture.cpp" />
-    <ClCompile Include="src\Management\Window.cpp" />
+    <ClCompile Include="src\Core\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\assimp\aabb.h" />
@@ -208,6 +212,10 @@
     <ClInclude Include="include\glfw\glfw3native.h" />
     <ClInclude Include="include\khr\khrplatform.h" />
     <ClInclude Include="src\Engine Manager.h" />
+    <ClInclude Include="src\Core\Engine.h" />
+    <ClInclude Include="src\Core\GuiLayer.h" />
+    <ClInclude Include="src\Core\Layer.h" />
+    <ClInclude Include="src\Core\LayerStack.h" />
     <ClInclude Include="src\OpenGL\Buffer.h" />
     <ClInclude Include="src\Scene\Light.h" />
     <ClInclude Include="src\OpenGL\Material.h" />
@@ -218,10 +226,10 @@
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\OpenGL\Texture.h" />
     <ClInclude Include="src\Scene\SceneManager.h" />
-    <ClInclude Include="src\Management\Input.h" />
+    <ClInclude Include="src\Core\Input.h" />
     <ClInclude Include="src\OpenGL\Shader.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />
-    <ClInclude Include="src\Management\Window.h" />
+    <ClInclude Include="src\Core\Window.h" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
     <ClInclude Include="include\imgui\imgui_impl_glfw.h" />

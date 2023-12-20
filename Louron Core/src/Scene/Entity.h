@@ -4,17 +4,18 @@
 
 #include "Components.h"
 
-//Base Entity Class
-class Entity {
+namespace Louron {
 
-public:
-	Entity() = default;
-	Entity(const Entity&) = default;
-	~Entity() = default;
+	//Base Entity Class
+	class Entity {
 
-private:
-	GLuint* m_ParentID;
-};
+	public:
+		Entity() = default;
+		Entity(const Entity&) = default;
+		~Entity() = default;
 
+	private:
+		GLuint* m_ParentID;
+	};
 
-
+}

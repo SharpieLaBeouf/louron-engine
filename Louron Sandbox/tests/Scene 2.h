@@ -5,7 +5,7 @@
 
 #include <imgui/imgui.h>
 
-#include "Management/InstanceManager.h"
+#include "Core/InstanceManager.h"
 #include "Scene/SceneManager.h"
 
 class Scene2 : public State {
