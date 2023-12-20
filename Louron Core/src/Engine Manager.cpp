@@ -1,9 +1,5 @@
 #include "Engine Manager.h"
 
-// VENDOR OPENGL
-#include <glad/glad.h>
-#include <glfw/glfw3.h>
-
 namespace Louron {
 
 	LouronEngine::LouronEngine() { }

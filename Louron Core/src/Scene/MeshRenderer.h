@@ -48,14 +48,12 @@ namespace Louron {
 
 		// OpenGL Data References
 		VertexArray* m_VAO = nullptr;
-
-		Engine& engine;
 	};
 
 	class MeshRendererComponent {
 
 	public:
-		MeshRendererComponent() = default;
+		MeshRendererComponent() : m_ShaderName("material_shader_flat") { }
 		MeshRendererComponent(const MeshRendererComponent&) = default;
 
 		int loadModel(const char* filePath, const char* shaderName);

@@ -1,8 +1,17 @@
 #pragma once
 
-#include "LayerStack.h"
+#include <memory>
+
+// VENDOR OPENGL
+#include <glad/glad.h>
+#include <glfw/glfw3.h>
+
+// ENGINE SYSTEMS
 #include "Window.h"
 #include "GuiLayer.h"
+#include "LayerStack.h"
+#include "../OpenGL/Shader.h"
+#include "../OpenGL/Texture.h"
 
 int main(int argc, char** argv);
 
@@ -34,13 +43,14 @@ namespace Louron {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* layer);
 
-		Window& GetWindow() { return m_Window; }
-
-		void Close();
-
+		Window& GetWindow() { return *m_Window; }
 		GuiLayer* GetImGuiLayer() { return m_GuiLayer; }
 
+		ShaderLibrary& GetShaderLibrary() { return *m_ShaderLibrary; }
+		TextureLibrary& GetTextureLibrary() { return *m_TextureLibrary; }
+
 		static Engine& Get() { return *s_Instance; }
+		void Close();
 
 		const EngineSpecification& GetSpecification() const { return m_Specification; }
 
@@ -50,10 +60,13 @@ namespace Louron {
 		bool OnWindowResize();
 
 	private:
-		Window m_Window;
+		std::unique_ptr <Window> m_Window;
 		GuiLayer* m_GuiLayer;
 		LayerStack m_LayerStack;
 		EngineSpecification m_Specification;
+
+		std::unique_ptr<ShaderLibrary> m_ShaderLibrary;
+		std::unique_ptr <TextureLibrary> m_TextureLibrary;
 
 		bool m_Running = true;
 		bool m_Minimized = false;

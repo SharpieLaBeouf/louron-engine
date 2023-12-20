@@ -31,7 +31,7 @@ namespace Louron {
 		if (mat->Bind()) {			
 			mat->setUniforms();
 			mat->getShader()->setMat4("model", glm::mat4(1.0f));
-			mat->getShader()->setMat4("proj", glm::perspective(glm::radians(60.0f), engine.GetWindow().getWidth() / engine.GetWindow().getHeight(), 0.1f, 100.0f));
+			mat->getShader()->setMat4("proj", glm::perspective(glm::radians(60.0f), Engine::Get().GetWindow().getWidth() / Engine::Get().GetWindow().getHeight(), 0.1f, 100.0f));
 			mat->getShader()->setMat4("view", mainCamera->getViewMatrix());
 			mat->getShader()->setVec3("u_Light.position", mainLight->position);
 			mat->getShader()->setVec4("u_Light.ambient", mainLight->ambient);
@@ -45,14 +45,6 @@ namespace Louron {
 		}
 
 		m_VAO->Unbind();
-	}
-
-
-	/// <summary>
-	/// MESH RENDERER COMPONENT
-	/// </summary>
-	MeshRendererComponent::MeshRendererComponent() : m_ShaderName("material_shader_flat") {
-
 	}
 
 	int MeshRendererComponent::loadModel(const char* filePath, const char* shaderName) {
@@ -147,8 +139,8 @@ namespace Louron {
 			}
 		}
 
-		Material* mesh_material = new Material(engine.GetShaderLibrary().GetShader(m_ShaderName),
-			engine.GetTextureLibrary().GetTexture("blank_texture")); // TODO: NEED TO IMPLEMENT GetShaderLibrary() and GetTextureLibrary() 
+		Material* mesh_material = new Material(Engine::Get().GetShaderLibrary().getShader(m_ShaderName),
+			Engine::Get().GetTextureLibrary().getTexture("blank_texture"));
 		if (mesh->mMaterialIndex >= 0) {
 
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -161,20 +153,20 @@ namespace Louron {
 			if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
 				material->GetTexture(aiTextureType_DIFFUSE, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
-				texture = engine.GetTextureLibrary().LoadTexture(m_Directory + "/" + temp); // TODO: NEED TO IMPLEMENT GetTextureLibrary()
+				texture = Engine::Get().GetTextureLibrary().loadTexture(m_Directory + "/" + temp);
 				mesh_material->AddTextureMap(L20_TEXTURE_DIFFUSE_MAP, texture);
 			}
 			if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
 				material->GetTexture(aiTextureType_SPECULAR, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
-				texture = engine.GetTextureLibrary().LoadTexture(m_Directory + "/" + temp); // TODO: NEED TO IMPLEMENT GetTextureLibrary()
+				texture = Engine::Get().GetTextureLibrary().loadTexture(m_Directory + "/" + temp);
 				mesh_material->AddTextureMap(L20_TEXTURE_SPECULAR_MAP, texture);
 			}
 
 			if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
 				material->GetTexture(aiTextureType_NORMALS, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
-				texture = engine.GetTextureLibrary().LoadTexture(m_Directory + "/" + temp); // TODO: NEED TO IMPLEMENT GetTextureLibrary()
+				texture = Engine::Get().GetTextureLibrary().loadTexture(m_Directory + "/" + temp);
 				mesh_material->AddTextureMap(L20_TEXTURE_NORMAL_MAP, texture);
 			}
 

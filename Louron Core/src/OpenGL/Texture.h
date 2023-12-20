@@ -7,6 +7,8 @@
 #include <iostream>
 #include <unordered_map>
 
+#include "glad/glad.h"
+
 namespace Louron {
 
 	class Texture {
