@@ -5,19 +5,15 @@
 
 #include <imgui/imgui.h>
 
-#include "Core/InstanceManager.h"
-#include "Scene/SceneManager.h"
+#include "Louron.h"
 
-class Scene5 : public State {
+class Scene5  {
 
 	//Private Setup Variables
 private:
 
-	InstanceManager* m_InstanceManager;
-
-	Window* m_Window;
-	InputManager* m_Input;
-	ShaderLibrary* m_ShaderLib;
+	Louron::InputManager& m_Input;
+	Louron::ShaderLibrary& m_ShaderLib;
 
 	unsigned int light_VAO = NULL;
 	unsigned int cube_VAO = NULL;
@@ -77,16 +73,11 @@ private:
 
 public:
 
-	explicit Scene5(InstanceManager* instanceManager)
-		: m_InstanceManager(instanceManager)
+	Scene5() :
+		m_Input(Louron::Engine::Get().GetInput()),
+		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary())
 	{
 		std::cout << "[L20] Opening Scene 5..." << std::endl;
-		m_Window = m_InstanceManager->getWindowInstance();
-		m_Input = m_InstanceManager->getInputInstance();
-		m_ShaderLib = m_InstanceManager->getShaderLibInstance();
-
-		glEnable(GL_DEPTH_TEST);
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		// Init Cube VAO
 		glGenVertexArrays(1, &cube_VAO);
@@ -123,15 +114,18 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
-		m_SceneCamera = new Camera(m_Window, glm::vec3(0.0f, 3.0f, 10.0f));
+		m_SceneCamera = new Louron::Camera(glm::vec3(0.0f, 3.0f, 10.0f));
+		m_SceneCamera->MouseToggledOff = false;
 		m_SceneCamera->MovementSpeed = 10.0f;
 		m_SceneCamera->MovementYDamp = 0.65f;
 
 		light_trans.position = glm::vec3(0.0f, 10.0f, 0.0f);
 		cube_trans.scale = glm::vec3(5.0f, 1.0f, 5.0f);
+
+		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic_phong.glsl");
 					
 	}
-	~Scene5() override
+	~Scene5()
 	{
 		std::cout << "[L20] Closing Scene 5..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
@@ -148,7 +142,7 @@ public:
 public:
 
 
-	void update() override {
+	void Update() {
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
@@ -163,87 +157,10 @@ public:
 				 (float)col * cube_trans.scale.z / 2.0f));
 		
 		m_SceneCamera->Update(deltaTime);
+
+		Draw();
 	}
-
-	void draw() override {
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glm::mat4 view = m_SceneCamera->getViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f);
-
-		// Draw Light Source
-		Shader* shader = m_ShaderLib->getShader("basic");
-		if (shader) {
-			glBindVertexArray(light_VAO);
-
-			shader->Bind();
-			shader->setMat4("view", view);
-			shader->setMat4("proj", proj);
-			shader->setVec4("ourColour", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
-			shader->setMat4("model", light_trans.getTransform());
-			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-		}
-
-		// Draw Cube
-		shader = m_ShaderLib->getShader("basic_phong");
-		if (shader) {
-			glBindVertexArray(cube_VAO);
-
-			shader->Bind();
-			shader->setMat4("view", view);
-			shader->setMat4("proj", proj);
-			shader->setMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.getTransform()))));
-			shader->setVec3("viewPos", m_SceneCamera->getPosition());
-			shader->setVec3("lightPos", light_trans.position);
-			shader->setVec4("lightColour", glm::vec4(1.0f));
-
-			glm::vec3 pos = glm::vec3(0.0f);
-			
-			for (int x = 0; x < rows; x++)
-			{
-				pos.x = (float)(x - rows / 2);
-				for (int z = 0; z < col; z++)
-				{
-					pos.z = (float)(z - col / 2); 
-						
-					double time = glfwGetTime();
-					pos.y = (float)sin((time * 8 + floor(x - 9) + floor(z - 9))) / 9 * 9;
-
-					if(z % 2 != 0 || x % 2 != 0) {
-						shader->setVec4("targetColour", glm::vec4(box_colour[0], box_colour[1], box_colour[2], box_colour[3]));
-					}
-					else {
-						shader->setVec4("targetColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-					}
-
-					shader->setMat4("model", glm::translate(cube_trans.getTransform(), pos));
-					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-				}
-			}
-		}
-		processGUI();
-	}
-
-private:
-
-	float box_colour[4] = { 0.992f, 0.325f, 0.325f, 1.0f };
-	float back_colour[4] = { 120.0f / 255.0f, 200.0f / 255.0f, 255.0f, 1.0f };
-
-	TransformComponent cube_trans;
-	TransformComponent light_trans;
-
-	Camera* m_SceneCamera = nullptr;
-
-
-	float currentTime = 0;
-	float lastTime = 0;
-	float deltaTime = 0;
-	int rows = 9, col = 9;
-
-private:
-
-	void processGUI() {
+	void UpdateGUI() {
 
 		static bool wireFrame = false;
 
@@ -256,10 +173,7 @@ private:
 		ImGui::Text("F11 = Toggle Fullscreen");
 		ImGui::Checkbox("Wireframe Mode", &wireFrame);
 
-		if (!wireFrame)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		else
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		wireFrame ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		ImGui::Separator();
 
@@ -282,9 +196,88 @@ private:
 			ImGui::ColorPicker4("Box", box_colour);
 			ImGui::TreePop();
 		}
-
-		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
-
 		ImGui::End();
+	}
+
+private:
+
+	float box_colour[4] = { 0.992f, 0.325f, 0.325f, 1.0f };
+	float back_colour[4] = { 120.0f / 255.0f, 200.0f / 255.0f, 255.0f, 1.0f };
+
+	Louron::TransformComponent cube_trans;
+	Louron::TransformComponent light_trans;
+
+	Louron::Camera* m_SceneCamera = nullptr;
+
+
+	float currentTime = 0;
+	float lastTime = 0;
+	float deltaTime = 0;
+	int rows = 9, col = 9;
+
+private:
+
+	void Draw() {
+
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glm::mat4 view = m_SceneCamera->getViewMatrix();
+		glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f);
+
+		// Draw Light Source
+		Louron::Shader* shader = m_ShaderLib.GetShader("basic");
+		if (shader) {
+			glBindVertexArray(light_VAO);
+
+			shader->Bind();
+			shader->SetMat4("view", view);
+			shader->SetMat4("proj", proj);
+			shader->SetVec4("ourColour", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
+			shader->SetMat4("model", light_trans.getTransform());
+			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		}
+
+		// Draw Cube
+		shader = m_ShaderLib.GetShader("basic_phong");
+		if (shader) {
+			glBindVertexArray(cube_VAO);
+
+			shader->Bind();
+			shader->SetMat4("view", view);
+			shader->SetMat4("proj", proj);
+			shader->SetMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.getTransform()))));
+			shader->SetVec3("viewPos", m_SceneCamera->getPosition());
+			shader->SetVec3("lightPos", light_trans.position);
+			shader->SetVec4("lightColour", glm::vec4(1.0f));
+
+			glm::vec3 pos = glm::vec3(0.0f);
+
+			for (int x = 0; x < rows; x++)
+			{
+				pos.x = (float)(x - rows / 2);
+				for (int z = 0; z < col; z++)
+				{
+					pos.z = (float)(z - col / 2);
+
+					double time = glfwGetTime();
+					pos.y = (float)sin((time * 8 + floor(x - 9) + floor(z - 9))) / 9 * 9;
+
+					if (z % 2 != 0 || x % 2 != 0) {
+						shader->SetVec4("targetColour", glm::vec4(box_colour[0], box_colour[1], box_colour[2], box_colour[3]));
+					}
+					else {
+						shader->SetVec4("targetColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+					}
+
+					shader->SetMat4("model", glm::translate(cube_trans.getTransform(), pos));
+					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+				}
+			}
+		}
+		m_ShaderLib.UnBind();
+
+		glDisable(GL_DEPTH_TEST);
 	}
 };

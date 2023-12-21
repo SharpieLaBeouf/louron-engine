@@ -2,9 +2,11 @@
 
 namespace Louron {
 
-	Camera::Camera(Window* wnd, glm::vec3 position, glm::vec3 up, float yaw, float pitch) {
-		m_Window = wnd;
-		m_Input = m_Window->getInput();
+	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : 
+		m_Window(Engine::Get().GetWindow()), 
+		m_Input(Engine::Get().GetInput())
+	{
+		
 		m_CameraPos = position;
 		m_CameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 		m_WorldUp = up;
@@ -15,7 +17,7 @@ namespace Louron {
 	}
 
 	void Camera::Update(float deltaTime) {
-		if (m_Input->GetKeyUp(GLFW_KEY_LEFT_ALT)) {
+		if (m_Input.GetKeyUp(GLFW_KEY_LEFT_ALT)) {
 			this->MouseToggledOff = !this->MouseToggledOff;
 			if (this->MouseToggledOff)
 				glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -32,27 +34,27 @@ namespace Louron {
 	}
 
 	void Camera::processKeyboard(float deltaTime) {
-		float modifier = (m_Input->GetKey(GLFW_KEY_LEFT_CONTROL)) ? 1.5f : 1.0f;
+		float modifier = (m_Input.GetKey(GLFW_KEY_LEFT_CONTROL)) ? 1.5f : 1.0f;
 		float velocity = modifier * MovementSpeed * deltaTime;
 
-		if (m_Input->GetKey(GLFW_KEY_W))
+		if (m_Input.GetKey(GLFW_KEY_W))
 			m_CameraPos += velocity * m_CameraFront;
-		if (m_Input->GetKey(GLFW_KEY_S))
+		if (m_Input.GetKey(GLFW_KEY_S))
 			m_CameraPos -= velocity * m_CameraFront;
 
-		if (m_Input->GetKey(GLFW_KEY_SPACE))
+		if (m_Input.GetKey(GLFW_KEY_SPACE))
 			m_CameraPos += velocity * m_WorldUp * MovementYDamp;
-		if (m_Input->GetKey(GLFW_KEY_LEFT_SHIFT))
+		if (m_Input.GetKey(GLFW_KEY_LEFT_SHIFT))
 			m_CameraPos -= velocity * m_WorldUp * MovementYDamp;
 
-		if (m_Input->GetKey(GLFW_KEY_D))
+		if (m_Input.GetKey(GLFW_KEY_D))
 			m_CameraPos += velocity * m_CameraRight;
-		if (m_Input->GetKey(GLFW_KEY_A))
+		if (m_Input.GetKey(GLFW_KEY_A))
 			m_CameraPos -= velocity * m_CameraRight;
 	}
 
 	void Camera::processMouse(bool constrainPitch) {
-		float xpos = m_Input->GetMouseX(), ypos = m_Input->GetMouseY();
+		float xpos = m_Input.GetMouseX(), ypos = m_Input.GetMouseY();
 
 		if (m_FirstMouse) {
 			m_LastMouseX = xpos;

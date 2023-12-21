@@ -28,33 +28,33 @@ namespace Louron {
 		GLboolean Bind();
 		void UnBind();
 
-		void setUniforms();
+		void SetUniforms();
 
-		void setShader(Shader* shader);
-		Shader* getShader();
+		void SetShader(Shader* shader);
+		Shader* GetShader();
 
 		Material() = delete;
 		Material(Texture* texture);
 		Material(Shader* shader, Texture* texture);
 		Material(Shader* shader, std::unordered_map<GLint, Texture*>& textures);
 
-		float getShine();
-		glm::vec4* getAmbient();
-		glm::vec4* getDiffuse();
-		glm::vec4* getSpecular();
+		float GetShine();
+		glm::vec4* GetAmbient();
+		glm::vec4* GetDiffuse();
+		glm::vec4* GetSpecular();
 
-		void setShine(float shine);
-		void setAmbient(const glm::vec4& val);
-		void setDiffuse(const glm::vec4& val);
-		void setSpecular(const glm::vec4& val);
+		void SetShine(float shine);
+		void SetAmbient(const glm::vec4& val);
+		void SetDiffuse(const glm::vec4& val);
+		void SetSpecular(const glm::vec4& val);
 
 		/// <param name="type">Refer using TextureMapType enum.</param>
 		void AddTextureMap(GLint type, Texture* val);
 		/// <param name="type">Refer using TextureMapType enum.</param>
 		Texture* GetTextureMap(GLint type);
 
-		void setMaterialIndex(GLuint index);
-		GLuint getMaterialIndex();
+		void SetMaterialIndex(GLuint index);
+		GLuint GetMaterialIndex();
 
 	private:
 

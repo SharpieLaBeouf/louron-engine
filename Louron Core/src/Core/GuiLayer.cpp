@@ -19,10 +19,6 @@ namespace Louron {
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
 		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-		float fontSize = 18.0f;// *2.0f;
-		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Bold.ttf", fontSize);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/OpenSans-Regular.ttf", fontSize);
-
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
@@ -30,7 +26,7 @@ namespace Louron {
 		SetDarkThemeColors();
 
 		Engine& app = Engine::Get();
-		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().getWindow());
+		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
 		// Setup Platform/Renderer bindings
 		bool imGuiGLFWErr = ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -53,7 +49,7 @@ namespace Louron {
 	void GuiLayer::End() {
 		ImGuiIO& io = ImGui::GetIO();
 		Engine& app = Engine::Get();
-		io.DisplaySize = ImVec2((float)app.GetWindow().getWidth(), (float)app.GetWindow().getHeight());
+		io.DisplaySize = ImVec2((float)app.GetWindow().GetWidth(), (float)app.GetWindow().GetHeight());
 
 		// Rendering
 		ImGui::Render();

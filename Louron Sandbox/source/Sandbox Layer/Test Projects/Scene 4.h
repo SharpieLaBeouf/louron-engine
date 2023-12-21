@@ -5,35 +5,26 @@
 
 #include <imgui/imgui.h>
 
-#include "Core/InstanceManager.h"
-#include "Scene/SceneManager.h"
+#include "Louron.h"
 
-class Scene4 : public State {
+class Scene4 {
 
 	//Private Setup Variables
 private:
 
-	InstanceManager* m_InstanceManager;
-
-	Window* m_Window;
-	InputManager* m_Input;
-	ShaderLibrary* m_ShaderLib;
-	TextureLibrary* m_TextureLib;
+	Louron::InputManager& m_Input;
+	Louron::ShaderLibrary& m_ShaderLib;
+	Louron::TextureLibrary& m_TextureLib;
 
 	//Constructors
 public:
 
-	Scene4(InstanceManager* instanceManager)
-		: m_InstanceManager(instanceManager)
+	Scene4() :
+		m_Input(Louron::Engine::Get().GetInput()),
+		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
+		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
 		std::cout << "[L20] Opening Scene 4..." << std::endl;
-		m_Window = m_InstanceManager->getWindowInstance();
-		m_Input = m_InstanceManager->getInputInstance();
-		m_ShaderLib = m_InstanceManager->getShaderLibInstance();
-		m_TextureLib = m_InstanceManager->getTextureLibInstance();
-
-		glEnable(GL_DEPTH_TEST);
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		// Init Plane VAO
 		glGenVertexArrays(1, &plane_VAO);
@@ -80,16 +71,21 @@ public:
 		plane_trans.position.y = -0.6f;
 		plane_trans.scale = glm::vec3(40.0f, 0.0f, 40.0f);
 
-		sceneCamera = new Camera(m_Window, glm::vec3(0.0f, 10.0f, 25.0f));
-			
-		m_ShaderLib->getShader("basic_texture")->Bind();
-		m_ShaderLib->getShader("basic_texture")->setInt("ourTexture", 0);
+		sceneCamera = new Louron::Camera(glm::vec3(0.0f, 10.0f, 25.0f));
+		sceneCamera->MouseToggledOff = false;
+		sceneCamera->MovementSpeed = 10.0f;
+		sceneCamera->MovementYDamp = 0.65f;
+
+		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic.glsl");
+		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic_texture.glsl");
+		m_ShaderLib.GetShader("basic_texture")->Bind();
+		m_ShaderLib.GetShader("basic_texture")->SetInt("ourTexture", 0);
+
+		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
 	}
-	~Scene4() override
+	~Scene4()
 	{
 		std::cout << "[L20] Closing Scene 4..." << std::endl;
-		glDisable(GL_DEPTH_TEST);
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
 		glDeleteVertexArrays(1, &plane_VAO);
 		glDeleteBuffers(1, &plane_VBO);
@@ -114,9 +110,9 @@ private:
 	int waveHeight = 10;
 	float waveSpeed = 5;
 
-	TransformComponent cube_trans;
-	TransformComponent plane_trans;
-	Camera* sceneCamera = nullptr;
+	Louron::TransformComponent cube_trans;
+	Louron::TransformComponent plane_trans;
+	Louron::Camera* sceneCamera = nullptr;
 
 	glm::vec4 back_colour = glm::vec4(0.992f, 0.325f, 0.325f, 1.0f);
 	glm::vec4 box_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -125,7 +121,7 @@ private:
 	//Public Functions
 public:
 
-	void update() override {
+	void Update() {
 
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
@@ -133,66 +129,10 @@ public:
 			
 		sceneCamera->Update(deltaTime);
 
+		Draw();
 	}
 
-	void draw() override {
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		Shader* shader = m_ShaderLib->getShader("basic");
-		if (shader)
-		{
-			// DRAW PLANE BENEATH
-			glBindVertexArray(plane_VAO);
-
-			shader->Bind();
-			shader->setMat4("model", plane_trans.getTransform());
-			shader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
-			shader->setMat4("view", sceneCamera->getViewMatrix());
-			shader->setVec4("ourColour", plane_colour);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		}
-
-		shader = m_ShaderLib->getShader("basic_texture");
-		if (shader)
-		{
-			// DRAW CUBES ABOVE
-
-			glBindVertexArray(cube_VAO);
-
-			shader->Bind();
-			shader->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
-			shader->setMat4("view", sceneCamera->getViewMatrix());
-			shader->setVec4("ourColour", box_colour);
-
-			m_TextureLib->getTexture("cube_texture")->Bind();
-			glm::vec3 pos = glm::vec3(0.0f);
-			for (int x = 1; x <= waveSize; x++)
-			{
-				pos.x = -waveSize / 2 + x - cube_trans.scale.x / 2;
-				for (int z = 1; z <= waveSize; z++)
-				{
-					pos.z = -waveSize / 2 + z - cube_trans.scale.z / 2;
-
-					double time = glfwGetTime();
-					pos.y = (float)sin((time * waveSpeed + floor(x - waveSize) + floor(z - waveSize))) / waveSize * waveHeight;
-
-					shader->setMat4("model", glm::translate(cube_trans.getTransform(), pos));
-					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-				}
-			}
-		}
-
-		m_ShaderLib->UnBind();
-		m_TextureLib->UnBind();
-
-		processGUI();
-
-	}
-
-private:
-
-	void processGUI() {
+	void UpdateGUI() {
 
 		static bool wireFrame = false;
 
@@ -213,10 +153,7 @@ private:
 		ImGui::Text("F11 = Toggle Fullscreen");
 		ImGui::Checkbox("Wireframe Mode", &wireFrame);
 
-		if (!wireFrame) 
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); 
-		else 
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		wireFrame ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		ImGui::Separator();
 
@@ -227,10 +164,64 @@ private:
 			ImGui::ColorPicker4("Plane", glm::value_ptr(plane_colour));
 			ImGui::TreePop();
 		}
-
-		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
-
 		ImGui::End();
+	}
+private:
+
+	void Draw() {
+
+		glEnable(GL_DEPTH_TEST);
+		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		Louron::Shader* shader = m_ShaderLib.GetShader("basic");
+		if (shader)
+		{
+			// DRAW PLANE BENEATH
+			glBindVertexArray(plane_VAO);
+
+			shader->Bind();
+			shader->SetMat4("model", plane_trans.getTransform());
+			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
+			shader->SetMat4("view", sceneCamera->getViewMatrix());
+			shader->SetVec4("ourColour", plane_colour);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		}
+
+		shader = m_ShaderLib.GetShader("basic_texture");
+		if (shader)
+		{
+			// DRAW CUBES ABOVE
+
+			glBindVertexArray(cube_VAO);
+
+			shader->Bind();
+			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
+			shader->SetMat4("view", sceneCamera->getViewMatrix());
+			shader->SetVec4("ourColour", box_colour);
+
+			m_TextureLib.GetTexture("cube_texture")->Bind();
+			glm::vec3 pos = glm::vec3(0.0f);
+			for (int x = 1; x <= waveSize; x++)
+			{
+				pos.x = (float)-waveSize / 2 + x - cube_trans.scale.x / 2;
+				for (int z = 1; z <= waveSize; z++)
+				{
+					pos.z = (float)-waveSize / 2 + z - cube_trans.scale.z / 2;
+
+					double time = glfwGetTime();
+					pos.y = (float)sin((time * waveSpeed + floor(x - waveSize) + floor(z - waveSize))) / waveSize * waveHeight;
+
+					shader->SetMat4("model", glm::translate(cube_trans.getTransform(), pos));
+					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+				}
+			}
+		}
+
+		m_ShaderLib.UnBind();
+		m_TextureLib.UnBind();
+
+		glDisable(GL_DEPTH_TEST);
 	}
 
 	unsigned int plane_VAO = NULL;

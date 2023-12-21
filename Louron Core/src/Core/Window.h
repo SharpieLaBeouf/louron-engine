@@ -9,42 +9,58 @@
 
 namespace Louron {
 
-	enum WindowScreenMode {
-		L20_WINDOW_WINDOWED = 0,
-		L20_WINDOW_BORDERLESS_FULLSCREEN = 1,
-		L20_WINDOW_FULLSCREEN = 2,
-		L20_WINDOW_WINDOWED_BORDERLESS = 3
+	struct WindowProps
+	{
+		std::string Title;
+		uint32_t Width;
+		uint32_t Height;
+
+		WindowProps(const std::string& title = "Louron Engine",
+			uint32_t width = 1600,
+			uint32_t height = 900)
+			: Title(title), Width(width), Height(height) {	}
 	};
 
 	class Window {
 
 	public:
-		Window();
-		Window(int width, int height);
-		Window(const char* title, int width, int height);
-		Window(const char* title, int width, int height, int screenMode);
+		Window(const WindowProps& props);
 		~Window();
 
-		int init();
+		void OnUpdate();
 
-		void toggleFullscreen();
+		unsigned int GetWidth() const { return m_Data->Width; }
+		unsigned int GetHeight() const { return m_Data->Height; }
 
-		GLFWwindow* getWindow();
-		InputManager* getInput();
+		void* GetNativeWindow() const { return m_Window; }
 
-		float getWidth();
-		float getHeight();
+		void SetVSync(bool enabled);
 
-		void setWidth(float width);
-		void setHeight(float height);
+		static std::unique_ptr<Window> Create(const WindowProps& props = WindowProps());
 
 	private:
-		int m_ScreenMode;
-		const char* m_Title;
-		GLFWwindow* m_Window;
-		InputManager* m_Input;
-		static float m_Width, m_Height;
 
-		friend static void windowSizeCallBack(GLFWwindow* window, int w, int h);
+		void Init(const WindowProps& props);
+		void Shutdown();
+
+	private:
+
+		struct WindowData {
+			std::string Title;
+			uint32_t Width = 1600, Height = 800;
+			bool VSync;
+		};
+
+	public:
+
+		WindowData& GetData() const { return *m_Data; }
+
+	private:
+
+		GLFWwindow* m_Window;
+
+		std::unique_ptr<WindowData> m_Data;
+
+		//friend static void windowSizeCallBack(GLFWwindow* window, int w, int h);
 	};
 }

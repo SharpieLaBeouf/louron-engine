@@ -29,20 +29,20 @@ namespace Louron {
 		Shader(const GLchar* shaderFile);
 		~Shader();
 
-		GLuint getProgram();
-		const std::string& getName();
+		GLuint GetProgram();
+		const std::string& GetName();
 
-		void setName(const std::string& name);
+		void SetName(const std::string& name);
 
-		void setBool(const GLchar* name, bool value) const;
-		void setInt(const GLchar* name, int value) const;
-		void setFloat(const GLchar* name, float value) const;
-		void setVec2(const GLchar* name, const glm::vec2& value) const;
-		void setVec3(const GLchar* name, const glm::vec3& value) const;
-		void setVec4(const GLchar* name, const glm::vec4& value) const;
-		void setMat2(const GLchar* name, const glm::mat2& mat) const;
-		void setMat3(const GLchar* name, const glm::mat3& mat) const;
-		void setMat4(const GLchar* name, const glm::mat4& mat) const;
+		void SetBool(const GLchar* name, bool value) const;
+		void SetInt(const GLchar* name, int value) const;
+		void SetFloat(const GLchar* name, float value) const;
+		void SetVec2(const GLchar* name, const glm::vec2& value) const;
+		void SetVec3(const GLchar* name, const glm::vec3& value) const;
+		void SetVec4(const GLchar* name, const glm::vec4& value) const;
+		void SetMat2(const GLchar* name, const glm::mat2& mat) const;
+		void SetMat3(const GLchar* name, const glm::mat3& mat) const;
+		void SetMat4(const GLchar* name, const glm::mat4& mat) const;
 
 	private:
 
@@ -65,11 +65,11 @@ namespace Louron {
 		void Add(Shader* shader);
 		void Add(const std::string& shaderName, Shader* shader);
 
-		Shader* loadShader(const std::string& shaderFile);
-		Shader* loadShader(const std::string& shaderFile, const std::string& shaderName);
+		Shader* LoadShader(const std::string& shaderFile);
+		Shader* LoadShader(const std::string& shaderFile, const std::string& shaderName);
 
-		Shader* getShader(const std::string& shaderName);
+		Shader* GetShader(const std::string& shaderName);
 
-		bool shaderExists(const std::string& name) const;
+		bool ShaderExists(const std::string& name) const;
 	};
 }

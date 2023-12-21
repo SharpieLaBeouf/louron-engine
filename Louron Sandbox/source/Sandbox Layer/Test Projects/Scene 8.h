@@ -5,72 +5,57 @@
 
 #include <imgui/imgui.h>
 
-#include "Engine Manager.h"
-#include "Scene/SceneManager.h"
+#include "Louron.h"
 
-class Scene8 : public State {
+class Scene8 {
 
 	//Private Setup Variables
 private:
 
-	Scene* m_Scene = nullptr;
+	std::unique_ptr<Louron::Scene> m_Scene;
 
-	Window* m_Window = nullptr;
-	InputManager* m_Input = nullptr;
-	ShaderLibrary* m_ShaderLib = nullptr;
-	TextureLibrary* m_TextureLib = nullptr;
-	InstanceManager* m_InstanceManager = nullptr;
+	Louron::InputManager& m_Input;
+	Louron::ShaderLibrary& m_ShaderLib;
+	Louron::TextureLibrary& m_TextureLib;
 
 public:
 
-	explicit Scene8(InstanceManager* instanceManager)
-		: m_InstanceManager(instanceManager)
+	 Scene8() :
+		 m_Input(Louron::Engine::Get().GetInput()),
+		 m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
+		 m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
+		 m_Scene(std::make_unique<Louron::Scene>())
 	{
 		std::cout << "[L20] Opening Scene 8..." << std::endl;
-		m_Window = m_InstanceManager->getWindowInstance();
-		m_Input = m_InstanceManager->getInputInstance();
-		m_ShaderLib = m_InstanceManager->getShaderLibInstance();
-		m_TextureLib = m_InstanceManager->getTextureLibInstance();
 
 		//scnCamera = new Camera(m_Window, glm::vec3(0.0f, 0.0f, 10.0f));
 
 		glEnable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-		m_Scene = new Scene();
 		if (m_Scene->LoadScene("hello world")) {
-			this->~Scene8();
+			std::cout << "[L20] Failed to Load Scene." << std::endl;
 		}
 	}
 
-	~Scene8() override
+	~Scene8()
 	{
 		std::cout << "[L20] Closing Scene 8..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
+	
+}
 
-	void update() override {
+	void Update() {
 
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
-		//scnCamera->Update(deltaTime);
-
+		Draw();
 	}
 
-	void draw() override {
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
-		processGUI();
-	}
-
-private:
-
-	void processGUI() {
+	void UpdateGUI() {
 
 		static bool wireFrame = false;
 
@@ -95,10 +80,15 @@ private:
 			ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
 			ImGui::TreePop();
 		}
-
-		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
-
 		ImGui::End();
+	}
+
+private:
+
+	void Draw() {
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 
 	}
 

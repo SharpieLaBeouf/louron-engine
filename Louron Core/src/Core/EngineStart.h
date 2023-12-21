@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Engine.h"
 
 extern Louron::Engine* Louron::CreateEngine(Louron::EngineCommandLineArgs args);

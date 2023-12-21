@@ -30,7 +30,7 @@ namespace Louron {
 
 	struct EngineSpecification
 	{
-		std::string Name = "Hazel Application";
+		std::string Name = "Louron Engine";
 		std::string WorkingDirectory;
 		EngineCommandLineArgs CommandLineArgs;
 	};
@@ -48,6 +48,8 @@ namespace Louron {
 
 		ShaderLibrary& GetShaderLibrary() { return *m_ShaderLibrary; }
 		TextureLibrary& GetTextureLibrary() { return *m_TextureLibrary; }
+
+		InputManager& GetInput() { return *m_Input; }
 
 		static Engine& Get() { return *s_Instance; }
 		void Close();
@@ -67,6 +69,8 @@ namespace Louron {
 
 		std::unique_ptr<ShaderLibrary> m_ShaderLibrary;
 		std::unique_ptr <TextureLibrary> m_TextureLibrary;
+
+		std::unique_ptr<InputManager> m_Input;
 
 		bool m_Running = true;
 		bool m_Minimized = false;

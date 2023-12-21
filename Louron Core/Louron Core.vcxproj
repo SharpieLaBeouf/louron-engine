@@ -103,11 +103,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="libs\glad\glad.c" />
-    <ClCompile Include="src\Engine Manager.cpp" />
     <ClCompile Include="src\Core\Engine.cpp" />
     <ClCompile Include="src\Core\GuiLayer.cpp" />
     <ClCompile Include="src\Core\LayerStack.cpp" />
-    <ClCompile Include="src\Core\EngineStart.cpp" />
+    <ClInclude Include="src\Core\EngineStart.h" />
     <ClCompile Include="src\Scene\MeshRenderer.cpp" />
     <ClCompile Include="src\OpenGL\Vertex Array.cpp" />
     <ClCompile Include="src\OpenGL\Buffer.cpp" />
@@ -211,11 +210,11 @@
     <ClInclude Include="include\glfw\glfw3.h" />
     <ClInclude Include="include\glfw\glfw3native.h" />
     <ClInclude Include="include\khr\khrplatform.h" />
-    <ClInclude Include="src\Engine Manager.h" />
     <ClInclude Include="src\Core\Engine.h" />
     <ClInclude Include="src\Core\GuiLayer.h" />
     <ClInclude Include="src\Core\Layer.h" />
     <ClInclude Include="src\Core\LayerStack.h" />
+    <ClInclude Include="src\Louron.h" />
     <ClInclude Include="src\OpenGL\Buffer.h" />
     <ClInclude Include="src\Scene\Light.h" />
     <ClInclude Include="src\OpenGL\Material.h" />

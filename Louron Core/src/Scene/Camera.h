@@ -1,8 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "../Core/Input.h"
-#include "../Core/Window.h"
+#include "../Core/Engine.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -22,11 +21,13 @@ namespace Louron {
 		bool MouseToggledOff = true;
 
 		Camera() = default;
-		Camera(Window* wnd, glm::vec3 position = glm::vec3(0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f);
+		Camera(glm::vec3 position = glm::vec3(0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f);
 		~Camera() { }
 
 		glm::mat4 getViewMatrix() const { return glm::lookAt(m_CameraPos, m_CameraPos + m_CameraFront, m_CameraUp); }
 		glm::vec3 getPosition() const { return m_CameraPos; }
+
+		void setPosition(glm::vec3 pos) { m_CameraPos = pos; }
 
 		void setPitch(float pitch) { m_Pitch = pitch; }
 		void setYaw(float yaw) { m_Yaw = yaw; }
@@ -40,8 +41,8 @@ namespace Louron {
 
 	private:
 
-		Window* m_Window;
-		InputManager* m_Input;
+		Window& m_Window;
+		InputManager& m_Input;
 
 		glm::vec3 m_CameraPos;
 		glm::vec3 m_CameraUp;

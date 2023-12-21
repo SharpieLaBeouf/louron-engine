@@ -29,14 +29,14 @@ namespace Louron {
 		}
 	}
 
-	void Material::setUniforms() {
+	void Material::SetUniforms() {
 
 		if (m_Shader)
 		{
-			m_Shader->setFloat("u_Material.shine", m_Shine);
-			m_Shader->setVec4("u_Material.ambient", m_Ambient);
-			m_Shader->setVec4("u_Material.diffuse", m_Diffuse);
-			m_Shader->setVec4("u_Material.specular", m_Specular);
+			m_Shader->SetFloat("u_Material.shine", m_Shine);
+			m_Shader->SetVec4("u_Material.ambient", m_Ambient);
+			m_Shader->SetVec4("u_Material.diffuse", m_Diffuse);
+			m_Shader->SetVec4("u_Material.specular", m_Specular);
 
 			for (int i = 0; i < m_Textures.size(); i++) {
 				if (m_Textures[i]) {
@@ -50,9 +50,9 @@ namespace Louron {
 		else std::cout << "[L20] Shader Not Linked to Material - Cannot Set Uniforms!" << std::endl;
 	}
 
-	void Material::setShader(Shader* shader) { m_Shader = shader; }
+	void Material::SetShader(Shader* shader) { m_Shader = shader; }
 
-	Shader* Material::getShader() { return m_Shader; }
+	Shader* Material::GetShader() { return m_Shader; }
 
 	Material::Material(Texture* texture) {
 		m_Shader = nullptr;
@@ -70,19 +70,19 @@ namespace Louron {
 			m_Textures[i] = textures[i];
 	}
 
-	float Material::getShine() { return m_Shine; }
-	glm::vec4* Material::getAmbient() { return &m_Ambient; }
-	glm::vec4* Material::getDiffuse() { return &m_Diffuse; }
-	glm::vec4* Material::getSpecular() { return &m_Specular; }
+	float Material::GetShine() { return m_Shine; }
+	glm::vec4* Material::GetAmbient() { return &m_Ambient; }
+	glm::vec4* Material::GetDiffuse() { return &m_Diffuse; }
+	glm::vec4* Material::GetSpecular() { return &m_Specular; }
 
-	void Material::setShine(float shine) { m_Shine = shine; }
-	void Material::setAmbient(const glm::vec4& val) { m_Ambient = val; }
-	void Material::setDiffuse(const glm::vec4& val) { m_Diffuse = val; }
-	void Material::setSpecular(const glm::vec4& val) { m_Specular = val; }
+	void Material::SetShine(float shine) { m_Shine = shine; }
+	void Material::SetAmbient(const glm::vec4& val) { m_Ambient = val; }
+	void Material::SetDiffuse(const glm::vec4& val) { m_Diffuse = val; }
+	void Material::SetSpecular(const glm::vec4& val) { m_Specular = val; }
 
 	void Material::AddTextureMap(GLint type, Texture* val) {
 		if (m_Shader)
-			m_Shader->setInt(std::string("u_Material." + m_TextureUniformNames[type]).c_str(), type);
+			m_Shader->SetInt(std::string("u_Material." + m_TextureUniformNames[type]).c_str(), type);
 		else
 			std::cout << "[L20] Shader Not Linked to Material - Cannot Set Texture Unit!" << std::endl;
 
@@ -96,11 +96,11 @@ namespace Louron {
 		return m_Textures[type];
 	}
 
-	void Material::setMaterialIndex(GLuint index) {
+	void Material::SetMaterialIndex(GLuint index) {
 		m_MaterialIndex = index;
 	}
 
-	GLuint Material::getMaterialIndex()
+	GLuint Material::GetMaterialIndex()
 	{
 		return m_MaterialIndex;
 	}

@@ -69,18 +69,18 @@ namespace Louron {
 	}
 	Shader::~Shader() { glDeleteProgram(m_Program); }
 
-	GLuint Shader::getProgram() { return m_Program; }
-	const std::string& Shader::getName() { return m_Name; }
-	void Shader::setName(const std::string& name) { m_Name = name; }
-	void Shader::setBool(const GLchar* name, bool value) const { glUniform1i(glGetUniformLocation(m_Program, name), (int)value); }
-	void Shader::setInt(const GLchar* name, int value) const { glUniform1i(glGetUniformLocation(m_Program, name), value); }
-	void Shader::setFloat(const GLchar* name, float value) const { glUniform1f(glGetUniformLocation(m_Program, name), value); }
-	void Shader::setVec2(const GLchar* name, const glm::vec2& value) const { glUniform2fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::setVec3(const GLchar* name, const glm::vec3& value) const { glUniform3fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::setVec4(const GLchar* name, const glm::vec4& value) const { glUniform4fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::setMat2(const GLchar* name, const glm::mat2& mat) const { glUniformMatrix2fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
-	void Shader::setMat3(const GLchar* name, const glm::mat3& mat) const { glUniformMatrix3fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
-	void Shader::setMat4(const GLchar* name, const glm::mat4& mat) const { glUniformMatrix4fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
+	GLuint Shader::GetProgram() { return m_Program; }
+	const std::string& Shader::GetName() { return m_Name; }
+	void Shader::SetName(const std::string& name) { m_Name = name; }
+	void Shader::SetBool(const GLchar* name, bool value) const { glUniform1i(glGetUniformLocation(m_Program, name), (int)value); }
+	void Shader::SetInt(const GLchar* name, int value) const { glUniform1i(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetFloat(const GLchar* name, float value) const { glUniform1f(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetVec2(const GLchar* name, const glm::vec2& value) const { glUniform2fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetVec3(const GLchar* name, const glm::vec3& value) const { glUniform3fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetVec4(const GLchar* name, const glm::vec4& value) const { glUniform4fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetMat2(const GLchar* name, const glm::mat2& mat) const { glUniformMatrix2fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
+	void Shader::SetMat3(const GLchar* name, const glm::mat3& mat) const { glUniformMatrix3fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
+	void Shader::SetMat4(const GLchar* name, const glm::mat4& mat) const { glUniformMatrix4fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
 
 	void Shader::checkCompileErrors(unsigned int shader, std::string type) {
 		int success;
@@ -108,11 +108,11 @@ namespace Louron {
 	void ShaderLibrary::UnBind() { glUseProgram(0); }
 
 	void ShaderLibrary::Add(Shader* shader) {
-		Add(shader->getName(), shader);
+		Add(shader->GetName(), shader);
 	}
 
 	void ShaderLibrary::Add(const std::string& shaderName, Shader* shader) {
-		if (shaderExists(shaderName)) {
+		if (ShaderExists(shaderName)) {
 
 			std::cout << "[L20] Shader Already Loaded! " << shaderName << std::endl;
 		}
@@ -121,27 +121,27 @@ namespace Louron {
 		}
 	}
 
-	Shader* ShaderLibrary::loadShader(const std::string& shaderFile) {
+	Shader* ShaderLibrary::LoadShader(const std::string& shaderFile) {
 		Shader* shader = new Shader(shaderFile.c_str());
 		Add(shader);
 		return shader;
 	}
 
-	Shader* ShaderLibrary::loadShader(const std::string& shaderFile, const std::string& shaderName) {
+	Shader* ShaderLibrary::LoadShader(const std::string& shaderFile, const std::string& shaderName) {
 		Shader* shader = new Shader(shaderFile.c_str());
 		Add(shaderName, shader);
 		return shader;
 	}
 
-	Shader* ShaderLibrary::getShader(const std::string& shaderName) {
-		if (!shaderExists(shaderName))
+	Shader* ShaderLibrary::GetShader(const std::string& shaderName) {
+		if (!ShaderExists(shaderName))
 			std::cout << "[L20] Shader Not Loaded! " << shaderName << std::endl;
 		else
 			return m_Shaders[shaderName];
 		return nullptr;
 	}
 
-	bool ShaderLibrary::shaderExists(const std::string& name) const {
+	bool ShaderLibrary::ShaderExists(const std::string& name) const {
 		return m_Shaders.find(name) != m_Shaders.end();
 	}
 }

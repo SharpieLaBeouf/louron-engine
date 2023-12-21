@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Main.cpp">
+    <ClCompile Include="Source\Sandbox Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Test Scene Application.cpp">
+    <ClCompile Include="source\Sandbox Layer\MainMenuLayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -58,45 +58,45 @@
     <Image Include="assets\Images\cube_texture.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="assets\Images\stone_texture_specular.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="assets\Images\stone_texture.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="assimp-vc143-mtd.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\Test Scene Application.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\MainMenu.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\Optimal Scene Setup.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\Scene 1.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 4.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\Scene 2.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 5.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\Scene 3.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 6.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\Scene 4.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 7.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\Scene 5.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 8.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\Scene 6.h">
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 9.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tests\Scene 7.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tests\Scene 8.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="tests\Scene 9.h">
+    <ClInclude Include="source\Sandbox Layer\MainMenuLayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

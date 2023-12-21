@@ -50,7 +50,7 @@ namespace Louron {
 			io.KeysDown[key] = false;
 	}
 
-	int InputManager::init(GLFWwindow* window)
+	int InputManager::Init(GLFWwindow* window)
 	{
 		glfwSetKeyCallback(window, keyCallback);
 		glfwSetMouseButtonCallback(window, mouseCallback);

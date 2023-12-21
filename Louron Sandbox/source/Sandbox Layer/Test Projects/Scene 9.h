@@ -5,39 +5,32 @@
 
 #include <imgui/imgui.h>
 
-#include "Core/InstanceManager.h"
-#include "Scene/SceneManager.h"
+#include "Louron.h"
 
-class Scene9 : public State {
+class Scene9 {
 
 	//Private Setup Variables
 private:
 
-	InstanceManager* m_InstanceManager;
+	Louron::InputManager& m_Input;
+	Louron::ShaderLibrary& m_ShaderLib;
+	Louron::TextureLibrary& m_TextureLib;
 
-	Window* m_Window;
-	InputManager* m_Input;
-	ShaderLibrary* m_ShaderLib;
-	TextureLibrary* m_TextureLib;
+	Louron::Material* phong_cube_mat = nullptr;
+	Louron::Light light_properties;
 
-	Material* phong_cube_mat = nullptr;
-	Light light_properties;
-
-	Camera* scnCamera;
+	Louron::Camera* scnCamera;
 
 public:
 
-	explicit Scene9(InstanceManager* instanceManager) : m_InstanceManager(instanceManager) {
+	 Scene9() :
+		 m_Input(Louron::Engine::Get().GetInput()),
+		 m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
+		 m_TextureLib(Louron::Engine::Get().GetTextureLibrary()) 
+	 {
 		std::cout << "[L20] Opening Scene 9..." << std::endl;
-		m_Window = m_InstanceManager->getWindowInstance();
-		m_Input = m_InstanceManager->getInputInstance();
-		m_ShaderLib = m_InstanceManager->getShaderLibInstance();
-		m_TextureLib = m_InstanceManager->getTextureLibInstance();
 
 		{
-			glEnable(GL_DEPTH_TEST);
-			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
 			// Init Cube VAO
 			glGenVertexArrays(1, &cube_VAO);
 			glGenBuffers(1, &cube_VBO);
@@ -64,21 +57,26 @@ public:
 			glBindVertexArray(0);
 		}
 		
-		scnCamera = new Camera(m_Window, glm::vec3(0.0f, 10.0f, 0.0f));
+		scnCamera = new Louron::Camera(glm::vec3(0.0f, 10.0f, 0.0f));
 		scnCamera->setPitch(-90.0f);
 		scnCamera->setYaw(-180.0f);
 		scnCamera->toggleMovement();
 		light_properties.position = scnCamera->getPosition();
+
+		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
+
+		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
+		m_TextureLib.loadTexture("assets/Images/cube_texture_specular.png");
 			
-		phong_cube_mat = new Material(m_ShaderLib->getShader("material_shader_phong"), m_TextureLib->getTexture("blank_texture"));
+		phong_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("blank_texture"));
 		phong_cube_mat->Bind();
-		phong_cube_mat->setDiffuse(glm::vec4(1.0f));
-		phong_cube_mat->AddTextureMap(TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib->getTexture("cube_texture"));
-		phong_cube_mat->AddTextureMap(TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib->getTexture("cube_texture_specular"));
+		phong_cube_mat->SetDiffuse(glm::vec4(1.0f));
+		phong_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("cube_texture"));
+		phong_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("cube_texture_specular"));
 		phong_cube_mat->UnBind();
 	}
 
-	~Scene9() override {
+	~Scene9() {
 		std::cout << "[L20] Closing Scene 9..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -91,7 +89,7 @@ public:
 		delete scnCamera;
 	}
 
-	void update() override {
+	void Update() {
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
@@ -99,24 +97,71 @@ public:
 
 		if (!gameover)
 		{
-			if (m_Input->GetKey(GLFW_KEY_W))
+			if (m_Input.GetKey(GLFW_KEY_W))
 				cube1_position.x += deltaTime * 2.0f;
-			if (m_Input->GetKey(GLFW_KEY_S))
+			if (m_Input.GetKey(GLFW_KEY_S))
 				cube1_position.x -= deltaTime;
-			if (m_Input->GetKey(GLFW_KEY_D))
+			if (m_Input.GetKey(GLFW_KEY_D))
 				cube1_position.z += deltaTime;
-			if (m_Input->GetKey(GLFW_KEY_A))
+			if (m_Input.GetKey(GLFW_KEY_A))
 				cube1_position.z -= deltaTime;
 
-			if (m_Input->GetKey(GLFW_KEY_UP))
+			if (m_Input.GetKey(GLFW_KEY_UP))
 				cube2_position.x += deltaTime * 2.0f;
-			if (m_Input->GetKey(GLFW_KEY_DOWN))
+			if (m_Input.GetKey(GLFW_KEY_DOWN))
 				cube2_position.x -= deltaTime;
-			if (m_Input->GetKey(GLFW_KEY_RIGHT))
+			if (m_Input.GetKey(GLFW_KEY_RIGHT))
 				cube2_position.z += deltaTime;
-			if (m_Input->GetKey(GLFW_KEY_LEFT))
+			if (m_Input.GetKey(GLFW_KEY_LEFT))
 				cube2_position.z -= deltaTime;
 		}
+
+		Draw();
+	}
+
+	void UpdateGUI() {
+
+		static bool wireFrame = false;
+
+		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
+
+		ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
+		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
+		ImGui::SetWindowSize(ImVec2(300.0f, 400.0f));
+
+		ImGui::Text("F11 = Toggle Fullscreen");
+		ImGui::Checkbox("Wireframe Mode", &wireFrame);
+
+		if (!wireFrame)
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		else
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		ImGui::Separator();
+
+		if (ImGui::TreeNode("Phong Cube Material"))
+		{
+			ImGui::ColorEdit4("Ambient", glm::value_ptr(*phong_cube_mat->GetAmbient()));
+			ImGui::ColorEdit4("Diffuse", glm::value_ptr(*phong_cube_mat->GetDiffuse()));
+			ImGui::ColorEdit4("Specular", glm::value_ptr(*phong_cube_mat->GetSpecular()));
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("Light Properties"))
+		{
+			ImGui::DragFloat3("Position", glm::value_ptr(light_properties.position), 0.1f);
+			ImGui::ColorEdit4("Ambient", glm::value_ptr(light_properties.ambient));
+			ImGui::ColorEdit4("Diffuse", glm::value_ptr(light_properties.diffuse));
+			ImGui::ColorEdit4("Specular", glm::value_ptr(light_properties.specular));
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("Colours"))
+		{
+			ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
+			ImGui::TreePop();
+		}
+		ImGui::End();
 
 		if (cube1_position.x > 5.5f)
 			gameOverGUI(1);
@@ -124,36 +169,40 @@ public:
 			gameOverGUI(2);
 	}
 
-	void draw() override {
+private:
+
+	void Draw() {
+
+		glEnable(GL_DEPTH_TEST);
+		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 
 		if (phong_cube_mat->Bind()) {
 			glBindVertexArray(cube_VAO);
 
-			phong_cube_mat->setUniforms();
-			phong_cube_mat->getShader()->setMat4("model", glm::translate(glm::mat4(1.0f), cube1_position));
-			phong_cube_mat->getShader()->setMat4("proj", glm::perspective(glm::radians(60.0f), m_Window->getWidth() / m_Window->getHeight(), 0.1f, 100.0f));
-			phong_cube_mat->getShader()->setMat4("view", scnCamera->getViewMatrix());
-			phong_cube_mat->getShader()->setVec3("u_Light.position", light_properties.position);
-			phong_cube_mat->getShader()->setVec4("u_Light.ambient", light_properties.ambient);
-			phong_cube_mat->getShader()->setVec4("u_Light.diffuse", light_properties.diffuse);
-			phong_cube_mat->getShader()->setVec4("u_Light.specular", light_properties.specular);
-			phong_cube_mat->getShader()->setVec3("u_CameraPos", scnCamera->getPosition());
+			phong_cube_mat->SetUniforms();
+			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube1_position));
+			phong_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
+			phong_cube_mat->GetShader()->SetMat4("view", scnCamera->getViewMatrix());
+			phong_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
+			phong_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
+			phong_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
+			phong_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
+			phong_cube_mat->GetShader()->SetVec3("u_CameraPos", scnCamera->getPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-			phong_cube_mat->getShader()->setMat4("model", glm::translate(glm::mat4(1.0f), cube2_position));
+			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube2_position));
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 			phong_cube_mat->UnBind();
 		}
 
-		processGUI();
+		glDisable(GL_DEPTH_TEST);
 	}
-
-private:
+	
 	void TextCentered(std::string text) {
 		auto windowWidth = ImGui::GetWindowSize().x;
 		auto textWidth = ImGui::CalcTextSize(text.c_str()).x;
@@ -188,54 +237,6 @@ private:
 
 	}
 
-	void processGUI() {
-
-		static bool wireFrame = false;
-
-		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
-
-		ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
-		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
-		ImGui::SetWindowSize(ImVec2(300.0f, 400.0f));
-
-		ImGui::Text("F11 = Toggle Fullscreen");
-		ImGui::Checkbox("Wireframe Mode", &wireFrame);
-		
-		if (!wireFrame)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		else
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-		ImGui::Separator();
-
-		if (ImGui::TreeNode("Phong Cube Material"))
-		{
-			ImGui::ColorEdit4("Ambient", glm::value_ptr(*phong_cube_mat->getAmbient()));
-			ImGui::ColorEdit4("Diffuse", glm::value_ptr(*phong_cube_mat->getDiffuse()));
-			ImGui::ColorEdit4("Specular", glm::value_ptr(*phong_cube_mat->getSpecular()));
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Light Properties"))
-		{
-			ImGui::DragFloat3("Position", glm::value_ptr(light_properties.position), 0.1f);
-			ImGui::ColorEdit4("Ambient", glm::value_ptr(light_properties.ambient));
-			ImGui::ColorEdit4("Diffuse", glm::value_ptr(light_properties.diffuse));
-			ImGui::ColorEdit4("Specular", glm::value_ptr(light_properties.specular));
-			ImGui::TreePop();
-		}
-
-		if (ImGui::TreeNode("Colours"))
-		{
-			ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
-			ImGui::TreePop();
-		}
-
-		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
-
-		ImGui::End();
-
-	}
 
 	glm::vec4 back_colour = { 0.3137f, 0.7843f, 1.0f, 1.0f };
 	glm::vec4 cube_colour = { 1.0f, 1.0f, 1.0f, 1.0f };

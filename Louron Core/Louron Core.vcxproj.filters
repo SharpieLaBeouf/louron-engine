@@ -99,16 +99,10 @@
     <ClCompile Include="include\imgui\imgui_widgets.cpp">
       <Filter>Vendor\ImGUI</Filter>
     </ClCompile>
-    <ClCompile Include="src\Engine Manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Core\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\LayerStack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Core\EngineStart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\GuiLayer.cpp">
@@ -458,9 +452,6 @@
     <ClInclude Include="include\imgui\imstb_truetype.h">
       <Filter>Vendor\ImGUI</Filter>
     </ClInclude>
-    <ClInclude Include="src\Engine Manager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Core\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -472,6 +463,12 @@
     </ClInclude>
     <ClInclude Include="src\Core\GuiLayer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Louron.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\EngineStart.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

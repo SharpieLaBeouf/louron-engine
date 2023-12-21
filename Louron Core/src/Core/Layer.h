@@ -5,7 +5,7 @@ namespace Louron {
 
 	class Layer {
 	public:
-		Layer(const std::string& layerName = "Generic Layer");
+		Layer(const std::string& layerName = "Generic Layer") { }
 		virtual ~Layer() = default;
 
 		virtual void OnAttach() {}

@@ -14,9 +14,9 @@ namespace Louron {
 
 	public:
 
-		InputManager() { }
+		InputManager() = default;
 
-		int init(GLFWwindow* window);
+		int Init(GLFWwindow* window);
 
 		bool GetKey(int glfwKeyCode);
 		bool GetKeyDown(int glfwKeyCode);

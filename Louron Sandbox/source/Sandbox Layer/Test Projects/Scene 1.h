@@ -1,25 +1,21 @@
 #pragma once
 
-#include <iostream>
 #include <stack>
+#include <iostream>
 
 #include <imgui/imgui.h>
 
-#include "Core/Input.h"
-#include "Core/InstanceManager.h"
-#include "OpenGL/Shader.h"
+#include "Louron.h"
 
-class Scene1 : public State {
+class Scene1 {
 
 private:
 
-	InstanceManager* m_InstanceManager;
+	Louron::InputManager& m_Input;
+	Louron::ShaderLibrary& m_ShaderLib;
 
-	InputManager* m_Input;
-	ShaderLibrary* m_ShaderLib;
-
-	glm::vec4 back_colour = glm::vec4( 0.75f, 0.90f, 1.0f, 1.0f );
-	glm::vec4 fore_colour = glm::vec4( 1.00f, 0.65f, 1.0f, 1.0f );
+	glm::vec4 back_colour = glm::vec4(0.75f, 0.90f, 1.0f, 1.0f);
+	glm::vec4 fore_colour = glm::vec4(1.00f, 0.65f, 1.0f, 1.0f);
 
 	unsigned int triangleVAO = NULL;
 	unsigned int triangleVBO = NULL;
@@ -37,18 +33,14 @@ private:
 
 public:
 
-	Scene1(InstanceManager* instanceManager)
-		: m_InstanceManager(instanceManager)
-	{
+	Scene1() : m_Input(Louron::Engine::Get().GetInput()), m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()) {
 		std::cout << "[L20] Opening Scene 1..." << std::endl;
-		m_Input = m_InstanceManager->getInputInstance();
-		m_ShaderLib = m_InstanceManager->getShaderLibInstance();
-			
+
 		glGenVertexArrays(1, &triangleVAO);
 		glGenBuffers(1, &triangleVBO);
 		glGenBuffers(1, &triangleEBO);
 		glBindVertexArray(triangleVAO);
-			
+
 		glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertices), triangle_vertices, GL_STATIC_DRAW);
 
@@ -60,49 +52,27 @@ public:
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
-			
+
+		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic.glsl");
+
 	}
-	~Scene1() override
-	{
+	~Scene1() {
 		std::cout << "[L20] Closing Scene 1..." << std::endl;
 		glDeleteVertexArrays(1, &triangleVAO);
 		glDeleteBuffers(1, &triangleVBO);
 		glDeleteBuffers(1, &triangleEBO);
 	}
 
-	void update() override {
-		if (m_Input->GetKeyDown(GLFW_KEY_F))
+	void Update() {
+		if (m_Input.GetKeyDown(GLFW_KEY_F))
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		else if (m_Input->GetKeyDown(GLFW_KEY_W))
+		else if (m_Input.GetKeyDown(GLFW_KEY_W))
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		Draw();
 	}
 
-
-	void draw() override {
-			
-		processGUI();
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		Shader* shader = m_ShaderLib->getShader("basic");
-		if (shader)
-		{
-			glBindVertexArray(triangleVAO);
-
-			shader->Bind();
-			shader->setMat4("model", glm::mat4(1.0f));
-			shader->setMat4("proj", glm::mat4(1.0f));
-			shader->setMat4("view", glm::mat4(1.0f));
-			shader->setVec4("ourColour", fore_colour);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		}
-
-		shader->UnBind();
-	}
-
-private:
-
-
-	void processGUI() {
+	void UpdateGUI() {
 
 		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 		ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
@@ -113,17 +83,37 @@ private:
 
 		static bool wireFrame = false;
 		ImGui::Checkbox("Wireframe Mode", &wireFrame);
-		if (!wireFrame) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); else glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+		wireFrame ? glPolygonMode(GL_FRONT_AND_BACK, GL_LINE) : glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		ImGui::Separator();
 
 		ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
 		ImGui::ColorPicker4("Triangles", glm::value_ptr(fore_colour));
 
-		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 
 		ImGui::End();
 	}
-	
-	
+
+private:
+	void Draw() {
+		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		Louron::Shader* shader = m_ShaderLib.GetShader("basic");
+		if (shader)
+		{
+			glBindVertexArray(triangleVAO);
+
+			shader->Bind();
+			shader->SetMat4("model", glm::mat4(1.0f));
+			shader->SetMat4("proj", glm::mat4(1.0f));
+			shader->SetMat4("view", glm::mat4(1.0f));
+			shader->SetVec4("ourColour", fore_colour);
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		}
+
+		shader->UnBind();
+	}
+
 };

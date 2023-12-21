@@ -48,7 +48,7 @@ namespace Louron {
 		Texture* loadTexture(const std::string& textureFile);
 		Texture* loadTexture(const std::string& textureFile, const std::string& textureName);
 
-		Texture* getTexture(const std::string& textureName);
+		Texture* GetTexture(const std::string& textureName);
 
 		bool textureExists(const std::string& name) const;
 	};

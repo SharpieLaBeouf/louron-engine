@@ -122,7 +122,7 @@ namespace Louron {
 
 		if (textureExists(texture_name)) {
 			std::cout << "[L20] Texture Already Loaded: " << texture_name << std::endl;
-			return getTexture(texture_name);
+			return GetTexture(texture_name);
 		}
 
 		Texture* texture = new Texture(textureFile.c_str());
@@ -134,7 +134,7 @@ namespace Louron {
 
 		if (textureExists(textureName)) {
 			std::cout << "[L20] Texture Already Loaded: " << textureName << std::endl;
-			return getTexture(textureName);
+			return GetTexture(textureName);
 		}
 
 		Texture* texture = new Texture(textureFile.c_str());
@@ -142,7 +142,7 @@ namespace Louron {
 		return texture;
 	}
 
-	Texture* TextureLibrary::getTexture(const std::string& textureName) {
+	Texture* TextureLibrary::GetTexture(const std::string& textureName) {
 		if (!textureExists(textureName))
 			std::cout << "[L20] Texture Not Loaded! " << textureName << std::endl;
 		else

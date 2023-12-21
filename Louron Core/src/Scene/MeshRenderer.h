@@ -25,7 +25,7 @@ namespace Louron {
 	public:
 
 
-		MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
+		MeshFilter(Window& wnd, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
 		~MeshFilter() { delete m_VAO; }
 
 		/// <summary>
@@ -48,6 +48,7 @@ namespace Louron {
 
 		// OpenGL Data References
 		VertexArray* m_VAO = nullptr;
+		Window& m_Window;
 	};
 
 	class MeshRendererComponent {
