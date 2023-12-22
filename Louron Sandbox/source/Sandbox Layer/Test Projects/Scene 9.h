@@ -17,6 +17,7 @@ private:
 	Louron::ShaderLibrary& m_ShaderLib;
 	Louron::TextureLibrary& m_TextureLib;
 
+	Louron::Material* flat_cube_mat = nullptr;
 	Louron::Material* phong_cube_mat = nullptr;
 	Louron::Light light_properties;
 
@@ -62,13 +63,17 @@ public:
 		scnCamera->setPitch(-90.0f);
 		scnCamera->setYaw(-180.0f);
 		scnCamera->toggleMovement();
-		light_properties.position = scnCamera->getPosition();
+		light_properties.position = { 0.0f, 5.0f, 0.0f };
 
+		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_flat.glsl");
 		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
 
 		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
 		m_TextureLib.loadTexture("assets/Images/cube_texture_specular.png");
 			
+		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("blank_texture"));
+		flat_cube_mat->Bind();
+
 		phong_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("blank_texture"));
 		phong_cube_mat->Bind();
 		phong_cube_mat->SetDiffuse(glm::vec4(1.0f));
@@ -101,22 +106,27 @@ public:
 			if (m_Input.GetKey(GLFW_KEY_W))
 				cube1_position.x += deltaTime * 2.0f;
 			if (m_Input.GetKey(GLFW_KEY_S))
-				cube1_position.x -= deltaTime;
+				cube1_position.x -= deltaTime * 2.0f;
 			if (m_Input.GetKey(GLFW_KEY_D))
-				cube1_position.z += deltaTime;
+				cube1_position.z += deltaTime * 2.0f;
 			if (m_Input.GetKey(GLFW_KEY_A))
-				cube1_position.z -= deltaTime;
+				cube1_position.z -= deltaTime * 2.0f;
 
 			if (m_Input.GetKey(GLFW_KEY_UP))
 				cube2_position.x += deltaTime * 2.0f;
 			if (m_Input.GetKey(GLFW_KEY_DOWN))
-				cube2_position.x -= deltaTime;
+				cube2_position.x -= deltaTime * 2.0f;
 			if (m_Input.GetKey(GLFW_KEY_RIGHT))
-				cube2_position.z += deltaTime;
+				cube2_position.z += deltaTime * 2.0f;
 			if (m_Input.GetKey(GLFW_KEY_LEFT))
-				cube2_position.z -= deltaTime;
+				cube2_position.z -= deltaTime * 2.0f;
 		}
-		
+
+		if (m_Input.GetMouseButton(GLFW_MOUSE_BUTTON_1)) 
+			light_properties.position = mouseToWorld(5.0f);
+
+		flat_cube_mat->SetDiffuse(light_properties.specular);
+
 		Draw();
 	}
 
@@ -172,19 +182,67 @@ public:
 
 private:
 
+	glm::vec3 mouseToWorld(float customIntersectionY) {
+
+		float windowWidth = static_cast<float>(Louron::Engine::Get().GetWindow().GetWidth());
+		float windowHeight = static_cast<float>(Louron::Engine::Get().GetWindow().GetHeight());
+
+		// 1. Normalise the mouse position (Screen Space -> Clip Space)
+		float xViewport = (2.0f * m_Input.GetMouseX()) / windowWidth - 1.0f;
+		float yViewport = 1.0f - (2.0f * m_Input.GetMouseY()) / windowHeight;
+
+		// 2. Calculate the inverse of the projection matrix (Clip Space -> View Space)
+		glm::mat4 invProjection = glm::inverse(glm::perspective(glm::radians(60.0f), windowWidth / windowHeight, 0.1f, 100.0f));
+
+		// 3. Transform the coordinates to eye space (Coordinate of Mouse X & Y on View Space)
+		glm::vec4 rayEye = invProjection * glm::vec4(xViewport, yViewport, -1.0f, 1.0f);
+		rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+		// 4. Calculate the inverse of the view matrix (View Space -> World Space)
+		glm::mat4 invView = glm::inverse(scnCamera->getViewMatrix());
+
+		// 5. Transform the ray to world coordinates and normalize it (Start Position of Ray in World Space)
+		glm::vec4 rayWorld = invView * rayEye;
+		rayWorld = glm::normalize(glm::vec4(rayWorld.x, rayWorld.y, rayWorld.z, 0.0f));
+
+		// 6. Calculate the intersection point in world coordinates (Cast Ray and Calculate Position at Custom Intersection on the Y Axis)
+		float t = (customIntersectionY - scnCamera->getPosition().y) / rayWorld.y;
+		glm::vec3 intersectionPoint = scnCamera->getPosition() + glm::vec3(rayWorld * t);
+
+		// 7. Return World Position Where Ray Hits Y Axis Intersection
+		return intersectionPoint;
+	}
+
+	glm::vec3 lightScale = { 0.3f, 0.3f, 0.3f };
+
 	void Draw() override {
 
 		glEnable(GL_DEPTH_TEST);
-
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		glBindVertexArray(cube_VAO);
+
+		glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f);
+		
+		// Render Light
+		if (flat_cube_mat->Bind())
+		{
+			flat_cube_mat->SetUniforms();
+			flat_cube_mat->GetShader()->SetMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), light_properties.position), lightScale));
+			flat_cube_mat->GetShader()->SetMat4("proj", proj);
+			flat_cube_mat->GetShader()->SetMat4("view", scnCamera->getViewMatrix());
+
+			// Light Render
+			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+			flat_cube_mat->UnBind();
+		}
+
+		// Render Players
 		if (phong_cube_mat->Bind()) {
-			glBindVertexArray(cube_VAO);
 
 			phong_cube_mat->SetUniforms();
-			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube1_position));
-			phong_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
+			phong_cube_mat->GetShader()->SetMat4("proj", proj);
 			phong_cube_mat->GetShader()->SetMat4("view", scnCamera->getViewMatrix());
 			phong_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
@@ -192,8 +250,11 @@ private:
 			phong_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
 			phong_cube_mat->GetShader()->SetVec3("u_CameraPos", scnCamera->getPosition());
 
+			// Player 1 Render
+			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube1_position));
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
+			// Player 2 Render
 			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube2_position));
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
