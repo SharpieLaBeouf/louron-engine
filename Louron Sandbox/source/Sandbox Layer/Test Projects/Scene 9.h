@@ -218,8 +218,8 @@ private:
 	void Draw() override {
 
 		glEnable(GL_DEPTH_TEST);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glBindVertexArray(cube_VAO);
 
@@ -238,7 +238,6 @@ private:
 			flat_cube_mat->UnBind();
 		}
 
-		// Render Players
 		if (phong_cube_mat->Bind()) {
 
 			phong_cube_mat->SetUniforms();
