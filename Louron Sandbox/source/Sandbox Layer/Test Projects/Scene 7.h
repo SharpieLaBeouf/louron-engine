@@ -6,8 +6,9 @@
 #include <imgui/imgui.h>
 
 #include "Louron.h"
+#include "Test Scene Base.h"
 
-class Scene7 {
+class Scene7 : public Scene {
 
 	//Private Setup Variables
 private:
@@ -45,14 +46,14 @@ public:
 		monkey->loadModel("assets/Models/Monkey/Monkey.fbx", "material_shader_phong");
 	}
 
-	~Scene7()
+	~Scene7() override
 	{
 		std::cout << "[L20] Closing Scene 7..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 
-	void Update() {
+	void Update() override {
 
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
@@ -65,7 +66,7 @@ public:
 		Draw();
 	}
 
-	void UpdateGUI() {
+	void UpdateGUI() override {
 
 		static bool wireFrame = false;
 
@@ -92,7 +93,7 @@ public:
 
 private:
 
-	void Draw() {
+	void Draw() override {
 
 		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

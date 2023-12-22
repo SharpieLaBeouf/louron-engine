@@ -6,8 +6,9 @@
 #include <imgui/imgui.h>
 
 #include "Louron.h"
+#include "Test Scene Base.h"
 
-class Scene9 {
+class Scene9 : public Scene {
 
 	//Private Setup Variables
 private:
@@ -76,7 +77,7 @@ public:
 		phong_cube_mat->UnBind();
 	}
 
-	~Scene9() {
+	~Scene9() override {
 		std::cout << "[L20] Closing Scene 9..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
@@ -89,7 +90,7 @@ public:
 		delete scnCamera;
 	}
 
-	void Update() {
+	void Update() override {
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
@@ -115,11 +116,11 @@ public:
 			if (m_Input.GetKey(GLFW_KEY_LEFT))
 				cube2_position.z -= deltaTime;
 		}
-
+		
 		Draw();
 	}
 
-	void UpdateGUI() {
+	void UpdateGUI() override {
 
 		static bool wireFrame = false;
 
@@ -171,10 +172,9 @@ public:
 
 private:
 
-	void Draw() {
+	void Draw() override {
 
 		glEnable(GL_DEPTH_TEST);
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);

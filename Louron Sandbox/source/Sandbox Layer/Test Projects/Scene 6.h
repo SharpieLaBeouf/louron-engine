@@ -6,8 +6,9 @@
 #include <imgui/imgui.h>
 
 #include "Louron.h"
+#include "Test Scene Base.h"
 
-class Scene6 {
+class Scene6 : public Scene {
 
 	//Private Setup Variables
 private:
@@ -91,7 +92,7 @@ public:
 		light_properties.position.z = -3.5f;	
 	}
 
-	~Scene6()
+	~Scene6() override
 	{
 		std::cout << "[L20] Closing Scene 6..." << std::endl;
 
@@ -104,7 +105,7 @@ public:
 		delete scnCamera;
 	}
 
-	void Update() {
+	void Update() override {
 
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
@@ -115,7 +116,7 @@ public:
 		Draw();
 	}
 
-	void UpdateGUI() {
+	void UpdateGUI() override {
 
 		static bool wireFrame = false;
 
@@ -175,7 +176,7 @@ public:
 
 private:
 
-	void Draw() {
+	void Draw() override {
 
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);

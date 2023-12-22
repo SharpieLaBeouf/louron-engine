@@ -5,15 +5,15 @@ MainMenuLayer::MainMenuLayer() {
 }
 
 void MainMenuLayer::OnAttach() {
-	scene1 = std::make_unique<Scene1>();
-	scene2 = std::make_unique<Scene2>();
-	scene3 = std::make_unique<Scene3>();
-	scene4 = std::make_unique<Scene4>();
-	scene5 = std::make_unique<Scene5>();
-	scene6 = std::make_unique<Scene6>();
-	scene7 = std::make_unique<Scene7>();
-	scene8 = std::make_unique<Scene8>();
-	scene9 = std::make_unique<Scene9>();
+	m_Scenes.push_back(std::make_unique<Scene1>());
+	m_Scenes.push_back(std::make_unique<Scene2>());
+	m_Scenes.push_back(std::make_unique<Scene3>());
+	m_Scenes.push_back(std::make_unique<Scene4>());
+	m_Scenes.push_back(std::make_unique<Scene5>());
+	m_Scenes.push_back(std::make_unique<Scene6>());
+	m_Scenes.push_back(std::make_unique<Scene7>());
+	m_Scenes.push_back(std::make_unique<Scene8>());
+	m_Scenes.push_back(std::make_unique<Scene9>());
 
 	Louron::Engine::Get().GetWindow().SetVSync(true);
 }
@@ -30,18 +30,10 @@ void MainMenuLayer::OnUpdate() {
 
 	switch (m_SceneSelector) {
 		default:
-			//TODO: Implement Project Scene Updates here
+			if (m_Scenes[m_SceneSelector-1] != nullptr)
+				m_Scenes[m_SceneSelector-1]->Update();
+			else std::cout << "[L20] This Scene is NULL!" << std::endl;
 		break;
-
-		case 1: scene1->Update(); break;
-		case 2: scene2->Update(); break;
-		case 3: scene3->Update(); break;
-		case 4: scene4->Update(); break;
-		case 5: scene5->Update(); break;
-		case 6: scene6->Update(); break;
-		case 7: scene7->Update(); break;
-		case 8: scene8->Update(); break;
-		case 9: scene9->Update(); break;
 
 		case 0:
 			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
@@ -112,29 +104,23 @@ void MainMenuLayer::OnGuiRender() {
 			ImGui::End();
 		}break;
 
-		case 1: scene1->UpdateGUI(); break;
-		case 2: scene2->UpdateGUI(); break;
-		case 3: scene3->UpdateGUI(); break;
-		case 4: scene4->UpdateGUI(); break;
-		case 5: scene5->UpdateGUI(); break;
-		case 6: scene6->UpdateGUI(); break;
-		case 7: scene7->UpdateGUI(); break;
-		case 8: scene8->UpdateGUI(); break;
-		case 9: scene9->UpdateGUI(); break;
-
-		default: {
-			ImGui::SetNextWindowBgAlpha(1.0f);
-			if (ImGui::Begin("Main Menu", (bool*)0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove))
-			{
-				glm::vec2 menuSize = { 600.0f, 400.0f };
-				ImGui::SetWindowSize(ImVec2(menuSize.x, menuSize.y), ImGuiCond_Always);
-				ImGui::SetWindowPos(ImVec2(io.DisplaySize.x / 2 - menuSize.x / 2, io.DisplaySize.y / 2 - menuSize.y / 2), ImGuiCond_Always);
+		default: 
+			if(m_Scenes[m_SceneSelector-1] != nullptr)
+				m_Scenes[m_SceneSelector-1]->UpdateGUI();
+			else {
+				ImGui::SetNextWindowBgAlpha(1.0f);
+				if (ImGui::Begin("Main Menu", (bool*)0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove))
+				{
+					glm::vec2 menuSize = { 600.0f, 400.0f };
+					ImGui::SetWindowSize(ImVec2(menuSize.x, menuSize.y), ImGuiCond_Always);
+					ImGui::SetWindowPos(ImVec2(io.DisplaySize.x / 2 - menuSize.x / 2, io.DisplaySize.y / 2 - menuSize.y / 2), ImGuiCond_Always);
 				
-				ImGui::Text(std::string("SCENE: " + std::to_string(m_SceneSelector)).c_str());
-				if (ImGui::Button("Return")) m_SceneSelector = 0;
+					ImGui::Text("This Scene is NULL!");
+					if (ImGui::Button("Return")) m_SceneSelector = 0;
+				}
+				ImGui::End();
 			}
-			ImGui::End();
-		}break;
+		break;
 
 	}
 
