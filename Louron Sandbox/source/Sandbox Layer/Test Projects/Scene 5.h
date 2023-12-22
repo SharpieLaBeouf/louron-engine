@@ -6,8 +6,9 @@
 #include <imgui/imgui.h>
 
 #include "Louron.h"
+#include "Test Scene Base.h"
 
-class Scene5  {
+class Scene5 : public Scene {
 
 	//Private Setup Variables
 private:
@@ -125,7 +126,7 @@ public:
 		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic_phong.glsl");
 					
 	}
-	~Scene5()
+	~Scene5() override
 	{
 		std::cout << "[L20] Closing Scene 5..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
@@ -142,7 +143,7 @@ public:
 public:
 
 
-	void Update() {
+	void Update() override {
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
@@ -160,7 +161,7 @@ public:
 
 		Draw();
 	}
-	void UpdateGUI() {
+	void UpdateGUI() override {
 
 		static bool wireFrame = false;
 
@@ -217,7 +218,7 @@ private:
 
 private:
 
-	void Draw() {
+	void Draw() override {
 
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);

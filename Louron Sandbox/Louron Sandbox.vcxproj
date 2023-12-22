@@ -211,6 +211,7 @@
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 7.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 8.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 9.h" />
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Test Scene Base.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

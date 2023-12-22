@@ -6,8 +6,9 @@
 #include <imgui/imgui.h>
 
 #include "Louron.h"
+#include "Test Scene Base.h"
 
-class Scene1 {
+class Scene1 : public Scene {
 
 private:
 
@@ -56,14 +57,14 @@ public:
 		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic.glsl");
 
 	}
-	~Scene1() {
+	~Scene1() override {
 		std::cout << "[L20] Closing Scene 1..." << std::endl;
 		glDeleteVertexArrays(1, &triangleVAO);
 		glDeleteBuffers(1, &triangleVBO);
 		glDeleteBuffers(1, &triangleEBO);
 	}
 
-	void Update() {
+	void Update() override {
 		if (m_Input.GetKeyDown(GLFW_KEY_F))
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		else if (m_Input.GetKeyDown(GLFW_KEY_W))
@@ -72,7 +73,7 @@ public:
 		Draw();
 	}
 
-	void UpdateGUI() {
+	void UpdateGUI() override {
 
 		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 		ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
@@ -96,7 +97,7 @@ public:
 	}
 
 private:
-	void Draw() {
+	void Draw() override {
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 		glClear(GL_COLOR_BUFFER_BIT);
 

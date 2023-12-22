@@ -29,13 +29,5 @@ public:
 
 private:
 	int m_SceneSelector = 0;
-	std::unique_ptr<Scene1> scene1;
-	std::unique_ptr<Scene2> scene2;
-	std::unique_ptr<Scene3> scene3;
-	std::unique_ptr<Scene4> scene4;
-	std::unique_ptr<Scene5> scene5;
-	std::unique_ptr<Scene6> scene6;
-	std::unique_ptr<Scene7> scene7;
-	std::unique_ptr<Scene8> scene8;
-	std::unique_ptr<Scene9> scene9;
+	std::vector<std::unique_ptr<Scene>> m_Scenes;
 };

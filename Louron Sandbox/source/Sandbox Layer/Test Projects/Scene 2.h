@@ -6,8 +6,9 @@
 #include <imgui/imgui.h>
 
 #include "Louron.h"
+#include "Test Scene Base.h"
 
-class Scene2 {
+class Scene2 : public Scene {
 
 //Private Setup Variables
 private:
@@ -51,7 +52,7 @@ public:
 
 		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
 	}
-	~Scene2()
+	~Scene2() override
 	{
 		std::cout << "[L20] Closing Scene 2..." << std::endl;
 		glDeleteVertexArrays(1, &VAO);
@@ -75,14 +76,14 @@ private:
 //Public Functions
 public:
 
-	void Update() {
+	void Update() override {
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
 		Draw();
 	}
-	void UpdateGUI() {
+	void UpdateGUI() override {
 
 		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 
@@ -112,7 +113,7 @@ public:
 
 private:
 
-	void Draw() {
+	void Draw() override {
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 		glClear(GL_COLOR_BUFFER_BIT);
 

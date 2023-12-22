@@ -6,8 +6,9 @@
 #include <imgui/imgui.h>
 
 #include "Louron.h"
+#include "Test Scene Base.h"
 
-class Scene3 {
+class Scene3 : public Scene {
 
 private:
 
@@ -51,7 +52,7 @@ public:
 
 		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
 	}
-	~Scene3()
+	~Scene3() override
 	{
 		std::cout << "[L20] Closing Scene 3..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
@@ -76,7 +77,7 @@ private:
 	//Public Functions
 public:
 
-	void Update() {
+	void Update() override {
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
@@ -84,7 +85,7 @@ public:
 		Draw();
 	}
 
-	void UpdateGUI() {
+	void UpdateGUI() override {
 
 		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 
@@ -115,7 +116,7 @@ public:
 	//Private Functions
 private:
 
-	void Draw() {
+	void Draw() override {
 
 		glEnable(GL_DEPTH_TEST);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
