@@ -21,7 +21,7 @@ private:
 	Louron::Material* phong_cube_mat = nullptr;
 	Louron::Light light_properties;
 
-	Louron::Camera* scnCamera;
+	Louron::Camera* m_SceneCamera;
 
 public:
 
@@ -59,10 +59,10 @@ public:
 			glBindVertexArray(0);
 		}
 		
-		scnCamera = new Louron::Camera(glm::vec3(0.0f, 10.0f, 0.0f));
-		scnCamera->setPitch(-90.0f);
-		scnCamera->setYaw(-180.0f);
-		scnCamera->toggleMovement();
+		m_SceneCamera = new Louron::Camera(glm::vec3(0.0f, 10.0f, 0.0f));
+		m_SceneCamera->setPitch(-90.0f);
+		m_SceneCamera->setYaw(-180.0f);
+		m_SceneCamera->toggleMovement();
 		light_properties.position = { 0.0f, 5.0f, 0.0f };
 
 		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_flat.glsl");
@@ -91,15 +91,16 @@ public:
 		glDeleteBuffers(1, &cube_VBO);
 		glDeleteBuffers(1, &cube_EBO);
 
+		delete flat_cube_mat;
 		delete phong_cube_mat;
-		delete scnCamera;
+		delete m_SceneCamera;
 	}
 
 	void Update() override {
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
-		scnCamera->Update(deltaTime);
+		m_SceneCamera->Update(deltaTime);
 
 		if (!gameover)
 		{
@@ -133,6 +134,16 @@ public:
 	void UpdateGUI() override {
 
 		static bool wireFrame = false;
+
+		ImGui::Begin("Game Rules", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoTitleBar |ImGuiWindowFlags_NoCollapse );
+
+		float gameRulesWidth = 300.0f;
+		ImGui::SetWindowPos(ImVec2(Louron::Engine::Get().GetWindow().GetWidth() / 2 - gameRulesWidth / 2, 10.0f));
+		ImGui::SetWindowSize(ImVec2(gameRulesWidth, 10.0f));
+
+		TextCentered(std::string("First One to the End Wins!"));
+
+		ImGui::End();
 
 		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 
@@ -199,15 +210,15 @@ private:
 		rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
 
 		// 4. Calculate the inverse of the view matrix (View Space -> World Space)
-		glm::mat4 invView = glm::inverse(scnCamera->getViewMatrix());
+		glm::mat4 invView = glm::inverse(m_SceneCamera->getViewMatrix());
 
 		// 5. Transform the ray to world coordinates and normalize it (Start Position of Ray in World Space)
 		glm::vec4 rayWorld = invView * rayEye;
 		rayWorld = glm::normalize(glm::vec4(rayWorld.x, rayWorld.y, rayWorld.z, 0.0f));
 
 		// 6. Calculate the intersection point in world coordinates (Cast Ray and Calculate Position at Custom Intersection on the Y Axis)
-		float t = (customIntersectionY - scnCamera->getPosition().y) / rayWorld.y;
-		glm::vec3 intersectionPoint = scnCamera->getPosition() + glm::vec3(rayWorld * t);
+		float t = (customIntersectionY - m_SceneCamera->getPosition().y) / rayWorld.y;
+		glm::vec3 intersectionPoint = m_SceneCamera->getPosition() + glm::vec3(rayWorld * t);
 
 		// 7. Return World Position Where Ray Hits Y Axis Intersection
 		return intersectionPoint;
@@ -231,7 +242,7 @@ private:
 			flat_cube_mat->SetUniforms();
 			flat_cube_mat->GetShader()->SetMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), light_properties.position), lightScale));
 			flat_cube_mat->GetShader()->SetMat4("proj", proj);
-			flat_cube_mat->GetShader()->SetMat4("view", scnCamera->getViewMatrix());
+			flat_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix());
 
 			// Light Render
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -242,12 +253,12 @@ private:
 
 			phong_cube_mat->SetUniforms();
 			phong_cube_mat->GetShader()->SetMat4("proj", proj);
-			phong_cube_mat->GetShader()->SetMat4("view", scnCamera->getViewMatrix());
+			phong_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix());
 			phong_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			phong_cube_mat->GetShader()->SetVec3("u_CameraPos", scnCamera->getPosition());
+			phong_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->getPosition());
 
 			// Player 1 Render
 			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube1_position));

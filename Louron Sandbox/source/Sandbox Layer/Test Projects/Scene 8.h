@@ -29,7 +29,7 @@ public:
 	{
 		std::cout << "[L20] Opening Scene 8..." << std::endl;
 
-		//scnCamera = new Camera(m_Window, glm::vec3(0.0f, 0.0f, 10.0f));
+		//m_SceneCamera = new Camera(m_Window, glm::vec3(0.0f, 0.0f, 10.0f));
 
 		glEnable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);

@@ -18,9 +18,9 @@ private:
 	glm::vec4 back_colour = glm::vec4(0.75f, 0.90f, 1.0f, 1.0f);
 	glm::vec4 fore_colour = glm::vec4(1.00f, 0.65f, 1.0f, 1.0f);
 
-	unsigned int triangleVAO = NULL;
-	unsigned int triangleVBO = NULL;
-	unsigned int triangleEBO = NULL;
+	unsigned int triangleVAO = -1;
+	unsigned int triangleVBO = -1;
+	unsigned int triangleEBO = -1;
 	float triangle_vertices[12] = {
 			0.5f,  0.5f, 0.0f,  // top right
 			0.5f, -0.5f, 0.0f,  // bottom right

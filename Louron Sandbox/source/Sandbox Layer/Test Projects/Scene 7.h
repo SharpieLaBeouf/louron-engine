@@ -17,7 +17,7 @@ private:
 	Louron::ShaderLibrary& m_ShaderLib;
 	Louron::TextureLibrary& m_TextureLib;
 
-	Louron::Camera* scnCamera;
+	Louron::Camera* m_SceneCamera;
 	Louron::Light light_properties;
 
 	std::unique_ptr<Louron::MeshRendererComponent> monkey;
@@ -32,10 +32,10 @@ public:
 	{
 		std::cout << "[L20] Opening Scene 7..." << std::endl;
 
-		scnCamera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
-		scnCamera->MouseToggledOff = false;
-		scnCamera->MovementSpeed = 10.0f;
-		scnCamera->MovementYDamp = 0.65f;
+		m_SceneCamera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
+		m_SceneCamera->MouseToggledOff = false;
+		m_SceneCamera->MovementSpeed = 10.0f;
+		m_SceneCamera->MovementYDamp = 0.65f;
 
 		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
 
@@ -51,6 +51,8 @@ public:
 		std::cout << "[L20] Closing Scene 7..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+
+		delete m_SceneCamera;
 	}
 
 	void Update() override {
@@ -59,7 +61,7 @@ public:
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
-		scnCamera->Update(deltaTime);
+		m_SceneCamera->Update(deltaTime);
 
 		light_properties.position.z = sin(currentTime * 5);
 
@@ -99,8 +101,8 @@ private:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 
-		monkey->renderEntireMesh(scnCamera, &light_properties);
-		back_pack->renderEntireMesh(scnCamera, &light_properties);
+		monkey->renderEntireMesh(m_SceneCamera, &light_properties);
+		back_pack->renderEntireMesh(m_SceneCamera, &light_properties);
 
 		glDisable(GL_DEPTH_TEST);
 	}

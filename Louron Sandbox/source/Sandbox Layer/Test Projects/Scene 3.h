@@ -143,9 +143,9 @@ private:
 		glDisable(GL_DEPTH_TEST);
 	}
 
-	unsigned int VAO = NULL;
-	unsigned int VBO = NULL;
-	unsigned int EBO = NULL;
+	unsigned int VAO = -1;
+	unsigned int VBO = -1;
+	unsigned int EBO = -1;
 	float vertices[120]{
 			0.5f,  0.5f, 0.5f,  1.0f, 1.0f,   // front top right
 			0.5f, -0.5f, 0.5f,  1.0f, 0.0f,   // front bottom right

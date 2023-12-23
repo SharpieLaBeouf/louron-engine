@@ -32,6 +32,7 @@
     <None Include="assets\Models\Monkey\Monkey.fbx" />
     <None Include="assets\Models\BackPack\BackPack.fbx" />
     <None Include="assimp-vc143-mt.dll" />
+    <None Include="assimp-vc143-mtd.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Models\BackPack\backpack_specular.jpg">
@@ -64,9 +65,6 @@
     <Image Include="assets\Images\stone_texture.png">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="assimp-vc143-mtd.dll" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 1.h">

@@ -16,10 +16,10 @@ private:
 	Louron::InputManager& m_Input;
 	Louron::ShaderLibrary& m_ShaderLib;
 
-	unsigned int light_VAO = NULL;
-	unsigned int cube_VAO = NULL;
-	unsigned int cube_VBO = NULL;
-	unsigned int cube_EBO = NULL;
+	unsigned int light_VAO = -1;
+	unsigned int cube_VAO = -1;
+	unsigned int cube_VBO = -1;
+	unsigned int cube_EBO = -1;
 	float cube_vertices[192] = {
 		// POSITION          // NORMAL            // TEXCORD
 		0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,  // front top right

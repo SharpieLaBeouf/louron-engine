@@ -225,9 +225,9 @@ private:
 		glDisable(GL_DEPTH_TEST);
 	}
 
-	unsigned int plane_VAO = NULL;
-	unsigned int plane_VBO = NULL;
-	unsigned int plane_EBO = NULL;
+	unsigned int plane_VAO = -1;
+	unsigned int plane_VBO = -1;
+	unsigned int plane_EBO = -1;
 	float plane_vertices[20] = {
 			0.5f, 0.0f,  0.5f, 1.0f, 1.0f,
 			0.5f, 0.0f, -0.5f, 1.0f, 0.0f,
@@ -239,9 +239,9 @@ private:
 		1, 2, 3
 	};
 
-	unsigned int cube_VAO = NULL;
-	unsigned int cube_VBO = NULL;
-	unsigned int cube_EBO = NULL;
+	unsigned int cube_VAO = -1;
+	unsigned int cube_VBO = -1;
+	unsigned int cube_EBO = -1;
 	float cube_vertices[120] = {
 			0.5f,  0.5f, 0.5f,  1.0f, 1.0f,   // front top right
 			0.5f, -0.5f, 0.5f,  1.0f, 0.0f,   // front bottom right

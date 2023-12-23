@@ -22,7 +22,7 @@ private:
 	Louron::Material* stone_cube_mat = nullptr;
 	Louron::Light light_properties;
 
-	Louron::Camera* scnCamera;
+	Louron::Camera* m_SceneCamera;
 
 public:
 
@@ -59,10 +59,10 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
-		scnCamera = new Louron::Camera({ 0.0f, 1.0f, 5.0f });
-		scnCamera->MouseToggledOff = false;
-		scnCamera->MovementSpeed = 10.0f;
-		scnCamera->MovementYDamp = 0.65f;
+		m_SceneCamera = new Louron::Camera({ 0.0f, 1.0f, 5.0f });
+		m_SceneCamera->MouseToggledOff = false;
+		m_SceneCamera->MovementSpeed = 10.0f;
+		m_SceneCamera->MovementYDamp = 0.65f;
 
 		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_flat.glsl");
 		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
@@ -102,7 +102,8 @@ public:
 
 		delete flat_cube_mat;
 		delete box_cube_mat;
-		delete scnCamera;
+		delete stone_cube_mat;
+		delete m_SceneCamera;
 	}
 
 	void Update() override {
@@ -111,7 +112,7 @@ public:
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
-		scnCamera->Update(deltaTime);
+		m_SceneCamera->Update(deltaTime);
 
 		Draw();
 	}
@@ -188,7 +189,7 @@ private:
 			flat_cube_mat->SetUniforms();
 			flat_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), light_properties.position));
 			flat_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			flat_cube_mat->GetShader()->SetMat4("view", scnCamera->getViewMatrix()); 
+			flat_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix()); 
 			
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			flat_cube_mat->UnBind();
@@ -198,12 +199,12 @@ private:
 			stone_cube_mat->SetUniforms();
 			stone_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
 			stone_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			stone_cube_mat->GetShader()->SetMat4("view", scnCamera->getViewMatrix());
+			stone_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix());
 			stone_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			stone_cube_mat->GetShader()->SetVec3("u_CameraPos", scnCamera->getPosition());
+			stone_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->getPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			stone_cube_mat->UnBind();
@@ -213,12 +214,12 @@ private:
 			box_cube_mat->SetUniforms();
 			box_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, 0.0f)));
 			box_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			box_cube_mat->GetShader()->SetMat4("view", scnCamera->getViewMatrix());
+			box_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix());
 			box_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			box_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			box_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			box_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			box_cube_mat->GetShader()->SetVec3("u_CameraPos", scnCamera->getPosition());
+			box_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->getPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			box_cube_mat->UnBind();

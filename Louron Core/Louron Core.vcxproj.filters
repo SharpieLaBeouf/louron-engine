@@ -69,9 +69,6 @@
     <ClCompile Include="src\Core\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\MeshRenderer.h">
-      <Filter>Header Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Scene\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -470,6 +467,9 @@
     <ClInclude Include="src\Core\EngineStart.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Scene\MeshRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\Shaders\Basic\basic.glsl" />
@@ -517,8 +517,8 @@
     <Text Include="include\entt\ENTT License.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="libs\assimp\assimp.lib" />
-    <Library Include="libs\assimp\assimpd.lib" />
     <Library Include="libs\glfw\glfw3.lib" />
+    <Library Include="libs\assimp\assimp-vc143-mt.lib" />
+    <Library Include="libs\assimp\assimp-vc143-mtd.lib" />
   </ItemGroup>
 </Project>
