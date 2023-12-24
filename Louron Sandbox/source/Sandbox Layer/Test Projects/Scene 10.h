@@ -14,7 +14,7 @@ public:
 	Louron::TransformComponent transform;
 	Louron::Material material;
 
-	float speed = 2.5f;
+	float speed = 3.0f;
 
 };
 
@@ -30,7 +30,7 @@ public:
 
 	float speed = 5.0f;
 
-	glm::vec2 velocity = { speed, speed * -0.75f };
+	glm::vec2 velocity = glm::vec2(speed, speed * -0.5f);
 
 };
 
@@ -179,12 +179,14 @@ public:
 				if (m_Input.GetKeyDown(GLFW_KEY_P))
 					m_Ball->velocity.y = -m_Ball->velocity.y;
 
+
 				// Process Ball Movement
 				ProcessBallMovement();
 
 				// Process Paddle Movement
 				ProcessPaddleMovement();
 
+				// Process Collissions
 				ProcessCollisions();
 
 				// TO REMOVE: Manual Game Over
@@ -268,6 +270,105 @@ private:
 
 	void ProcessCollisions() {
 
+		if (CheckPaddleCollision(m_Paddles[0]) || CheckPaddleCollision(m_Paddles[1]))
+			m_Ball->velocity.x = -m_Ball->velocity.x;
+
+		if (CheckWallCollision())
+		{
+			std::cout << "COLLISSION WITH WALL";
+		}
+	}
+
+	bool CheckPaddleCollision(const std::unique_ptr<Paddle>& paddle) {
+
+		float ballLeft		= m_Ball->transform.position.z - m_Ball->transform.scale.z / 2;
+		float ballRight		= m_Ball->transform.position.z + m_Ball->transform.scale.z / 2;
+		float ballTop		= m_Ball->transform.position.x - m_Ball->transform.scale.x / 2;
+		float ballBottom	= m_Ball->transform.position.x + m_Ball->transform.scale.x / 2;
+
+		float paddleLeft	= paddle->transform.position.z - paddle->transform.scale.z / 2;
+		float paddleRight	= paddle->transform.position.z + paddle->transform.scale.z / 2;
+		float paddleTop		= paddle->transform.position.x - paddle->transform.scale.x / 2;
+		float paddleBottom	= paddle->transform.position.x + paddle->transform.scale.x / 2;
+
+		if (ballLeft >= paddleRight)
+		{
+			return false;
+		}
+
+		if (ballRight <= paddleLeft)
+		{
+			return false;
+		}
+
+		if (ballTop >= paddleBottom)
+		{
+			return false;
+		}
+
+		if (ballBottom <= paddleTop)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	bool CheckWallCollision() {
+
+		float windowWidth = static_cast<float>(Louron::Engine::Get().GetWindow().GetWidth());
+		float windowHeight = static_cast<float>(Louron::Engine::Get().GetWindow().GetHeight());
+
+		// Normalised viewport boundaries
+		float screenLeft = -1.0f;
+		float screenTop = 1.0f;
+
+		// Transform screen boundaries to world space
+		glm::mat4 invProjection = glm::inverse(glm::perspective(glm::radians(60.0f), windowWidth / windowHeight, 0.1f, 100.0f));
+
+		// 3. Transform the coordinates to eye space (Coordinate of Mouse X & Y on View Space)
+		glm::vec4 rayEye = invProjection * glm::vec4(screenLeft, screenTop, -1.0f, 1.0f);
+		rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
+
+		// 4. Calculate the inverse of the view matrix (View Space -> World Space)
+		glm::mat4 invView = glm::inverse(m_SceneCamera.getViewMatrix());
+
+		// 5. Transform the ray to world coordinates and normalize it (Start Position of Ray in World Space)
+		glm::vec4 rayWorld = invView * rayEye;
+		rayWorld = glm::normalize(glm::vec4(rayWorld.x, rayWorld.y, rayWorld.z, 0.0f));
+
+		// 6. Calculate the intersection point in world coordinates (Cast Ray and Calculate Position at Custom Intersection on the Y Axis)
+		float t = (0.0f - m_SceneCamera.getPosition().y) / rayWorld.y;
+		glm::vec3 boundaryLeftTop = m_SceneCamera.getPosition() + glm::vec3(rayWorld * t);
+		glm::vec3 boundaryRightBottom = -boundaryLeftTop;
+
+		// Define Ball Boundaries
+		float ballLeft		= m_Ball->transform.position.z - m_Ball->transform.scale.z / 2;
+		float ballRight		= m_Ball->transform.position.z + m_Ball->transform.scale.z / 2;
+		float ballTop		= m_Ball->transform.position.x - m_Ball->transform.scale.x / 2;
+		float ballBottom	= m_Ball->transform.position.x + m_Ball->transform.scale.x / 2;
+
+		if (ballRight >= boundaryRightBottom.z)
+		{
+			return true;
+		}
+
+		if (ballLeft <= boundaryLeftTop.z)
+		{
+			return true;
+		}
+
+		if (ballTop >= boundaryLeftTop.x)
+		{
+			return true;
+		}
+
+		if (ballBottom <= boundaryRightBottom.x)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	void ProcessBallMovement() {
@@ -301,7 +402,7 @@ private:
 		m_GameStartTimer = 3.0f;
 
 		// Reset Ball, Light, and Paddles
-		m_Ball->velocity = { m_Ball->speed, m_Ball->speed * -0.75f };
+		m_Ball->velocity = { m_Ball->speed, m_Ball->speed * -0.5f };
 		m_Ball->transform.position = glm::vec3(0.0f);
 		m_Light.position = glm::vec3(m_Ball->transform.position.x, 1.0f, m_Ball->transform.position.z);
 		for (auto& paddle : m_Paddles) paddle->transform.position.x = 0.0f;
