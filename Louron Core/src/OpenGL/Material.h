@@ -33,7 +33,8 @@ namespace Louron {
 		void SetShader(Shader* shader);
 		Shader* GetShader();
 
-		Material() = delete;
+		Material();
+		Material(Shader* shader);
 		Material(Texture* texture);
 		Material(Shader* shader, Texture* texture);
 		Material(Shader* shader, std::unordered_map<GLint, Texture*>& textures);
@@ -42,6 +43,8 @@ namespace Louron {
 		glm::vec4* GetAmbient();
 		glm::vec4* GetDiffuse();
 		glm::vec4* GetSpecular();
+
+		void SetTexture(Texture* texture, TextureMapType textureType);
 
 		void SetShine(float shine);
 		void SetAmbient(const glm::vec4& val);

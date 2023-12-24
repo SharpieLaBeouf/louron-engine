@@ -185,7 +185,7 @@ public:
 
 		if (ImGui::TreeNode("Cube Transform"))
 		{
-			ImGui::DragFloat3("Light Translate", glm::value_ptr(cube_trans.position), 0.01f, 0, 0, "%.2f");
+			ImGui::DragFloat3("Translate", glm::value_ptr(cube_trans.position), 0.01f, 0, 0, "%.2f");
 			ImGui::DragFloat3("Rotate", glm::value_ptr(cube_trans.rotation), 1.0f, 0, 0, "%.2f");
 			ImGui::DragFloat3("Scale", glm::value_ptr(cube_trans.scale), 0.01f, 0, 0, "%.2f");
 			ImGui::TreePop();
@@ -236,7 +236,7 @@ private:
 			shader->SetMat4("view", view);
 			shader->SetMat4("proj", proj);
 			shader->SetVec4("ourColour", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
-			shader->SetMat4("model", light_trans.getTransform());
+			shader->SetMat4("model", light_trans);
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		}
 
@@ -248,7 +248,7 @@ private:
 			shader->Bind();
 			shader->SetMat4("view", view);
 			shader->SetMat4("proj", proj);
-			shader->SetMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.getTransform()))));
+			shader->SetMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.GetTransform()))));
 			shader->SetVec3("viewPos", m_SceneCamera->getPosition());
 			shader->SetVec3("lightPos", light_trans.position);
 			shader->SetVec4("lightColour", glm::vec4(1.0f));
@@ -272,7 +272,7 @@ private:
 						shader->SetVec4("targetColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 					}
 
-					shader->SetMat4("model", glm::translate(cube_trans.getTransform(), pos));
+					shader->SetMat4("model", glm::translate(cube_trans.GetTransform(), pos));
 					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				}
 			}

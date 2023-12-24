@@ -44,8 +44,8 @@ namespace Louron {
 		void Rotate(const glm::vec3& vector) { rotation += vector; }
 		void Scale(const glm::vec3& vector) { scale += vector; }
 
-		operator glm::mat4() { return this->getTransform(); }
-		glm::mat4 getTransform() const {
+		operator glm::mat4() { return this->GetTransform(); }
+		glm::mat4 GetTransform() const {
 			return glm::translate(glm::mat4(1.0f), position)
 				* glm::toMat4(glm::quat(glm::radians(rotation)))
 				* glm::scale(glm::mat4(1.0f), scale);

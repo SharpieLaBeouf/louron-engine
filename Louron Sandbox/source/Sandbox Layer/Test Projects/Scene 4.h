@@ -182,7 +182,7 @@ private:
 			glBindVertexArray(plane_VAO);
 
 			shader->Bind();
-			shader->SetMat4("model", plane_trans.getTransform());
+			shader->SetMat4("model", plane_trans);
 			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
 			shader->SetMat4("view", sceneCamera->getViewMatrix());
 			shader->SetVec4("ourColour", plane_colour);
@@ -213,7 +213,7 @@ private:
 					double time = glfwGetTime();
 					pos.y = (float)sin((time * waveSpeed + floor(x - waveSize) + floor(z - waveSize))) / waveSize * waveHeight;
 
-					shader->SetMat4("model", glm::translate(cube_trans.getTransform(), pos));
+					shader->SetMat4("model", glm::translate(cube_trans.GetTransform(), pos));
 					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				}
 			}

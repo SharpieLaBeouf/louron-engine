@@ -133,6 +133,7 @@ namespace Louron {
 		return shader;
 	}
 
+	// TODO: shaderlibrary should hold ownership of all the Shader objects initialised. I should return a reference to a unique_ptr opposed to a raw pointer.
 	Shader* ShaderLibrary::GetShader(const std::string& shaderName) {
 		if (!ShaderExists(shaderName))
 			std::cout << "[L20] Shader Not Loaded! " << shaderName << std::endl;

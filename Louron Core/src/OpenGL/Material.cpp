@@ -1,4 +1,5 @@
 #include "Material.h"
+#include "../Core/Engine.h"
 
 namespace Louron {
 
@@ -50,26 +51,60 @@ namespace Louron {
 		else std::cout << "[L20] Shader Not Linked to Material - Cannot Set Uniforms!" << std::endl;
 	}
 
-	void Material::SetShader(Shader* shader) { m_Shader = shader; }
+	void Material::SetShader(Shader* shader) { 
+		m_Shader = shader; 
+	}
+	void Material::SetTexture(Texture* texture, TextureMapType textureType) { 
+		m_Textures[textureType] = texture; 
+	}
 
-	Shader* Material::GetShader() { return m_Shader; }
+	Shader* Material::GetShader() { 
+		return m_Shader; 
+	}
 
+	/// <summary>
+	/// DEFAULT CONSTRUCTOR - Initialise Material with NO SHADER and BLANK TEXTURE
+	/// </summary>
+	Material::Material() : m_Shader(nullptr) { 
+		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
+			m_Textures[i] = Engine::Get().GetTextureLibrary().GetTexture("blank_texture");
+	}
+
+	/// <summary>
+	/// Initialise Material with BLANK TEXTURE
+	/// </summary>
+	Material::Material(Shader* shader) {
+		m_Shader = shader;
+		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
+			m_Textures[i] = Engine::Get().GetTextureLibrary().GetTexture("blank_texture");
+	}
+
+	/// <summary>
+	/// Initialise Material with NO SHADER and TEXTURE PARAMETER
+	/// </summary>
 	Material::Material(Texture* texture) {
 		m_Shader = nullptr;
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
 			m_Textures[i] = texture;
 	}
 
+	/// <summary>
+	/// Initialise Material with SHADER and TEXTURE PARAMETER
+	/// </summary>
 	Material::Material(Shader* shader, Texture* texture) : m_Shader(shader) {
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
 			m_Textures[i] = texture;
 	}
 
+	/// <summary>
+	/// Initialise Material with SHADER and TEXTURE UNORDERED MAP PARAMETER
+	/// </summary>
 	Material::Material(Shader* shader, std::unordered_map<GLint, Texture*>& textures) : m_Shader(shader) {
 		for (int i = 0; i < textures.size(); i++)
 			m_Textures[i] = textures[i];
 	}
 
+	// TODO: consider changing these to return references to a unique_ptr which holds the ownership of the details within the class
 	float Material::GetShine() { return m_Shine; }
 	glm::vec4* Material::GetAmbient() { return &m_Ambient; }
 	glm::vec4* Material::GetDiffuse() { return &m_Diffuse; }
@@ -81,10 +116,12 @@ namespace Louron {
 	void Material::SetSpecular(const glm::vec4& val) { m_Specular = val; }
 
 	void Material::AddTextureMap(GLint type, Texture* val) {
-		if (m_Shader)
+		if (m_Shader) {
+			m_Shader->Bind();
 			m_Shader->SetInt(std::string("u_Material." + m_TextureUniformNames[type]).c_str(), type);
-		else
-			std::cout << "[L20] Shader Not Linked to Material - Cannot Set Texture Unit!" << std::endl;
+			m_Shader->UnBind();
+		}
+		else std::cout << "[L20] Shader Not Linked to Material - Cannot Set Texture Unit!" << std::endl;
 
 		if (type < m_Textures.size() && type > -1) {
 			m_Textures[type] = val;

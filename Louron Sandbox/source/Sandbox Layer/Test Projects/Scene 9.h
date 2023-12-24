@@ -72,14 +72,11 @@ public:
 		m_TextureLib.loadTexture("assets/Images/cube_texture_specular.png");
 			
 		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("blank_texture"));
-		flat_cube_mat->Bind();
-
+		
 		phong_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("blank_texture"));
-		phong_cube_mat->Bind();
 		phong_cube_mat->SetDiffuse(glm::vec4(1.0f));
 		phong_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("cube_texture"));
 		phong_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("cube_texture_specular"));
-		phong_cube_mat->UnBind();
 	}
 
 	~Scene9() override {
@@ -306,7 +303,7 @@ private:
 
 	}
 
-
+	
 	glm::vec4 back_colour = { 0.3137f, 0.7843f, 1.0f, 1.0f };
 	glm::vec4 cube_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 

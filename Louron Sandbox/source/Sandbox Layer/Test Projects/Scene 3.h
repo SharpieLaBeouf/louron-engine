@@ -132,7 +132,7 @@ private:
 			shader->Bind();
 			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
 			shader->SetMat4("view", glm::lookAt(glm::vec3(0.0f, 1.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-			shader->SetMat4("model", trans.getTransform());
+			shader->SetMat4("model", trans);
 			shader->SetVec4("ourColour", fore_colour);
 
 			m_TextureLib.GetTexture("cube_texture")->Bind();
