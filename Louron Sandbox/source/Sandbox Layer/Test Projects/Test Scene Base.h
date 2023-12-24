@@ -6,6 +6,9 @@ public:
 	Scene() = default;
 	virtual ~Scene() = default;
 
+	virtual void OnAttach() { }
+	virtual void OnDetach() { }
+
 	virtual void Update() { }
 	virtual void UpdateGUI() { }
 

@@ -68,7 +68,7 @@ void main() {
 	vec3 viewDir = normalize(u_CameraPos - FragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	
-	vec4 ambient  = texture(u_Material.diffuseMap,  TexCoord) * u_Material.diffuse * min((u_Light.ambient), 0.2);
+	vec4 ambient  = texture(u_Material.diffuseMap,  TexCoord) * u_Material.diffuse * min((u_Light.ambient), 0.5);
 	vec4 diffuse  = u_Material.diffuse  * texture(u_Material.diffuseMap,  TexCoord) * u_Light.diffuse * max(dot(norm, lightDir), 0.0);
 	vec4 specular = texture(u_Material.specularMap, TexCoord) * u_Light.specular * pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shine);
 
