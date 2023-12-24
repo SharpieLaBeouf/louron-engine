@@ -14,7 +14,6 @@ void MainMenuLayer::OnAttach() {
 	m_Scenes.push_back(std::make_unique<Scene7>());
 	m_Scenes.push_back(std::make_unique<Scene8>());
 	m_Scenes.push_back(std::make_unique<Scene9>());
-	m_Scenes.push_back(std::make_unique<Scene10>());
 
 	Louron::Engine::Get().GetWindow().SetVSync(true);
 }
@@ -27,11 +26,7 @@ void MainMenuLayer::OnUpdate() {
 	glClearColor(211.0f / 255.0f, 238.0f / 255.0f, 255.0f / 255.0f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (Louron::Engine::Get().GetInput().GetKeyUp(GLFW_KEY_ESCAPE)) {
-		if (m_SceneSelector > 0)
-			m_Scenes[m_SceneSelector - 1]->OnDetach();
-		m_SceneSelector = 0;
-	}
+	if (Louron::Engine::Get().GetInput().GetKeyUp(GLFW_KEY_ESCAPE)) m_SceneSelector = 0;
 
 	switch (m_SceneSelector) {
 		default:
@@ -63,62 +58,46 @@ void MainMenuLayer::OnGuiRender() {
 				if (ImGui::Button(" 1. Basic Triangles        ")) {
 					std::cout << "[L20] Menu Item 1 Pressed!" << std::endl;
 					m_SceneSelector = 1;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene1>(m_Engine));
 				}
 				if (ImGui::Button(" 2. Basic Texture          ")) {
 					std::cout << "[L20] Menu Item 2 Pressed!" << std::endl;
 					m_SceneSelector = 2;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene2>(m_Engine));
 				}
 				if (ImGui::Button(" 3. Basic Cube             ")) {
 					std::cout << "[L20] Menu Item 3 Pressed!" << std::endl;
 					m_SceneSelector = 3;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene3>(m_Engine));
 				}
 				if (ImGui::Button(" 4. Basic Camera           ")) {
 					std::cout << "[L20] Menu Item 4 Pressed!" << std::endl;
 					m_SceneSelector = 4;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene4>(m_Engine));
 				}
 				if (ImGui::Button(" 5. Basic Lighting         ")) {
 					std::cout << "[L20] Menu Item 5 Pressed!" << std::endl;
 					m_SceneSelector = 5;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene5>(m_Engine));
 				}
 				if (ImGui::Button(" 6. Basic Material         ")) {
 					std::cout << "[L20] Menu Item 6 Pressed!" << std::endl;
 					m_SceneSelector = 6;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene6>(m_Engine));
 				}
 				if (ImGui::Button(" 7. Basic Model Loading    ")) {
 					std::cout << "[L20] Menu Item 7 Pressed!" << std::endl;
 					m_SceneSelector = 7;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene7>(m_Engine));
 				}
 				if (ImGui::Button(" 8. Entity System          ")) {
 					std::cout << "[L20] Menu Item 8 Pressed!" << std::endl;
 					m_SceneSelector = 8;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene8>(m_Engine));
 				}
 				if (ImGui::Button(" 9. First Rudimentary Game ")) {
 					std::cout << "[L20] Menu Item 9 Pressed!" << std::endl;
 					m_SceneSelector = 9;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
-					//m_States->push_back(std::make_unique<Scene9>(m_Engine));
-				}
-
-				if (ImGui::Button(" 10. Pong Clone            ")) {
-					std::cout << "[L20] Menu Item 10 Pressed!" << std::endl;
-					m_SceneSelector = 10;
-					m_Scenes[m_SceneSelector - 1]->OnAttach();
 					//m_States->push_back(std::make_unique<Scene9>(m_Engine));
 				}
 			}
