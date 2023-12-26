@@ -14,8 +14,9 @@ public:
 	Louron::TransformComponent transform;
 	Louron::Material material;
 
-	float speed = 3.0f;
+	float speed = 5.0f;
 
+	int score = 0;
 };
 
 struct Ball {
@@ -28,9 +29,9 @@ public:
 	Louron::TransformComponent transform;
 	Louron::Material material;
 
-	float speed = 5.0f;
+	float speed = 8.0f;
 
-	glm::vec2 velocity = glm::vec2(speed, speed * -0.5f);
+	glm::vec2 velocity = glm::vec2(speed, speed * -0.6f);
 
 };
 
@@ -123,7 +124,7 @@ public:
 		for (auto& paddle : m_Paddles) {
 			paddle->material.SetShader(m_ShaderLib.GetShader("material_shader_phong"));
 			paddle->material.SetDiffuse({ 0.41f, 0.41f, 0.41f, 1.0f });
-			paddle->transform.scale = glm::vec3(3.5f, 1.0f, 1.0f);
+			paddle->transform.scale = glm::vec3(2.0f, 1.0f, 1.0f);
 		}
 
 		m_Light.position.y = 1.0f;
@@ -163,10 +164,10 @@ public:
 
 			// COUNT DOWN: If game is not over, and game is not running, conduct game start timer of 3 seconds!
 			if (!m_GameRunning) {
-				if (m_GameStartTimer <= 0.0f) {
+				if (m_GameStartTimer <= 0.0f)
 					m_GameRunning = true;
-				}
-				else m_GameStartTimer -= deltaTime;
+				else 
+					m_GameStartTimer -= deltaTime;
 			}
 
 			// GAME LOOP: If timer is up, start the game!
@@ -179,7 +180,6 @@ public:
 				if (m_Input.GetKeyDown(GLFW_KEY_P))
 					m_Ball->velocity.y = -m_Ball->velocity.y;
 
-
 				// Process Ball Movement
 				ProcessBallMovement();
 
@@ -189,8 +189,8 @@ public:
 				// Process Collissions
 				ProcessCollisions();
 
-				// TO REMOVE: Manual Game Over
-				if (m_Input.GetKeyDown(GLFW_KEY_F1))
+				// Check if Game is Over
+				if(m_Paddles[0]->score >= 3 || m_Paddles[1]->score >= 3)
 					m_GameOver = true;
 
 			}
@@ -235,9 +235,11 @@ public:
 
 				float gameRulesWidth = 300.0f;
 				ImGui::SetWindowPos(ImVec2(Louron::Engine::Get().GetWindow().GetWidth() / 2 - gameRulesWidth / 2, 10.0f));
-				ImGui::SetWindowSize(ImVec2(gameRulesWidth, 10.0f));
+				ImGui::SetWindowSize(ImVec2(gameRulesWidth, 100.0f));
 
 				ImGui::Text("Game is In Session!");
+				ImGui::Text("Player 1 Score: %i", m_Paddles[0]->score);
+				ImGui::Text("Player 2 Score: %i", m_Paddles[1]->score);
 
 				ImGui::End();
 			}
@@ -254,7 +256,15 @@ public:
 
 			float gameRulesWidth = 300.0f;
 			ImGui::SetWindowPos(ImVec2(Louron::Engine::Get().GetWindow().GetWidth() / 2 - gameRulesWidth / 2, 10.0f));
-			ImGui::SetWindowSize(ImVec2(gameRulesWidth, 10.0f));
+			ImGui::SetWindowSize(ImVec2(gameRulesWidth, 100.0f));
+
+			if (m_Paddles[0]->score >= 3)
+				ImGui::Text("Player 1 Won!");
+
+			if (m_Paddles[1]->score >= 3)
+				ImGui::Text("Player 2 Won!");
+
+			ImGui::Text("Final Score: %i - %i", m_Paddles[0]->score, m_Paddles[1]->score);
 
 			if (ImGui::Button("Reset Game?"))
 				ResetGame();
@@ -268,15 +278,39 @@ public:
 
 private:
 
+	enum CollisionType{ None, Top, Bottom, Right, Left };
+
+	void ScorePoint(std::unique_ptr<Paddle>& paddle) {
+
+		paddle->score++;
+
+		m_Ball->velocity = { m_Ball->speed, m_Ball->speed * -0.5f };
+		m_Ball->transform.position = glm::vec3(0.0f);
+		m_Light.position = glm::vec3(m_Ball->transform.position.x, 1.0f, m_Ball->transform.position.z);
+		for (auto& paddle : m_Paddles) paddle->transform.position.x = 0.0f;
+	}
+
 	void ProcessCollisions() {
 
-		if (CheckPaddleCollision(m_Paddles[0]) || CheckPaddleCollision(m_Paddles[1]))
+		if (CheckPaddleCollision(m_Paddles[0]) || CheckPaddleCollision(m_Paddles[1])) {
 			m_Ball->velocity.x = -m_Ball->velocity.x;
-
-		if (CheckWallCollision())
-		{
-			std::cout << "COLLISSION WITH WALL";
 		}
+
+		switch (CheckWallCollision()) {
+			case CollisionType::Top:
+				m_Ball->velocity.y = -m_Ball->velocity.y;
+			break;
+			case CollisionType::Bottom:
+				m_Ball->velocity.y = -m_Ball->velocity.y;
+			break;
+			case CollisionType::Left:
+				ScorePoint(m_Paddles[1]);
+			break;
+			case CollisionType::Right:
+				ScorePoint(m_Paddles[0]);
+			break;
+		}
+		
 	}
 
 	bool CheckPaddleCollision(const std::unique_ptr<Paddle>& paddle) {
@@ -314,7 +348,7 @@ private:
 		return true;
 	}
 
-	bool CheckWallCollision() {
+	CollisionType CheckWallCollision() {
 
 		float windowWidth = static_cast<float>(Louron::Engine::Get().GetWindow().GetWidth());
 		float windowHeight = static_cast<float>(Louron::Engine::Get().GetWindow().GetHeight());
@@ -350,25 +384,25 @@ private:
 
 		if (ballRight >= boundaryRightBottom.z)
 		{
-			return true;
+			return CollisionType::Right;
 		}
 
 		if (ballLeft <= boundaryLeftTop.z)
 		{
-			return true;
+			return CollisionType::Left;
 		}
 
 		if (ballTop >= boundaryLeftTop.x)
 		{
-			return true;
+			return CollisionType::Top;
 		}
 
 		if (ballBottom <= boundaryRightBottom.x)
 		{
-			return true;
+			return CollisionType::Bottom;
 		}
 
-		return false;
+		return CollisionType::None;
 	}
 
 	void ProcessBallMovement() {
@@ -405,7 +439,10 @@ private:
 		m_Ball->velocity = { m_Ball->speed, m_Ball->speed * -0.5f };
 		m_Ball->transform.position = glm::vec3(0.0f);
 		m_Light.position = glm::vec3(m_Ball->transform.position.x, 1.0f, m_Ball->transform.position.z);
-		for (auto& paddle : m_Paddles) paddle->transform.position.x = 0.0f;
+		for (auto& paddle : m_Paddles) {
+			paddle->transform.position.x = 0.0f;
+			paddle->score = 0;
+		}
 
 	}
 
