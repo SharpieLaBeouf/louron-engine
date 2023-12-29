@@ -46,7 +46,7 @@ private:
 	Louron::TextureLibrary& m_TextureLib;
 
 	Louron::Camera m_SceneCamera;
-	Louron::Light m_Light;
+	Louron::OldLight m_Light;
 
 	std::vector<std::unique_ptr<Paddle>> m_Paddles;
 

@@ -15,6 +15,7 @@ void MainMenuLayer::OnAttach() {
 	m_Scenes.push_back(std::make_unique<Scene8>());
 	m_Scenes.push_back(std::make_unique<Scene9>());
 	m_Scenes.push_back(std::make_unique<Scene10>());
+	m_Scenes.push_back(std::make_unique<Scene11>());
 
 	Louron::Engine::Get().GetWindow().SetVSync(true);
 }
@@ -24,8 +25,6 @@ void MainMenuLayer::OnDetach() {
 }
 
 void MainMenuLayer::OnUpdate() {
-	glClearColor(211.0f / 255.0f, 238.0f / 255.0f, 255.0f / 255.0f, 1);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (Louron::Engine::Get().GetInput().GetKeyUp(GLFW_KEY_ESCAPE)) {
 		if (m_SceneSelector == 0) {
@@ -46,6 +45,8 @@ void MainMenuLayer::OnUpdate() {
 		break;
 
 	case 0:
+		glClearColor(211.0f / 255.0f, 238.0f / 255.0f, 255.0f / 255.0f, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 		break;
 	}
@@ -123,6 +124,13 @@ void MainMenuLayer::OnGuiRender() {
 			if (ImGui::Button(" 10. Pong Clone            ")) {
 				std::cout << "[L20] Menu Item 10 Pressed!" << std::endl;
 				m_SceneSelector = 10;
+				m_Scenes[m_SceneSelector - 1]->OnAttach();
+				//m_States->push_back(std::make_unique<Scene9>(m_Engine));
+			}
+
+			if (ImGui::Button(" 11. Forward+ Rendering    ")) {
+				std::cout << "[L20] Menu Item 10 Pressed!" << std::endl;
+				m_SceneSelector = 11;
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
 				//m_States->push_back(std::make_unique<Scene9>(m_Engine));
 			}

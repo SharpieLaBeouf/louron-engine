@@ -33,6 +33,8 @@
     <None Include="assets\Models\BackPack\BackPack.fbx" />
     <None Include="assimp-vc143-mt.dll" />
     <None Include="assimp-vc143-mtd.dll" />
+    <None Include="assets\Shaders\Forward+\FP_Material_Shader.glsl" />
+    <None Include="assets\Shaders\Forward+\FP_Light_Culling.comp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Models\BackPack\backpack_specular.jpg">
@@ -101,6 +103,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 10.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 11.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

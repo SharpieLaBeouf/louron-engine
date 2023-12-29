@@ -90,7 +90,7 @@ namespace Louron {
 				{
 					auto view = m_Registry.view<TransformComponent, MeshRendererComponent>();
 
-					Light tempLight;
+					OldLight tempLight;
 					tempLight.position = { 0.0f, 10.0f, 0.0f };
 
 					for (auto entity : view) {

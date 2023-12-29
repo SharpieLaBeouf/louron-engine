@@ -37,7 +37,7 @@ namespace Louron {
 		///   the current object.
 		/// 
 		/// </summary>
-		void renderMeshFilter(Camera* mainCamera, Material* mat, Light* mainLight);
+		void renderMeshFilter(Camera* mainCamera, Material* mat, OldLight* mainLight);
 
 		void setMaterialIndex(GLuint index) { m_MaterialIndex = index; }
 		GLuint getMaterialIndex() const { return m_MaterialIndex; }
@@ -68,7 +68,7 @@ namespace Louron {
 		///			-> Loop render all meshes with bound material01
 		///		-> etc ... foreach groupings of material
 		/// </summary>
-		void renderEntireMesh(Camera* mainCamera, Light* mainLight);
+		void renderEntireMesh(Camera* mainCamera, OldLight* mainLight);
 
 		std::vector<MeshFilter*> getMeshes();
 

@@ -26,7 +26,7 @@ namespace Louron {
 		void Bind();
 		void UnBind();
 
-		Shader(const GLchar* shaderFile);
+		Shader(const GLchar* shaderFile, bool isComputeShader);
 		~Shader();
 
 		GLuint GetProgram();
@@ -65,8 +65,8 @@ namespace Louron {
 		void Add(Shader* shader);
 		void Add(const std::string& shaderName, Shader* shader);
 
-		Shader* LoadShader(const std::string& shaderFile);
-		Shader* LoadShader(const std::string& shaderFile, const std::string& shaderName);
+		Shader* LoadShader(const std::string& shaderFile, bool isComputeShader = false);
+		Shader* LoadShader(const std::string& shaderFile, const std::string& shaderName, bool isComputeShader = false);
 
 		Shader* GetShader(const std::string& shaderName);
 

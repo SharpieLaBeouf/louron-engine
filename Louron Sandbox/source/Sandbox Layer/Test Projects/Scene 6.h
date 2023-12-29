@@ -20,7 +20,7 @@ private:
 	Louron::Material* flat_cube_mat = nullptr;
 	Louron::Material* box_cube_mat = nullptr;
 	Louron::Material* stone_cube_mat = nullptr;
-	Louron::Light light_properties;
+	Louron::OldLight light_properties;
 
 	Louron::Camera* m_SceneCamera;
 

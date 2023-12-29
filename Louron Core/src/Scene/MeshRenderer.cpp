@@ -27,7 +27,7 @@ namespace Louron {
 		m_VAO->SetIndexBuffer(ebo);
 	}
 
-	void MeshFilter::renderMeshFilter(Camera* mainCamera, Material* mat, Light* mainLight) {
+	void MeshFilter::renderMeshFilter(Camera* mainCamera, Material* mat, OldLight* mainLight) {
 
 		m_VAO->Bind();
 
@@ -88,7 +88,7 @@ namespace Louron {
 	Material* MeshRendererComponent::getMaterial(int index) { return m_Materials[index]; }
 	void MeshRendererComponent::addMaterial(int index, Material* mat) { m_Materials[index] = mat; }
 
-	void MeshRendererComponent::renderEntireMesh(Camera* mainCamera, Light* mainLight) {
+	void MeshRendererComponent::renderEntireMesh(Camera* mainCamera, OldLight* mainLight) {
 		for (GLuint i = 0; i < m_Meshes.size(); i++) {
 			m_Meshes[i]->renderMeshFilter(mainCamera, m_Materials[m_Meshes[i]->getMaterialIndex()], mainLight);
 		}

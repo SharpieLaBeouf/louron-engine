@@ -6,66 +6,103 @@ namespace Louron {
 	void Shader::Bind() { glUseProgram(m_Program); }
 	void Shader::UnBind() { glUseProgram(0); }
 
-	Shader::Shader(const GLchar* shaderFile)
+	Shader::Shader(const GLchar* shaderFile, bool isComputeShader = false)
 	{
 
 		std::ifstream file(shaderFile);
 
-		enum class ShaderType {
-			NONE = -1, VERTEX = 0, FRAGMENT = 1
-		};
+		if (!isComputeShader) {
 
-		std::string line; std::stringstream ss[2];
-		ShaderType type = ShaderType::NONE;
-		while (getline(file, line))
-		{
-			if (line.find("#SHADER") != std::string::npos)
+			enum class ShaderType {
+				NONE = -1, VERTEX = 0, FRAGMENT = 1
+			};
+
+			std::string line; std::stringstream ss[2];
+			ShaderType type = ShaderType::NONE;
+			while (getline(file, line))
 			{
-				if (line.find("VERTEX") != std::string::npos)
-					type = ShaderType::VERTEX;
-				else if (line.find("FRAGMENT") != std::string::npos)
-					type = ShaderType::FRAGMENT;
+				if (line.find("#SHADER") != std::string::npos)
+				{
+					if (line.find("VERTEX") != std::string::npos)
+						type = ShaderType::VERTEX;
+					else if (line.find("FRAGMENT") != std::string::npos)
+						type = ShaderType::FRAGMENT;
+				}
+				else
+					ss[(int)type] << line << '\n';
 			}
-			else
-				ss[(int)type] << line << '\n';
+
+			std::string vString = ss[0].str();
+			std::string fString = ss[1].str();
+
+			const GLchar* vShaderCode = vString.c_str();
+			const GLchar* fShaderCode = fString.c_str();
+
+			unsigned int vertex, fragment;
+
+			vertex = glCreateShader(GL_VERTEX_SHADER);
+			glShaderSource(vertex, 1, &vShaderCode, NULL);
+			glCompileShader(vertex);
+			checkCompileErrors(vertex, "VERTEX");
+
+			fragment = glCreateShader(GL_FRAGMENT_SHADER);
+			glShaderSource(fragment, 1, &fShaderCode, NULL);
+			glCompileShader(fragment);
+			checkCompileErrors(fragment, "FRAGMENT");
+
+			m_Program = glCreateProgram();
+			glAttachShader(m_Program, vertex);
+			glAttachShader(m_Program, fragment);
+			glLinkProgram(m_Program);
+			checkCompileErrors(m_Program, "PROGRAM");
+
+			glDeleteShader(vertex);
+			glDeleteShader(fragment);
+
+			std::string name = shaderFile;
+			auto lastSlash = name.find_last_of("/\\");
+			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+			auto lastDot = name.rfind('.');
+			auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
+			name = name.substr(lastSlash, count);
+			m_Name = name.c_str();
+
+		}
+		else {
+			std::string cShaderCodeSrc;
+			std::stringstream cShaderCodeStream;
+			cShaderCodeStream << file.rdbuf();
+			file.close();
+
+			cShaderCodeSrc = cShaderCodeStream.str();
+
+			const GLchar* cShaderCode = cShaderCodeSrc.c_str();
+
+			GLuint compute;
+
+			compute = glCreateShader(GL_COMPUTE_SHADER);
+			glShaderSource(compute, 1, &cShaderCode, NULL);
+			glCompileShader(compute);
+			checkCompileErrors(compute, "COMPUTE");
+
+			m_Program = glCreateProgram();
+			glAttachShader(m_Program, compute);
+
+			glLinkProgram(m_Program);
+			checkCompileErrors(m_Program, "PROGRAM");
+
+			glDeleteShader(compute);
+
+			std::string name = shaderFile;
+			auto lastSlash = name.find_last_of("/\\");
+			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+			auto lastDot = name.rfind('.');
+			auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
+			name = name.substr(lastSlash, count);
+			m_Name = name.c_str();
 		}
 
-		std::string vString = ss[0].str();
-		std::string fString = ss[1].str();
-
-		const char* vShaderCode = vString.c_str();
-		const char* fShaderCode = fString.c_str();
-
-		unsigned int vertex, fragment;
-
-		vertex = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertex, 1, &vShaderCode, NULL);
-		glCompileShader(vertex);
-		checkCompileErrors(vertex, "VERTEX");
-
-		fragment = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragment, 1, &fShaderCode, NULL);
-		glCompileShader(fragment);
-		checkCompileErrors(fragment, "FRAGMENT");
-
-		m_Program = glCreateProgram();
-		glAttachShader(m_Program, vertex);
-		glAttachShader(m_Program, fragment);
-		glLinkProgram(m_Program);
-		checkCompileErrors(m_Program, "PROGRAM");
-
-		glDeleteShader(vertex);
-		glDeleteShader(fragment);
-
-		std::string name = shaderFile;
-		auto lastSlash = name.find_last_of("/\\");
-		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-		auto lastDot = name.rfind('.');
-		auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
-		name = name.substr(lastSlash, count);
-		m_Name = name.c_str();
-
-		std::cout << "[L20] Loaded Shader: " << shaderFile << std::endl;
+		std::cout << "[L20] Loaded Shader (" << m_Name << "): " << shaderFile << std::endl;
 	}
 	Shader::~Shader() { glDeleteProgram(m_Program); }
 
@@ -121,14 +158,14 @@ namespace Louron {
 		}
 	}
 
-	Shader* ShaderLibrary::LoadShader(const std::string& shaderFile) {
-		Shader* shader = new Shader(shaderFile.c_str());
+	Shader* ShaderLibrary::LoadShader(const std::string& shaderFile, bool isComputeShader) {
+		Shader* shader = new Shader(shaderFile.c_str(), isComputeShader);
 		Add(shader);
 		return shader;
 	}
 
-	Shader* ShaderLibrary::LoadShader(const std::string& shaderFile, const std::string& shaderName) {
-		Shader* shader = new Shader(shaderFile.c_str());
+	Shader* ShaderLibrary::LoadShader(const std::string& shaderFile, const std::string& shaderName, bool isComputeShader) {
+		Shader* shader = new Shader(shaderFile.c_str(), isComputeShader);
 		Add(shaderName, shader);
 		return shader;
 	}

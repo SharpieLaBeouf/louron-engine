@@ -18,7 +18,7 @@ private:
 	Louron::TextureLibrary& m_TextureLib;
 
 	Louron::Camera* m_SceneCamera;
-	Louron::Light light_properties;
+	Louron::OldLight light_properties;
 
 	std::unique_ptr<Louron::MeshRendererComponent> monkey;
 	std::unique_ptr < Louron::MeshRendererComponent> back_pack;
