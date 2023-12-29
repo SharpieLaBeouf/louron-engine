@@ -2,7 +2,10 @@
 
 #include <iostream>
 
+#include "Scene.h"
 #include "Components.h"
+
+#include "entt/entt.hpp"
 
 namespace Louron {
 
@@ -11,11 +14,43 @@ namespace Louron {
 
 	public:
 		Entity() = default;
+		Entity(entt::entity regHandle, Scene* scene);
 		Entity(const Entity&) = default;
-		~Entity() = default;
+
+		// This adds a Component to the applicable Entity, and returns that Component
+		template<typename T, typename... Args>
+		T& AddComponent(Args&&... args) {
+			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			return component;
+		}
+
+		// This returns the applicable Component
+		template<typename T>
+		T& GetComponent() {
+			return m_Scene->m_Registry.get<T>(m_EntityHandle);
+		}
+
+		// This returns if the Entity has an applicable Component
+		template <typename T>
+		bool HasComponent() {
+			return m_Scene->m_Registry.has<T>(m_EntityHandle);
+		}
+		// This removes any Component within the applicable Entity
+		template <typename T>
+		void RemoveComponent() {
+			m_Scene->m_Registry.remove_if_exists<T>(m_EntityHandle);
+		}
+
+		operator bool() const { return m_EntityHandle != entt::null; }
+		operator entt::entity() const { return m_EntityHandle; }
+		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
+
+		// This returns the tag reference to the Component
+		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
 
 	private:
-		GLuint* m_ParentID;
+		entt::entity m_EntityHandle{ entt::null };
+		Scene* m_Scene = nullptr;
 	};
 
 }

@@ -16,4 +16,4 @@
 #include "Scene/Entity.h"
 #include "Scene/Light.h"
 #include "Scene/MeshRenderer.h"
-#include "Scene/SceneManager.h"
+#include "Scene/Scene.h"

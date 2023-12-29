@@ -14,6 +14,7 @@
 
 namespace Louron {
 
+	// TODO: Create Point Light Struct
 	class Light {
 
 	public:

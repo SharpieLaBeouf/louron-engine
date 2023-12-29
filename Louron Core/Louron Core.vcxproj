@@ -121,17 +121,18 @@
     <ClCompile Include="src\Scene\MeshRenderer.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
-    <ClCompile Include="src\OpenGL\Shader.cpp" />
-    <ClCompile Include="src\OpenGL\Texture.cpp" />
-    <ClCompile Include="src\OpenGL\Vertex Array.cpp" />
-    <ClCompile Include="src\OpenGL\Buffer.cpp" />
-    <ClCompile Include="src\OpenGL\Material.cpp" />
-    <ClCompile Include="include\imgui\imgui.cpp" />
-    <ClCompile Include="include\imgui\imgui_demo.cpp" />
-    <ClCompile Include="include\imgui\imgui_draw.cpp" />
-    <ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
-    <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
-    <ClCompile Include="include\imgui\imgui_widgets.cpp" />
+	<ClCompile Include="src\Scene\Scene.cpp" />
+	<ClCompile Include="src\OpenGL\Shader.cpp" />
+	<ClCompile Include="src\OpenGL\Texture.cpp" />
+	<ClCompile Include="src\OpenGL\Vertex Array.cpp" />
+	<ClCompile Include="src\OpenGL\Buffer.cpp" />
+	<ClCompile Include="src\OpenGL\Material.cpp" />
+	<ClCompile Include="include\imgui\imgui.cpp" />
+	<ClCompile Include="include\imgui\imgui_demo.cpp" />
+	<ClCompile Include="include\imgui\imgui_draw.cpp" />
+	<ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
+	<ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
+	<ClCompile Include="include\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\assimp\aabb.h" />
@@ -234,7 +235,7 @@
     <ClInclude Include="src\Scene\Components.h" />
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\OpenGL\Texture.h" />
-    <ClInclude Include="src\Scene\SceneManager.h" />
+    <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Core\Input.h" />
     <ClInclude Include="src\OpenGL\Shader.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />

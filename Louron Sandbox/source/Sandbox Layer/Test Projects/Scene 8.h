@@ -29,29 +29,32 @@ public:
 	{
 		std::cout << "[L20] Opening Scene 8..." << std::endl;
 
-		//m_SceneCamera = new Camera(m_Window, glm::vec3(0.0f, 0.0f, 10.0f));
-
-		glEnable(GL_DEPTH_TEST);
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-
-		if (m_Scene->LoadScene("hello world")) {
-			std::cout << "[L20] Failed to Load Scene." << std::endl;
-		}
-	}
+		// Load Shader if Not Yet Loaded
+		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
+		
+		// Create Entity for Monkey and Load Applicable Model
+		m_Scene->CreateEntity("Monkey").AddComponent<Louron::MeshRendererComponent>().loadModel("assets/Models/Monkey/Pink_Monkey.fbx", "material_shader_phong");
+		
+		// Create Entity for Camera and Set to Primary Camera
+		m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>().Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Primary = true;
+	 
+	 }
 
 	~Scene8() override
 	{
 		std::cout << "[L20] Closing Scene 8..." << std::endl;
-		glDisable(GL_DEPTH_TEST);
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	
-}
+			
+	}
 
 	void Update() override {
 
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
+
+		// Update Camera Component
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
 
 		Draw();
 	}
@@ -88,9 +91,14 @@ private:
 
 	void Draw() override {
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		// Draw All Entities in Scene
+		m_Scene->OnUpdate();
+
+		glDisable(GL_DEPTH_TEST);
 	}
 
 	glm::vec4 back_colour = { 0.3137f, 0.7843f, 1.0f, 1.0f };

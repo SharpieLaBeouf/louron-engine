@@ -54,9 +54,11 @@ namespace Louron {
 
 	struct CameraComponent {
 
+		Camera* Camera = nullptr;
+		bool Primary = true;
 
-
-
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
 
 	};
 }
