@@ -72,7 +72,8 @@ namespace Louron {
     }
 
     bool Engine::OnWindowClose() {
-        return false;
+        m_Running = false;
+        return true;
     }
 
     bool Engine::OnWindowResize() {

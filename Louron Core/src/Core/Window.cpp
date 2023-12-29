@@ -66,6 +66,11 @@ namespace Louron {
 				glViewport(0, 0, data.Width, data.Height);
 			});
 
+		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow* window)
+			{
+				Engine::Get().Close();
+			});
+
 		std::cout << "[L20] GLFW Created Window: " << m_Data->Width << "x" << m_Data->Height << std::endl;
 	}
 

@@ -26,7 +26,14 @@ void MainMenuLayer::OnUpdate() {
 	glClearColor(211.0f / 255.0f, 238.0f / 255.0f, 255.0f / 255.0f, 1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (Louron::Engine::Get().GetInput().GetKeyUp(GLFW_KEY_ESCAPE)) m_SceneSelector = 0;
+	if (Louron::Engine::Get().GetInput().GetKeyUp(GLFW_KEY_ESCAPE)) {
+		if (m_SceneSelector == 0) {
+			std::cout << "[L20] Closing Window..." << std::endl;
+			Louron::Engine::Get().Close();
+		}
+		else 
+			m_SceneSelector = 0;
+	}
 
 	switch (m_SceneSelector) {
 		default:
