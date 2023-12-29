@@ -1,7 +1,7 @@
 # LouronEngine
 
 **Overview:**
-Louron Engine is a personal project initiated in 2020 with the ambitious goal of crafting a versatile game engine. The primary focus is on providing a seamless game development experience for Windows and mobile devices. As an ongoing labor of love, this project has seen intermittent but dedicated efforts to create a robust foundation for game development.
+Louron Engine is a personal project initiated in 2020 with the ambitious goal of crafting a versatile game engine. The primary focus is on providing a seamless game development experience for Windows. As an ongoing labor of love, this project has seen intermittent but dedicated efforts to create a robust foundation for game development.
 
 **Current Status:**
 While Louron Engine has some functionality so far, there's still a considerable journey ahead.
