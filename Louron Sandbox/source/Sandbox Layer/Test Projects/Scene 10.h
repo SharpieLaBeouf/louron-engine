@@ -72,7 +72,7 @@ public:
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
 		m_SceneCamera(glm::vec3(0.0f, 10.0f, 0.0f))
 	{
-		std::cout << "[L20] Opening Scene 10 - PONG..." << std::endl;
+		std::cout << "[L20] Loading Scene 10 - PONG..." << std::endl;
 
 		// Init Cube VAO
 		{
@@ -100,10 +100,6 @@ public:
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 			glBindVertexArray(0);
 		}
-
-
-		// Load Standard Flat Shader
-		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
 
 		// Create Ball and Assign Shader to Ball Material and Set Colour to Red
 		m_Ball = std::make_unique<Ball>();
@@ -136,7 +132,7 @@ public:
 	}
 
 	~Scene10() {
-		std::cout << "[L20] Closing Scene 10 - PONG..." << std::endl;
+		std::cout << "[L20] Unloading Scene 10 - PONG..." << std::endl;
 
 
 	}
@@ -365,15 +361,15 @@ private:
 		rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
 
 		// 4. Calculate the inverse of the view matrix (View Space -> World Space)
-		glm::mat4 invView = glm::inverse(m_SceneCamera.getViewMatrix());
+		glm::mat4 invView = glm::inverse(m_SceneCamera.GetViewMatrix());
 
 		// 5. Transform the ray to world coordinates and normalize it (Start Position of Ray in World Space)
 		glm::vec4 rayWorld = invView * rayEye;
 		rayWorld = glm::normalize(glm::vec4(rayWorld.x, rayWorld.y, rayWorld.z, 0.0f));
 
 		// 6. Calculate the intersection point in world coordinates (Cast Ray and Calculate Position at Custom Intersection on the Y Axis)
-		float t = (0.0f - m_SceneCamera.getPosition().y) / rayWorld.y;
-		glm::vec3 boundaryLeftTop = m_SceneCamera.getPosition() + glm::vec3(rayWorld * t);
+		float t = (0.0f - m_SceneCamera.GetPosition().y) / rayWorld.y;
+		glm::vec3 boundaryLeftTop = m_SceneCamera.GetPosition() + glm::vec3(rayWorld * t);
 		glm::vec3 boundaryRightBottom = -boundaryLeftTop;
 
 		// Define Ball Boundaries
@@ -463,12 +459,12 @@ private:
 			m_Ball->material.SetUniforms();
 			m_Ball->material.GetShader()->SetMat4("model", m_Ball->transform);
 			m_Ball->material.GetShader()->SetMat4("proj", proj);
-			m_Ball->material.GetShader()->SetMat4("view", m_SceneCamera.getViewMatrix());
+			m_Ball->material.GetShader()->SetMat4("view", m_SceneCamera.GetViewMatrix());
 			m_Ball->material.GetShader()->SetVec3("u_Light.position", m_Light.position);
 			m_Ball->material.GetShader()->SetVec4("u_Light.ambient", m_Light.ambient);
 			m_Ball->material.GetShader()->SetVec4("u_Light.diffuse", m_Light.diffuse);
 			m_Ball->material.GetShader()->SetVec4("u_Light.specular", m_Light.specular);
-			m_Ball->material.GetShader()->SetVec3("u_CameraPos", m_SceneCamera.getPosition());
+			m_Ball->material.GetShader()->SetVec3("u_CameraPos", m_SceneCamera.GetPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			m_Ball->material.UnBind();
@@ -481,12 +477,12 @@ private:
 				paddle->material.SetUniforms();
 				paddle->material.GetShader()->SetMat4("model", paddle->transform);
 				paddle->material.GetShader()->SetMat4("proj", proj);
-				paddle->material.GetShader()->SetMat4("view", m_SceneCamera.getViewMatrix());
+				paddle->material.GetShader()->SetMat4("view", m_SceneCamera.GetViewMatrix());
 				paddle->material.GetShader()->SetVec3("u_Light.position", m_Light.position);
 				paddle->material.GetShader()->SetVec4("u_Light.ambient", m_Light.ambient);
 				paddle->material.GetShader()->SetVec4("u_Light.diffuse", m_Light.diffuse);
 				paddle->material.GetShader()->SetVec4("u_Light.specular", m_Light.specular);
-				paddle->material.GetShader()->SetVec3("u_CameraPos", m_SceneCamera.getPosition());
+				paddle->material.GetShader()->SetVec3("u_CameraPos", m_SceneCamera.GetPosition());
 
 				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				m_Ball->material.UnBind();

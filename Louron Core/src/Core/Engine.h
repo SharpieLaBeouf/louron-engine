@@ -12,6 +12,7 @@
 #include "LayerStack.h"
 #include "../OpenGL/Shader.h"
 #include "../OpenGL/Texture.h"
+#include "../Scene/Mesh.h"
 
 int main(int argc, char** argv);
 
@@ -46,10 +47,9 @@ namespace Louron {
 		Window& GetWindow() { return *m_Window; }
 		GuiLayer* GetImGuiLayer() { return m_GuiLayer; }
 
+		InputManager& GetInput() { return *m_Input; }
 		ShaderLibrary& GetShaderLibrary() { return *m_ShaderLibrary; }
 		TextureLibrary& GetTextureLibrary() { return *m_TextureLibrary; }
-
-		InputManager& GetInput() { return *m_Input; }
 
 		static Engine& Get() { return *s_Instance; }
 		void Close();
@@ -61,20 +61,23 @@ namespace Louron {
 		bool OnWindowClose();
 		bool OnWindowResize();
 
+		std::vector<std::string> FindFilePaths(const std::string& directory, const std::string& extension);
+
 	private:
+
+		bool m_Running = true;
+		bool m_Minimized = false;
+		float m_LastFrameTime = 0.0f;
+
 		std::unique_ptr <Window> m_Window;
 		GuiLayer* m_GuiLayer;
 		LayerStack m_LayerStack;
 		EngineSpecification m_Specification;
 
-		std::unique_ptr<ShaderLibrary> m_ShaderLibrary;
-		std::unique_ptr <TextureLibrary> m_TextureLibrary;
-
+		// Resource Management Systems
 		std::unique_ptr<InputManager> m_Input;
-
-		bool m_Running = true;
-		bool m_Minimized = false;
-		float m_LastFrameTime = 0.0f;
+		std::unique_ptr<ShaderLibrary> m_ShaderLibrary;
+		std::unique_ptr<TextureLibrary> m_TextureLibrary;
 
 	private:
 		static Engine* s_Instance;

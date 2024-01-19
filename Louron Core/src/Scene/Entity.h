@@ -4,6 +4,7 @@
 
 #include "Scene.h"
 #include "Components.h"
+#include "Mesh.h"
 
 #include "entt/entt.hpp"
 
@@ -20,7 +21,15 @@ namespace Louron {
 		// This adds a Component to the applicable Entity, and returns that Component
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) {
+
+			if (std::is_same<T, MeshComponent>::value && !HasComponent<MaterialComponent>())
+				AddComponent<MaterialComponent>();
+
+			if (HasComponent<T>())
+				return GetComponent<T>();
+
 			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+
 			return component;
 		}
 

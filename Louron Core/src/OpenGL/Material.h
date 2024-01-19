@@ -4,7 +4,7 @@
 #include "Texture.h"
 
 #include <string>
-#include <unordered_map>
+#include <array>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -21,6 +21,8 @@ namespace Louron {
 		L20_TEXTURE_NORMAL_MAP = 2
 	};
 
+	struct CameraComponent;
+
 	class Material {
 
 	public:
@@ -29,46 +31,43 @@ namespace Louron {
 		void UnBind();
 
 		void SetUniforms();
+		void UpdateUniforms(const CameraComponent& Camera);
 
-		void SetShader(Shader* shader);
-		Shader* GetShader();
+		void SetShader(std::shared_ptr<Shader>& shader);
+		std::shared_ptr<Shader>& GetShader();
 
 		Material();
-		Material(Shader* shader);
+		Material(std::shared_ptr<Shader>& shader);
 		Material(Texture* texture);
-		Material(Shader* shader, Texture* texture);
-		Material(Shader* shader, std::unordered_map<GLint, Texture*>& textures);
+		Material(std::shared_ptr<Shader>& shader, Texture* texture);
+		Material(std::shared_ptr<Shader>& shader, std::unordered_map<GLint, Texture*>& textures);
 
-		float GetShine();
-		glm::vec4* GetAmbient();
+		float GetShine() const;
 		glm::vec4* GetDiffuse();
 		glm::vec4* GetSpecular();
 
 		void SetTexture(Texture* texture, TextureMapType textureType);
 
 		void SetShine(float shine);
-		void SetAmbient(const glm::vec4& val);
 		void SetDiffuse(const glm::vec4& val);
 		void SetSpecular(const glm::vec4& val);
 
-		/// <param name="type">Refer using TextureMapType enum.</param>
 		void AddTextureMap(GLint type, Texture* val);
-		/// <param name="type">Refer using TextureMapType enum.</param>
+		
 		Texture* GetTextureMap(GLint type);
 
 		void SetMaterialIndex(GLuint index);
-		GLuint GetMaterialIndex();
+		GLuint GetMaterialIndex() const;
 
 	private:
 
 		GLuint m_MaterialIndex = NULL;
 
 		GLfloat m_Shine = 32.0f;
-		glm::vec4 m_Ambient = glm::vec4(0.25f);
 		glm::vec4 m_Diffuse = glm::vec4(1.0f);
 		glm::vec4 m_Specular = glm::vec4(0.5f);
 
-		Shader* m_Shader;
+		std::shared_ptr<Shader> m_Shader;
 
 		std::unordered_map<GLint, Texture*> m_Textures;
 
@@ -78,4 +77,35 @@ namespace Louron {
 			"normalMap"
 		};
 	};
+
+	struct BPMaterial : public Material {
+
+	public:
+
+		BPMaterial() = default;
+		~BPMaterial() = default;
+
+		GLfloat m_Shine = 32.0f;
+		glm::vec4 m_Diffuse = glm::vec4(1.0f);
+		glm::vec4 m_Specular = glm::vec4(0.5f);
+
+		GLuint MaterialIndex;
+		std::shared_ptr<Shader> MaterialShader;
+		std::array<std::shared_ptr<Texture>, L20_TOTAL_ELEMENTS> MaterialTextures;
+
+	public:
+
+		void SetShader(std::shared_ptr<Shader> shader) { MaterialShader = shader; }
+
+	};
+
+	struct PBRMaterial : public Material {
+
+	public:
+
+		PBRMaterial() = default;
+		~PBRMaterial() = default;
+
+	};
+
 }

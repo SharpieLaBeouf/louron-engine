@@ -30,7 +30,7 @@ public:
 		 m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		 m_TextureLib(Louron::Engine::Get().GetTextureLibrary()) 
 	 {
-		std::cout << "[L20] Opening Scene 9..." << std::endl;
+		std::cout << "[L20] Loading Scene 9..." << std::endl;
 
 		{
 			// Init Cube VAO
@@ -64,13 +64,7 @@ public:
 		m_SceneCamera->setYaw(-180.0f);
 		m_SceneCamera->toggleMovement();
 		light_properties.position = { 0.0f, 5.0f, 0.0f };
-
-		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_flat.glsl");
-		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
-
-		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
-		m_TextureLib.loadTexture("assets/Images/cube_texture_specular.png");
-			
+					
 		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("blank_texture"));
 		
 		phong_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("blank_texture"));
@@ -80,7 +74,7 @@ public:
 	}
 
 	~Scene9() override {
-		std::cout << "[L20] Closing Scene 9..." << std::endl;
+		std::cout << "[L20] Unloading Scene 9..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
@@ -160,7 +154,6 @@ public:
 
 		if (ImGui::TreeNode("Phong Cube Material"))
 		{
-			ImGui::ColorEdit4("Ambient", glm::value_ptr(*phong_cube_mat->GetAmbient()));
 			ImGui::ColorEdit4("Diffuse", glm::value_ptr(*phong_cube_mat->GetDiffuse()));
 			ImGui::ColorEdit4("Specular", glm::value_ptr(*phong_cube_mat->GetSpecular()));
 			ImGui::TreePop();
@@ -207,15 +200,15 @@ private:
 		rayEye = glm::vec4(rayEye.x, rayEye.y, -1.0f, 0.0f);
 
 		// 4. Calculate the inverse of the view matrix (View Space -> World Space)
-		glm::mat4 invView = glm::inverse(m_SceneCamera->getViewMatrix());
+		glm::mat4 invView = glm::inverse(m_SceneCamera->GetViewMatrix());
 
 		// 5. Transform the ray to world coordinates and normalize it (Start Position of Ray in World Space)
 		glm::vec4 rayWorld = invView * rayEye;
 		rayWorld = glm::normalize(glm::vec4(rayWorld.x, rayWorld.y, rayWorld.z, 0.0f));
 
 		// 6. Calculate the intersection point in world coordinates (Cast Ray and Calculate Position at Custom Intersection on the Y Axis)
-		float t = (customIntersectionY - m_SceneCamera->getPosition().y) / rayWorld.y;
-		glm::vec3 intersectionPoint = m_SceneCamera->getPosition() + glm::vec3(rayWorld * t);
+		float t = (customIntersectionY - m_SceneCamera->GetPosition().y) / rayWorld.y;
+		glm::vec3 intersectionPoint = m_SceneCamera->GetPosition() + glm::vec3(rayWorld * t);
 
 		// 7. Return World Position Where Ray Hits Y Axis Intersection
 		return intersectionPoint;
@@ -239,7 +232,7 @@ private:
 			flat_cube_mat->SetUniforms();
 			flat_cube_mat->GetShader()->SetMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), light_properties.position), lightScale));
 			flat_cube_mat->GetShader()->SetMat4("proj", proj);
-			flat_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix());
+			flat_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix());
 
 			// Light Render
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -250,12 +243,12 @@ private:
 
 			phong_cube_mat->SetUniforms();
 			phong_cube_mat->GetShader()->SetMat4("proj", proj);
-			phong_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix());
+			phong_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix());
 			phong_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			phong_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->getPosition());
+			phong_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->GetPosition());
 
 			// Player 1 Render
 			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube1_position));

@@ -35,7 +35,7 @@ private:
 public:
 
 	Scene1() : m_Input(Louron::Engine::Get().GetInput()), m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()) {
-		std::cout << "[L20] Opening Scene 1..." << std::endl;
+		std::cout << "[L20] Loading Scene 1..." << std::endl;
 
 		glGenVertexArrays(1, &triangleVAO);
 		glGenBuffers(1, &triangleVBO);
@@ -54,11 +54,9 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
-		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic.glsl");
-
 	}
 	~Scene1() override {
-		std::cout << "[L20] Closing Scene 1..." << std::endl;
+		std::cout << "[L20] Unloading Scene 1..." << std::endl;
 		glDeleteVertexArrays(1, &triangleVAO);
 		glDeleteBuffers(1, &triangleVBO);
 		glDeleteBuffers(1, &triangleEBO);
@@ -101,7 +99,7 @@ private:
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		Louron::Shader* shader = m_ShaderLib.GetShader("basic");
+		std::shared_ptr<Louron::Shader> shader = m_ShaderLib.GetShader("basic");
 		if (shader)
 		{
 			glBindVertexArray(triangleVAO);

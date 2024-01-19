@@ -20,8 +20,11 @@ private:
 	Louron::Camera* m_SceneCamera;
 	Louron::OldLight light_properties;
 
-	std::unique_ptr<Louron::MeshRendererComponent> monkey;
-	std::unique_ptr < Louron::MeshRendererComponent> back_pack;
+	Louron::MaterialComponent monkey_mat;
+	Louron::MaterialComponent back_pack_mat;
+
+	std::unique_ptr<Louron::MeshComponent> monkey;
+	std::unique_ptr<Louron::MeshComponent> back_pack;
 
 public:
 
@@ -30,25 +33,22 @@ public:
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
-		std::cout << "[L20] Opening Scene 7..." << std::endl;
+		std::cout << "[L20] Loading Scene 7..." << std::endl;
 
 		m_SceneCamera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
 		m_SceneCamera->MouseToggledOff = false;
 		m_SceneCamera->MovementSpeed = 10.0f;
 		m_SceneCamera->MovementYDamp = 0.65f;
 
-		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
-
-		back_pack = std::make_unique<Louron::MeshRendererComponent>();
-		back_pack->loadModel("assets/Models/BackPack/BackPack.fbx", "material_shader_phong");
-
-		monkey = std::make_unique<Louron::MeshRendererComponent>();
-		monkey->loadModel("assets/Models/Monkey/Monkey.fbx", "material_shader_phong");
+		back_pack = std::make_unique<Louron::MeshComponent>();
+		back_pack->LoadModel("assets/Models/BackPack/BackPack.fbx", monkey_mat);
+		monkey = std::make_unique<Louron::MeshComponent>();
+		monkey->LoadModel("assets/Models/BackPack/BackPack.fbx", back_pack_mat);
 	}
 
 	~Scene7() override
 	{
-		std::cout << "[L20] Closing Scene 7..." << std::endl;
+		std::cout << "[L20] Unloading Scene 7..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
@@ -101,8 +101,9 @@ private:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 
-		monkey->renderEntireMesh(m_SceneCamera, &light_properties);
-		back_pack->renderEntireMesh(m_SceneCamera, &light_properties);
+		// TODO: Implement Functionality for Basic Forward Rendering where required
+		// monkey->Render();
+		// back_pack->Render();
 
 		glDisable(GL_DEPTH_TEST);
 	}

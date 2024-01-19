@@ -118,21 +118,22 @@
     <ClCompile Include="src\Core\Input.cpp" />
     <ClCompile Include="src\Core\LayerStack.cpp" />
     <ClCompile Include="src\Core\Window.cpp" />
-    <ClCompile Include="src\Scene\MeshRenderer.cpp" />
+    <ClCompile Include="src\Renderer\Renderer.cpp" />
+    <ClCompile Include="src\Scene\Mesh.cpp" />
     <ClCompile Include="src\Scene\Camera.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
-	<ClCompile Include="src\Scene\Scene.cpp" />
-	<ClCompile Include="src\OpenGL\Shader.cpp" />
-	<ClCompile Include="src\OpenGL\Texture.cpp" />
-	<ClCompile Include="src\OpenGL\Vertex Array.cpp" />
-	<ClCompile Include="src\OpenGL\Buffer.cpp" />
-	<ClCompile Include="src\OpenGL\Material.cpp" />
-	<ClCompile Include="include\imgui\imgui.cpp" />
-	<ClCompile Include="include\imgui\imgui_demo.cpp" />
-	<ClCompile Include="include\imgui\imgui_draw.cpp" />
-	<ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
-	<ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
-	<ClCompile Include="include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\Scene\Scene.cpp" />
+    <ClCompile Include="src\OpenGL\Shader.cpp" />
+    <ClCompile Include="src\OpenGL\Texture.cpp" />
+    <ClCompile Include="src\OpenGL\Vertex Array.cpp" />
+    <ClCompile Include="src\OpenGL\Buffer.cpp" />
+    <ClCompile Include="src\OpenGL\Material.cpp" />
+    <ClCompile Include="include\imgui\imgui.cpp" />
+    <ClCompile Include="include\imgui\imgui_demo.cpp" />
+    <ClCompile Include="include\imgui\imgui_draw.cpp" />
+    <ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="include\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\assimp\aabb.h" />
@@ -227,9 +228,10 @@
     <ClInclude Include="src\Core\LayerStack.h" />
     <ClInclude Include="src\Louron.h" />
     <ClInclude Include="src\OpenGL\Buffer.h" />
+    <ClInclude Include="src\Renderer\Renderer.h" />
     <ClInclude Include="src\Scene\Light.h" />
     <ClInclude Include="src\OpenGL\Material.h" />
-    <ClInclude Include="src\Scene\MeshRenderer.h" />
+    <ClInclude Include="src\Scene\Mesh.h" />
     <ClInclude Include="src\OpenGL\Vertex Array.h" />
     <ClInclude Include="src\Scene\Camera.h" />
     <ClInclude Include="src\Scene\Components.h" />

@@ -110,6 +110,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
+      <Profile>
+      </Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -131,6 +133,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <Profile />
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -148,7 +151,8 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <Profile />
+      <Profile>
+      </Profile>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
@@ -186,12 +190,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\Models\BackPack\BackPack.fbx" />
+    <None Include="assets\Models\Cube\Cube.fbx" />
     <None Include="assets\Models\Monkey\Monkey.fbx" />
-    <None Include="assets\Models\Ship\Ship.fbx" />
+    <None Include="assets\Models\Monkey\Pink_Monkey.fbx" />
     <None Include="assets\Shaders\Basic\basic.glsl" />
     <None Include="assets\Shaders\Basic\basic_phong.glsl" />
     <None Include="assets\Shaders\Basic\basic_texture.glsl" />
+    <None Include="assets\Shaders\Forward+\FP_Depth.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Light_Culling.comp" />
+    <None Include="assets\Shaders\Default Shader.glsl" />
+    <None Include="assets\Shaders\Forward+\FP_Material_BP_Shader.glsl" />
+    <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
     <None Include="assets\Shaders\Materials\material_shader_flat.glsl" />
     <None Include="assets\Shaders\Materials\material_shader_phong.glsl" />
     <None Include="assimp-vc143-mt.dll">

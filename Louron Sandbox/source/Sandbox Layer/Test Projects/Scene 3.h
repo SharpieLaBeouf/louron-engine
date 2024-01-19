@@ -21,7 +21,7 @@ public:
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{			
-		std::cout << "[L20] Opening Scene 3..." << std::endl;
+		std::cout << "[L20] Loading Scene 3..." << std::endl;
 
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
@@ -44,17 +44,10 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
-		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic_texture.glsl");
-			
-		m_ShaderLib.GetShader("basic_texture")->Bind();
-		m_ShaderLib.GetShader("basic_texture")->SetInt("ourTexture", 0);
-		m_ShaderLib.GetShader("basic_texture")->UnBind();
-
-		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
 	}
 	~Scene3() override
 	{
-		std::cout << "[L20] Closing Scene 3..." << std::endl;
+		std::cout << "[L20] Unloading Scene 3..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glDeleteVertexArrays(1, &VAO);
 		glDeleteBuffers(1, &VBO);
@@ -124,7 +117,7 @@ private:
 
 		trans.rotation.z += deltaTime * speed;
 
-		Louron::Shader* shader = m_ShaderLib.GetShader("basic_texture");
+		std::shared_ptr<Louron::Shader> shader = m_ShaderLib.GetShader("basic_texture");
 		if (shader)
 		{
 			glBindVertexArray(VAO);

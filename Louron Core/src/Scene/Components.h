@@ -7,17 +7,16 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+#include <map>
+
 #include "Light.h"
 #include "Camera.h"
-#include "MeshRenderer.h"
+#include "Mesh.h"
+#include "../OpenGL/Material.h"
 
-//COMPONENT LIST
-//--------------
-// TagComponent
-// TransformComponent
-// MeshRendererComponent
-// CameraComponent
-// LightComponent
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace Louron {
 
@@ -60,5 +59,59 @@ namespace Louron {
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
 
+	};
+
+	struct MaterialComponent {
+
+		std::vector<std::shared_ptr<Material>> Materials;
+		std::string ShaderName = "Default Shader";
+
+		MaterialComponent() = default;
+		MaterialComponent(const std::string& shaderName) : ShaderName(shaderName) { }
+		MaterialComponent(const MaterialComponent&) = default;
+
+		void LinkMeshMaterials(std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>> meshMaterialPair) {
+			for (const auto& material : meshMaterialPair)
+				Materials.push_back(material.second);
+		}
+
+		void SetShader(const std::string& shaderName) {
+			ShaderName = shaderName;
+			for (const auto& mat : Materials) {
+				mat->SetShader(Engine::Get().GetShaderLibrary().GetShader(ShaderName));
+			}
+		}
+	};
+
+	struct MeshComponent {
+
+	public:
+		bool active = true;
+
+		MeshComponent() {}
+		MeshComponent(std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>> meshes) {
+			for (const auto& mesh : meshes) {
+				
+				m_Meshes.push_back(mesh.first);
+				
+				m_MeshCount++;
+			}
+		}
+		MeshComponent(const MeshComponent&) = default;
+		~MeshComponent() = default;
+
+		int LoadModel(const char* filePath, MaterialComponent& materialComponent);
+
+		std::vector<std::shared_ptr<MeshFilter>>& GetMeshes() { return m_Meshes; }
+
+	private:
+
+		GLuint m_MeshCount = 0;
+		std::vector<std::shared_ptr<MeshFilter>> m_Meshes;
+
+		std::string m_Directory;
+
+		void ProcessNode(aiNode* node, const aiScene* scene, MaterialComponent& materialComponent);
+		std::shared_ptr<MeshFilter> ProcessMesh(aiMesh* mesh, const aiScene* scene, MaterialComponent& materialComponent) const;
 	};
 }

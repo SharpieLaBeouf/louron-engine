@@ -27,36 +27,54 @@ namespace Louron {
 
 	struct PointLightComponent {
 
-		glm::vec3 position;
+		glm::vec4 position = { 0.0f, 0.0f, 0.0f, 1.0f };
 
-		float Constant;
-		float Linear;
-		float Quadratic;
-		
-		glm::vec3 ambient;
-		glm::vec3 diffuse;
-		glm::vec3 specular;
+		glm::vec4 ambient = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+		float constant = 1.0f;
+		float linear = 0.09f;
+		float quadratic = 0.032f;
+
+		bool lastLight = false;
 
 		PointLightComponent() = default;
 		PointLightComponent(const PointLightComponent&) = default;
 	};
 
-	struct SpotLight {
-		glm::vec3 position;
-		glm::vec3 direction;
+	struct SpotLightComponent {
+		glm::vec4 position = glm::vec4(0.0f);
+		glm::vec4 direction = glm::vec4(0.0f);
 
-		float cutOff;
-		float outerCutOff;
+		glm::vec4 ambient = { 0.0f, 0.0f, 0.0f, 1.0f };
+		glm::vec4 diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
+		glm::vec4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-		float constant;
-		float linear;
-		float quadratic;
+		float cutOff = glm::cos(glm::radians(12.5f));
+		float outerCutOff = glm::cos(glm::radians(15.0f));
 
-		glm::vec3 ambient;
-		glm::vec3 diffuse;
-		glm::vec3 specular;
+		float constant = 1.0f;
+		float linear = 0.09f;
+		float quadratic = 0.032f;
 
-		SpotLight() = default;
-		SpotLight(const SpotLight&) = default;
+		bool lastLight = false;
+
+		SpotLightComponent() = default;
+		SpotLightComponent(const SpotLightComponent&) = default;
+	};
+
+	struct DirectionalLightComponent {
+
+		glm::vec4 direction;
+		glm::vec4 ambient;
+		glm::vec4 diffuse;
+		glm::vec4 specular;
+		
+		bool lastLight = false;
+	};
+
+	struct VisibleLightIndex {
+		int index;
 	};
 }

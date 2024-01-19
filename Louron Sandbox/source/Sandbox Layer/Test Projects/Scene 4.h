@@ -25,7 +25,7 @@ public:
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
-		std::cout << "[L20] Opening Scene 4..." << std::endl;
+		std::cout << "[L20] Loading Scene 4..." << std::endl;
 
 		// Init Plane VAO
 		glGenVertexArrays(1, &plane_VAO);
@@ -77,16 +77,10 @@ public:
 		sceneCamera->MovementSpeed = 10.0f;
 		sceneCamera->MovementYDamp = 0.65f;
 
-		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic.glsl");
-		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic_texture.glsl");
-		m_ShaderLib.GetShader("basic_texture")->Bind();
-		m_ShaderLib.GetShader("basic_texture")->SetInt("ourTexture", 0);
-
-		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
 	}
 	~Scene4() override
 	{
-		std::cout << "[L20] Closing Scene 4..." << std::endl;
+		std::cout << "[L20] Unloading Scene 4..." << std::endl;
 
 		glDeleteVertexArrays(1, &plane_VAO);
 		glDeleteBuffers(1, &plane_VBO);
@@ -175,7 +169,7 @@ private:
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		Louron::Shader* shader = m_ShaderLib.GetShader("basic");
+		std::shared_ptr<Louron::Shader> shader = m_ShaderLib.GetShader("basic");
 		if (shader)
 		{
 			// DRAW PLANE BENEATH
@@ -184,7 +178,7 @@ private:
 			shader->Bind();
 			shader->SetMat4("model", plane_trans);
 			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			shader->SetMat4("view", sceneCamera->getViewMatrix());
+			shader->SetMat4("view", sceneCamera->GetViewMatrix());
 			shader->SetVec4("ourColour", plane_colour);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		}
@@ -198,7 +192,7 @@ private:
 
 			shader->Bind();
 			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			shader->SetMat4("view", sceneCamera->getViewMatrix());
+			shader->SetMat4("view", sceneCamera->GetViewMatrix());
 			shader->SetVec4("ourColour", box_colour);
 
 			m_TextureLib.GetTexture("cube_texture")->Bind();
@@ -219,7 +213,7 @@ private:
 			}
 		}
 
-		m_ShaderLib.UnBind();
+		m_ShaderLib.UnBindAllShaders();
 		m_TextureLib.UnBind();
 
 		glDisable(GL_DEPTH_TEST);

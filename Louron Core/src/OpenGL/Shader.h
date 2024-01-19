@@ -18,7 +18,7 @@ namespace Louron {
 
 	private:
 
-		GLuint m_Program;
+		GLuint m_Program = -1;
 		std::string m_Name;
 
 	public:
@@ -47,29 +47,29 @@ namespace Louron {
 	private:
 
 		void checkCompileErrors(unsigned int shader, std::string type);
-
 	};
 
 	class ShaderLibrary {
 
-	private:
-
-		std::unordered_map<std::string, Shader*> m_Shaders;
-
 	public:
 
-		void UnBind();
+		void UnBindAllShaders();
 
-		ShaderLibrary() = default;
+		ShaderLibrary();
 
-		void Add(Shader* shader);
-		void Add(const std::string& shaderName, Shader* shader);
+		std::shared_ptr<Shader>& GetShader(const std::string& shaderName);
+		std::shared_ptr<Shader>& LoadShader(const std::string& shaderFile, bool isComputeShader = false);
 
-		Shader* LoadShader(const std::string& shaderFile, bool isComputeShader = false);
-		Shader* LoadShader(const std::string& shaderFile, const std::string& shaderName, bool isComputeShader = false);
-
-		Shader* GetShader(const std::string& shaderName);
+		const std::shared_ptr<Shader>& GetDefault() { return m_DefaultShader; }
 
 		bool ShaderExists(const std::string& name) const;
+
+	private:
+
+		std::unordered_map<std::string, std::shared_ptr<Shader>> m_Shaders;
+		std::shared_ptr<Shader> m_DefaultShader;
+
+	private:
+		std::string FilePathToShaderName(const std::string& shaderFile);
 	};
 }

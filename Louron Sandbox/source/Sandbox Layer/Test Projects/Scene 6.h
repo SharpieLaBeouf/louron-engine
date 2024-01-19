@@ -31,7 +31,7 @@ public:
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
-		std::cout << "[L20] Opening Scene 6..." << std::endl;
+		std::cout << "[L20] Loading Scene 6..." << std::endl;
 
 		// Init Cube VAO
 		glGenVertexArrays(1, &cube_VAO);
@@ -64,14 +64,6 @@ public:
 		m_SceneCamera->MovementSpeed = 10.0f;
 		m_SceneCamera->MovementYDamp = 0.65f;
 
-		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_flat.glsl");
-		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
-
-		m_TextureLib.loadTexture("assets/Images/cube_texture.png");
-		m_TextureLib.loadTexture("assets/Images/cube_texture_specular.png");
-		m_TextureLib.loadTexture("assets/Images/stone_texture.png");
-		m_TextureLib.loadTexture("assets/Images/stone_texture_specular.png");
-
 		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("blank_texture"));
 		flat_cube_mat->Bind();
 		flat_cube_mat->SetDiffuse(glm::vec4(1.0f));
@@ -94,7 +86,7 @@ public:
 
 	~Scene6() override
 	{
-		std::cout << "[L20] Closing Scene 6..." << std::endl;
+		std::cout << "[L20] Unloading Scene 6..." << std::endl;
 
 		glDeleteVertexArrays(1, &cube_VAO);
 		glDeleteBuffers(1, &cube_VBO);
@@ -136,7 +128,6 @@ public:
 
 		if (ImGui::TreeNode("Flat Cube Material"))
 		{
-			ImGui::ColorEdit4("Ambient", glm::value_ptr(*flat_cube_mat->GetAmbient()));
 			ImGui::ColorEdit4("Diffuse", glm::value_ptr(*flat_cube_mat->GetDiffuse()));
 			ImGui::ColorEdit4("Specular", glm::value_ptr(*flat_cube_mat->GetSpecular()));
 			ImGui::TreePop();
@@ -144,7 +135,6 @@ public:
 
 		if (ImGui::TreeNode("Box Cube Material"))
 		{
-			ImGui::ColorEdit4("Ambient", glm::value_ptr(*box_cube_mat->GetAmbient()));
 			ImGui::ColorEdit4("Diffuse", glm::value_ptr(*box_cube_mat->GetDiffuse()));
 			ImGui::ColorEdit4("Specular", glm::value_ptr(*box_cube_mat->GetSpecular()));
 			ImGui::TreePop();
@@ -152,7 +142,6 @@ public:
 
 		if (ImGui::TreeNode("Stone Cube Material"))
 		{
-			ImGui::ColorEdit4("Ambient", glm::value_ptr(*stone_cube_mat->GetAmbient()));
 			ImGui::ColorEdit4("Diffuse", glm::value_ptr(*stone_cube_mat->GetDiffuse()));
 			ImGui::ColorEdit4("Specular", glm::value_ptr(*stone_cube_mat->GetSpecular()));
 			ImGui::TreePop();
@@ -189,7 +178,7 @@ private:
 			flat_cube_mat->SetUniforms();
 			flat_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), light_properties.position));
 			flat_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			flat_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix()); 
+			flat_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix()); 
 			
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			flat_cube_mat->UnBind();
@@ -199,12 +188,12 @@ private:
 			stone_cube_mat->SetUniforms();
 			stone_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
 			stone_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			stone_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix());
+			stone_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix());
 			stone_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			stone_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->getPosition());
+			stone_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->GetPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			stone_cube_mat->UnBind();
@@ -214,12 +203,12 @@ private:
 			box_cube_mat->SetUniforms();
 			box_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, 0.0f)));
 			box_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			box_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->getViewMatrix());
+			box_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix());
 			box_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			box_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			box_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			box_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			box_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->getPosition());
+			box_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->GetPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			box_cube_mat->UnBind();

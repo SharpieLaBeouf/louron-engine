@@ -1,4 +1,5 @@
-#include "MeshRenderer.h"
+#include "Mesh.h"
+#include "Components.h"
 
 namespace Louron {
 
@@ -7,12 +8,10 @@ namespace Louron {
 	/// </summary>
 	/// <param name="vertices"></param>
 	/// <param name="indices"></param>
-	MeshFilter::MeshFilter(Window& wnd, const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) : 
-		m_Window(wnd), 
-		m_MaterialIndex(-1) 
+	MeshFilter::MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
 	{
 		
-		m_VAO = new VertexArray();
+		VAO = std::make_unique<VertexArray>();
 		VertexBuffer* vbo = new VertexBuffer(vertices, (GLuint)vertices.size());
 		BufferLayout layout = {
 			{ ShaderDataType::Float3, "aPos" },
@@ -23,34 +22,11 @@ namespace Louron {
 
 		IndexBuffer* ebo = new IndexBuffer(indices, (GLuint)indices.size());
 
-		m_VAO->AddVertexBuffer(vbo);
-		m_VAO->SetIndexBuffer(ebo);
+		VAO->AddVertexBuffer(vbo);
+		VAO->SetIndexBuffer(ebo);
 	}
 
-	void MeshFilter::renderMeshFilter(Camera* mainCamera, Material* mat, OldLight* mainLight) {
-
-		m_VAO->Bind();
-
-		if (mat->Bind()) {			
-			mat->SetUniforms();
-			mat->GetShader()->SetMat4("model", glm::mat4(1.0f));
-			mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), 0.1f, 100.0f));
-			mat->GetShader()->SetMat4("view", mainCamera->getViewMatrix());
-			mat->GetShader()->SetVec3("u_Light.position", mainLight->position);
-			mat->GetShader()->SetVec4("u_Light.ambient", mainLight->ambient);
-			mat->GetShader()->SetVec4("u_Light.diffuse", mainLight->diffuse);
-			mat->GetShader()->SetVec4("u_Light.specular", mainLight->specular);
-			mat->GetShader()->SetVec3("u_CameraPos", mainCamera->getPosition());
-
-			glDrawElements(GL_TRIANGLES, m_VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
-
-			mat->UnBind();
-		}
-
-		m_VAO->Unbind();
-	}
-
-	int MeshRendererComponent::loadModel(const char* filePath, const char* shaderName) {
+	int MeshComponent::LoadModel(const char* filePath, MaterialComponent& materialComponent) {
 
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filePath,
@@ -61,13 +37,11 @@ namespace Louron {
 			aiProcess_SortByPType
 			);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			std::cout << "[L20] Error Reading File: " << importer.GetErrorString() << std::endl;
+			std::cerr << "[L20] Error Reading File: " << importer.GetErrorString() << std::endl;
 			return GL_FALSE;
 		}
 		m_Directory = filePath;
 		m_Directory = m_Directory.substr(0, m_Directory.find_last_of('/'));
-		m_ShaderName = shaderName;
-
 
 		std::string mesh_name = filePath;
 		auto lastSlash = mesh_name.find_last_of("/\\");
@@ -76,41 +50,29 @@ namespace Louron {
 		auto count = lastDot == std::string::npos ? mesh_name.size() - lastSlash : lastDot - lastSlash;
 		mesh_name = mesh_name.substr(lastSlash, count);
 
-		processNode(scene->mRootNode, scene);
+		ProcessNode(scene->mRootNode, scene, materialComponent);
 		std::cout << "[L20] Loaded Mesh: " << mesh_name.c_str() << std::endl;
 
 		return GL_TRUE;
 	}
 
-	std::vector<MeshFilter*> MeshRendererComponent::getMeshes() { return m_Meshes; }
-
-	std::map<int, Material*>* MeshRendererComponent::getMaterials() { return &m_Materials; }
-	Material* MeshRendererComponent::getMaterial(int index) { return m_Materials[index]; }
-	void MeshRendererComponent::addMaterial(int index, Material* mat) { m_Materials[index] = mat; }
-
-	void MeshRendererComponent::renderEntireMesh(Camera* mainCamera, OldLight* mainLight) {
-		for (GLuint i = 0; i < m_Meshes.size(); i++) {
-			m_Meshes[i]->renderMeshFilter(mainCamera, m_Materials[m_Meshes[i]->getMaterialIndex()], mainLight);
-		}
-	}
-
-	void MeshRendererComponent::processNode(aiNode* node, const aiScene* scene) {
+	void MeshComponent::ProcessNode(aiNode* node, const aiScene* scene, MaterialComponent& materialComponent) {
 		// process all the node's meshes (if any)
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			m_Meshes.push_back(processMesh(mesh, scene));
+			m_Meshes.push_back(ProcessMesh(mesh, scene, materialComponent));
 			m_MeshCount++;
 		}
 		// then do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
-			processNode(node->mChildren[i], scene);
+			ProcessNode(node->mChildren[i], scene, materialComponent);
 		}
 
 	}
 
-	MeshFilter* MeshRendererComponent::processMesh(aiMesh* mesh, const aiScene* scene) {
+	std::shared_ptr<MeshFilter> MeshComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene, MaterialComponent& materialComponent) const {
 
 		// Process Vertices
 		std::vector<Vertex> mesh_vertices;
@@ -134,19 +96,19 @@ namespace Louron {
 		}
 
 		// Create Material
-		for (int i = 0; i < m_Materials.size(); i++) {
-			if (m_Materials[i] != nullptr) {
-				if (m_Materials[i]->GetMaterialIndex() == mesh->mMaterialIndex) {
+		for (int i = 0; i < materialComponent.Materials.size(); i++) {
+			if (materialComponent.Materials[i] != nullptr) {
+				if (materialComponent.Materials[i]->GetMaterialIndex() == mesh->mMaterialIndex) {
 
-					MeshFilter* temp_mesh = new MeshFilter(Engine::Get().GetWindow(), mesh_vertices, mesh_indices);
-					temp_mesh->setMaterialIndex(mesh->mMaterialIndex);
+					std::shared_ptr<MeshFilter> temp_mesh = std::make_shared<MeshFilter>(mesh_vertices, mesh_indices);
+					temp_mesh->MaterialIndex = mesh->mMaterialIndex;
 					return temp_mesh;
 				}
 
 			}
 		}
 
-		Material* mesh_material = new Material(Engine::Get().GetShaderLibrary().GetShader(m_ShaderName),
+		std::shared_ptr<Material> mesh_material = std::make_shared<Material>(Engine::Get().GetShaderLibrary().GetShader(materialComponent.ShaderName),
 			Engine::Get().GetTextureLibrary().GetTexture("blank_texture"));
 		if (mesh->mMaterialIndex >= 0) {
 
@@ -180,21 +142,20 @@ namespace Louron {
 			// Load relevant material values
 			float shine = 0;
 			aiColor3D colour;
-			material->Get(AI_MATKEY_COLOR_AMBIENT, colour);
-			mesh_material->SetAmbient(glm::vec4(colour.r, colour.g, colour.b, 1.0f));
 			material->Get(AI_MATKEY_COLOR_DIFFUSE, colour);
 			mesh_material->SetDiffuse(glm::vec4(colour.r, colour.g, colour.b, 1.0f));
 			material->Get(AI_MATKEY_COLOR_SPECULAR, colour);
 			mesh_material->SetSpecular(glm::vec4(colour.r, colour.g, colour.b, 1.0f));
 			material->Get(AI_MATKEY_SHININESS, shine);
-			mesh_material->SetShine(32.0f);
+			mesh_material->SetShine(shine);
 
 			mesh_material->SetMaterialIndex(mesh->mMaterialIndex);
 		}
-		m_Materials[mesh->mMaterialIndex] = mesh_material;
 
-		MeshFilter* temp_mesh = new MeshFilter(Engine::Get().GetWindow(), mesh_vertices, mesh_indices);
-		temp_mesh->setMaterialIndex(mesh->mMaterialIndex);
+		materialComponent.Materials.push_back(mesh_material);
+
+		std::shared_ptr<MeshFilter> temp_mesh = std::make_shared<MeshFilter>(mesh_vertices, mesh_indices);
+		temp_mesh->MaterialIndex = mesh->mMaterialIndex;
 		return temp_mesh;
 	}
 }

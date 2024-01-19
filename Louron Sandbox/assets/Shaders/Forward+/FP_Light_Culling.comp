@@ -1,13 +1,5 @@
 #version 450
 
-struct DirLight {
-    vec3 direction;
-	
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};
-
 struct PointLight {
     vec3 position;
     
@@ -37,6 +29,11 @@ struct SpotLight {
 
 struct VisibleIndex {
     int index;
+};
+
+struct BoundingSphere {
+	vec3 centre;
+	float radius;
 };
 
 // Point Lights SSBO
@@ -70,17 +67,24 @@ uniform int SL_LightCount;
 shared uint minDepthInt;
 shared uint maxDepthInt;
 shared vec4 frustumPlanes[6];
+shared BoundingSphere frustumSpheres[6];
 
 shared uint PL_VisibleLightCount;
 shared uint SL_VisibleLightCount;
 
 // Shared workgroup storage for visible indicies
-shared int PL_VisibleLightIndices[1024];
-shared int SL_VisibleLightIndices[1024];
+#define MAX_LIGHTS 1024
+
+shared int PL_VisibleLightIndices[MAX_LIGHTS];
+shared int SL_VisibleLightIndices[MAX_LIGHTS];
 
 shared mat4 viewProjection;
 
 #define TILE_SIZE 16
+
+BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax);
+BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar);
+bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere);
 
 layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
 void main(){
@@ -145,6 +149,12 @@ void main(){
 		frustumPlanes[4] /= length(frustumPlanes[4].xyz);
 		frustumPlanes[5] *= view;
 		frustumPlanes[5] /= length(frustumPlanes[5].xyz);
+
+		for (uint i = 0; i < 6; i++) {
+			vec3 planeNormal = frustumPlanes[i].xyz;
+			float planeDistance = frustumPlanes[i].w;
+			frustumSpheres[i] = createBoundingSphereForFrustumPlane(planeNormal, planeDistance, minDepth, maxDepth);
+		}
     }
     
 	barrier();
@@ -208,33 +218,18 @@ void main(){
 			break;
 		}
 
-		SpotLight spotLight = SL_Buffer_Data.data[lightIndex];
-
 		// Check if any part of the spotlight cone intersects with the frustum planes
 		bool isVisible = false;
 		for (uint j = 0; j < 6; j++) {
-			float planeDistance = dot(vec4(spotLight.position, 1.0), frustumPlanes[j]);
-
-			// Find the intersection point of the cone based on the distance from the spotlight to the plane
-			vec3 coneIntersectionPoint = spotLight.position - frustumPlanes[j].xyz * planeDistance;
-
-			// Calculate the distance from the spotlight to the cone intersection point with the plane
-			float distanceToIntersection = distance(coneIntersectionPoint, spotLight.position);
-
-			// Calculate the radius of the cone at the intersection point
-			float coneRadiusAtIntersection = distanceToIntersection * tan(spotLight.outerCutOff);
-
-			// Calculate the distance from the intersection point to the plane
-			float coneIntersectionDistance = dot(vec4(coneIntersectionPoint, 1.0), frustumPlanes[j]);
 
 			// Check if the radius intersects with the frustum plane
-			if (coneRadiusAtIntersection >= coneIntersectionDistance) {
+			if (SpotlightVsSphere(SL_Buffer_Data.data[lightIndex], frustumSpheres[j])) {
 				isVisible = true;
 				break;  // No need to check other planes if already determined as visible
 			}
 		}
 
-		// If the spotlight is visible, add its index to the shared array
+	   // If the spotlight is visible, add its index to the shared array
 		if (isVisible) {
 			uint offset = atomicAdd(SL_VisibleLightCount, 1);
 			SL_VisibleLightIndices[offset] = int(lightIndex);
@@ -244,10 +239,10 @@ void main(){
 
 	barrier();
 
-	// One thread should fill the global light buffer
+	// Step 4. One thread should fill the global light buffer
 	if (gl_LocalInvocationIndex == 0) {
 	
-		uint offset = index * 1024; // Determine position in global buffer
+		uint offset = index * MAX_LIGHTS; // Determine position in global buffer
 	
 		// Fill Indicies buffer for each workgroup for all point lights that have been detected
 		for (uint i = 0; i < PL_VisibleLightCount; i++) {
@@ -255,7 +250,7 @@ void main(){
 		}
 		
 		// If array is not full, then mark last index in buffer as -1
-		if (PL_VisibleLightCount != 1024) {
+		if (PL_VisibleLightCount != MAX_LIGHTS) {
 			PL_IndiciesBuffer_Data.data[offset + PL_VisibleLightCount].index = -1;
 		}
 
@@ -265,8 +260,43 @@ void main(){
 		}
 		
 		// If array is not full, then mark last index in buffer as -1
-		if (SL_VisibleLightCount != 1024) {
+		if (SL_VisibleLightCount != MAX_LIGHTS) {
 			SL_IndiciesBuffer_Data.data[offset + SL_VisibleLightCount].index = -1;
 		}
 	}
+}
+
+// Create a bounding sphere from an AABB
+BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax) {
+
+    BoundingSphere sphere;
+    sphere.centre = 0.5 * (aabbMin + aabbMax);
+    sphere.radius = length(aabbMax - sphere.centre);
+    return sphere;
+}
+
+// Create a bounding sphere for each frustum plane
+BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar) {
+
+    vec3 frustumCenter = frustumNormal * frustumDistance;
+    vec3 frustumExtents = vec3(zNear, zNear, zFar); // You might need to adjust these extents based on your frustum definition
+    return createBoundingSphere(frustumCenter - frustumExtents, frustumCenter + frustumExtents);
+}
+
+// Function to test if a spotlight cone intersects with a bounding sphere
+bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere) {
+
+    // Calculate the spotlight range based on attenuation factors and a predefined cutoff value
+    float cutoffRange = sqrt(1.0 / max(max(spotlight.constant, spotlight.linear), spotlight.quadratic));
+
+    vec3 v = sphere.centre - spotlight.position;
+    float lenSq = dot(v, v);
+    float v1Len = dot(v, normalize(spotlight.direction));
+    float distanceClosestPoint = cos(spotlight.cutOff) * sqrt(lenSq - v1Len * v1Len) - v1Len * sin(spotlight.cutOff);
+
+    bool angleCull = distanceClosestPoint > sphere.radius;
+    bool frontCull = v1Len > sphere.radius + cutoffRange;
+    bool backCull = v1Len < -sphere.radius;
+
+    return !(angleCull || frontCull || backCull);
 }

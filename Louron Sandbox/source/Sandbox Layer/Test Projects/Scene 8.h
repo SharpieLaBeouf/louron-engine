@@ -27,23 +27,23 @@ public:
 		 m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
 		 m_Scene(std::make_unique<Louron::Scene>())
 	{
-		std::cout << "[L20] Opening Scene 8..." << std::endl;
-
-		// Load Shader if Not Yet Loaded
-		m_ShaderLib.LoadShader("assets/Shaders/Materials/material_shader_phong.glsl");
-		
+		std::cout << "[L20] Loading Scene 8..." << std::endl;
+				
 		// Create Entity for Monkey and Load Applicable Model
-		m_Scene->CreateEntity("Monkey").AddComponent<Louron::MeshRendererComponent>().loadModel("assets/Models/Monkey/Pink_Monkey.fbx", "material_shader_phong");
+		Louron::Entity MonkeyEntity = m_Scene->CreateEntity("Monkey");
+		MonkeyEntity.AddComponent<Louron::MaterialComponent>("FP_Material_BP_Shader");
+		MonkeyEntity.AddComponent<Louron::MeshComponent>().LoadModel("assets/Models/Monkey/Pink_Monkey.fbx", MonkeyEntity.GetComponent<Louron::MaterialComponent>());
 		
 		// Create Entity for Camera and Set to Primary Camera
 		m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>().Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
 		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Primary = true;
-	 
+
+		m_Scene->CreateEntity("Flash Light").AddComponent<Louron::SpotLightComponent>();
 	 }
 
 	~Scene8() override
 	{
-		std::cout << "[L20] Closing Scene 8..." << std::endl;
+		std::cout << "[L20] Unloading Scene 8..." << std::endl;
 			
 	}
 
@@ -55,6 +55,10 @@ public:
 
 		// Update Camera Component
 		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::TransformComponent>().position = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition();
+
+		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::TransformComponent>().position = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::TransformComponent>().position;
+		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
 
 		Draw();
 	}

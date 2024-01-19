@@ -3,6 +3,8 @@
 
 namespace Louron {
 
+// -- Shader --
+
 	void Shader::Bind() { glUseProgram(m_Program); }
 	void Shader::UnBind() { glUseProgram(0); }
 
@@ -58,15 +60,6 @@ namespace Louron {
 
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
-
-			std::string name = shaderFile;
-			auto lastSlash = name.find_last_of("/\\");
-			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-			auto lastDot = name.rfind('.');
-			auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
-			name = name.substr(lastSlash, count);
-			m_Name = name.c_str();
-
 		}
 		else {
 			std::string cShaderCodeSrc;
@@ -92,23 +85,17 @@ namespace Louron {
 			checkCompileErrors(m_Program, "PROGRAM");
 
 			glDeleteShader(compute);
-
-			std::string name = shaderFile;
-			auto lastSlash = name.find_last_of("/\\");
-			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-			auto lastDot = name.rfind('.');
-			auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
-			name = name.substr(lastSlash, count);
-			m_Name = name.c_str();
 		}
-
-		std::cout << "[L20] Loaded Shader (" << m_Name << "): " << shaderFile << std::endl;
 	}
+
 	Shader::~Shader() { glDeleteProgram(m_Program); }
 
 	GLuint Shader::GetProgram() { return m_Program; }
+
 	const std::string& Shader::GetName() { return m_Name; }
+
 	void Shader::SetName(const std::string& name) { m_Name = name; }
+
 	void Shader::SetBool(const GLchar* name, bool value) const { glUniform1i(glGetUniformLocation(m_Program, name), (int)value); }
 	void Shader::SetInt(const GLchar* name, int value) const { glUniform1i(glGetUniformLocation(m_Program, name), value); }
 	void Shader::SetFloat(const GLchar* name, float value) const { glUniform1f(glGetUniformLocation(m_Program, name), value); }
@@ -142,44 +129,85 @@ namespace Louron {
 		}
 	}
 
-	void ShaderLibrary::UnBind() { glUseProgram(0); }
+// -- Shader Library --
 
-	void ShaderLibrary::Add(Shader* shader) {
-		Add(shader->GetName(), shader);
+	void ShaderLibrary::UnBindAllShaders() { glUseProgram(0); }
+
+	/// <summary>
+	/// Initialises the ShaderLibrary class so that it always holds a default shader.
+	/// </summary>
+	ShaderLibrary::ShaderLibrary() {
+		m_DefaultShader = LoadShader("assets/Shaders/Default Shader.glsl");
 	}
 
-	void ShaderLibrary::Add(const std::string& shaderName, Shader* shader) {
+	/// <summary>
+	/// This loads a shader based on the name of the shader file path.
+	/// </summary>
+	/// <param name="shaderFile">File Path to Shader</param>
+	/// <param name="isComputeShader">Set to true if it is a Compute Shader</param>
+	/// <returns></returns>
+	std::shared_ptr<Shader>& ShaderLibrary::LoadShader(const std::string& shaderFile, bool isComputeShader) {
+
+		std::string shaderName = FilePathToShaderName(shaderFile);
+
+		// Check if Shader Already Exists
 		if (ShaderExists(shaderName)) {
-
-			std::cout << "[L20] Shader Already Loaded! " << shaderName << std::endl;
-		}
-		else {
-			m_Shaders[shaderName] = shader;
-		}
-	}
-
-	Shader* ShaderLibrary::LoadShader(const std::string& shaderFile, bool isComputeShader) {
-		Shader* shader = new Shader(shaderFile.c_str(), isComputeShader);
-		Add(shader);
-		return shader;
-	}
-
-	Shader* ShaderLibrary::LoadShader(const std::string& shaderFile, const std::string& shaderName, bool isComputeShader) {
-		Shader* shader = new Shader(shaderFile.c_str(), isComputeShader);
-		Add(shaderName, shader);
-		return shader;
-	}
-
-	// TODO: shaderlibrary should hold ownership of all the Shader objects initialised. I should return a reference to a unique_ptr opposed to a raw pointer.
-	Shader* ShaderLibrary::GetShader(const std::string& shaderName) {
-		if (!ShaderExists(shaderName))
-			std::cout << "[L20] Shader Not Loaded! " << shaderName << std::endl;
-		else
+			std::cout << "[L20] Shader Already Loaded - Returning " << shaderName << std::endl;
 			return m_Shaders[shaderName];
-		return nullptr;
+		}
+
+		std::shared_ptr<Shader> shader = std::make_unique<Shader>(shaderFile.c_str(), isComputeShader);
+		shader->SetName(shaderName);
+
+		// Check if Shader Linked Successfully
+		GLint success;
+		glGetProgramiv(shader->GetProgram(), GL_LINK_STATUS, &success);
+
+		if (success == GL_FALSE) {
+			std::cout << "[L20] Shader Not Loaded - Returning Default Shader" << std::endl;
+			return m_DefaultShader;
+		}
+
+		std::cout << "[L20] Shader Loaded - Returning " << shaderName << std::endl;
+		m_Shaders[shaderName] = std::move(shader);
+		return m_Shaders[shaderName];
 	}
 
+	/// <summary>
+	/// This returns a unique_ptr reference to a given shader. Where there is no shader that exists, it returns a default shader.
+	/// </summary>
+	/// <param name="shaderName"></param>
+	/// <returns></returns>
+	std::shared_ptr<Shader>& ShaderLibrary::GetShader(const std::string& shaderName) {
+		if (ShaderExists(shaderName))
+			return m_Shaders[shaderName];
+	
+		std::cout << "[L20] Shader Not Found - Returning Default Shader" << std::endl;
+		return m_DefaultShader;
+	}
+
+	/// <summary>
+	/// Checks if the shader exists within the map.
+	/// </summary>
+	/// <param name="name"></param>
+	/// <returns></returns>
 	bool ShaderLibrary::ShaderExists(const std::string& name) const {
 		return m_Shaders.find(name) != m_Shaders.end();
+	}
+
+	/// <summary>
+	/// Decodes the filepath to determine the name of the shader.
+	/// </summary>
+	/// <param name="shaderFile"></param>
+	/// <returns></returns>
+	std::string ShaderLibrary::FilePathToShaderName(const std::string& shaderFile)
+	{
+		std::string name = shaderFile;
+		auto lastSlash = name.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = name.rfind('.');
+		auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
+		name = name.substr(lastSlash, count);
+		return name.c_str();
 	}
 }

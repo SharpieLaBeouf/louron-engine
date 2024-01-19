@@ -15,5 +15,5 @@
 #include "Scene/Components.h"
 #include "Scene/Entity.h"
 #include "Scene/Light.h"
-#include "Scene/MeshRenderer.h"
+#include "Scene/Mesh.h"
 #include "Scene/Scene.h"

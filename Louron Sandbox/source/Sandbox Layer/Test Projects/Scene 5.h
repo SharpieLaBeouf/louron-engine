@@ -78,7 +78,7 @@ public:
 		m_Input(Louron::Engine::Get().GetInput()),
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary())
 	{
-		std::cout << "[L20] Opening Scene 5..." << std::endl;
+		std::cout << "[L20] Loading Scene 5..." << std::endl;
 
 		// Init Cube VAO
 		glGenVertexArrays(1, &cube_VAO);
@@ -122,13 +122,11 @@ public:
 
 		light_trans.position = glm::vec3(0.0f, 10.0f, 0.0f);
 		cube_trans.scale = glm::vec3(5.0f, 1.0f, 5.0f);
-
-		m_ShaderLib.LoadShader("assets/Shaders/Basic/basic_phong.glsl");
-					
+							
 	}
 	~Scene5() override
 	{
-		std::cout << "[L20] Closing Scene 5..." << std::endl;
+		std::cout << "[L20] Unloading Scene 5..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
@@ -224,11 +222,11 @@ private:
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 view = m_SceneCamera->getViewMatrix();
+		glm::mat4 view = m_SceneCamera->GetViewMatrix();
 		glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f);
 
 		// Draw Light Source
-		Louron::Shader* shader = m_ShaderLib.GetShader("basic");
+		std::shared_ptr<Louron::Shader> shader = m_ShaderLib.GetShader("basic");
 		if (shader) {
 			glBindVertexArray(light_VAO);
 
@@ -249,7 +247,7 @@ private:
 			shader->SetMat4("view", view);
 			shader->SetMat4("proj", proj);
 			shader->SetMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.GetTransform()))));
-			shader->SetVec3("viewPos", m_SceneCamera->getPosition());
+			shader->SetVec3("viewPos", m_SceneCamera->GetPosition());
 			shader->SetVec3("lightPos", light_trans.position);
 			shader->SetVec4("lightColour", glm::vec4(1.0f));
 
@@ -277,7 +275,7 @@ private:
 				}
 			}
 		}
-		m_ShaderLib.UnBind();
+		m_ShaderLib.UnBindAllShaders();
 
 		glDisable(GL_DEPTH_TEST);
 	}

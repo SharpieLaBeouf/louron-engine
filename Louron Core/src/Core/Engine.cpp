@@ -25,7 +25,32 @@ namespace Louron {
         PushOverlay(m_GuiLayer);
 
         m_ShaderLibrary = std::make_unique<ShaderLibrary>();
+   
+        // TODO: Move loading to Scene Management for Loading Scenes?
+
+        // Load All Shaders 
+        {
+            for (const auto& path : FindFilePaths("assets", ".glsl")) {
+                m_ShaderLibrary->LoadShader(path);
+            }
+
+            for (const auto& path : FindFilePaths("assets", ".comp")) {
+                m_ShaderLibrary->LoadShader(path, true);
+            }
+        }
+
         m_TextureLibrary = std::make_unique<TextureLibrary>();
+
+        // Load All Textures
+        {
+            for (const auto& path : FindFilePaths("assets", ".png")) {
+                m_TextureLibrary->loadTexture(path);
+            }
+
+            for (const auto& path : FindFilePaths("assets", ".jpg")) {
+                m_TextureLibrary->loadTexture(path);
+            }
+        }
 
         m_Input = std::make_unique<InputManager>();
         m_Input->Init((GLFWwindow*)m_Window->GetNativeWindow());
@@ -78,6 +103,28 @@ namespace Louron {
 
     bool Engine::OnWindowResize() {
         return false;
+    }
+
+    std::vector<std::string> Engine::FindFilePaths(const std::string& directory, const std::string& extension)
+    {
+        std::vector<std::string> foundPaths;
+
+        try {
+            for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+                if (std::filesystem::is_regular_file(entry) && entry.path().extension() == extension) {
+                    foundPaths.push_back(entry.path().string());
+                }
+                else if (std::filesystem::is_directory(entry)) {
+                   auto subDirectoryPaths = FindFilePaths(entry.path().string(), extension);
+                   foundPaths.insert(foundPaths.end(), subDirectoryPaths.begin(), subDirectoryPaths.end());
+                }
+            }
+        }
+        catch (const std::exception& e) {
+            std::cerr << "[L20] Error: " << e.what() << std::endl;
+        }
+       
+        return foundPaths;
     }
 }
 
