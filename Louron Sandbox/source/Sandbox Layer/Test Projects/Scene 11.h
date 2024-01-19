@@ -54,8 +54,14 @@ public:
 				entity.GetComponent<Louron::MaterialComponent>().LinkMeshMaterials(resources->GetMesh("Monkey"));
 			}
 			else {
-				entity.AddComponent<Louron::MeshComponent>(resources->GetMesh("Cube"));
-				entity.GetComponent<Louron::MaterialComponent>().LinkMeshMaterials(resources->GetMesh("Cube"));
+
+				entity.AddComponent<Louron::MeshComponent>().LoadModel("assets/Models/Cube/Cube.fbx", materials);
+
+				// This is not working yet as using the mesh material reference to the scene resources manager does not 
+				// create new materials when varying them from the base material contained in the resource manager
+				// 
+				//entity.AddComponent<Louron::MeshComponent>(resources->GetMesh("Cube"));
+				//entity.GetComponent<Louron::MaterialComponent>().LinkMeshMaterials(resources->GetMesh("Cube"));
 
 				if (glm::linearRand(-1.0f, 1.0f) > 0.0f)
 				{
@@ -107,11 +113,15 @@ public:
 	void OnAttach() override {
 		glEnable(GL_DEPTH_TEST);
 		lastTime = (float)glfwGetTime(); 
+
+		m_Scene->OnStart();
 	}
 
 	void OnDetach() override {
 
 		glDisable(GL_DEPTH_TEST);
+
+		m_Scene->OnStop();
 	}
 
 	void Update() override {
@@ -232,7 +242,7 @@ private:
 
 	void Draw() override {
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_Scene->OnUpdate();

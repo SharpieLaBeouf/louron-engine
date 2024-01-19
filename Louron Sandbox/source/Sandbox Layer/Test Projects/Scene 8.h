@@ -47,6 +47,19 @@ public:
 			
 	}
 
+
+	void OnAttach() override { 
+
+		glEnable(GL_DEPTH_TEST);
+		lastTime = (float)glfwGetTime();
+		m_Scene->OnStart();
+	}
+	void OnDetach() override { 
+
+		glDisable(GL_DEPTH_TEST);
+		m_Scene->OnStop();
+	}
+
 	void Update() override {
 
 		currentTime = (float)glfwGetTime();
@@ -95,14 +108,10 @@ private:
 
 	void Draw() override {
 
-		glEnable(GL_DEPTH_TEST);
-		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
+		glClearColor(back_colour.r, back_colour.g, back_colour.b, back_colour.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		// Draw All Entities in Scene
 		m_Scene->OnUpdate();
-
-		glDisable(GL_DEPTH_TEST);
 	}
 
 	glm::vec4 back_colour = { 0.3137f, 0.7843f, 1.0f, 1.0f };
