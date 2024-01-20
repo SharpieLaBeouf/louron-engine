@@ -6,6 +6,8 @@
 
 #include "../Renderer/Renderer.h"
 
+#include <glm/gtc/quaternion.hpp>
+
 namespace Louron {
 	Scene::Scene() {
 
@@ -152,17 +154,22 @@ namespace Louron {
 
 				// Call Renderer for all Meshes
 				{
-					auto view = m_Registry.view<TransformComponent, MeshComponent, MaterialComponent>();
+					auto view = m_Registry.view<TransformComponent, MeshRenderer, MeshFilter>();
 
-					for (auto entity : view) {
-						auto [transform, mesh, material] = view.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
+					if (view.begin() != view.end()) {
+						for (auto entity : view) {
+							auto [transform, meshRenderer, meshFilter] = view.get<TransformComponent, MeshRenderer, MeshFilter>(entity);
 
-						Entity meshEntity = Entity{ entity, this };
+							Entity meshEntity = Entity{ entity, this };
 
-						glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
-						glClear(GL_DEPTH_BUFFER_BIT);
-						Renderer::DrawMeshComponent(&meshEntity, &cameraEntity, "FP_Depth");
-						glBindFramebuffer(GL_FRAMEBUFFER, 0);
+							if (!meshRenderer.active)
+								continue;
+
+							glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
+							glClear(GL_DEPTH_BUFFER_BIT);
+							Renderer::DrawMeshComponent(&meshEntity, &cameraEntity, "FP_Depth");
+							glBindFramebuffer(GL_FRAMEBUFFER, 0);
+						}
 					}
 				}
 			}
@@ -245,13 +252,16 @@ namespace Louron {
 				DirectionalLightComponent* directionalLights = (DirectionalLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 
 				if (directionalLights) {
-					auto view = m_Registry.view<DirectionalLightComponent>();
+					auto view = m_Registry.view<TransformComponent, DirectionalLightComponent>();
 
 					int i = 0;
 					for (auto entity : view) {
 
 						directionalLights[i] = view.get<DirectionalLightComponent>(entity);
 						directionalLights[i].lastLight = false;
+						directionalLights[i].direction = glm::normalize(
+							glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) * 
+							glm::quat(glm::radians(view.get<TransformComponent>(entity).rotation)));
 
 						i++;
 
@@ -288,44 +298,57 @@ namespace Louron {
 
 				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				std::unordered_map<std::shared_ptr<Material>, std::vector<std::pair<std::shared_ptr<MeshFilter>, TransformComponent>>> materialMeshMap;
+				// Gather all entities within scene with appropriate components
+				auto view = m_Registry.view<TransformComponent, MeshRenderer, MeshFilter>();
+				if (view.begin() != view.end()) {
+					std::unordered_map<std::shared_ptr<Material>, std::vector<std::pair<std::shared_ptr<Mesh>, TransformComponent>>> materialMeshMap;
 
-				auto view = m_Registry.view<TransformComponent, MeshComponent, MaterialComponent>();
+					// Loop entities and access relevant components required for rendering
+					for (const auto& entity : view) {
+						auto [transform, meshRenderer, meshFilter] = view.get<TransformComponent, MeshRenderer, MeshFilter>(entity);
 
-				// Group Meshes to Materials
-				for (auto entity : view) {
-					auto [transform, mesh, material] = view.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
+						Entity meshEntity = Entity{ entity, this };
 
-					Entity meshEntity = Entity{ entity, this };
-					//Renderer::DrawMeshComponent(&meshEntity, &cameraEntity);
+						// Check if MeshRenderer is toggled for rendering, if not, continue to next entity
+						if (!meshRenderer.active)
+							continue;
 
-					for (const auto& subMesh : mesh.GetMeshes()) {
-						if (material.Materials.size() > 0 && material.Materials[subMesh->MaterialIndex] != nullptr) {
-							materialMeshMap[material.Materials[subMesh->MaterialIndex]].push_back(std::make_pair(subMesh, transform));
+						// Loop through each submesh within the meshfilter
+						for (auto& subMesh : *meshFilter.Meshes)
+							if ((*meshRenderer.Materials)[subMesh->MaterialIndex] != nullptr)
+								materialMeshMap[(*meshRenderer.Materials)[subMesh->MaterialIndex]].push_back(std::make_pair(subMesh, transform));
+							else
+								std::cout << "[L20] Mesh with invalid material encountered!" << std::endl;
+
+					}
+
+					// FINAL RENDER!
+					for (const auto& materialMeshPair : materialMeshMap) {
+						const auto& material = materialMeshPair.first;
+						const auto& meshes = materialMeshPair.second;
+
+						// Update appropriate uniforms per Material
+						if (material) {
+							material->Bind();
+							material->UpdateUniforms(cameraEntity.GetComponent<CameraComponent>());
 						}
 						else {
-							std::cout << "[L20] Mesh with invalid material encountered!" << std::endl;
+							std::cout << "[L20] Invalid material encountered during rendering!" << std::endl;
+							continue;
+						}
+
+						// TODO: potential instancing for same meshes?
+
+						// Render all Meshes per material
+						for (const auto& meshTransform : meshes) {
+							material->GetShader()->SetMat4("model", meshTransform.second.GetTransform());
+							Renderer::DrawMesh(meshTransform.first);
 						}
 					}
-				}
 
-				for (const auto& materialMeshPair : materialMeshMap) {
-					const auto& materialKey = materialMeshPair.first;
-					const auto& meshesValue = materialMeshPair.second;
-
-					if (materialKey) {
-						materialKey->Bind();
-						materialKey->UpdateUniforms(cameraEntity.GetComponent<CameraComponent>());
-					}
-					else {
-						std::cout << "[L20] Invalid material encountered during rendering!" << std::endl;
-						continue;
-					}
-
-					for (const auto& meshTransform : meshesValue) {
-						materialKey->GetShader()->SetMat4("model", meshTransform.second.GetTransform());
-						Renderer::DrawMeshFilter(meshTransform.first);
-					}
+					// Clean Up Scene Render Pass
+					if (!materialMeshMap.empty())
+						materialMeshMap.begin()->first->UnBind();
 				}
 			}
 		}
@@ -339,7 +362,7 @@ namespace Louron {
 
 	// RESOURCE MANAGER FOR SCENES
 
-	int ResourceManager::LoadMesh(const char* filePath, std::shared_ptr<Shader> shader) {
+	int ResourceManager::LoadMesh(const char* filePath, const std::shared_ptr<Shader>& shader) {
 
 		std::string mesh_name = filePath;
 
@@ -349,7 +372,7 @@ namespace Louron {
 		auto count = lastDot == std::string::npos ? mesh_name.size() - lastSlash : lastDot - lastSlash;
 		mesh_name = mesh_name.substr(lastSlash, count);
 
-		if (!Meshes[mesh_name].empty()) {
+		if (Meshes[mesh_name].first != nullptr) {
 			std::cout << "[L20] INFO: Mesh Already Loaded!" << std::endl;
 			return GL_FALSE;
 		}
@@ -372,10 +395,6 @@ namespace Louron {
 
 		Meshes[mesh_name] = ProcessNode(scene->mRootNode, scene, directory, shader);
 
-		int materialIterator = 0;
-		for (const auto& material : Meshes[mesh_name]) {
-			Materials[mesh_name + std::to_string(materialIterator)] = material.second;
-		}
 		std::cout << "[L20] Loaded Mesh: " << mesh_name.c_str() << std::endl;
 
 		return GL_TRUE;
@@ -389,38 +408,58 @@ namespace Louron {
 		return 0;
 	}
 
-	std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>> ResourceManager::GetMesh(const std::string& meshName)
+	void ResourceManager::LinkShader(std::shared_ptr<Shader> shader)
 	{
-		if (Meshes[meshName].empty()) {
+		Shaders[shader->GetName()] = shader;
+	}
+
+	std::shared_ptr<MeshFilter> ResourceManager::GetMeshFilter(const std::string& name)
+	{
+		if (Meshes[name].first == nullptr) {
 			std::cerr << "[L20] ERROR: Mesh Not Loaded to Scene Resource Manager!" << std::endl;
 			assert(false);
 		}
 
-		return Meshes[meshName];
+		return Meshes[name].first;
 	}
 
-	std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>> ResourceManager::ProcessNode(aiNode* node, const aiScene* scene, std::string directory, std::shared_ptr<Shader> shader)	{
+	std::shared_ptr<MeshRenderer> ResourceManager::GetMeshRenderer(const std::string& name)
+	{
+		if (Meshes[name].second == nullptr) {
+			std::cerr << "[L20] ERROR: Mesh Not Loaded to Scene Resource Manager!" << std::endl;
+			assert(false);
+		}
 
-		std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>> meshes;
+		return Meshes[name].second;
+	}
+
+	std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<MeshRenderer>> ResourceManager::ProcessNode(aiNode* node, const aiScene* scene, std::string directory, const std::shared_ptr<Shader>& shader)	{
+
+		std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<MeshRenderer>> meshGroup = { std::make_shared<MeshFilter>(), std::make_shared<MeshRenderer>() };
 
 		// process all the node's meshes (if any)
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(ProcessMesh(mesh, scene, directory, shader));
+			std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> meshMaterial = ProcessMesh(mesh, scene, directory, shader);
+
+			meshGroup.first->Meshes->push_back(meshMaterial.first);
+			meshGroup.second->Materials->push_back(meshMaterial.second);
 		}
 		// then do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
-			std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>> childMeshes = ProcessNode(node->mChildren[i], scene, directory, shader);
+			std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<MeshRenderer>> childMeshGroup = ProcessNode(node->mChildren[i], scene, directory, shader);
 
-			meshes.insert(meshes.end(), childMeshes.begin(), childMeshes.end());
+			// Connect Meshes to MeshFilter
+			meshGroup.first->Meshes->insert(meshGroup.first->Meshes->end(), childMeshGroup.first->Meshes->begin(), childMeshGroup.first->Meshes->end());
+			meshGroup.second->Materials->insert(meshGroup.second->Materials->end(), childMeshGroup.second->Materials->begin(), childMeshGroup.second->Materials->end());
 		}
 
-		return meshes;
+		return meshGroup;
 	}
 
-	std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>> ResourceManager::ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, std::shared_ptr<Shader> shader) const {
+	std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> ResourceManager::ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, const std::shared_ptr<Shader>& shader) {
 
 		// Process Vertices
 		std::vector<Vertex> mesh_vertices;
@@ -443,7 +482,7 @@ namespace Louron {
 				mesh_indices.push_back(face.mIndices[j]);
 		}
 
-		std::shared_ptr<Material> mesh_material = std::make_shared<Material>(shader, Engine::Get().GetTextureLibrary().GetTexture("blank_texture"));
+		std::shared_ptr<Material> temp_material = std::make_shared<Material>(shader, Engine::Get().GetTextureLibrary().GetTexture("blank_texture"));
 		if (mesh->mMaterialIndex >= 0) {
 
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -457,38 +496,45 @@ namespace Louron {
 				material->GetTexture(aiTextureType_DIFFUSE, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
 				texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
-				mesh_material->AddTextureMap(L20_TEXTURE_DIFFUSE_MAP, texture);
+				temp_material->AddTextureMap(L20_TEXTURE_DIFFUSE_MAP, texture);
 			}
 			if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
 				material->GetTexture(aiTextureType_SPECULAR, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
 				texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
-				mesh_material->AddTextureMap(L20_TEXTURE_SPECULAR_MAP, texture);
+				temp_material->AddTextureMap(L20_TEXTURE_SPECULAR_MAP, texture);
 			}
 
 			if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
 				material->GetTexture(aiTextureType_NORMALS, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
 				texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
-				mesh_material->AddTextureMap(L20_TEXTURE_NORMAL_MAP, texture);
+				temp_material->AddTextureMap(L20_TEXTURE_NORMAL_MAP, texture);
 			}
 
 			// Load relevant material values
 			float shine = 0;
 			aiColor3D colour;
 			material->Get(AI_MATKEY_COLOR_DIFFUSE, colour);
-			mesh_material->SetDiffuse(glm::vec4(colour.r, colour.g, colour.b, 1.0f));
+			temp_material->SetDiffuse(glm::vec4(colour.r, colour.g, colour.b, 1.0f));
 			material->Get(AI_MATKEY_COLOR_SPECULAR, colour);
-			mesh_material->SetSpecular(glm::vec4(colour.r, colour.g, colour.b, 1.0f));
+			temp_material->SetSpecular(glm::vec4(colour.r, colour.g, colour.b, 1.0f));
 			material->Get(AI_MATKEY_SHININESS, shine);
-			mesh_material->SetShine(shine);
+			temp_material->SetShine(shine);
 
-			mesh_material->SetMaterialIndex(mesh->mMaterialIndex);
+			aiString materialName;
+			material->Get(AI_MATKEY_NAME, materialName);
+			std::stringstream materialNameString;
+			
+			materialNameString << mesh->mName.C_Str() << "." << materialName.C_Str();
+			
+			temp_material->SetName(materialNameString.str());		
+			Materials[temp_material->GetName()] = temp_material;
 		}
 
-		std::shared_ptr<MeshFilter> temp_mesh = std::make_shared<MeshFilter>(mesh_vertices, mesh_indices);
+		std::shared_ptr<Mesh> temp_mesh = std::make_shared<Mesh>(mesh_vertices, mesh_indices);
 		temp_mesh->MaterialIndex = mesh->mMaterialIndex;
 
-		return std::make_pair(temp_mesh, mesh_material);
+		return std::make_pair(temp_mesh, temp_material);
 	}
 }

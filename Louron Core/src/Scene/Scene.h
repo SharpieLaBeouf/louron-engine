@@ -30,23 +30,26 @@ namespace Louron {
 		std::unordered_map<std::string, std::shared_ptr<Texture>> Textures;
 		std::unordered_map<std::string, std::shared_ptr<Material>> Materials;
 		
-		std::unordered_map<std::string, std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>>> Meshes;
+		std::unordered_map<std::string, std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<MeshRenderer>>> Meshes;
 
 	public:
 
-		int LoadMesh(const char* filePath, std::shared_ptr<Shader> shader);
+		int LoadMesh(const char* filePath, const std::shared_ptr<Shader>& shader);
 		int LoadShader(const char* filePath);
 		int LoadTexture(const char* filePath);
 
-		std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>> GetMesh(const std::string& meshName);
+		void LinkShader(std::shared_ptr<Shader> shader);
+
+		std::shared_ptr<MeshFilter> GetMeshFilter(const std::string& name);
+		std::shared_ptr<MeshRenderer> GetMeshRenderer(const std::string& name);
 
 		ResourceManager() = default;
 		~ResourceManager() = default;
 				
 	private:
 
-		std::vector<std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>>> ProcessNode(aiNode* node, const aiScene* scene, std::string directory, std::shared_ptr<Shader> shader);
-		std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<Material>> ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, std::shared_ptr<Shader> shader) const;
+		std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<MeshRenderer>> ProcessNode(aiNode* node, const aiScene* scene, std::string directory, const std::shared_ptr<Shader>& shader);
+		std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, const std::shared_ptr<Shader>& shader);
 
 	};
 

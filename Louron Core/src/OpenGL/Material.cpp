@@ -93,6 +93,7 @@ namespace Louron {
 		return m_Shader; 
 	}
 
+
 	/// <summary>
 	/// DEFAULT CONSTRUCTOR - Initialise Material with NO SHADER and BLANK TEXTURE
 	/// </summary>
@@ -102,9 +103,19 @@ namespace Louron {
 	}
 
 	/// <summary>
+	/// Initialise Material with BLANK TEXTURE and CUSTOM NAME
+	/// </summary>
+	/// <param name="name"></param>
+	/// <param name="shader"></param>
+	Material::Material(const std::string& name, std::shared_ptr<Shader> shader) : m_Name(name), m_Shader(shader) {
+		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
+			m_Textures[i] = Engine::Get().GetTextureLibrary().GetTexture("blank_texture");
+	}
+
+	/// <summary>
 	/// Initialise Material with BLANK TEXTURE
 	/// </summary>
-	Material::Material(std::shared_ptr<Shader>& shader) : m_Shader(shader) {
+	Material::Material(std::shared_ptr<Shader> shader) : m_Shader(shader) {
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
 			m_Textures[i] = Engine::Get().GetTextureLibrary().GetTexture("blank_texture");
 	}
@@ -120,7 +131,7 @@ namespace Louron {
 	/// <summary>
 	/// Initialise Material with SHADER and TEXTURE PARAMETER
 	/// </summary>
-	Material::Material(std::shared_ptr<Shader>& shader, Texture* texture) : m_Shader(shader) {
+	Material::Material(std::shared_ptr<Shader> shader, Texture* texture) : m_Shader(shader) {
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
 			m_Textures[i] = texture;
 	}
@@ -128,7 +139,7 @@ namespace Louron {
 	/// <summary>
 	/// Initialise Material with SHADER and TEXTURE UNORDERED MAP PARAMETER
 	/// </summary>
-	Material::Material(std::shared_ptr<Shader>& shader, std::unordered_map<GLint, Texture*>& textures) : m_Shader(shader) {
+	Material::Material(std::shared_ptr<Shader> shader, std::unordered_map<GLint, Texture*>& textures) : m_Shader(shader) {
 		for (int i = 0; i < textures.size(); i++)
 			m_Textures[i] = textures[i];
 	}
@@ -157,14 +168,5 @@ namespace Louron {
 
 	Texture* Material::GetTextureMap(GLint type) {
 		return m_Textures[type];
-	}
-
-	void Material::SetMaterialIndex(GLuint index) {
-		m_MaterialIndex = index;
-	}
-
-	GLuint Material::GetMaterialIndex() const
-	{
-		return m_MaterialIndex;
 	}
 }

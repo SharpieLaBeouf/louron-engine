@@ -65,13 +65,16 @@ namespace Louron {
 	};
 
 	struct DirectionalLightComponent {
-
+	private:
 		glm::vec4 direction;
+	public:
 		glm::vec4 ambient;
 		glm::vec4 diffuse;
 		glm::vec4 specular;
 		
 		bool lastLight = false;
+
+		friend class Scene;
 	};
 
 	struct VisibleLightIndex {

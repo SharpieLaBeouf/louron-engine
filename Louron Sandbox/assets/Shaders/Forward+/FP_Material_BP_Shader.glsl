@@ -146,7 +146,7 @@ void main() {
     fragColour = vec4(result, 1.0);
 }
 
-vec3 CalcDirLights(vec3 normal, vec3 viewDir){
+vec3 CalcDirLights(vec3 normal, vec3 viewDir) {
     
     vec3 dirResult = vec3(0.0f, 0.0f, 0.0f);
 

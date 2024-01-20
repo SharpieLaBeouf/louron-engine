@@ -34,47 +34,50 @@ public:
 
 		const auto& resources = m_Scene->GetResources();
 
-		resources->LoadShader("FP_Material_BP_Shader");
+		resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
 
-		resources->LoadMesh("assets/Models/Cube/Cube.fbx", Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
-		resources->LoadMesh("assets/Models/Monkey/Monkey.fbx", Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
-		resources->LoadMesh("assets/Models/BackPack/BackPack.fbx", Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
+		resources->LoadMesh("assets/Models/Cube/Cube.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+		resources->LoadMesh("assets/Models/Monkey/Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+		resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+
+		std::shared_ptr<Louron::Material> stoneCubeMaterial = std::make_shared<Louron::Material>("Stone Cube Material", resources->Shaders["FP_Material_BP_Shader"]);
+		stoneCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("stone_texture"));
+		stoneCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("stone_texture_specular"));
+		resources->Materials[stoneCubeMaterial->GetName()] = stoneCubeMaterial;
+
+		std::shared_ptr<Louron::Material> woodenCubeMaterial = std::make_shared<Louron::Material>("Wooden Cube Material", resources->Shaders["FP_Material_BP_Shader"]);
+		woodenCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("cube_texture"));
+		woodenCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("cube_texture_specular"));
+		resources->Materials[woodenCubeMaterial->GetName()] = woodenCubeMaterial;
 
 		for (int i = 0; i < numCubes; i++) {
 			
 			Louron::Entity entity = m_Scene->CreateEntity("Entity " + std::to_string(i));
-			Louron::MaterialComponent& materials = entity.AddComponent<Louron::MaterialComponent>("FP_Material_BP_Shader");
 
 			entity.GetComponent<Louron::TransformComponent>().position = { glm::linearRand(-10.0f, 10.0f), glm::linearRand(-10.0f, 10.0f), glm::linearRand(-20.0f, -1.0f) };
 			entity.GetComponent<Louron::TransformComponent>().rotation = { glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) };
 			entity.GetComponent<Louron::TransformComponent>().scale = glm::vec3(glm::linearRand(0.5f, 2.0f));
 			
 			if (i <= numCubes / 2) {
-				entity.AddComponent<Louron::MeshComponent>(resources->GetMesh("Monkey"));
-				entity.GetComponent<Louron::MaterialComponent>().LinkMeshMaterials(resources->GetMesh("Monkey"));
+				entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Monkey"));
+				entity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("Monkey"));
 			}
 			else {
 
-				entity.AddComponent<Louron::MeshComponent>().LoadModel("assets/Models/Cube/Cube.fbx", materials);
-
-				// This is not working yet as using the mesh material reference to the scene resources manager does not 
-				// create new materials when varying them from the base material contained in the resource manager
-				// 
-				//entity.AddComponent<Louron::MeshComponent>(resources->GetMesh("Cube"));
-				//entity.GetComponent<Louron::MaterialComponent>().LinkMeshMaterials(resources->GetMesh("Cube"));
+				entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Cube"));
 
 				if (glm::linearRand(-1.0f, 1.0f) > 0.0f)
-				{
-					materials.Materials[0]->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("cube_texture"));
-					materials.Materials[0]->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("cube_texture_specular"));
-				}
+					entity.AddComponent<Louron::MeshRenderer>().Materials->push_back(resources->Materials["Stone Cube Material"]);
 				else
-				{
-					materials.Materials[0]->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("stone_texture"));
-					materials.Materials[0]->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("stone_texture_specular"));
-				}
+					entity.AddComponent<Louron::MeshRenderer>().Materials->push_back(resources->Materials["Wooden Cube Material"]);
+				
 			}
 		}
+
+
+		Louron::Entity entity = m_Scene->CreateEntity("Pink_Monkey");
+		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Pink_Monkey"));
+		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("Pink_Monkey"));
 
 
 		// Create Entity for Camera and Set to Primary Camera
@@ -97,7 +100,7 @@ public:
 		Louron::Entity dirLight = m_Scene->CreateEntity("Directional Light");
 		dirLight.AddComponent<Louron::DirectionalLightComponent>();
 
-		dirLight.GetComponent<Louron::DirectionalLightComponent>().direction = { -0.2f, -1.0f, -0.3f, 1.0f };
+		dirLight.GetComponent<Louron::TransformComponent>().rotation = { 50.0f, -30.0f, 0.0f };
 		dirLight.GetComponent<Louron::DirectionalLightComponent>().ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
 		dirLight.GetComponent<Louron::DirectionalLightComponent>().diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
 		dirLight.GetComponent<Louron::DirectionalLightComponent>().specular = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -120,7 +123,6 @@ public:
 	void OnDetach() override {
 
 		glDisable(GL_DEPTH_TEST);
-
 		m_Scene->OnStop();
 	}
 
@@ -145,6 +147,9 @@ public:
 				entity.GetComponent<Louron::TransformComponent>().rotation = { glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) };
 				entity.GetComponent<Louron::TransformComponent>().scale = glm::vec3(glm::linearRand(0.5f, 2.0f));
 			}
+
+			m_Scene->FindEntityByName("Pink_Monkey").GetComponent<Louron::TransformComponent>().rotation = { glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) };
+
 		}
 
 		Draw();
@@ -197,6 +202,21 @@ public:
 			frustumPlanesChecks[j] = true;
 		}
 
+		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
+
+		ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
+		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
+		ImGui::SetWindowSize(ImVec2(300.0f, 400.0f));
+
+		ImGui::Separator();
+
+		if (ImGui::TreeNode("Colours"))
+		{
+			ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
+			ImGui::TreePop();
+		}
+		ImGui::End();
+
 
 		//if (ImGui::Begin("Frustum Plane Algorithm Testing", (bool*)0))
 		//{
@@ -240,9 +260,11 @@ public:
 
 private:
 
+	glm::vec4 back_colour = { 0.0f, 0.0f, 0.0f, 1.0f };
+
 	void Draw() override {
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(back_colour.r, back_colour.g, back_colour.b, back_colour.a);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_Scene->OnUpdate();

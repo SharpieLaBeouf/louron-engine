@@ -5,17 +5,17 @@ namespace Louron {
 	void Renderer::DrawMeshComponent(Entity* MeshEntity, Entity* CameraEntity, std::string optionalShader) {
 
 		CameraComponent& camera = CameraEntity->GetComponent<CameraComponent>();
-		MaterialComponent& material = MeshEntity->GetComponent<MaterialComponent>();
 		TransformComponent& transform = MeshEntity->GetComponent<TransformComponent>();
-		std::vector<std::shared_ptr<MeshFilter>> meshes = MeshEntity->GetComponent<MeshComponent>().GetMeshes();
+		MeshRenderer& meshRenderer = MeshEntity->GetComponent<MeshRenderer>();
+		MeshFilter& meshFilter = MeshEntity->GetComponent<MeshFilter>();
 
 		// Get All Mesh Filters in Mesh Component
-		for (auto& meshFilter : meshes) {
+		for (auto& mesh : *meshFilter.Meshes) {
 
-			meshFilter->VAO->Bind();
+			mesh->VAO->Bind();
 
-			if (material.Materials[meshFilter->MaterialIndex] != nullptr) {
-				std::shared_ptr<Material>& mat = material.Materials[meshFilter->MaterialIndex];
+			if ((*meshRenderer.Materials)[mesh->MaterialIndex] != nullptr) {
+				std::shared_ptr<Material> mat = (*meshRenderer.Materials)[mesh->MaterialIndex];
 				std::shared_ptr<Shader> shader;
 				
 				if (optionalShader == "")
@@ -65,7 +65,7 @@ namespace Louron {
 
 				// Draw
 
-				glDrawElements(GL_TRIANGLES, meshFilter->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+				glDrawElements(GL_TRIANGLES, mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 
 				shader->UnBind();
 			}
@@ -76,9 +76,12 @@ namespace Louron {
 		}
 	}
 	void Renderer::DrawMeshFilter(std::shared_ptr<MeshFilter> Mesh)	{
+		for (const auto& mesh : *Mesh->Meshes)
+			DrawMesh(mesh);
+	}
 
+	void Renderer::DrawMesh(std::shared_ptr<Mesh> Mesh) {
 		Mesh->VAO->Bind();
 		glDrawElements(GL_TRIANGLES, Mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
-
 	}
 }

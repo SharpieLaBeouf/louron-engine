@@ -28,12 +28,17 @@ public:
 		 m_Scene(std::make_unique<Louron::Scene>())
 	{
 		std::cout << "[L20] Loading Scene 8..." << std::endl;
-				
+
+		const auto& resources = m_Scene->GetResources();
+		resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
+		resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+		
 		// Create Entity for Monkey and Load Applicable Model
 		Louron::Entity MonkeyEntity = m_Scene->CreateEntity("Monkey");
-		MonkeyEntity.AddComponent<Louron::MaterialComponent>("FP_Material_BP_Shader");
-		MonkeyEntity.AddComponent<Louron::MeshComponent>().LoadModel("assets/Models/Monkey/Pink_Monkey.fbx", MonkeyEntity.GetComponent<Louron::MaterialComponent>());
-		
+
+		MonkeyEntity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Pink_Monkey"));
+		MonkeyEntity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("Pink_Monkey"));
+
 		// Create Entity for Camera and Set to Primary Camera
 		m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>().Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
 		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Primary = true;

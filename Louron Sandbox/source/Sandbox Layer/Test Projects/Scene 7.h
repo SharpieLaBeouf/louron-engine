@@ -20,11 +20,11 @@ private:
 	Louron::Camera* m_SceneCamera;
 	Louron::OldLight light_properties;
 
-	Louron::MaterialComponent monkey_mat;
-	Louron::MaterialComponent back_pack_mat;
+	//std::unique_ptr<Louron::MeshFilter> monkeyFilter;
+	//std::unique_ptr<Louron::MeshRenderer> monkeyRenderer;
 
-	std::unique_ptr<Louron::MeshComponent> monkey;
-	std::unique_ptr<Louron::MeshComponent> back_pack;
+	//std::unique_ptr<Louron::MeshFilter> backPackFilter;
+	//std::unique_ptr<Louron::MeshRenderer> backPackRenderer;
 
 public:
 
@@ -40,10 +40,10 @@ public:
 		m_SceneCamera->MovementSpeed = 10.0f;
 		m_SceneCamera->MovementYDamp = 0.65f;
 
-		back_pack = std::make_unique<Louron::MeshComponent>();
-		back_pack->LoadModel("assets/Models/BackPack/BackPack.fbx", monkey_mat);
-		monkey = std::make_unique<Louron::MeshComponent>();
-		monkey->LoadModel("assets/Models/BackPack/BackPack.fbx", back_pack_mat);
+		//back_pack = std::make_unique<Louron::MeshComponent>();
+		//back_pack->LoadModel("assets/Models/BackPack/BackPack.fbx", monkey_mat);
+		//monkey = std::make_unique<Louron::MeshComponent>();
+		//monkey->LoadModel("assets/Models/BackPack/BackPack.fbx", back_pack_mat);
 	}
 
 	~Scene7() override

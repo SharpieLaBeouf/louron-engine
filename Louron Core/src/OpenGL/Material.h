@@ -37,10 +37,11 @@ namespace Louron {
 		std::shared_ptr<Shader>& GetShader();
 
 		Material();
-		Material(std::shared_ptr<Shader>& shader);
+		Material(const std::string& name, std::shared_ptr<Shader> shader);
+		Material(std::shared_ptr<Shader> shader);
 		Material(Texture* texture);
-		Material(std::shared_ptr<Shader>& shader, Texture* texture);
-		Material(std::shared_ptr<Shader>& shader, std::unordered_map<GLint, Texture*>& textures);
+		Material(std::shared_ptr<Shader> shader, Texture* texture);
+		Material(std::shared_ptr<Shader> shader, std::unordered_map<GLint, Texture*>& textures);
 
 		float GetShine() const;
 		glm::vec4* GetDiffuse();
@@ -56,12 +57,12 @@ namespace Louron {
 		
 		Texture* GetTextureMap(GLint type);
 
-		void SetMaterialIndex(GLuint index);
-		GLuint GetMaterialIndex() const;
+		std::string GetName() const { return m_Name; }
+		void SetName(const std::string& name) { m_Name = name; }
 
 	private:
 
-		GLuint m_MaterialIndex = NULL;
+		std::string m_Name;
 
 		GLfloat m_Shine = 32.0f;
 		glm::vec4 m_Diffuse = glm::vec4(1.0f);

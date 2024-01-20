@@ -1,14 +1,8 @@
 #include "Mesh.h"
-#include "Components.h"
 
 namespace Louron {
 
-	/// <summary>
-	/// MESH FILTER
-	/// </summary>
-	/// <param name="vertices"></param>
-	/// <param name="indices"></param>
-	MeshFilter::MeshFilter(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
 	{
 		
 		VAO = std::make_unique<VertexArray>();
@@ -26,8 +20,16 @@ namespace Louron {
 		VAO->SetIndexBuffer(ebo);
 	}
 
-	int MeshComponent::LoadModel(const char* filePath, MaterialComponent& materialComponent) {
+	void MeshFilter::LinkMeshFilterFromScene(const std::shared_ptr<MeshFilter>& meshFilter) {
+		Meshes = meshFilter->Meshes;
+	}
 
+	/// <summary>
+	/// Less efficient on memory as this will load the model multiple times into 
+	/// memory for each instance of the MeshRenderer component.
+	/// </summary>
+	int MeshRenderer::LoadModelFromFile(const char* filePath, MeshFilter& meshFilter) {
+		
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(filePath,
 			aiProcess_CalcTangentSpace |
@@ -50,29 +52,51 @@ namespace Louron {
 		auto count = lastDot == std::string::npos ? mesh_name.size() - lastSlash : lastDot - lastSlash;
 		mesh_name = mesh_name.substr(lastSlash, count);
 
-		ProcessNode(scene->mRootNode, scene, materialComponent);
+		ProcessNode(scene->mRootNode, scene, meshFilter);
 		std::cout << "[L20] Loaded Mesh: " << mesh_name.c_str() << std::endl;
 
 		return GL_TRUE;
 	}
 
-	void MeshComponent::ProcessNode(aiNode* node, const aiScene* scene, MaterialComponent& materialComponent) {
+	/// <summary>
+	/// More efficient than loading from file. This means that the scene resource manager
+	/// will hold all the data in one place, and these components will reference the data
+	/// contained within one place, opposed to duplicating data in memory.
+	/// 
+	/// This requires you to also Load the MeshFilter from the scene to the Entities
+	/// MeshFilter component.
+	/// </summary>
+	void MeshRenderer::LinkMeshRendererFromScene(const std::shared_ptr<MeshRenderer>& meshRenderer)
+	{
+		Materials = meshRenderer->Materials;
+	}
+
+	/// <summary>
+	/// Recursive function that loads all meshes and submeshes within a meshfilter.
+	/// </summary>
+	void MeshRenderer::ProcessNode(aiNode* node, const aiScene* scene, MeshFilter& meshFilter) {
+		
 		// process all the node's meshes (if any)
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			m_Meshes.push_back(ProcessMesh(mesh, scene, materialComponent));
-			m_MeshCount++;
+			meshFilter.Meshes->push_back(ProcessMesh(mesh, scene));
 		}
+
 		// then do the same for each of its children
 		for (unsigned int i = 0; i < node->mNumChildren; i++)
 		{
-			ProcessNode(node->mChildren[i], scene, materialComponent);
+			ProcessNode(node->mChildren[i], scene, meshFilter);
 		}
 
 	}
 
-	std::shared_ptr<MeshFilter> MeshComponent::ProcessMesh(aiMesh* mesh, const aiScene* scene, MaterialComponent& materialComponent) const {
+	/// <summary>
+	/// Loads the model data from ASSIMP into a Mesh and Material class.
+	/// </summary>
+	std::shared_ptr<Mesh> MeshRenderer::ProcessMesh(aiMesh* mesh, const aiScene* scene) const {
+
+		// VERTICIES and INDICES
 
 		// Process Vertices
 		std::vector<Vertex> mesh_vertices;
@@ -95,21 +119,24 @@ namespace Louron {
 				mesh_indices.push_back(face.mIndices[j]);
 		}
 
-		// Create Material
-		for (int i = 0; i < materialComponent.Materials.size(); i++) {
-			if (materialComponent.Materials[i] != nullptr) {
-				if (materialComponent.Materials[i]->GetMaterialIndex() == mesh->mMaterialIndex) {
+		// MATERIALS
 
-					std::shared_ptr<MeshFilter> temp_mesh = std::make_shared<MeshFilter>(mesh_vertices, mesh_indices);
+		// Check if Material has already been loaded, and apply that material index to the mesh
+		if (Materials->size() > 0) {
+			for (int i = 0; i < Materials->size(); i++) {
+				if ((*Materials)[i] != nullptr && mesh->mMaterialIndex == i) {
+					std::shared_ptr<Mesh> temp_mesh = std::make_shared<Mesh>(mesh_vertices, mesh_indices);
 					temp_mesh->MaterialIndex = mesh->mMaterialIndex;
 					return temp_mesh;
 				}
-
 			}
 		}
 
-		std::shared_ptr<Material> mesh_material = std::make_shared<Material>(Engine::Get().GetShaderLibrary().GetShader(materialComponent.ShaderName),
+		// Create new Material if not loaded, and gather material data from ASSIMP
+		// Use Forward Plus shader, and Blank Texture as defaults
+		std::shared_ptr<Material> mesh_material = std::make_shared<Material>(Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"),
 			Engine::Get().GetTextureLibrary().GetTexture("blank_texture"));
+		
 		if (mesh->mMaterialIndex >= 0) {
 
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -148,14 +175,13 @@ namespace Louron {
 			mesh_material->SetSpecular(glm::vec4(colour.r, colour.g, colour.b, 1.0f));
 			material->Get(AI_MATKEY_SHININESS, shine);
 			mesh_material->SetShine(shine);
-
-			mesh_material->SetMaterialIndex(mesh->mMaterialIndex);
 		}
 
-		materialComponent.Materials.push_back(mesh_material);
+		Materials->push_back(mesh_material);
 
-		std::shared_ptr<MeshFilter> temp_mesh = std::make_shared<MeshFilter>(mesh_vertices, mesh_indices);
+		std::shared_ptr<Mesh> temp_mesh = std::make_shared<Mesh>(mesh_vertices, mesh_indices);
 		temp_mesh->MaterialIndex = mesh->mMaterialIndex;
 		return temp_mesh;
 	}
+	
 }

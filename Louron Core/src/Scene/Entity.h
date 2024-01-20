@@ -22,9 +22,6 @@ namespace Louron {
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) {
 
-			if (std::is_same<T, MeshComponent>::value && !HasComponent<MaterialComponent>())
-				AddComponent<MaterialComponent>();
-
 			if (HasComponent<T>())
 				return GetComponent<T>();
 
@@ -36,6 +33,11 @@ namespace Louron {
 		// This returns the applicable Component
 		template<typename T>
 		T& GetComponent() {
+			if (m_EntityHandle == entt::null) {
+				std::cerr << "[L20] ERROR: Attempted to Retrieve Component from NULL Entity!" << std::endl;
+				assert(false);
+			}
+			
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
 		}
 
