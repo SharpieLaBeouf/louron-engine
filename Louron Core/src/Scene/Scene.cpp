@@ -181,103 +181,106 @@ namespace Louron {
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, FP_Data.SL_Buffer);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, FP_Data.SL_Indices_Buffer);
 			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, FP_Data.DL_Buffer);
-
-			// Point Lights
-			{
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
-				PointLightComponent* pointLights = (PointLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-
-				if (pointLights) {
-					auto view = m_Registry.view<TransformComponent, PointLightComponent>();
-
-					int i = 0;
-					for (auto entity : view) {
-						auto [transform, point_light] = view.get<TransformComponent, PointLightComponent>(entity);
-
-						point_light.position = glm::vec4(transform.position, 1.0f);
-
-						pointLights[i] = point_light;
-						pointLights[i].lastLight = false;
-
-						i++;
-
-						if (i >= MAX_POINT_LIGHTS)
-							break;
-					}
-					pointLights[i].lastLight = true;
-				}
-				else {
-					std::cout << "[L20] Point Light Buffer Not Mapped Successfully!" << std::endl;
-				}
-
-				glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-				}
-
-			// Spot Lights
-			{
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
-				SpotLightComponent* spotLights = (SpotLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-
-				if (spotLights) {
-					auto view = m_Registry.view<TransformComponent, SpotLightComponent>();
-
-					int i = 0;
-					for (auto entity : view) {
-						auto [transform, spot_light] = view.get<TransformComponent, SpotLightComponent>(entity);
-
-						spot_light.position = glm::vec4(transform.position, 1.0f);
-
-						spotLights[i] = spot_light;
-						spotLights[i].lastLight = false;
-
-						i++;
-
-						if (i >= MAX_SPOT_LIGHTS)
-							break;
-					}
-					spotLights[i].lastLight = true;
-				}
-				else {
-					std::cout << "[L20] Spot Light Buffer Not Mapped Successfully!" << std::endl;
-				}
-
-				glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-			}
-
-			// Directional Lights
-			{
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
-				DirectionalLightComponent* directionalLights = (DirectionalLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-
-				if (directionalLights) {
-					auto view = m_Registry.view<TransformComponent, DirectionalLightComponent>();
-
-					int i = 0;
-					for (auto entity : view) {
-
-						directionalLights[i] = view.get<DirectionalLightComponent>(entity);
-						directionalLights[i].lastLight = false;
-						directionalLights[i].direction = glm::normalize(
-							glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) * 
-							glm::quat(glm::radians(view.get<TransformComponent>(entity).rotation)));
-
-						i++;
-
-						if (i >= MAX_DIRECTIONAL_LIGHTS)
-							break;
-					}
-					directionalLights[i].lastLight = true;
-				}
-				else {
-					std::cout << "[L20] Spot Light Buffer Not Mapped Successfully!" << std::endl;
-				}
-
-				glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-			}
 			
+			// Lights
+			{
+				// Point Lights
+				{
+					glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
+					PointLightComponent* pointLights = (PointLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+
+					if (pointLights) {
+						auto view = m_Registry.view<TransformComponent, PointLightComponent>();
+
+						int i = 0;
+						for (auto entity : view) {
+							auto [transform, point_light] = view.get<TransformComponent, PointLightComponent>(entity);
+
+							point_light.position = glm::vec4(transform.position, 1.0f);
+
+							pointLights[i] = point_light;
+							pointLights[i].lastLight = false;
+
+							i++;
+
+							if (i >= MAX_POINT_LIGHTS)
+								break;
+						}
+						pointLights[i].lastLight = true;
+					}
+					else {
+						std::cout << "[L20] Point Light Buffer Not Mapped Successfully!" << std::endl;
+					}
+
+					glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+					glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+				}
+
+				// Spot Lights
+				{
+					glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
+					SpotLightComponent* spotLights = (SpotLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+
+					if (spotLights) {
+						auto view = m_Registry.view<TransformComponent, SpotLightComponent>();
+
+						int i = 0;
+						for (auto entity : view) {
+							auto [transform, spot_light] = view.get<TransformComponent, SpotLightComponent>(entity);
+
+							spot_light.position = glm::vec4(transform.position, 1.0f);
+
+							spotLights[i] = spot_light;
+							spotLights[i].lastLight = false;
+
+							i++;
+
+							if (i >= MAX_SPOT_LIGHTS)
+								break;
+						}
+						spotLights[i].lastLight = true;
+					}
+					else {
+						std::cout << "[L20] Spot Light Buffer Not Mapped Successfully!" << std::endl;
+					}
+
+					glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+					glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+				}
+
+				// Directional Lights
+				{
+					glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
+					DirectionalLightComponent* directionalLights = (DirectionalLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+
+					if (directionalLights) {
+						auto view = m_Registry.view<TransformComponent, DirectionalLightComponent>();
+
+						int i = 0;
+						for (auto entity : view) {
+
+							directionalLights[i] = view.get<DirectionalLightComponent>(entity);
+							directionalLights[i].lastLight = false;
+							directionalLights[i].direction = glm::normalize(
+								glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) *
+								glm::quat(glm::radians(view.get<TransformComponent>(entity).rotation)));
+
+							i++;
+
+							if (i >= MAX_DIRECTIONAL_LIGHTS)
+								break;
+						}
+						directionalLights[i].lastLight = true;
+					}
+					else {
+						std::cout << "[L20] Spot Light Buffer Not Mapped Successfully!" << std::endl;
+					}
+
+					glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+					glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+				}
+			}
+
 			// 4. Conduct Light Cull
 			std::shared_ptr<Shader>& lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
 			lightCull->Bind();
@@ -493,21 +496,34 @@ namespace Louron {
 
 			std::string temp;
 			if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+				
 				material->GetTexture(aiTextureType_DIFFUSE, 0, &texture_str);
-				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+				temp = texture_str.C_Str(); 
+				
+				if (temp.rfind("..\\", 0) == 0) 
+					temp.erase(0, 3);
+								
 				texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
 				temp_material->AddTextureMap(L20_TEXTURE_DIFFUSE_MAP, texture);
 			}
 			if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
 				material->GetTexture(aiTextureType_SPECULAR, 0, &texture_str);
-				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+				temp = texture_str.C_Str(); 
+				
+				if (temp.rfind("..\\", 0) == 0) 
+					temp.erase(0, 3);
+				
 				texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
 				temp_material->AddTextureMap(L20_TEXTURE_SPECULAR_MAP, texture);
 			}
 
 			if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
 				material->GetTexture(aiTextureType_NORMALS, 0, &texture_str);
-				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
+				temp = texture_str.C_Str(); 
+				
+				if (temp.rfind("..\\", 0) == 0) 
+					temp.erase(0, 3);
+				
 				texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
 				temp_material->AddTextureMap(L20_TEXTURE_NORMAL_MAP, texture);
 			}

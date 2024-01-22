@@ -48,6 +48,9 @@ struct DirLight {
     vec4 specular;
 
     bool lastLight;
+
+	// DO NOT USE - this is for SSBO alignment purposes ONLY
+    vec3 m_Alignment;
 };
 
 struct PointLight {
@@ -79,7 +82,10 @@ struct SpotLight {
 	float linear;
 	float quadratic;
 
-    bool lastLight; 
+    bool lastLight;
+   
+	// DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
+	vec2 m_Alignment;
 };
 
 struct VisibleIndex {
@@ -123,15 +129,13 @@ vec3 CalcDirLights(vec3 normal, vec3 viewDir);
 vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir);
 
-ivec2 location;
-ivec2 tileID;
+ivec2 location = ivec2(gl_FragCoord.xy);
+ivec2 tileID = location / ivec2(16, 16);
 uint index;
 
 void main() {
 
 	// Determine which tile this pixel belongs to
-	location = ivec2(gl_FragCoord.xy);
-	tileID = location / ivec2(16, 16);
 	index = tileID.y * numberOfTilesX + tileID.x;
 	
 	vec3 norm = normalize(Normal);
@@ -146,12 +150,16 @@ void main() {
     fragColour = vec4(result, 1.0);
 }
 
+// Calculate Directional Light Lighting in Scene (MAX 10)
 vec3 CalcDirLights(vec3 normal, vec3 viewDir) {
     
     vec3 dirResult = vec3(0.0f, 0.0f, 0.0f);
 
-    for (int i = 0; i < DL_Buffer_Data.data.length() && DL_Buffer_Data.data[i].lastLight == false; ++i){
-            
+    for (int i = 0; i < DL_Buffer_Data.data.length(); i++) {
+
+        if (DL_Buffer_Data.data[i].lastLight == true)
+            break;
+
         DirLight light = DL_Buffer_Data.data[i];
 
         vec3 lightDir = normalize(-light.direction.xyz);
@@ -179,11 +187,17 @@ vec3 CalcDirLights(vec3 normal, vec3 viewDir) {
     return dirResult;
 }
 
-vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir){
+// Calculate Point Light Lighting in Scene
+vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
 
     vec3 pointResult = vec3(0.0f, 0.0f, 0.0f);
 
-    for (int i = 0; i < PL_Buffer_Data.data.length() && PL_Buffer_Data.data[i].lastLight == false; ++i){
+    // LOOP through PL SSBO
+    for (int i = 0; i < PL_Buffer_Data.data.length(); i++) {
+        
+        // BREAK LOOP if reached the last of the lights
+        if (PL_Buffer_Data.data[i].lastLight == true)
+            break;
     
         PointLight light = PL_Buffer_Data.data[i];
 
@@ -215,12 +229,16 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir){
     return pointResult;
 }
 
+// Calculate Spot Light Lighting in Scene
 vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir){
     
     vec3 spotResult = vec3(0.0f, 0.0f, 0.0f);
 
-    for (int i = 0; i < SL_Buffer_Data.data.length() && SL_Buffer_Data.data[i].lastLight == false; ++i) {
+    for (int i = 0; i < SL_Buffer_Data.data.length(); i++) {
     
+        if (SL_Buffer_Data.data[i].lastLight == true)
+            break;
+                
         SpotLight light = SL_Buffer_Data.data[i];
         vec3 lightDir = normalize(light.position.xyz - fragPos);
        
@@ -250,7 +268,7 @@ vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir){
         specular *= attenuation * intensity;
         
         spotResult += (ambient + diffuse + specular);
-    }
+     }
 
     return spotResult;
 }

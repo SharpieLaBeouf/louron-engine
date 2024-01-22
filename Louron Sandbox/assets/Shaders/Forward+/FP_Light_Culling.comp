@@ -1,30 +1,38 @@
 #version 450
 
 struct PointLight {
-    vec3 position;
-    
-    float constant;
-    float linear;
-    float quadratic;
-	
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+    vec4 position;
+
+    vec4 ambient;
+    vec4 diffuse;
+    vec4 specular;
+
+	float constant;
+	float linear;
+	float quadratic;
+
+    bool lastLight;
 };
 
 struct SpotLight {
-    vec3 position;
-    vec3 direction;
-    float cutOff;
-    float outerCutOff;
-  
-    float constant;
-    float linear;
-    float quadratic;
-  
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;       
+	vec4 position;
+	vec4 direction;
+
+	vec4 ambient;
+	vec4 diffuse;
+	vec4 specular;
+
+	float cutOff;
+	float outerCutOff;
+
+	float constant;
+	float linear;
+	float quadratic;
+
+    bool lastLight;
+   
+	// DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
+	vec2 m_Alignment;
 };
 
 struct VisibleIndex {
@@ -177,7 +185,7 @@ void main(){
 		}
 
 		// Calculate attentuation of the point light to determine the radius of the pointlight
-		vec3 position = PL_Buffer_Data.data[lightIndex].position;
+		vec3 position = PL_Buffer_Data.data[lightIndex].position.xyz;
 		float constant = PL_Buffer_Data.data[lightIndex].constant;
 		float linear = PL_Buffer_Data.data[lightIndex].linear;
 		float quadratic = PL_Buffer_Data.data[lightIndex].quadratic;
@@ -289,9 +297,9 @@ bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere) {
     // Calculate the spotlight range based on attenuation factors and a predefined cutoff value
     float cutoffRange = sqrt(1.0 / max(max(spotlight.constant, spotlight.linear), spotlight.quadratic));
 
-    vec3 v = sphere.centre - spotlight.position;
+    vec3 v = sphere.centre - spotlight.position.xyz;
     float lenSq = dot(v, v);
-    float v1Len = dot(v, normalize(spotlight.direction));
+    float v1Len = dot(v, normalize(spotlight.direction.xyz));
     float distanceClosestPoint = cos(spotlight.cutOff) * sqrt(lenSq - v1Len * v1Len) - v1Len * sin(spotlight.cutOff);
 
     bool angleCull = distanceClosestPoint > sphere.radius;

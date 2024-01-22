@@ -60,19 +60,38 @@ namespace Louron {
 
 		bool lastLight = false;
 
+	private:
+
+		// DO NOT USE - this is for SSBO alignment purposes ONLY
+		glm::vec2 m_Alignment;
+
+	public:
+
 		SpotLightComponent() = default;
 		SpotLightComponent(const SpotLightComponent&) = default;
 	};
 
 	struct DirectionalLightComponent {
+	
 	private:
+		// This is private because the Transform Component holds the direction
+		// we just need this here for the SSBO data parsing and alignment.
 		glm::vec4 direction;
+	
 	public:
+		
 		glm::vec4 ambient;
 		glm::vec4 diffuse;
 		glm::vec4 specular;
 		
 		bool lastLight = false;
+
+	private:
+
+		// DO NOT USE - this is for SSBO alignment purposes ONLY
+		glm::vec3 m_Alignment;
+
+	public:
 
 		friend class Scene;
 	};

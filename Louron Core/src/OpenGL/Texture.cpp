@@ -58,7 +58,7 @@ namespace Louron {
 			stbi_image_free(textureData);
 		}
 		else {
-			std::cout << "[L20] Failed to load texture!" << std::endl;
+			std::cout << "[L20] Failed to load texture!: " << texturePath << std::endl;
 		}
 	}
 

@@ -39,6 +39,7 @@ public:
 		resources->LoadMesh("assets/Models/Cube/Cube.fbx", resources->Shaders["FP_Material_BP_Shader"]);
 		resources->LoadMesh("assets/Models/Monkey/Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
 		resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+		resources->LoadMesh("assets/Models/BackPack/BackPack.fbx", resources->Shaders["FP_Material_BP_Shader"]);
 
 		std::shared_ptr<Louron::Material> stoneCubeMaterial = std::make_shared<Louron::Material>("Stone Cube Material", resources->Shaders["FP_Material_BP_Shader"]);
 		stoneCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("stone_texture"));
@@ -74,11 +75,14 @@ public:
 			}
 		}
 
-
 		Louron::Entity entity = m_Scene->CreateEntity("Pink_Monkey");
 		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Pink_Monkey"));
 		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("Pink_Monkey"));
 
+		entity = m_Scene->CreateEntity("BackPack");
+		entity.GetComponent<Louron::TransformComponent>().position = { 0.0f, 0.0f, -25.0f };
+		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("BackPack"));
+		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("BackPack"));
 
 		// Create Entity for Camera and Set to Primary Camera
 		auto& camera = m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>();
@@ -98,9 +102,9 @@ public:
 		pointLight.quadratic = 0.032f;
 
 		Louron::Entity dirLight = m_Scene->CreateEntity("Directional Light");
-		dirLight.AddComponent<Louron::DirectionalLightComponent>();
-
 		dirLight.GetComponent<Louron::TransformComponent>().rotation = { 50.0f, -30.0f, 0.0f };
+
+		dirLight.AddComponent<Louron::DirectionalLightComponent>();
 		dirLight.GetComponent<Louron::DirectionalLightComponent>().ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
 		dirLight.GetComponent<Louron::DirectionalLightComponent>().diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
 		dirLight.GetComponent<Louron::DirectionalLightComponent>().specular = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -159,48 +163,48 @@ public:
 
 	void UpdateGUI() override {
 
-		//Frustum Plane Algorithm Testing
-		glm::vec4 frustumPlanes[6]{};
-		bool frustumPlanesChecks[6]{ false };
-		glm::vec2 tileNumber{ (float)m_Window.GetWidth() / 16.0f, glm::ceil((float)m_Window.GetHeight() / 16.0f) };
+		////Frustum Plane Algorithm Testing
+		//glm::vec4 frustumPlanes[6]{};
+		//bool frustumPlanesChecks[6]{ false };
+		//glm::vec2 tileNumber{ (float)m_Window.GetWidth() / 16.0f, glm::ceil((float)m_Window.GetHeight() / 16.0f) };
 
-		glm::vec2 negativeStep = (2.0f * glm::vec2(tileID)) / tileNumber;
-		glm::vec2 positiveStep = (2.0f * glm::vec2(tileID + glm::ivec2(1, 1))) / tileNumber;
+		//glm::vec2 negativeStep = (2.0f * glm::vec2(tileID)) / tileNumber;
+		//glm::vec2 positiveStep = (2.0f * glm::vec2(tileID + glm::ivec2(1, 1))) / tileNumber;
 
-		frustumPlanes[0] = glm::vec4(1.0, 0.0, 0.0, 1.0 - negativeStep.x); // Left
-		frustumPlanes[1] = glm::vec4(-1.0, 0.0, 0.0, -1.0 + positiveStep.x); // Right
-		frustumPlanes[2] = glm::vec4(0.0, 1.0, 0.0, 1.0 - negativeStep.y); // Bottom
-		frustumPlanes[3] = glm::vec4(0.0, -1.0, 0.0, -1.0 + positiveStep.y); // Top
-		frustumPlanes[4] = glm::vec4(0.0, 0.0, -1.0, 0.1); // Near
-		frustumPlanes[5] = glm::vec4(0.0, 0.0, 1.0, 100.0); // Far
+		//frustumPlanes[0] = glm::vec4(1.0, 0.0, 0.0, 1.0 - negativeStep.x); // Left
+		//frustumPlanes[1] = glm::vec4(-1.0, 0.0, 0.0, -1.0 + positiveStep.x); // Right
+		//frustumPlanes[2] = glm::vec4(0.0, 1.0, 0.0, 1.0 - negativeStep.y); // Bottom
+		//frustumPlanes[3] = glm::vec4(0.0, -1.0, 0.0, -1.0 + positiveStep.y); // Top
+		//frustumPlanes[4] = glm::vec4(0.0, 0.0, -1.0, 0.1); // Near
+		//frustumPlanes[5] = glm::vec4(0.0, 0.0, 1.0, 100.0); // Far
 
-		glm::mat4 view = m_Scene->GetPrimaryCameraEntity().GetComponent<Louron::CameraComponent>().Camera->GetViewMatrix();
-		glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), 0.1f, 100.0f);
+		//glm::mat4 view = m_Scene->GetPrimaryCameraEntity().GetComponent<Louron::CameraComponent>().Camera->GetViewMatrix();
+		//glm::mat4 proj = glm::perspective(glm::radians(60.0f), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), 0.1f, 100.0f);
 
-		glm::mat4 viewProj = proj * view;
-		for (int i = 0; i < 4; i++) {
-			frustumPlanes[i] = frustumPlanes[i] * viewProj;
-			frustumPlanes[i] /= glm::length(glm::vec3(frustumPlanes[i].x, frustumPlanes[i].y, frustumPlanes[i].z));
-		}
+		//glm::mat4 viewProj = proj * view;
+		//for (int i = 0; i < 4; i++) {
+		//	frustumPlanes[i] = frustumPlanes[i] * viewProj;
+		//	frustumPlanes[i] /= glm::length(glm::vec3(frustumPlanes[i].x, frustumPlanes[i].y, frustumPlanes[i].z));
+		//}
 
-		frustumPlanes[4] = frustumPlanes[4] * view;
-		frustumPlanes[4] /= glm::length(glm::vec3(frustumPlanes[4].x, frustumPlanes[4].y, frustumPlanes[4].z));
-		frustumPlanes[5] = frustumPlanes[5] * view;
-		frustumPlanes[5] /= glm::length(glm::vec3(frustumPlanes[5].x, frustumPlanes[5].y, frustumPlanes[5].z));
+		//frustumPlanes[4] = frustumPlanes[4] * view;
+		//frustumPlanes[4] /= glm::length(glm::vec3(frustumPlanes[4].x, frustumPlanes[4].y, frustumPlanes[4].z));
+		//frustumPlanes[5] = frustumPlanes[5] * view;
+		//frustumPlanes[5] /= glm::length(glm::vec3(frustumPlanes[5].x, frustumPlanes[5].y, frustumPlanes[5].z));
 
-		glm::vec4 position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		//glm::vec4 position = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-		// We check if the light exists in our frustum
-		float distance = 0.0f;
-		for (int j = 0; j < 6; j++) {
-			distance = glm::dot(position, frustumPlanes[j]);
+		//// We check if the light exists in our frustum
+		//float distance = 0.0f;
+		//for (int j = 0; j < 6; j++) {
+		//	distance = glm::dot(position, frustumPlanes[j]);
 
-			// If one of the tests fails, then there is no intersection
-			if (distance <= 0.0) {
-				break;
-			}
-			frustumPlanesChecks[j] = true;
-		}
+		//	// If one of the tests fails, then there is no intersection
+		//	if (distance <= 0.0) {
+		//		break;
+		//	}
+		//	frustumPlanesChecks[j] = true;
+		//}
 
 		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 
