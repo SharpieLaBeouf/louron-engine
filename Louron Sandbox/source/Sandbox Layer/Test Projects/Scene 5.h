@@ -120,8 +120,8 @@ public:
 		m_SceneCamera->MovementSpeed = 10.0f;
 		m_SceneCamera->MovementYDamp = 0.65f;
 
-		light_trans.position = glm::vec3(0.0f, 10.0f, 0.0f);
-		cube_trans.scale = glm::vec3(5.0f, 1.0f, 5.0f);
+		light_trans.SetPosition({ 0.0f, 10.0f, 0.0f });
+		cube_trans.SetScale({ 5.0f, 1.0f, 5.0f });
 							
 	}
 	~Scene5() override
@@ -147,13 +147,13 @@ public:
 		lastTime = currentTime;
 
 		//light_trans.position = glm::vec3(0.0f, 10.0f, 0.0f);
-		light_trans.position = glm::vec3(
-			sin(currentTime) * rows * cube_trans.scale.x / 2.0f, 
-			10.0f, 
+		light_trans.SetPosition({
+			sin(currentTime) * rows * cube_trans.GetScale().x / 2.0f,
+			10.0f,
 			glm::clamp(
-				tan(currentTime) * cube_trans.scale.z, 
-				-(float)col * cube_trans.scale.z / 2.0f, 
-				 (float)col * cube_trans.scale.z / 2.0f));
+				tan(currentTime) * cube_trans.GetScale().z,
+				-(float)col * cube_trans.GetScale().z / 2.0f,
+				 (float)col * cube_trans.GetScale().z / 2.0f) });
 		
 		m_SceneCamera->Update(deltaTime);
 
@@ -183,9 +183,17 @@ public:
 
 		if (ImGui::TreeNode("Cube Transform"))
 		{
-			ImGui::DragFloat3("Translate", glm::value_ptr(cube_trans.position), 0.01f, 0, 0, "%.2f");
-			ImGui::DragFloat3("Rotate", glm::value_ptr(cube_trans.rotation), 1.0f, 0, 0, "%.2f");
-			ImGui::DragFloat3("Scale", glm::value_ptr(cube_trans.scale), 0.01f, 0, 0, "%.2f");
+			glm::vec3 temp = cube_trans.GetPosition();
+			ImGui::DragFloat3("Translate", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
+			cube_trans.SetPosition(temp);
+
+			temp = cube_trans.GetRotation();
+			ImGui::DragFloat3("Rotate", glm::value_ptr(temp), 1.0f, 0, 0, "%.2f");
+			cube_trans.SetRotation(temp);
+
+			temp = cube_trans.GetScale();
+			ImGui::DragFloat3("Scale", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
+			cube_trans.SetScale(temp);
 			ImGui::TreePop();
 		}
 
@@ -203,8 +211,8 @@ private:
 	float box_colour[4] = { 0.992f, 0.325f, 0.325f, 1.0f };
 	float back_colour[4] = { 120.0f / 255.0f, 200.0f / 255.0f, 255.0f, 1.0f };
 
-	Louron::TransformComponent cube_trans;
-	Louron::TransformComponent light_trans;
+	Louron::Transform cube_trans;
+	Louron::Transform light_trans;
 
 	Louron::Camera* m_SceneCamera = nullptr;
 
@@ -248,7 +256,7 @@ private:
 			shader->SetMat4("proj", proj);
 			shader->SetMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.GetTransform()))));
 			shader->SetVec3("viewPos", m_SceneCamera->GetPosition());
-			shader->SetVec3("lightPos", light_trans.position);
+			shader->SetVec3("lightPos", light_trans.GetPosition());
 			shader->SetVec4("lightColour", glm::vec4(1.0f));
 
 			glm::vec3 pos = glm::vec3(0.0f);

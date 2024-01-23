@@ -17,7 +17,7 @@ void MainMenuLayer::OnAttach() {
 	m_Scenes.push_back(std::make_unique<Scene10>());
 	m_Scenes.push_back(std::make_unique<Scene11>());
 
-	Louron::Engine::Get().GetWindow().SetVSync(true);
+	Louron::Engine::Get().GetWindow().SetVSync(false);
 }
 
 void MainMenuLayer::OnDetach() {

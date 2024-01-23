@@ -14,7 +14,7 @@
 
 namespace Louron {
 
-	// TODO: Create Point Light Struct
+	// TODO: Remove Old Light Struct
 	struct OldLight {
 		glm::vec3 position = glm::vec3(0.0f);
 
@@ -63,7 +63,7 @@ namespace Louron {
 	private:
 
 		// DO NOT USE - this is for SSBO alignment purposes ONLY
-		glm::vec2 m_Alignment;
+		std::array<float, 2> temp{ 0.0f };
 
 	public:
 
@@ -76,20 +76,20 @@ namespace Louron {
 	private:
 		// This is private because the Transform Component holds the direction
 		// we just need this here for the SSBO data parsing and alignment.
-		glm::vec4 direction;
+		glm::vec4 direction = glm::vec4(0.0f);
 	
 	public:
 		
-		glm::vec4 ambient;
-		glm::vec4 diffuse;
-		glm::vec4 specular;
+		glm::vec4 ambient = glm::vec4(0.2f);
+		glm::vec4 diffuse = glm::vec4(1.0f);
+		glm::vec4 specular = glm::vec4(0.5f);
 		
 		bool lastLight = false;
 
 	private:
 
 		// DO NOT USE - this is for SSBO alignment purposes ONLY
-		glm::vec3 m_Alignment;
+		std::array<float, 3> temp{ 0.0f };
 
 	public:
 

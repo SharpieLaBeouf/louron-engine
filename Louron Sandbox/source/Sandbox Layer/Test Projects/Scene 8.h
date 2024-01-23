@@ -36,8 +36,8 @@ public:
 		// Create Entity for Monkey and Load Applicable Model
 		Louron::Entity MonkeyEntity = m_Scene->CreateEntity("Monkey");
 
-		MonkeyEntity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Pink_Monkey"));
-		MonkeyEntity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("Pink_Monkey"));
+		MonkeyEntity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Pink_Monkey"));
+		MonkeyEntity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Pink_Monkey"));
 
 		// Create Entity for Camera and Set to Primary Camera
 		m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>().Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
@@ -73,9 +73,9 @@ public:
 
 		// Update Camera Component
 		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::TransformComponent>().position = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition();
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition());
 
-		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::TransformComponent>().position = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::TransformComponent>().position;
+		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().GetPosition());
 		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
 
 		Draw();

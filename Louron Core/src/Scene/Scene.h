@@ -3,10 +3,7 @@
 #include <vector>
 #include <memory>
 
-#include "Mesh.h"
-#include "../OpenGL/Shader.h"
-#include "../OpenGL/Texture.h"
-#include "../OpenGL/Material.h"
+#include "Resource Manager.h"
 
 #include <entt/entt.hpp>
 #include <assimp/Importer.hpp>
@@ -21,37 +18,6 @@
 namespace Louron {
 
 	class Entity;
-
-	struct ResourceManager {
-
-	public:
-
-		std::unordered_map<std::string, std::shared_ptr<Shader>> Shaders;
-		std::unordered_map<std::string, std::shared_ptr<Texture>> Textures;
-		std::unordered_map<std::string, std::shared_ptr<Material>> Materials;
-		
-		std::unordered_map<std::string, std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<MeshRenderer>>> Meshes;
-
-	public:
-
-		int LoadMesh(const char* filePath, const std::shared_ptr<Shader>& shader);
-		int LoadShader(const char* filePath);
-		int LoadTexture(const char* filePath);
-
-		void LinkShader(std::shared_ptr<Shader> shader);
-
-		std::shared_ptr<MeshFilter> GetMeshFilter(const std::string& name);
-		std::shared_ptr<MeshRenderer> GetMeshRenderer(const std::string& name);
-
-		ResourceManager() = default;
-		~ResourceManager() = default;
-				
-	private:
-
-		std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<MeshRenderer>> ProcessNode(aiNode* node, const aiScene* scene, std::string directory, const std::shared_ptr<Shader>& shader);
-		std::pair<std::shared_ptr<Mesh>, std::shared_ptr<Material>> ProcessMesh(aiMesh* mesh, const aiScene* scene, std::string directory, const std::shared_ptr<Shader>& shader);
-
-	};
 
 	class Scene {
 
@@ -72,6 +38,7 @@ namespace Louron {
 
 		void OnStart();
 		void OnUpdate();
+		void OnUpdateGUI();
 		void OnStop();
 
 		template<typename... Components>

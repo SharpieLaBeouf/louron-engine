@@ -13,7 +13,7 @@ namespace Louron {
 		m_Yaw = yaw;
 		m_Pitch = pitch;
 
-		m_ProjectionMatrix = glm::perspective(glm::radians(60.0f), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), 0.1f, 100.0f);
+		m_ProjectionMatrix = glm::perspective(glm::radians(60.0f), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), 0.1f, 1000.0f);
 
 		UpdateCameraVectors();
 	}

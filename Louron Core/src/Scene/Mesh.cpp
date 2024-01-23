@@ -20,7 +20,7 @@ namespace Louron {
 		VAO->SetIndexBuffer(ebo);
 	}
 
-	void MeshFilter::LinkMeshFilterFromScene(const std::shared_ptr<MeshFilter>& meshFilter) {
+	void MeshFilter::LinkMeshFilter(const std::shared_ptr<MeshFilter>& meshFilter) {
 		Meshes = meshFilter->Meshes;
 	}
 
@@ -66,7 +66,7 @@ namespace Louron {
 	/// This requires you to also Load the MeshFilter from the scene to the Entities
 	/// MeshFilter component.
 	/// </summary>
-	void MeshRenderer::LinkMeshRendererFromScene(const std::shared_ptr<MeshRenderer>& meshRenderer)
+	void MeshRenderer::LinkMeshRenderer(const std::shared_ptr<MeshRenderer>& meshRenderer)
 	{
 		Materials = meshRenderer->Materials;
 	}
@@ -177,7 +177,7 @@ namespace Louron {
 			mesh_material->SetShine(shine);
 		}
 
-		Materials->push_back(mesh_material);
+		Materials->operator[]((GLuint)mesh->mMaterialIndex) = mesh_material;
 
 		std::shared_ptr<Mesh> temp_mesh = std::make_shared<Mesh>(mesh_vertices, mesh_indices);
 		temp_mesh->MaterialIndex = mesh->mMaterialIndex;

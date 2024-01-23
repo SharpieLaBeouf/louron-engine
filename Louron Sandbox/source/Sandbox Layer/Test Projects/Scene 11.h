@@ -18,7 +18,8 @@ private:
 	float currentTime = 0;
 	float deltaTime = 0;
 	float lastTime = 0;
-	const int numCubes = 50;
+	const int numLights = 20;
+	std::vector<float> lightBobOffset;
 
 public:
 
@@ -36,62 +37,65 @@ public:
 
 		resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
 
-		resources->LoadMesh("assets/Models/Cube/Cube.fbx", resources->Shaders["FP_Material_BP_Shader"]);
 		resources->LoadMesh("assets/Models/Monkey/Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
 		resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
 		resources->LoadMesh("assets/Models/BackPack/BackPack.fbx", resources->Shaders["FP_Material_BP_Shader"]);
 
-		std::shared_ptr<Louron::Material> stoneCubeMaterial = std::make_shared<Louron::Material>("Stone Cube Material", resources->Shaders["FP_Material_BP_Shader"]);
-		stoneCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("stone_texture"));
-		stoneCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("stone_texture_specular"));
-		resources->Materials[stoneCubeMaterial->GetName()] = stoneCubeMaterial;
+		resources->LoadMesh("assets/Models/Sponza/sponza.obj", resources->Shaders["FP_Material_BP_Shader"]);
+		resources->LoadMesh("assets/Models/Torch/model/obj/Torch.obj", resources->Shaders["FP_Material_BP_Shader"]);
 
-		std::shared_ptr<Louron::Material> woodenCubeMaterial = std::make_shared<Louron::Material>("Wooden Cube Material", resources->Shaders["FP_Material_BP_Shader"]);
-		woodenCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("cube_texture"));
-		woodenCubeMaterial->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("cube_texture_specular"));
-		resources->Materials[woodenCubeMaterial->GetName()] = woodenCubeMaterial;
+		Louron::Entity entity = m_Scene->CreateEntity("Sponza");
+		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("sponza"));
+		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("sponza"));
+		entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(0.04f));
 
-		for (int i = 0; i < numCubes; i++) {
+		entity = m_Scene->CreateEntity("Monkey");
+		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Monkey"));
+		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Monkey"));
+		entity.GetComponent<Louron::Transform>().SetPosition({ -15.0f, 4.0f, -6.2f });
+		entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, -45.0f, 0.0f });
+
+		entity = m_Scene->CreateEntity("Pink_Monkey");
+		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Pink_Monkey"));
+		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Pink_Monkey"));
+		entity.GetComponent<Louron::Transform>().SetPosition({ -15.0f, 4.0f, 4.2f });
+		entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, -135.0f, 0.0f });
+
+		entity = m_Scene->CreateEntity("BackPack");
+		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("BackPack"));
+		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("BackPack"));
+		entity.GetComponent<Louron::Transform>().SetPosition({ -40.0f, 4.0f, -1.2f });
+		entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, 90.0f, 0.0f });
+
+		Louron::PointLightComponent PL_Component;
+		for (int i = 0; i < numLights; i++) {
 			
 			Louron::Entity entity = m_Scene->CreateEntity("Entity " + std::to_string(i));
 
-			entity.GetComponent<Louron::TransformComponent>().position = { glm::linearRand(-10.0f, 10.0f), glm::linearRand(-10.0f, 10.0f), glm::linearRand(-20.0f, -1.0f) };
-			entity.GetComponent<Louron::TransformComponent>().rotation = { glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) };
-			entity.GetComponent<Louron::TransformComponent>().scale = glm::vec3(glm::linearRand(0.5f, 2.0f));
+			PL_Component = entity.AddComponent<Louron::PointLightComponent>();
+			PL_Component.diffuse = glm::vec4(1.0f);
+
+			entity.GetComponent<Louron::Transform>().SetPosition({glm::linearRand(-30.0f, 30.0f), glm::linearRand(15.0f, 50.0f), glm::linearRand(-4.2f, 2.2f)});
+			entity.GetComponent<Louron::Transform>().SetRotation({glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f)});
+			entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(glm::linearRand(0.5f, 2.0f)));
 			
-			if (i <= numCubes / 2) {
-				entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Monkey"));
-				entity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("Monkey"));
-			}
-			else {
+			entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Torch"));
+			entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Torch"));
 
-				entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Cube"));
-
-				if (glm::linearRand(-1.0f, 1.0f) > 0.0f)
-					entity.AddComponent<Louron::MeshRenderer>().Materials->push_back(resources->Materials["Stone Cube Material"]);
-				else
-					entity.AddComponent<Louron::MeshRenderer>().Materials->push_back(resources->Materials["Wooden Cube Material"]);
-				
-			}
+			lightBobOffset.push_back(glm::linearRand(-100.0f, 100.0f));
 		}
-
-		Louron::Entity entity = m_Scene->CreateEntity("Pink_Monkey");
-		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("Pink_Monkey"));
-		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("Pink_Monkey"));
-
-		entity = m_Scene->CreateEntity("BackPack");
-		entity.GetComponent<Louron::TransformComponent>().position = { 0.0f, 0.0f, -25.0f };
-		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilterFromScene(resources->GetMeshFilter("BackPack"));
-		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRendererFromScene(resources->GetMeshRenderer("BackPack"));
 
 		// Create Entity for Camera and Set to Primary Camera
 		auto& camera = m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>();
 		camera.Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
 		camera.Primary = true;
+		camera.Camera->setPitch(-20.0f);
+		camera.Camera->setYaw(0.0f);
+		camera.Camera->setPosition({ -30.0f, 10.0f, -1.2f });
 
 		auto& pointLight = m_Scene->FindEntityByName("Main Camera").AddComponent<Louron::PointLightComponent>();
 
-		pointLight.position = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::TransformComponent>().position, 1.0f);
+		pointLight.position = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().GetPosition(), 1.0f);
 
 		pointLight.ambient =  { 0.2f, 0.2f, 0.2f, 1.0f };
 		pointLight.diffuse =  { 0.8f, 0.8f, 0.8f, 1.0f };
@@ -102,7 +106,7 @@ public:
 		pointLight.quadratic = 0.032f;
 
 		Louron::Entity dirLight = m_Scene->CreateEntity("Directional Light");
-		dirLight.GetComponent<Louron::TransformComponent>().rotation = { 50.0f, -30.0f, 0.0f };
+		dirLight.GetComponent<Louron::Transform>().SetRotation({ 50.0f, -30.0f, 0.0f });
 
 		dirLight.AddComponent<Louron::DirectionalLightComponent>();
 		dirLight.GetComponent<Louron::DirectionalLightComponent>().ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
@@ -138,22 +142,27 @@ public:
 
 		// Update Camera Component
 		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::TransformComponent>().position = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition();
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition());
 
-		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::TransformComponent>().position = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::TransformComponent>().position;
+		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().GetPosition());
 		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
 
 		if (m_Input.GetMouseButtonDown(GLFW_MOUSE_BUTTON_1)) {
-
-			for (int i = 0; i < numCubes; i++) {
+			for (int i = 0; i < numLights; i++) {
 				Louron::Entity entity = m_Scene->FindEntityByName("Entity " + std::to_string(i));
-				entity.GetComponent<Louron::TransformComponent>().position = { glm::linearRand(-10.0f, 10.0f), glm::linearRand(-10.0f, 10.0f), glm::linearRand(-20.0f, -1.0f) };
-				entity.GetComponent<Louron::TransformComponent>().rotation = { glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) };
-				entity.GetComponent<Louron::TransformComponent>().scale = glm::vec3(glm::linearRand(0.5f, 2.0f));
+				entity.GetComponent<Louron::Transform>().SetPosition({ glm::linearRand(-30.0f, 30.0f), glm::linearRand(15.0f, 50.0f), glm::linearRand(-4.2f, 2.2f)});
+				entity.GetComponent<Louron::Transform>().SetRotation({ glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) });
+				entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(glm::linearRand(0.5f, 2.0f)));
 			}
+		}
 
-			m_Scene->FindEntityByName("Pink_Monkey").GetComponent<Louron::TransformComponent>().rotation = { glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) };
+		for (int i = 0; i < numLights; i++) {
+			
+			// Each Light has their own bobbing height
+			float bobbingOffset = sin(currentTime + lightBobOffset[i]) * deltaTime;
 
+			Louron::Entity entity = m_Scene->FindEntityByName("Entity " + std::to_string(i));
+			entity.GetComponent<Louron::Transform>().Translate({ 0.0f, bobbingOffset, 0.0f});
 		}
 
 		Draw();
@@ -162,6 +171,30 @@ public:
 	glm::ivec2 tileID{ 0, 0 };
 
 	void UpdateGUI() override {
+
+		m_Scene->OnUpdateGUI();
+
+		ImGui::Begin("Application Scene Control", (bool*)0,
+			ImGuiWindowFlags_NoMove |
+			ImGuiWindowFlags_NoResize |
+			ImGuiWindowFlags_NoSavedSettings |
+			ImGuiWindowFlags_NoCollapse
+		);
+
+		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
+		ImGui::SetWindowSize(ImVec2(200.0f, 100.0f));
+
+		ImGui::Separator();
+
+		ImGui::Text("Light Count: %i", numLights);
+
+		if (ImGui::TreeNode("Colours"))
+		{
+			ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
+			ImGui::TreePop();
+		}
+
+		ImGui::End();
 
 		////Frustum Plane Algorithm Testing
 		//glm::vec4 frustumPlanes[6]{};
@@ -206,20 +239,6 @@ public:
 		//	frustumPlanesChecks[j] = true;
 		//}
 
-		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
-
-		ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
-		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
-		ImGui::SetWindowSize(ImVec2(300.0f, 400.0f));
-
-		ImGui::Separator();
-
-		if (ImGui::TreeNode("Colours"))
-		{
-			ImGui::ColorPicker4("Background", glm::value_ptr(back_colour));
-			ImGui::TreePop();
-		}
-		ImGui::End();
 
 
 		//if (ImGui::Begin("Frustum Plane Algorithm Testing", (bool*)0))
@@ -264,7 +283,7 @@ public:
 
 private:
 
-	glm::vec4 back_colour = { 0.0f, 0.0f, 0.0f, 1.0f };
+	glm::vec4 back_colour = { 0.5294f, 0.8078f, 0.9215f, 1.0f };
 
 	void Draw() override {
 

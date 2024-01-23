@@ -5,7 +5,7 @@ namespace Louron {
 	void Renderer::DrawMeshComponent(Entity* MeshEntity, Entity* CameraEntity, std::string optionalShader) {
 
 		CameraComponent& camera = CameraEntity->GetComponent<CameraComponent>();
-		TransformComponent& transform = MeshEntity->GetComponent<TransformComponent>();
+		Transform& transform = MeshEntity->GetComponent<Transform>();
 		MeshRenderer& meshRenderer = MeshEntity->GetComponent<MeshRenderer>();
 		MeshFilter& meshFilter = MeshEntity->GetComponent<MeshFilter>();
 
@@ -58,7 +58,7 @@ namespace Louron {
 
 				// Set General Shader Uniforms
 
-				shader->SetMat4("model", transform.GetTransform());
+				shader->SetMat4("model", transform);
 				shader->SetMat4("proj", camera.Camera->GetProjMatrix());
 				shader->SetMat4("view", camera.Camera->GetViewMatrix());
 				shader->SetVec3("u_CameraPos", camera.Camera->GetPosition());
@@ -75,13 +75,62 @@ namespace Louron {
 
 		}
 	}
-	void Renderer::DrawMeshFilter(std::shared_ptr<MeshFilter> Mesh)	{
-		for (const auto& mesh : *Mesh->Meshes)
-			DrawMesh(mesh);
-	}
 
 	void Renderer::DrawMesh(std::shared_ptr<Mesh> Mesh) {
 		Mesh->VAO->Bind();
-		glDrawElements(GL_TRIANGLES, Mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+   		glDrawElements(GL_TRIANGLES, Mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+	}
+
+	GLuint InstanceBuffer = -1;
+
+	void Renderer::DrawInstancedMesh(std::shared_ptr<Mesh> Mesh, std::vector<Transform> Transforms) {
+
+		// TODO: Instancing
+
+		std::vector<glm::mat4> transformMatrices;
+		for (int i = 0; i < Transforms.size(); i++)
+			transformMatrices.push_back(Transforms[i]);
+
+		if(InstanceBuffer == -1)
+			glGenBuffers(1, &InstanceBuffer);
+
+		glBindBuffer(GL_ARRAY_BUFFER, InstanceBuffer);
+		glBufferData(GL_ARRAY_BUFFER, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0], GL_STATIC_DRAW);
+
+		Mesh->VAO->Bind();
+
+		// vertex attributes
+		std::size_t vec4Size = sizeof(glm::vec4);
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)0);
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(1 * vec4Size));
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(2 * vec4Size));
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(3 * vec4Size));
+
+		glVertexAttribDivisor(3, 1);
+		glVertexAttribDivisor(4, 1);
+		glVertexAttribDivisor(5, 1);
+		glVertexAttribDivisor(6, 1);
+
+		glDrawElementsInstanced(GL_TRIANGLES, Mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, (GLsizei)Transforms.size());
+
+		// Reset state after drawing
+		glDisableVertexAttribArray(3);
+		glDisableVertexAttribArray(4);
+		glDisableVertexAttribArray(5);
+		glDisableVertexAttribArray(6);
+
+		// Optionally reset divisor values if needed
+		glVertexAttribDivisor(3, 0);
+		glVertexAttribDivisor(4, 0);
+		glVertexAttribDivisor(5, 0);
+		glVertexAttribDivisor(6, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDeleteBuffers(1, &InstanceBuffer);
+
 	}
 }

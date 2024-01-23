@@ -11,7 +11,7 @@ struct Paddle {
 public:
 	Paddle() { }
 
-	Louron::TransformComponent transform;
+	Louron::Transform transform;
 	Louron::Material material;
 
 	float speed = 5.0f;
@@ -23,10 +23,10 @@ struct Ball {
 
 public:
 	Ball() {
-		transform.scale = glm::vec3(0.3f);
+		transform.SetScale(glm::vec3(0.3f));
 	}
 
-	Louron::TransformComponent transform;
+	Louron::Transform transform;
 	Louron::Material material;
 
 	float speed = 8.0f;
@@ -112,15 +112,15 @@ public:
 		m_Paddles.push_back(std::make_unique<Paddle>());
 
 		// Set Positions of Individual Paddles
-		m_Paddles[0]->transform.position = glm::vec3(0.0f, 0.0f, -8.5f);
-		m_Paddles[1]->transform.position = glm::vec3(0.0f, 0.0f, 8.5f);
+		m_Paddles[0]->transform.SetPosition(glm::vec3(0.0f, 0.0f, -8.5f));
+		m_Paddles[1]->transform.SetPosition(glm::vec3(0.0f, 0.0f, 8.5f));
 
 		// Assign Material Values and Modify Scale
 		int index = 0;
 		for (auto& paddle : m_Paddles) {
 			paddle->material.SetShader(m_ShaderLib.GetShader("material_shader_phong"));
 			paddle->material.SetDiffuse({ 0.41f, 0.41f, 0.41f, 1.0f });
-			paddle->transform.scale = glm::vec3(2.0f, 1.0f, 1.0f);
+			paddle->transform.SetScale(glm::vec3(2.0f, 1.0f, 1.0f));
 		}
 
 		m_Light.position.y = 1.0f;
@@ -281,9 +281,11 @@ private:
 		paddle->score++;
 
 		m_Ball->velocity = { m_Ball->speed, m_Ball->speed * -0.5f };
-		m_Ball->transform.position = glm::vec3(0.0f);
-		m_Light.position = glm::vec3(m_Ball->transform.position.x, 1.0f, m_Ball->transform.position.z);
-		for (auto& paddle : m_Paddles) paddle->transform.position.x = 0.0f;
+		m_Ball->transform.SetPosition(glm::vec3(0.0f));
+		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
+		
+		for (auto& paddle : m_Paddles) 
+			paddle->transform.SetPositionX(0.0f);
 	}
 
 	void ProcessCollisions() {
@@ -311,15 +313,15 @@ private:
 
 	bool CheckPaddleCollision(const std::unique_ptr<Paddle>& paddle) {
 
-		float ballLeft		= m_Ball->transform.position.z - m_Ball->transform.scale.z / 2;
-		float ballRight		= m_Ball->transform.position.z + m_Ball->transform.scale.z / 2;
-		float ballTop		= m_Ball->transform.position.x - m_Ball->transform.scale.x / 2;
-		float ballBottom	= m_Ball->transform.position.x + m_Ball->transform.scale.x / 2;
-
-		float paddleLeft	= paddle->transform.position.z - paddle->transform.scale.z / 2;
-		float paddleRight	= paddle->transform.position.z + paddle->transform.scale.z / 2;
-		float paddleTop		= paddle->transform.position.x - paddle->transform.scale.x / 2;
-		float paddleBottom	= paddle->transform.position.x + paddle->transform.scale.x / 2;
+		float ballLeft		= m_Ball->transform.GetPosition().z - m_Ball->transform.GetScale().z / 2;
+		float ballRight		= m_Ball->transform.GetPosition().z + m_Ball->transform.GetScale().z / 2;
+		float ballTop		= m_Ball->transform.GetPosition().x - m_Ball->transform.GetScale().x / 2;
+		float ballBottom	= m_Ball->transform.GetPosition().x + m_Ball->transform.GetScale().x / 2;
+																					
+		float paddleLeft	= paddle->transform.GetPosition().z - paddle->transform.GetScale().z / 2;
+		float paddleRight	= paddle->transform.GetPosition().z + paddle->transform.GetScale().z / 2;
+		float paddleTop		= paddle->transform.GetPosition().x - paddle->transform.GetScale().x / 2;
+		float paddleBottom	= paddle->transform.GetPosition().x + paddle->transform.GetScale().x / 2;
 
 		if (ballLeft >= paddleRight)
 		{
@@ -373,10 +375,10 @@ private:
 		glm::vec3 boundaryRightBottom = -boundaryLeftTop;
 
 		// Define Ball Boundaries
-		float ballLeft		= m_Ball->transform.position.z - m_Ball->transform.scale.z / 2;
-		float ballRight		= m_Ball->transform.position.z + m_Ball->transform.scale.z / 2;
-		float ballTop		= m_Ball->transform.position.x - m_Ball->transform.scale.x / 2;
-		float ballBottom	= m_Ball->transform.position.x + m_Ball->transform.scale.x / 2;
+		float ballLeft		= m_Ball->transform.GetPosition().z - m_Ball->transform.GetScale().z / 2;
+		float ballRight		= m_Ball->transform.GetPosition().z + m_Ball->transform.GetScale().z / 2;
+		float ballTop		= m_Ball->transform.GetPosition().x - m_Ball->transform.GetScale().x / 2;
+		float ballBottom	= m_Ball->transform.GetPosition().x + m_Ball->transform.GetScale().x / 2;
 
 		if (ballRight >= boundaryRightBottom.z)
 		{
@@ -402,27 +404,29 @@ private:
 	}
 
 	void ProcessBallMovement() {
-		m_Ball->transform.position.z += deltaTime * m_Ball->velocity.x;
-		m_Ball->transform.position.x += deltaTime * m_Ball->velocity.y;
-		m_Light.position = glm::vec3(m_Ball->transform.position.x, 1.0f, m_Ball->transform.position.z);
+
+		m_Ball->transform.Translate({ 0.0f, 0.0f, deltaTime * m_Ball->velocity.x });
+		m_Ball->transform.Translate({ deltaTime * m_Ball->velocity.y, 0.0f, 0.0f });
+
+		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
 	}
 
 	void ProcessPaddleMovement() {
 
 		// Move Paddle 1 Up and Down
 		if (m_Input.GetKey(GLFW_KEY_W)) {
-			m_Paddles[0]->transform.position.x += deltaTime * m_Paddles[0]->speed;
+			m_Paddles[0]->transform.Translate({ deltaTime * m_Paddles[0]->speed , 0.0f, 0.0f });
 		}
 		if (m_Input.GetKey(GLFW_KEY_S)) {
-			m_Paddles[0]->transform.position.x -= deltaTime * m_Paddles[0]->speed;
+			m_Paddles[0]->transform.Translate({ -deltaTime * m_Paddles[0]->speed , 0.0f, 0.0f });
 		}
 
 		// Move Paddle 2 Up and Down
 		if (m_Input.GetKey(GLFW_KEY_UP)) {
-			m_Paddles[1]->transform.position.x += deltaTime * m_Paddles[1]->speed;
+			m_Paddles[1]->transform.Translate({ deltaTime * m_Paddles[1]->speed , 0.0f, 0.0f });
 		}
 		if (m_Input.GetKey(GLFW_KEY_DOWN)) {
-			m_Paddles[1]->transform.position.x -= deltaTime * m_Paddles[1]->speed;
+			m_Paddles[1]->transform.Translate({ -deltaTime * m_Paddles[1]->speed , 0.0f, 0.0f });
 		}
 	}
 
@@ -433,10 +437,10 @@ private:
 
 		// Reset Ball, Light, and Paddles
 		m_Ball->velocity = { m_Ball->speed, m_Ball->speed * -0.5f };
-		m_Ball->transform.position = glm::vec3(0.0f);
-		m_Light.position = glm::vec3(m_Ball->transform.position.x, 1.0f, m_Ball->transform.position.z);
+		m_Ball->transform.SetPosition(glm::vec3(0.0f));
+		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
 		for (auto& paddle : m_Paddles) {
-			paddle->transform.position.x = 0.0f;
+			paddle->transform.SetPositionX(0.0f);
 			paddle->score = 0;
 		}
 

@@ -31,7 +31,7 @@ namespace Louron {
 
 		std::shared_ptr<std::vector<std::shared_ptr<Mesh>>> Meshes = std::make_shared<std::vector<std::shared_ptr<Mesh>>>();
 
-		void LinkMeshFilterFromScene(const std::shared_ptr<MeshFilter>& meshFilter);
+		void LinkMeshFilter(const std::shared_ptr<MeshFilter>& meshFilter);
 
 		MeshFilter() = default;
 		~MeshFilter() = default;
@@ -42,13 +42,13 @@ namespace Louron {
 
 	public:
 		bool active = true;
-		std::shared_ptr<std::vector<std::shared_ptr<Material>>> Materials = std::make_shared<std::vector<std::shared_ptr<Material>>>();
+		std::shared_ptr<std::unordered_map<GLuint, std::shared_ptr<Material>>> Materials = std::make_shared<std::unordered_map<GLuint, std::shared_ptr<Material>>>();
 
 	public:
 
 		int LoadModelFromFile(const char* filePath, MeshFilter& mesh);
 
-		void LinkMeshRendererFromScene(const std::shared_ptr<MeshRenderer>& meshRenderer);
+		void LinkMeshRenderer(const std::shared_ptr<MeshRenderer>& meshRenderer);
 
 		MeshRenderer() = default;
 		MeshRenderer(const MeshRenderer&) = default;

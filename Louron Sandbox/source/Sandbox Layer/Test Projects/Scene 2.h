@@ -66,7 +66,7 @@ private:
 	glm::vec4 back_colour = glm::vec4( 0.992f, 0.992f, 0.588f, 1.0f );
 	glm::vec4 fore_colour = glm::vec4( 1.0f  , 1.0f  , 1.0f  , 1.0f );
 
-	Louron::TransformComponent trans;
+	Louron::Transform trans;
 		
 //Public Functions
 public:
@@ -83,9 +83,18 @@ public:
 		ImGui::Begin("Scene Control", (bool*)0, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoSavedSettings);
 
 		ImGui::InputInt("Speed", &speed);
-		ImGui::DragFloat3("Translate", glm::value_ptr(trans.position), 0.01f, 0, 0, "%.2f");
-		ImGui::DragFloat3("Rotate", glm::value_ptr(trans.rotation), 1.0f, 0, 0, "%.2f");
-		ImGui::DragFloat3("Scale", glm::value_ptr(trans.scale), 0.01f, 0, 0, "%.2f");
+
+		glm::vec3 temp = trans.GetPosition();
+		ImGui::DragFloat3("Translate", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
+		trans.SetPosition(temp);
+
+		temp = trans.GetRotation();
+		ImGui::DragFloat3("Rotate", glm::value_ptr(temp), 1.0f, 0, 0, "%.2f");
+		trans.SetRotation(temp);
+
+		temp = trans.GetScale();
+		ImGui::DragFloat3("Scale", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
+		trans.SetScale(temp);
 
 		ImGui::SetWindowCollapsed(true, ImGuiCond_FirstUseEver);
 		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
@@ -112,7 +121,7 @@ private:
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		trans.rotation.y += deltaTime * speed;
+		trans.Rotate({ 0.0f, deltaTime * speed, 0.0f });
 
 		std::shared_ptr<Louron::Shader> shader = m_ShaderLib.GetShader("basic_texture");
 		if (shader)

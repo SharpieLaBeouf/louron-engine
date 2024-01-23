@@ -69,8 +69,8 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 
-		plane_trans.position.y = -0.6f;
-		plane_trans.scale = glm::vec3(40.0f, 0.0f, 40.0f);
+		plane_trans.SetPosition({ 0.0f, -0.6f, 0.0f });
+		plane_trans.SetScale({ 40.0f, 0.0f, 40.0f });
 
 		sceneCamera = new Louron::Camera(glm::vec3(0.0f, 10.0f, 25.0f));
 		sceneCamera->MouseToggledOff = false;
@@ -105,8 +105,8 @@ private:
 	int waveHeight = 10;
 	float waveSpeed = 5;
 
-	Louron::TransformComponent cube_trans;
-	Louron::TransformComponent plane_trans;
+	Louron::Transform cube_trans;
+	Louron::Transform plane_trans;
 	Louron::Camera* sceneCamera = nullptr;
 
 	glm::vec4 back_colour = glm::vec4(0.992f, 0.325f, 0.325f, 1.0f);
@@ -140,10 +140,22 @@ public:
 		ImGui::DragInt("Cube Amount", &waveSize, 1.0f, 0, 100);
 		ImGui::DragInt("Wave Height", &waveHeight, 1.0f, 0, 100);
 		ImGui::DragFloat("Wave Speed", &waveSpeed, 0.1f);
-		ImGui::DragFloat3("Translate", glm::value_ptr(cube_trans.position), 0.01f, 0, 0, "%.2f");
-		ImGui::DragFloat3("Rotate", glm::value_ptr(cube_trans.rotation), 1.0f, 0, 0, "%.2f");
-		ImGui::DragFloat3("Scale", glm::value_ptr(cube_trans.scale), 0.01f, 0, 0, "%.2f");
-		ImGui::DragFloat3("Plane Scale", glm::value_ptr(plane_trans.scale), 0.01f, 0, 0, "%.2f");
+
+		glm::vec3 temp = cube_trans.GetPosition();
+		ImGui::DragFloat3("Translate", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
+		cube_trans.SetPosition(temp);
+
+		temp = cube_trans.GetRotation();
+		ImGui::DragFloat3("Rotate", glm::value_ptr(temp), 1.0f, 0, 0, "%.2f");
+		cube_trans.SetRotation(temp);
+
+		temp = cube_trans.GetScale();
+		ImGui::DragFloat3("Scale", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
+		cube_trans.SetScale(temp);
+
+		temp = plane_trans.GetScale();
+		ImGui::DragFloat3("Plane Scale", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
+		plane_trans.SetScale(temp);
 
 		ImGui::Text("F11 = Toggle Fullscreen");
 		ImGui::Checkbox("Wireframe Mode", &wireFrame);
@@ -199,10 +211,10 @@ private:
 			glm::vec3 pos = glm::vec3(0.0f);
 			for (int x = 1; x <= waveSize; x++)
 			{
-				pos.x = (float)-waveSize / 2 + x - cube_trans.scale.x / 2;
+				pos.x = (float)-waveSize / 2 + x - cube_trans.GetScale().x / 2;
 				for (int z = 1; z <= waveSize; z++)
 				{
-					pos.z = (float)-waveSize / 2 + z - cube_trans.scale.z / 2;
+					pos.z = (float)-waveSize / 2 + z - cube_trans.GetScale().z / 2;
 
 					double time = glfwGetTime();
 					pos.y = (float)sin((time * waveSpeed + floor(x - waveSize) + floor(z - waveSize))) / waveSize * waveHeight;
