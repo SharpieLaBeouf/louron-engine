@@ -189,10 +189,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\Models\BackPack\BackPack.fbx" />
-    <None Include="assets\Models\Cube\Cube.fbx" />
-    <None Include="assets\Models\Monkey\Monkey.fbx" />
-    <None Include="assets\Models\Monkey\Pink_Monkey.fbx" />
     <None Include="assets\Shaders\Basic\basic.glsl" />
     <None Include="assets\Shaders\Basic\basic_phong.glsl" />
     <None Include="assets\Shaders\Basic\basic_texture.glsl" />
@@ -216,11 +212,6 @@
     <Image Include="assets\Images\grass_texture.jpg" />
     <Image Include="assets\Images\stone_texture.png" />
     <Image Include="assets\Images\stone_texture_specular.png" />
-    <Image Include="assets\Models\BackPack\backpack_ao.jpg" />
-    <Image Include="assets\Models\BackPack\backpack_diffuse.jpg" />
-    <Image Include="assets\Models\BackPack\backpack_normal.png" />
-    <Image Include="assets\Models\BackPack\backpack_roughness.jpg" />
-    <Image Include="assets\Models\BackPack\backpack_specular.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Sandbox Layer\MainMenuLayer.h" />

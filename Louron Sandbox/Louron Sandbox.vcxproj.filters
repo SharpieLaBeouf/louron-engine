@@ -28,35 +28,16 @@
     <None Include="assets\Shaders\Basic\basic_texture.glsl" />
     <None Include="assets\Shaders\Basic\basic_phong.glsl" />
     <None Include="assets\Shaders\Basic\basic.glsl" />
-    <None Include="assets\Models\Monkey\Monkey.fbx" />
-    <None Include="assets\Models\BackPack\BackPack.fbx" />
     <None Include="assimp-vc143-mt.dll" />
     <None Include="assimp-vc143-mtd.dll" />
     <None Include="assets\Shaders\Forward+\FP_Material_Shader.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Light_Culling.comp" />
     <None Include="assets\Shaders\Default Shader.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Depth.glsl" />
-    <None Include="assets\Models\Monkey\Pink_Monkey.fbx" />
-    <None Include="assets\Models\Cube\Cube.fbx" />
     <None Include="assets\Shaders\Forward+\FP_Material_BP_Shader.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="assets\Models\BackPack\backpack_specular.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\Models\BackPack\backpack_ao.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\Models\BackPack\backpack_diffuse.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\Models\BackPack\backpack_normal.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\Models\BackPack\backpack_roughness.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="assets\Images\grass_texture.jpg">
       <Filter>Resource Files</Filter>
     </Image>
