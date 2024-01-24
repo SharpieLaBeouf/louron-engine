@@ -17,14 +17,15 @@ private:
 	Louron::ShaderLibrary& m_ShaderLib;
 	Louron::TextureLibrary& m_TextureLib;
 
-	Louron::Camera* m_SceneCamera;
-	Louron::OldLight light_properties;
+	Louron::Camera m_SceneCamera{ glm::vec3(0.0f, 0.0f, 10.0f) };
 
-	//std::unique_ptr<Louron::MeshFilter> monkeyFilter;
-	//std::unique_ptr<Louron::MeshRenderer> monkeyRenderer;
+	Louron::Transform monkeyTransform{ {-5.0f, 0.0f, 0.0f} };
+	Louron::MeshFilter monkeyFilter{};
+	Louron::MeshRenderer monkeyRenderer{};
 
-	//std::unique_ptr<Louron::MeshFilter> backPackFilter;
-	//std::unique_ptr<Louron::MeshRenderer> backPackRenderer;
+	Louron::Transform backPackTransform{ {5.0f, 0.0f, 0.0f} };
+	Louron::MeshFilter backPackFilter{};
+	Louron::MeshRenderer backPackRenderer{};
 
 public:
 
@@ -35,24 +36,29 @@ public:
 	{
 		std::cout << "[L20] Loading Scene 7..." << std::endl;
 
-		m_SceneCamera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
-		m_SceneCamera->MouseToggledOff = false;
-		m_SceneCamera->MovementSpeed = 10.0f;
-		m_SceneCamera->MovementYDamp = 0.65f;
+		m_SceneCamera.MouseToggledOff = false;
+		m_SceneCamera.MovementSpeed = 10.0f;
+		m_SceneCamera.MovementYDamp = 0.65f;
 
-		//back_pack = std::make_unique<Louron::MeshComponent>();
-		//back_pack->LoadModel("assets/Models/BackPack/BackPack.fbx", monkey_mat);
-		//monkey = std::make_unique<Louron::MeshComponent>();
-		//monkey->LoadModel("assets/Models/BackPack/BackPack.fbx", back_pack_mat);
+		monkeyRenderer.LoadModelFromFile("assets/Models/Monkey/Monkey.fbx", monkeyFilter);
+		backPackRenderer.LoadModelFromFile("assets/Models/BackPack/BackPack.fbx", backPackFilter);
 	}
 
 	~Scene7() override
 	{
 		std::cout << "[L20] Unloading Scene 7..." << std::endl;
 		glDisable(GL_DEPTH_TEST);
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
+	}
 
-		delete m_SceneCamera;
+	void OnAttach() override {
+
+		glEnable(GL_DEPTH_TEST);
+	}
+
+	void OnDetach() override {
+
+		glDisable(GL_DEPTH_TEST);
 	}
 
 	void Update() override {
@@ -61,9 +67,7 @@ public:
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 
-		m_SceneCamera->Update(deltaTime);
-
-		light_properties.position.z = sin(currentTime * 5);
+		m_SceneCamera.Update(deltaTime);
 
 		Draw();
 	}
@@ -97,15 +101,12 @@ private:
 
 	void Draw() override {
 
-		glEnable(GL_DEPTH_TEST);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 
-		// TODO: Implement Functionality for Basic Forward Rendering where required
-		// monkey->Render();
-		// back_pack->Render();
+		monkeyRenderer.ManualDraw(monkeyFilter, m_SceneCamera, monkeyTransform);
+		backPackRenderer.ManualDraw(backPackFilter, m_SceneCamera, backPackTransform);
 
-		glDisable(GL_DEPTH_TEST);
 	}
 
 	glm::vec4 back_colour = { 0.3137f, 0.7843f, 1.0f, 1.0f };

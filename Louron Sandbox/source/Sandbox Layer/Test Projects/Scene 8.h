@@ -8,6 +8,7 @@
 #include "Louron.h"
 #include "Test Scene Base.h"
 
+
 class Scene8 : public Scene {
 
 	//Private Setup Variables
@@ -32,18 +33,27 @@ public:
 		const auto& resources = m_Scene->GetResources();
 		resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
 		resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+		resources->LoadMesh("assets/Models/Torch/model/obj/Torch.obj", resources->Shaders["FP_Material_BP_Shader"]);
 		
 		// Create Entity for Monkey and Load Applicable Model
-		Louron::Entity MonkeyEntity = m_Scene->CreateEntity("Monkey");
+		Louron::Entity entity = m_Scene->CreateEntity("Monkey");
 
-		MonkeyEntity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Pink_Monkey"));
-		MonkeyEntity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Pink_Monkey"));
+		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Pink_Monkey"));
+		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Pink_Monkey"));
 
 		// Create Entity for Camera and Set to Primary Camera
-		m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>().Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Primary = true;
+		entity = m_Scene->CreateEntity("Main Camera");
+		entity.AddComponent<Louron::CameraComponent>().Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
+		entity.GetComponent<Louron::CameraComponent>().Primary = true;
 
-		m_Scene->CreateEntity("Flash Light").AddComponent<Louron::SpotLightComponent>();
+		entity = m_Scene->CreateEntity("Flash Light");
+		entity.AddComponent<Louron::SpotLightComponent>();
+
+		entity = m_Scene->CreateEntity("Point Light");
+		entity.GetComponent<Louron::Transform>().SetPositionY(7.0f);
+		entity.AddComponent<Louron::PointLightComponent>();
+		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Torch"));
+		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Torch"));
 	 }
 
 	~Scene8() override
@@ -51,7 +61,6 @@ public:
 		std::cout << "[L20] Unloading Scene 8..." << std::endl;
 			
 	}
-
 
 	void OnAttach() override { 
 
@@ -77,6 +86,8 @@ public:
 
 		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().GetPosition());
 		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
+
+		m_Scene->FindEntityByName("Point Light").GetComponent<Louron::Transform>().TranslateX(sin(currentTime) * deltaTime);
 
 		Draw();
 	}

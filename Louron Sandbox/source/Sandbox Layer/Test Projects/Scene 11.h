@@ -161,8 +161,7 @@ public:
 			// Each Light has their own bobbing height
 			float bobbingOffset = sin(currentTime + lightBobOffset[i]) * deltaTime;
 
-			Louron::Entity entity = m_Scene->FindEntityByName("Entity " + std::to_string(i));
-			entity.GetComponent<Louron::Transform>().Translate({ 0.0f, bobbingOffset, 0.0f});
+			m_Scene->FindEntityByName("Entity " + std::to_string(i)).GetComponent<Louron::Transform>().TranslateY(bobbingOffset);
 		}
 
 		Draw();

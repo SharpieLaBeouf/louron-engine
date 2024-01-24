@@ -1,6 +1,6 @@
 #include "Material.h"
 #include "../Core/Engine.h"
-#include "../Scene/Components.h"
+#include "../Scene/Camera.h"
 
 namespace Louron {
 
@@ -26,39 +26,7 @@ namespace Louron {
 		glUseProgram(0);
 	}
 
-	// TODO: Remove Set Uniforms
-
-	void Material::SetUniforms() {
-
-		if (m_Shader)
-		{
-			m_Shader->SetFloat("u_Material.shine", m_Shine);
-			m_Shader->SetVec4("u_Material.diffuse", m_Diffuse);
-			m_Shader->SetVec4("u_Material.specular", m_Specular);
-
-			if (m_Textures[L20_TEXTURE_DIFFUSE_MAP] != nullptr) {
-
-				m_Shader->SetInt(std::string("u_Material." + m_TextureUniformNames[L20_TEXTURE_DIFFUSE_MAP]).c_str(), L20_TEXTURE_DIFFUSE_MAP);
-				glActiveTexture(GL_TEXTURE0 + L20_TEXTURE_DIFFUSE_MAP);
-				glBindTexture(GL_TEXTURE_2D, m_Textures[L20_TEXTURE_DIFFUSE_MAP]->getID());
-			}
-			if (m_Textures[L20_TEXTURE_SPECULAR_MAP] != nullptr) {
-
-				m_Shader->SetInt(std::string("u_Material." + m_TextureUniformNames[L20_TEXTURE_SPECULAR_MAP]).c_str(), L20_TEXTURE_SPECULAR_MAP);
-				glActiveTexture(GL_TEXTURE0 + L20_TEXTURE_SPECULAR_MAP);
-				glBindTexture(GL_TEXTURE_2D, m_Textures[L20_TEXTURE_SPECULAR_MAP]->getID());
-			}
-			if (m_Textures[L20_TEXTURE_NORMAL_MAP] != nullptr) {
-
-				m_Shader->SetInt(std::string("u_Material." + m_TextureUniformNames[L20_TEXTURE_NORMAL_MAP]).c_str(), L20_TEXTURE_NORMAL_MAP);
-				glActiveTexture(GL_TEXTURE0 + L20_TEXTURE_NORMAL_MAP);
-				glBindTexture(GL_TEXTURE_2D, m_Textures[L20_TEXTURE_NORMAL_MAP]->getID());
-			}
-		}
-		else std::cout << "[L20] Shader Not Linked to Material - Cannot Set Uniforms!" << std::endl;
-	}
-
-	void Material::UpdateUniforms(const CameraComponent& camera) {
+	void Material::UpdateUniforms(const Camera& camera) {
 
 		if (m_Shader) {
 			m_Shader->SetFloat("u_Material.shine", m_Shine);
@@ -72,10 +40,10 @@ namespace Louron {
 				glBindTexture(GL_TEXTURE_2D, m_Textures[i]->getID());
 			}
 
-			if (camera.Camera) {
-				m_Shader->SetMat4("proj", camera.Camera->GetProjMatrix());
-				m_Shader->SetMat4("view", camera.Camera->GetViewMatrix());
-				m_Shader->SetVec3("u_CameraPos", camera.Camera->GetPosition());
+			if (&camera != nullptr) {
+				m_Shader->SetMat4("proj", camera.GetProjMatrix());
+				m_Shader->SetMat4("view", camera.GetViewMatrix());
+				m_Shader->SetVec3("u_CameraPos", camera.GetPosition());
 			}
 		}
 		else std::cout << "[L20] Shader Not Linked to Material - Cannot Set Uniforms!" << std::endl;
@@ -92,7 +60,6 @@ namespace Louron {
 	std::shared_ptr<Shader>& Material::GetShader() {
 		return m_Shader; 
 	}
-
 
 	/// <summary>
 	/// DEFAULT CONSTRUCTOR - Initialise Material with NO SHADER and BLANK TEXTURE

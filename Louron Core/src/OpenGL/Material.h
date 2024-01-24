@@ -21,7 +21,7 @@ namespace Louron {
 		L20_TEXTURE_NORMAL_MAP = 2
 	};
 
-	struct CameraComponent;
+	class Camera;
 
 	class Material {
 
@@ -30,8 +30,7 @@ namespace Louron {
 		GLboolean Bind();
 		void UnBind();
 
-		void SetUniforms();
-		void UpdateUniforms(const CameraComponent& Camera);
+		void UpdateUniforms(const Camera& Camera);
 
 		void SetShader(std::shared_ptr<Shader>& shader);
 		std::shared_ptr<Shader>& GetShader();

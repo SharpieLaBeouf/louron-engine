@@ -125,7 +125,6 @@ namespace Louron {
 	int gDrawCalls = 0;
 	std::string gMaterialString = "";
 	
-	// TODO: Forward+ Rendering
 	void Scene::OnUpdate() {
 
 		if (!m_IsPaused) {
@@ -134,11 +133,11 @@ namespace Louron {
 
 			Forward Plus Render Sequence
 
-				1. Get Primary Camera Data
-				2. Conduct Depth Pre-Pass
-				3. Bind and Update Light SSBOs
-				4. Conduct Light Cull
-				5. Render All MeshComponents
+				1. DONE: Get Primary Camera Data
+				2. TODO: Conduct Depth Pre-Pass
+				3. DONE: Bind and Update Light SSBOs
+				4. TODO: Conduct Light Cull
+				5. DONE: Render All MeshComponents
 
 			*/
 
@@ -346,7 +345,7 @@ namespace Louron {
 							// Update appropriate uniforms per Material
 							if (material) {
 								material->Bind();
-								material->UpdateUniforms(cameraEntity.GetComponent<CameraComponent>());
+								material->UpdateUniforms(*cameraEntity.GetComponent<CameraComponent>().Camera);
 							}
 							else {
 								std::cout << "[L20] Invalid material encountered during rendering!" << std::endl;

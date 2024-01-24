@@ -124,7 +124,7 @@ private:
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		trans.Rotate({ 0.0f, 0.0f, deltaTime * speed });
+		trans.RotateZ(deltaTime * speed);
 
 		std::shared_ptr<Louron::Shader> shader = m_ShaderLib.GetShader("basic_texture");
 		if (shader)

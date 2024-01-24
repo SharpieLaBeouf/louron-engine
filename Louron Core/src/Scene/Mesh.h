@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Camera.h"
+
+#include "../Core/Engine.h"
+
 #include "../OpenGL/Texture.h"
 #include "../OpenGL/Material.h"
 #include "../OpenGL/Vertex Array.h"
-
-#include "../Core/Engine.h"
 
 #include <string>
 #include <vector>
@@ -38,6 +40,8 @@ namespace Louron {
 
 	};
 
+	struct Transform;
+
 	struct MeshRenderer {
 
 	public:
@@ -50,6 +54,8 @@ namespace Louron {
 
 		void LinkMeshRenderer(const std::shared_ptr<MeshRenderer>& meshRenderer);
 
+		void ManualDraw(const MeshFilter& meshFilter, const Camera& camera, const Transform& transform);
+
 		MeshRenderer() = default;
 		MeshRenderer(const MeshRenderer&) = default;
 		~MeshRenderer() = default;
@@ -58,7 +64,7 @@ namespace Louron {
 
 		std::string m_Directory;
 
-		void ProcessNode(aiNode* node, const aiScene* scene, MeshFilter& meshFilter);
-		std::shared_ptr<Mesh> ProcessMesh(aiMesh* mesh, const aiScene* scene) const;
+		void ProcessNode(aiNode* node, const aiScene* scene, MeshFilter& meshFilter, const std::string& directory, std::shared_ptr<Shader> shader, const std::string& modelName);
+		void ProcessMesh(aiMesh* mesh, const aiScene* scene, MeshFilter& meshFilter, const std::string& directory, std::shared_ptr<Shader> shader, const std::string& modelName);
 	};
 }

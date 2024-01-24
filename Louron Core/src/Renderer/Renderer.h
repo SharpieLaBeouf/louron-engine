@@ -12,8 +12,6 @@ namespace Louron {
 
 		Renderer() = default;
 
-		static void DrawMeshComponent(Entity* MeshEntity, Entity* CameraEntity, std::string optionalShader = "");
-
 		static void DrawMesh(std::shared_ptr<Mesh> Mesh);
 		static void DrawInstancedMesh(std::shared_ptr<Mesh> Mesh, std::vector<Transform> Transforms);
 	

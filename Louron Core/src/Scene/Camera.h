@@ -37,7 +37,7 @@ namespace Louron {
 
 		void toggleMovement() { m_Movement = !m_Movement; }
 
-		void Update(float deltaTime = 0);
+		void Update(float deltaTime = 0.0f);
 
 		void processKeyboard(float deltaTime);
 		void processMouse(bool constrainPitch = true);

@@ -20,7 +20,7 @@ private:
 	Louron::Material* flat_cube_mat = nullptr;
 	Louron::Material* box_cube_mat = nullptr;
 	Louron::Material* stone_cube_mat = nullptr;
-	Louron::OldLight light_properties;
+	ManualLight light_properties;
 
 	Louron::Camera* m_SceneCamera;
 
@@ -175,40 +175,36 @@ private:
 		glBindVertexArray(cube_VAO);
 		if (flat_cube_mat->Bind())
 		{
-			flat_cube_mat->SetUniforms();
+			flat_cube_mat->UpdateUniforms(*m_SceneCamera);
 			flat_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), light_properties.position));
-			flat_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			flat_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix()); 
 			
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			flat_cube_mat->UnBind();
 		}
 
 		if (stone_cube_mat->Bind()) {
-			stone_cube_mat->SetUniforms();
+			stone_cube_mat->UpdateUniforms(*m_SceneCamera);
+			
 			stone_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
-			stone_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			stone_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix());
+
 			stone_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			stone_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->GetPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			stone_cube_mat->UnBind();
 		}
 
 		if (box_cube_mat->Bind()) {
-			box_cube_mat->SetUniforms();
+			box_cube_mat->UpdateUniforms(*m_SceneCamera);
+
 			box_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, 0.0f)));
-			box_cube_mat->GetShader()->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			box_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix());
+			
 			box_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			box_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			box_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			box_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			box_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->GetPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			box_cube_mat->UnBind();

@@ -19,7 +19,7 @@ private:
 
 	Louron::Material* flat_cube_mat = nullptr;
 	Louron::Material* phong_cube_mat = nullptr;
-	Louron::OldLight light_properties;
+	ManualLight light_properties;
 
 	Louron::Camera* m_SceneCamera;
 
@@ -229,10 +229,8 @@ private:
 		// Render Light
 		if (flat_cube_mat->Bind())
 		{
-			flat_cube_mat->SetUniforms();
+			flat_cube_mat->UpdateUniforms(*m_SceneCamera);
 			flat_cube_mat->GetShader()->SetMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), light_properties.position), lightScale));
-			flat_cube_mat->GetShader()->SetMat4("proj", proj);
-			flat_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix());
 
 			// Light Render
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -241,14 +239,11 @@ private:
 
 		if (phong_cube_mat->Bind()) {
 
-			phong_cube_mat->SetUniforms();
-			phong_cube_mat->GetShader()->SetMat4("proj", proj);
-			phong_cube_mat->GetShader()->SetMat4("view", m_SceneCamera->GetViewMatrix());
+			phong_cube_mat->UpdateUniforms(*m_SceneCamera);
 			phong_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.diffuse", light_properties.diffuse);
 			phong_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
-			phong_cube_mat->GetShader()->SetVec3("u_CameraPos", m_SceneCamera->GetPosition());
 
 			// Player 1 Render
 			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube1_position));

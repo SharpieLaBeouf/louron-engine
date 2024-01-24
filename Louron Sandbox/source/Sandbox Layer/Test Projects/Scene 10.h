@@ -46,7 +46,7 @@ private:
 	Louron::TextureLibrary& m_TextureLib;
 
 	Louron::Camera m_SceneCamera;
-	Louron::OldLight m_Light;
+	ManualLight m_Light;
 
 	std::vector<std::unique_ptr<Paddle>> m_Paddles;
 
@@ -405,8 +405,8 @@ private:
 
 	void ProcessBallMovement() {
 
-		m_Ball->transform.Translate({ 0.0f, 0.0f, deltaTime * m_Ball->velocity.x });
-		m_Ball->transform.Translate({ deltaTime * m_Ball->velocity.y, 0.0f, 0.0f });
+		m_Ball->transform.TranslateZ(deltaTime * m_Ball->velocity.x);
+		m_Ball->transform.TranslateX(deltaTime * m_Ball->velocity.y);
 
 		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
 	}
@@ -415,18 +415,18 @@ private:
 
 		// Move Paddle 1 Up and Down
 		if (m_Input.GetKey(GLFW_KEY_W)) {
-			m_Paddles[0]->transform.Translate({ deltaTime * m_Paddles[0]->speed , 0.0f, 0.0f });
+			m_Paddles[0]->transform.TranslateX( deltaTime * m_Paddles[0]->speed);
 		}
 		if (m_Input.GetKey(GLFW_KEY_S)) {
-			m_Paddles[0]->transform.Translate({ -deltaTime * m_Paddles[0]->speed , 0.0f, 0.0f });
+			m_Paddles[0]->transform.TranslateX( -deltaTime * m_Paddles[0]->speed);
 		}
 
 		// Move Paddle 2 Up and Down
 		if (m_Input.GetKey(GLFW_KEY_UP)) {
-			m_Paddles[1]->transform.Translate({ deltaTime * m_Paddles[1]->speed , 0.0f, 0.0f });
+			m_Paddles[1]->transform.TranslateX( deltaTime * m_Paddles[1]->speed);
 		}
 		if (m_Input.GetKey(GLFW_KEY_DOWN)) {
-			m_Paddles[1]->transform.Translate({ -deltaTime * m_Paddles[1]->speed , 0.0f, 0.0f });
+			m_Paddles[1]->transform.TranslateX( -deltaTime * m_Paddles[1]->speed);
 		}
 	}
 
@@ -460,15 +460,13 @@ private:
 		// Render Ball
 		if (m_Ball->material.Bind()) {
 
-			m_Ball->material.SetUniforms();
+			m_Ball->material.UpdateUniforms(m_SceneCamera);
+
 			m_Ball->material.GetShader()->SetMat4("model", m_Ball->transform);
-			m_Ball->material.GetShader()->SetMat4("proj", proj);
-			m_Ball->material.GetShader()->SetMat4("view", m_SceneCamera.GetViewMatrix());
 			m_Ball->material.GetShader()->SetVec3("u_Light.position", m_Light.position);
 			m_Ball->material.GetShader()->SetVec4("u_Light.ambient", m_Light.ambient);
 			m_Ball->material.GetShader()->SetVec4("u_Light.diffuse", m_Light.diffuse);
 			m_Ball->material.GetShader()->SetVec4("u_Light.specular", m_Light.specular);
-			m_Ball->material.GetShader()->SetVec3("u_CameraPos", m_SceneCamera.GetPosition());
 
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			m_Ball->material.UnBind();
@@ -478,15 +476,13 @@ private:
 		for (const auto& paddle : m_Paddles) {
 			if (paddle->material.Bind()) {
 
-				paddle->material.SetUniforms();
+				paddle->material.UpdateUniforms(m_SceneCamera);
 				paddle->material.GetShader()->SetMat4("model", paddle->transform);
-				paddle->material.GetShader()->SetMat4("proj", proj);
-				paddle->material.GetShader()->SetMat4("view", m_SceneCamera.GetViewMatrix());
+
 				paddle->material.GetShader()->SetVec3("u_Light.position", m_Light.position);
 				paddle->material.GetShader()->SetVec4("u_Light.ambient", m_Light.ambient);
 				paddle->material.GetShader()->SetVec4("u_Light.diffuse", m_Light.diffuse);
 				paddle->material.GetShader()->SetVec4("u_Light.specular", m_Light.specular);
-				paddle->material.GetShader()->SetVec3("u_CameraPos", m_SceneCamera.GetPosition());
 
 				glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				m_Ball->material.UnBind();
