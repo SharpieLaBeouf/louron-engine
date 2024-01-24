@@ -17,3 +17,6 @@
 #include "Scene/Light.h"
 #include "Scene/Mesh.h"
 #include "Scene/Scene.h"
+
+#include "Renderer/Renderer.h"
+#include "Renderer/RendererPipeline.h"

@@ -14,11 +14,13 @@ class Scene8 : public Scene {
 	//Private Setup Variables
 private:
 
-	std::unique_ptr<Louron::Scene> m_Scene;
+	std::shared_ptr<Louron::Scene> m_Scene;
 
 	Louron::InputManager& m_Input;
 	Louron::ShaderLibrary& m_ShaderLib;
 	Louron::TextureLibrary& m_TextureLib;
+
+	std::shared_ptr<Louron::ForwardPlusPipeline> m_Pipeline;
 
 public:
 
@@ -26,9 +28,13 @@ public:
 		 m_Input(Louron::Engine::Get().GetInput()),
 		 m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		 m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
-		 m_Scene(std::make_unique<Louron::Scene>())
+		 m_Pipeline(nullptr),
+		 m_Scene(nullptr)
 	{
 		std::cout << "[L20] Loading Scene 8..." << std::endl;
+
+		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
+		m_Scene = std::make_shared<Louron::Scene>(m_Pipeline);
 
 		const auto& resources = m_Scene->GetResources();
 		resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
@@ -43,7 +49,7 @@ public:
 
 		// Create Entity for Camera and Set to Primary Camera
 		entity = m_Scene->CreateEntity("Main Camera");
-		entity.AddComponent<Louron::CameraComponent>().Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
+		entity.AddComponent<Louron::CameraComponent>().Camera = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 0.0f, 10.0f));
 		entity.GetComponent<Louron::CameraComponent>().Primary = true;
 
 		entity = m_Scene->CreateEntity("Flash Light");

@@ -31,7 +31,7 @@ namespace Louron {
 
 	struct CameraComponent {
 
-		Camera* Camera = nullptr;
+		std::shared_ptr<Camera> Camera = nullptr;
 		bool Primary = true;
 
 		CameraComponent() = default;

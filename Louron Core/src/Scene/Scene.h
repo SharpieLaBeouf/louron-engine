@@ -18,12 +18,14 @@
 namespace Louron {
 
 	class Entity;
+	class RenderPipeline;
 
 	class Scene {
 
 	public:
 
-		Scene();
+		Scene() = delete;
+		Scene(std::shared_ptr<RenderPipeline> pipeline);
 		~Scene() { }
 
 		Entity CreateEntity(const std::string& name = std::string());
@@ -46,10 +48,14 @@ namespace Louron {
 
 		const std::unique_ptr<ResourceManager>& GetResources() { return m_ResourceManager; }
 
+		entt::registry* GetRegistry() { return &m_Registry; }
+
 	private:
 		entt::registry m_Registry;
 		bool m_IsRunning = false;
 		bool m_IsPaused = false;
+
+		std::shared_ptr<RenderPipeline> m_Pipeline;
 
 		std::unique_ptr<ResourceManager> m_ResourceManager = std::make_unique<ResourceManager>();
 

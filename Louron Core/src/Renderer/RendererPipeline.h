@@ -1,42 +1,69 @@
 #pragma once
 
+#include <memory>
+
+#include "../Scene/Components.h"
+
 namespace Louron {
 
-	class RendererPipeline {
+	class Scene;
 
-		virtual void OnUpdate() {
-			// Standard Forward Rendering Pass
-		}
-
+	class RenderPipeline {
 	public:
 
-		RendererPipeline() = default;
+		RenderPipeline() = default;
+
+		virtual void OnUpdate(Scene* scene) { }
 	};
 
-	class ForwardPlusPipeline : public RendererPipeline {
+	class ForwardPlusPipeline : public RenderPipeline {
 
 	public:
 
-		void OnUpdate() override {
-			// Forward Plus Rendering Pass
-		}
+		ForwardPlusPipeline();
 
-	public:
+		void OnUpdate(Scene* scene) override;
 
-		ForwardPlusPipeline() = default;
+	private:
+
+		void BindLightSSBO(Scene* scene);
+		void ConductDepthPass(Scene* scene, Camera* camera);
+		void ConductLightCull(Camera* camera);
+		void ConductRenderPass(Scene* scene, Camera* camera);
+
+	private:
+
+		struct ForwardPlusData {
+
+			unsigned int PL_Buffer;
+			unsigned int PL_Indices_Buffer;
+			unsigned int SL_Buffer;
+			unsigned int SL_Indices_Buffer;
+
+			unsigned int DL_Buffer;
+
+			unsigned int DepthMap_FBO;
+			unsigned int DepthMap_Texture;
+
+			unsigned int workGroupsX;
+			unsigned int workGroupsY;
+
+		} FP_Data;
+
 	};
 
-	class DeferredPipeline : public RendererPipeline {
+	class DeferredPipeline : public RenderPipeline {
 
 	public:
 
-		void OnUpdate() override {
+		void OnUpdate(Scene* scene) override {
 			// Deferred Rendering Pass
 		}
 
 	public:
 
-		DeferredPipeline() = default;
+		DeferredPipeline() = delete;
+		DeferredPipeline(std::shared_ptr<Scene> scene);
 	};
 
 }

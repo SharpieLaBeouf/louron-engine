@@ -8,7 +8,7 @@ class Scene11 : public Scene {
 
 private:
 
-	std::unique_ptr<Louron::Scene> m_Scene;
+	std::shared_ptr<Louron::Scene> m_Scene;
 
 	Louron::Window& m_Window;
 	Louron::InputManager& m_Input;
@@ -21,6 +21,8 @@ private:
 	const int numLights = 20;
 	std::vector<float> lightBobOffset;
 
+	std::shared_ptr<Louron::ForwardPlusPipeline> m_Pipeline;
+
 public:
 
 
@@ -29,9 +31,13 @@ public:
 		m_Input(Louron::Engine::Get().GetInput()),
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
-		m_Scene(std::make_unique<Louron::Scene>())
+		m_Pipeline(nullptr),
+		m_Scene(nullptr)
 	{
 		std::cout << "[L20] Loading Scene 11..." << std::endl;
+
+		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
+		m_Scene = std::make_shared<Louron::Scene>(m_Pipeline);
 
 		const auto& resources = m_Scene->GetResources();
 
@@ -87,7 +93,7 @@ public:
 
 		// Create Entity for Camera and Set to Primary Camera
 		auto& camera = m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>();
-		camera.Camera = new Louron::Camera(glm::vec3(0.0f, 0.0f, 10.0f));
+		camera.Camera = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 0.0f, 10.0f));
 		camera.Primary = true;
 		camera.Camera->setPitch(-20.0f);
 		camera.Camera->setYaw(0.0f);

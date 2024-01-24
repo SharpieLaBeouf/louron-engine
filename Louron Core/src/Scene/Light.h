@@ -83,7 +83,7 @@ namespace Louron {
 
 	public:
 
-		friend class Scene;
+		friend class ForwardPlusPipeline;
 	};
 
 	struct VisibleLightIndex {
