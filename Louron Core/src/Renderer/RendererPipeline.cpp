@@ -9,8 +9,8 @@ namespace Louron {
 
 	ForwardPlusPipeline::ForwardPlusPipeline() {
 
-		FP_Data.workGroupsX = (Engine::Get().GetWindow().GetWidth() + (Engine::Get().GetWindow().GetWidth() % 16)) / 16;
-		FP_Data.workGroupsY = (Engine::Get().GetWindow().GetHeight() + (Engine::Get().GetWindow().GetHeight() % 16)) / 16;
+		FP_Data.workGroupsX = (unsigned int)std::ceil((float)Engine::Get().GetWindow().GetWidth() / 16.0f);
+		FP_Data.workGroupsY = (unsigned int)std::ceil((float)Engine::Get().GetWindow().GetHeight() / 16.0f);
 		size_t numberOfTiles = static_cast<size_t>(FP_Data.workGroupsX * FP_Data.workGroupsY);
 
 		// Setup Light Buffers
@@ -65,9 +65,9 @@ namespace Louron {
 		
 		Camera* camera = nullptr;
 		{
-			auto view = scene->GetRegistry()->view<Transform, CameraComponent>();
-			for (auto entity : view) {
-				auto temp_camera = view.get<CameraComponent>(entity);
+			const auto& view = scene->GetRegistry()->view<Transform, CameraComponent>();
+			for (const auto& entity : view) {
+				const auto& temp_camera = view.get<CameraComponent>(entity);
 
 				if (temp_camera.Primary) {
 					camera = temp_camera.Camera.get();
@@ -77,9 +77,26 @@ namespace Louron {
 		}
 
 		BindLightSSBO(scene);
-		//ConductDepthPass(scene, camera); // WIP
-		//ConductLightCull(camera); // WIP
+		ConductDepthPass(scene, camera); // WIP
+		ConductLightCull(camera); // WIP
 		ConductRenderPass(scene, camera);
+	}
+
+	/// <summary>
+	/// Set OpenGL state configuration required by renderer.
+	/// </summary>
+	void ForwardPlusPipeline::OnStartPipeline() {
+
+		glEnable(GL_DEPTH_TEST); 
+
+	}
+
+	/// <summary>
+	/// Reset OpenGL state configuration required by renderer.
+	/// </summary>
+	void ForwardPlusPipeline::OnStopPipeline() {
+
+		glDisable(GL_DEPTH_TEST);
 	}
 
 	void ForwardPlusPipeline::BindLightSSBO(Scene* scene) {
@@ -106,14 +123,14 @@ namespace Louron {
 						point_light.position = glm::vec4(transform.GetPosition(), 1.0f);
 
 						pointLights[i] = point_light;
-						pointLights[i].lastLight = false;
+						pointLights[i].lightProperties.lastLight = false;
 
 						i++;
 
 						if (i >= MAX_POINT_LIGHTS)
 							break;
 					}
-					pointLights[i].lastLight = true;
+					pointLights[i].lightProperties.lastLight = true;
 				}
 				else {
 					std::cout << "[L20] Point Light Buffer Not Mapped Successfully!" << std::endl;
@@ -190,49 +207,65 @@ namespace Louron {
 
 	}
 
+	// TODO: Sort Front to Back for Rendering
 	void ForwardPlusPipeline::ConductDepthPass(Scene* scene, Camera* camera) {
-		//if (cameraEntity.GetComponent<CameraComponent>().Camera) {
+		if (camera) {
 
-		//	// Call Renderer for all Meshes
-		//	{
-		//		auto view = m_Registry.view<Transform, MeshRenderer, MeshFilter>();
+			// Call Renderer for all Meshes
+			{
+				const auto& view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();
 
-		//		if (view.begin() != view.end()) {
-		//			for (auto entity : view) {
-		//				auto [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
+				if (view.begin() != view.end()) {
 
-		//				Entity meshEntity = Entity{ entity, this };
+					std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth");
 
-		//				if (!meshRenderer.active)
-		//					continue;
+					if (shader)
+					{
+						glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
+						glClear(GL_DEPTH_BUFFER_BIT);
 
-		//				glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
-		//				glClear(GL_DEPTH_BUFFER_BIT);
-		//				Renderer::DrawMeshComponent(&meshEntity, &cameraEntity, "FP_Depth");
-		//				glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//			}
-		//		}
-		//	}
-		//}
+						shader->SetMat4("proj", camera->GetProjMatrix());
+						shader->SetMat4("view", camera->GetViewMatrix());
+
+						for (const auto& entity : view) {
+							const auto& [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
+
+							if (!meshRenderer.active)
+								continue;
+
+							shader->SetMat4("model", transform.GetTransform());
+
+							for (const auto& mesh : *meshFilter.Meshes)
+								Renderer::DrawMesh(mesh);
+						}
+
+						glBindFramebuffer(GL_FRAMEBUFFER, 0);
+					}
+				}
+			}
+		}
 	}
 
+	// TODO: Do testing to ensure that this is working as desired
 	void ForwardPlusPipeline::ConductLightCull(Camera* camera) {
 		
 		// Conduct Light Cull
 		std::shared_ptr<Shader> lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
-		lightCull->Bind();
-		glUniformMatrix4fv(glGetUniformLocation(lightCull->GetProgram(), "projection"), 1, GL_FALSE, glm::value_ptr(camera->GetProjMatrix()));
-		glUniformMatrix4fv(glGetUniformLocation(lightCull->GetProgram(), "view"), 1, GL_FALSE, glm::value_ptr(camera->GetViewMatrix()));
 
+		lightCull->Bind();
+
+
+		lightCull->SetMat4("view", camera->GetViewMatrix());
+		lightCull->SetMat4("proj", camera->GetProjMatrix());
+		lightCull->SetiVec2("screenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight()));
 		glActiveTexture(GL_TEXTURE4);
-		glUniform1i(glGetUniformLocation(lightCull->GetProgram(), "depthMap"), 4);
+		lightCull->SetInt("depthMap", 4);
 		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
 
 		glDispatchCompute(FP_Data.workGroupsX, FP_Data.workGroupsY, 1);
 
 		glActiveTexture(GL_TEXTURE4);
 		glBindTexture(GL_TEXTURE_2D, 0);
-
 	}
 
 	void ForwardPlusPipeline::ConductRenderPass(Scene* scene, Camera* camera) {
@@ -267,7 +300,7 @@ namespace Louron {
 							}
 				}
 
-				// FINAL RENDER!
+				// Colour Render Pass
 				for (const auto& materialMeshPair : materialMeshTransMap) {
 					const auto& material = materialMeshPair.first;
 					const auto& meshes = materialMeshPair.second;
@@ -276,6 +309,7 @@ namespace Louron {
 					if (material) {
 						material->Bind();
 						material->UpdateUniforms(*camera);
+						material->GetShader()->SetInt("u_TilesX", FP_Data.workGroupsX);
 					}
 					else {
 						std::cout << "[L20] Invalid material encountered during rendering!" << std::endl;

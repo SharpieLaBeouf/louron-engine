@@ -99,6 +99,9 @@ namespace Louron {
 	void Shader::SetBool(const GLchar* name, bool value) const { glUniform1i(glGetUniformLocation(m_Program, name), (int)value); }
 	void Shader::SetInt(const GLchar* name, int value) const { glUniform1i(glGetUniformLocation(m_Program, name), value); }
 	void Shader::SetFloat(const GLchar* name, float value) const { glUniform1f(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetiVec2(const GLchar* name, const glm::ivec2& value) const { glUniform2iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetiVec3(const GLchar* name, const glm::ivec3& value) const { glUniform3iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetiVec4(const GLchar* name, const glm::ivec4& value) const { glUniform4iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
 	void Shader::SetVec2(const GLchar* name, const glm::vec2& value) const { glUniform2fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
 	void Shader::SetVec3(const GLchar* name, const glm::vec3& value) const { glUniform3fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
 	void Shader::SetVec4(const GLchar* name, const glm::vec4& value) const { glUniform4fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }

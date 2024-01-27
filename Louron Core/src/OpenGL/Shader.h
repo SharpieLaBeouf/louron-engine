@@ -37,6 +37,9 @@ namespace Louron {
 		void SetBool(const GLchar* name, bool value) const;
 		void SetInt(const GLchar* name, int value) const;
 		void SetFloat(const GLchar* name, float value) const;
+		void SetiVec2(const GLchar* name, const glm::ivec2& value) const;
+		void SetiVec3(const GLchar* name, const glm::ivec3& value) const;
+		void SetiVec4(const GLchar* name, const glm::ivec4& value) const; 
 		void SetVec2(const GLchar* name, const glm::vec2& value) const;
 		void SetVec3(const GLchar* name, const glm::vec3& value) const;
 		void SetVec4(const GLchar* name, const glm::vec4& value) const;

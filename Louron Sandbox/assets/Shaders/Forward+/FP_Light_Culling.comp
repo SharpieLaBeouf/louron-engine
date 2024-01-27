@@ -7,10 +7,10 @@ struct PointLight {
     vec4 diffuse;
     vec4 specular;
 
-	float constant;
-	float linear;
-	float quadratic;
+    float radius;
+    float intensity;
 
+    bool activeLight;
     bool lastLight;
 };
 
@@ -63,19 +63,19 @@ struct BoundingSphere {
     } SL_IndiciesBuffer_Data;
 
 // Declare Uniforms
-uniform sampler2D depthMap;
 uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 proj;
 uniform ivec2 screenSize;
-
-uniform int PL_LightCount;
-uniform int SL_LightCount;
+uniform sampler2D depthMap;
 
 // Declare values that are shared between all threads in workgroup
 shared uint minDepthInt;
 shared uint maxDepthInt;
 shared vec4 frustumPlanes[6];
 shared BoundingSphere frustumSpheres[6];
+
+shared int PL_LightCount = 0;
+shared int SL_LightCount = 0;
 
 shared uint PL_VisibleLightCount;
 shared uint SL_VisibleLightCount;
@@ -102,24 +102,46 @@ void main(){
 	ivec2 tileID = ivec2(gl_WorkGroupID.xy);
 	ivec2 tileNumber = ivec2(gl_NumWorkGroups.xy);
 	uint index = tileID.y * tileNumber.x + tileID.x;
-
+		
     if (gl_LocalInvocationIndex == 0) {
 		minDepthInt = 0xFFFFFFFF;
 		maxDepthInt = 0;
 		PL_VisibleLightCount = 0;
 		SL_VisibleLightCount = 0;
-		viewProjection = projection * view;
+		viewProjection = proj * view;
+		
+		PL_LightCount = 0;
+		SL_LightCount = 0;
+		
+		// LOOP through PL SSBO and Count
+		for (int i = 0; i < PL_Buffer_Data.data.length(); i++) {
+			// BREAK LOOP if reached the last of the lights
+			if (PL_Buffer_Data.data[i].lastLight == true)
+				break;
+
+			PL_LightCount++;
+		}
+		
+		// LOOP through SL SSBO and Count
+		for (int i = 0; i < SL_Buffer_Data.data.length(); i++) {
+
+			// BREAK LOOP if reached the last of the lights
+			if (SL_Buffer_Data.data[i].lastLight == true)
+				break;
+
+			SL_LightCount++;
+		}
 	}
 
     barrier();
-
+	
 	// Step 1: Calculate the minimum and maximum depth values for the work group tile
 	float maxDepth, minDepth;
 
 	vec2 text = vec2(location) / screenSize;
 
 	float depth = texture(depthMap, text).r;
-    depth = (0.5 * projection[3][2]) / (depth + 0.5 * projection[2][2] - 0.5);
+    depth = (0.5 * proj[3][2]) / (depth + 0.5 * proj[2][2] - 0.5);
 
 	uint depthInt = floatBitsToUint(depth);
 	atomicMin(minDepthInt, depthInt);
@@ -169,34 +191,25 @@ void main(){
 	
 	// Step 3: Setup for Light Cull algorithms.
 	uint threadCount = TILE_SIZE * TILE_SIZE;
-	uint passCount = 0;
+	uint passCount = (PL_LightCount + threadCount - 1) / threadCount;
 	
-	barrier();
-
-	// Step 3a: Cull point lights in parallel. Max 256 per pass due to workgroup containing 16x16 threads or pixels.
-	
-	passCount = (PL_LightCount + threadCount - 1) / threadCount;
+	// Step 3a: Cull point lights in parallel. Max 256 light checks per pass due to workgroup containing 16x16 threads or pixels.
 	for (uint i = 0; i < passCount; i++) {
 		
 		// Get the lightIndex to test for this thread / pass. If the index is >= light count, then this thread can stop testing lights
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
+		
 		if (lightIndex >= PL_LightCount) {
 			break;
 		}
 
-		// Calculate attentuation of the point light to determine the radius of the pointlight
-		vec3 position = PL_Buffer_Data.data[lightIndex].position.xyz;
-		float constant = PL_Buffer_Data.data[lightIndex].constant;
-		float linear = PL_Buffer_Data.data[lightIndex].linear;
-		float quadratic = PL_Buffer_Data.data[lightIndex].quadratic;
-
-		// Calculate the radius of the pointlight
-		float radius = sqrt(1.0 / quadratic);
-
+		vec4 position = PL_Buffer_Data.data[lightIndex].position;
+		float radius = PL_Buffer_Data.data[lightIndex].radius;
+								
 		// We check if the light exists in our frustum
 		float distance = 0.0;
 		for (uint j = 0; j < 6; j++) {
-			distance = dot(vec4(position, 1.0f), frustumPlanes[j]) + radius;
+			distance = dot(position, frustumPlanes[j]) + radius;
 
 			// If one of the tests fails, then there is no intersection
 			if (distance <= 0.0) {
@@ -216,7 +229,7 @@ void main(){
 	
 	barrier();
 
-	// Step 3b: Cull spot lights in parallel. Max 256 per pass due to workgroup containing 16x16 threads or pixels.
+	// Step 3b: Cull spot lights in parallel. Max 256 light checks per pass due to workgroup containing 16x16 threads or pixels.
 
 	passCount = (SL_LightCount + threadCount - 1) / threadCount;
 	for (uint i = 0; i < passCount; i++) {
@@ -247,7 +260,7 @@ void main(){
 
 	barrier();
 
-	// Step 4. One thread should fill the global light buffer
+	// Step 4. One thread per workgroup should fill the global light buffer
 	if (gl_LocalInvocationIndex == 0) {
 	
 		uint offset = index * MAX_LIGHTS; // Determine position in global buffer
@@ -261,7 +274,7 @@ void main(){
 		if (PL_VisibleLightCount != MAX_LIGHTS) {
 			PL_IndiciesBuffer_Data.data[offset + PL_VisibleLightCount].index = -1;
 		}
-
+		
 		// Fill Indicies buffer for each workgroup for all spotlights that have been detected
 		for (uint i = 0; i < SL_VisibleLightCount; i++) {
 			SL_IndiciesBuffer_Data.data[offset + i].index = SL_VisibleLightIndices[i];

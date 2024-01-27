@@ -121,9 +121,9 @@ namespace Louron {
 
 		m_IsRunning = true;
 
-	}
+		m_Pipeline->OnStartPipeline();
 
-	int gDrawCalls = 0;
+	}
 	
 	void Scene::OnUpdate() {
 
@@ -135,22 +135,6 @@ namespace Louron {
 	void Scene::OnUpdateGUI() {
 
 
-		ImGui::Begin("Profiling", (bool*)0, 
-			ImGuiWindowFlags_NoMove | 
-			ImGuiWindowFlags_NoResize | 
-			ImGuiWindowFlags_NoSavedSettings |
-			ImGuiWindowFlags_NoCollapse
-		);
-
-		ImGui::SetWindowPos(ImVec2(0.0f, 100.0f));
-		ImGui::SetWindowSize(ImVec2(200.0f, 100.0f));
-
-		ImGui::Separator();
-
-		ImGui::Text("Draw Calls: %i", gDrawCalls);
-		gDrawCalls = 0;
-
-		ImGui::End();
 
 	}
 
@@ -158,5 +142,6 @@ namespace Louron {
 
 		m_IsRunning = false;
 
+		m_Pipeline->OnStopPipeline();
 	}
 }

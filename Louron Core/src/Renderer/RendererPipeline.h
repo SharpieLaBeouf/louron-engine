@@ -14,6 +14,8 @@ namespace Louron {
 		RenderPipeline() = default;
 
 		virtual void OnUpdate(Scene* scene) { }
+		virtual void OnStartPipeline() { }
+		virtual void OnStopPipeline() { }
 	};
 
 	class ForwardPlusPipeline : public RenderPipeline {
@@ -23,6 +25,9 @@ namespace Louron {
 		ForwardPlusPipeline();
 
 		void OnUpdate(Scene* scene) override;
+
+		void OnStartPipeline() override;
+		void OnStopPipeline() override;
 
 	private:
 

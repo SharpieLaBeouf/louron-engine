@@ -23,11 +23,12 @@ namespace Louron {
 		glm::vec4 diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
 		glm::vec4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-		float constant = 1.0f;
-		float linear = 0.09f;
-		float quadratic = 0.032f;
-
-		bool lastLight = false;
+		struct LightProperties {
+			float radius = 10.0f;
+			float intensity = 1.0f;
+			int active = true;
+			int lastLight = false;
+		} lightProperties;
 
 		PointLightComponent() = default;
 		PointLightComponent(const PointLightComponent&) = default;
@@ -48,7 +49,7 @@ namespace Louron {
 		float linear = 0.09f;
 		float quadratic = 0.032f;
 
-		bool lastLight = false;
+		int lastLight = false;
 
 	private:
 
@@ -74,7 +75,7 @@ namespace Louron {
 		glm::vec4 diffuse = glm::vec4(1.0f);
 		glm::vec4 specular = glm::vec4(0.5f);
 		
-		bool lastLight = false;
+		int lastLight = false;
 
 	private:
 
