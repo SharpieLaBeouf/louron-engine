@@ -48,7 +48,7 @@ struct Material {
 	vec4 specular;
     sampler2D specularMap;
 
-    sampler2D normal;
+    sampler2D normalMap;
 
     float shine;
 }; 
@@ -128,22 +128,29 @@ layout(std430, binding = 4) readonly buffer DL_Buffer {
 } DL_Buffer_Data;
 
 // Shader In/Out Variables
-in vec3 FragPos;
-in vec3 Normal;
 in vec2 TexCoord;
+in vec3 Normal;
+in vec3 FragPos;
 out vec4 fragColour;
 
 // Standard Uniform Variables
+uniform mat4 proj;
 uniform vec3 u_CameraPos;
 uniform Material u_Material;
 
 // Forward Plus Uniform Variables
 uniform int u_TilesX;
+uniform ivec2 u_ScreenSize;
+uniform sampler2D u_Depth;
 
 // Forward Plus Local Variables
 uint index;
 ivec2 location = ivec2(gl_FragCoord.xy);
 ivec2 tileID = location / ivec2(16, 16);
+
+uint MAX_DIRECTIONAL_LIGHTS = 10;
+uint MAX_POINT_LIGHTS = 1024;
+uint MAX_SPOT_LIGHTS = 1024;
 
 // Lighting Functions
 vec3 CalcDirLights(vec3 normal, vec3 viewDir);
@@ -151,7 +158,7 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main() {
-
+    
 	// Determine which tile this pixel belongs to
 	index = tileID.y * u_TilesX + tileID.x;
 	
@@ -208,24 +215,24 @@ vec3 CalcDirLights(vec3 normal, vec3 viewDir) {
 vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
 
     vec3 pointResult = vec3(0.0f, 0.0f, 0.0f);
+    
+	ivec2 location = ivec2(gl_FragCoord.xy);
+	ivec2 tileID = location / ivec2(16, 16);
+	uint index = tileID.y * u_TilesX + tileID.x;
+    uint offset = index * MAX_POINT_LIGHTS;
 
-    // LOOP through PL SSBO
-    for (int i = 0; i < PL_Buffer_Data.data.length(); i++) {
-        
-        // BREAK LOOP if reached the last of the lights
-        if (PL_Buffer_Data.data[i].lastLight == true)
-            break;
+    for (int i = 0;  i < MAX_POINT_LIGHTS && PL_IndiciesBuffer_Data.data[offset + i].index != -1; i++) {
 
-        // CONTINUE LOOP from next light if this light is not active for lighting
-        if (PL_Buffer_Data.data[i].activeLight == false)
+        uint lightIndex = PL_IndiciesBuffer_Data.data[offset + i].index;
+
+        if (PL_Buffer_Data.data[lightIndex].activeLight == false)
             continue;
-            
-        float distance = length(PL_Buffer_Data.data[i].position.xyz - fragPos);
-
-        // If fragment is within radius of the PL
-        if (distance < PL_Buffer_Data.data[i].radius){
+    
+        float dist = length(PL_Buffer_Data.data[lightIndex].position.xyz - fragPos);
         
-            PointLight light = PL_Buffer_Data.data[i];
+        if (dist < PL_Buffer_Data.data[lightIndex].radius) {
+
+            PointLight light = PL_Buffer_Data.data[lightIndex];
 
             vec3 lightDir = normalize(light.position.xyz - fragPos);
         
@@ -237,7 +244,7 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
             float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shine);
         
             // attenuation
-            float attenuation = light.intensity * pow(max(0.0, 1.0 - abs(distance) / light.radius), 2.0);
+            float attenuation = light.intensity * pow(max(0.0, 1.0 - abs(dist) / light.radius), 2.0);
 
             // combine results
             vec3 ambient = light.ambient.xyz * texture(u_Material.diffuseMap, TexCoord).rgb             * u_Material.diffuse.xyz;
@@ -249,7 +256,7 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
             specular *= attenuation;
 
             pointResult += (ambient + diffuse + specular);
-        } 
+        }
     }
 
     return pointResult;

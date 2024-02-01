@@ -17,8 +17,7 @@ namespace Louron {
 		for (int i = 0; i < Transforms.size(); i++)
 			transformMatrices.push_back(Transforms[i]);
 
-		if(InstanceBuffer == -1)
-			glGenBuffers(1, &InstanceBuffer);
+		glGenBuffers(1, &InstanceBuffer);
 
 		glBindBuffer(GL_ARRAY_BUFFER, InstanceBuffer);
 		glBufferData(GL_ARRAY_BUFFER, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0], GL_STATIC_DRAW);

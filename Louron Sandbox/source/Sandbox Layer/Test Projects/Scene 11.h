@@ -26,7 +26,7 @@ private:
 	bool lightActive = true;
 	float lightRadius = 10.0f;
 	float lightIntensity = 1.0f;
-	glm::vec3 lightPosition = glm::vec3(0.0f);
+	glm::vec3 lightPosition = glm::vec3(0.0f, 2.0f, 0.0f);
 
 public:
 
@@ -162,7 +162,7 @@ public:
 		}
 
 		// Bob Lights Up and Down
-		for (int i = 0; i < numLights; i++) {
+		for (int i = 1; i < numLights; i++) {
 			
 			// Each Light has their own bobbing height
 			float bobbingOffset = sin(currentTime + lightBobOffset[i]) * deltaTime;

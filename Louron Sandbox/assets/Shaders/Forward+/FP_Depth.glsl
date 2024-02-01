@@ -4,12 +4,12 @@
 
 layout (location = 0) in vec3 aPos;
 
-uniform mat4 proj;
-uniform mat4 view;
-uniform mat4 model;
+uniform mat4 u_Proj;
+uniform mat4 u_View;
+uniform mat4 u_Model;
 
 void main() {
-	gl_Position = proj * view * model * vec4(aPos, 1.0);
+	gl_Position = u_Proj * u_View * u_Model * vec4(aPos, 1.0);
 }
 
 #SHADER FRAGMENT

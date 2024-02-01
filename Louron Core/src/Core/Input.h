@@ -2,7 +2,7 @@
 #include <string>
 
 #include <glfw/glfw3.h>
-
+#include <glm/glm.hpp>
 #include <imgui/imgui.h>
 
 const inline int MAX_KEYS = 1024;
@@ -28,6 +28,8 @@ namespace Louron {
 
 		float GetMouseX();
 		float GetMouseY();
+
+		glm::vec2 GetMousePosition() { return glm::vec2((float)m_MouseX, (float)m_MouseY); }
 
 	private:
 

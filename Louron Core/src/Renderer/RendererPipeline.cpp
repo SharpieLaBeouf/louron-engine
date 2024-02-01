@@ -76,9 +76,9 @@ namespace Louron {
 			}
 		}
 
+		ConductDepthPass(scene, camera);
 		BindLightSSBO(scene);
-		ConductDepthPass(scene, camera); // WIP
-		ConductLightCull(camera); // WIP
+		ConductLightCull(camera); // WIP for Spot Lights
 		ConductRenderPass(scene, camera);
 	}
 
@@ -207,7 +207,6 @@ namespace Louron {
 
 	}
 
-	// TODO: Sort Front to Back for Rendering
 	void ForwardPlusPipeline::ConductDepthPass(Scene* scene, Camera* camera) {
 		if (camera) {
 
@@ -215,7 +214,29 @@ namespace Louron {
 			{
 				const auto& view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();
 
+				// First: Distance, Second: Transform, Third: MeshFilter
+				std::vector<std::tuple<float, Transform, MeshFilter>> sortedEntities;
+
 				if (view.begin() != view.end()) {
+
+					for (const auto& entity : view) {
+						const auto& [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
+
+						if (!meshRenderer.active)
+							continue;
+
+						glm::vec3 objectPosition = transform.GetPosition();
+						float distance = glm::length(objectPosition - camera->GetPosition());
+
+						sortedEntities.emplace_back(distance, transform, meshFilter);
+					}
+
+					// Lambda function compares the distances of two entities (a and b) and orders them in a way that ensures front-to-back sorting
+					std::sort(sortedEntities.begin(), sortedEntities.end(), [](const auto& a, const auto& b) {
+
+						return std::get<0>(a) < std::get<0>(b);
+
+					});
 
 					std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth");
 
@@ -224,20 +245,18 @@ namespace Louron {
 						glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
 						glClear(GL_DEPTH_BUFFER_BIT);
 
-						shader->SetMat4("proj", camera->GetProjMatrix());
-						shader->SetMat4("view", camera->GetViewMatrix());
+						shader->Bind();
+						shader->SetMat4("u_Proj", camera->GetProjMatrix());
+						shader->SetMat4("u_View", camera->GetViewMatrix());
 
-						for (const auto& entity : view) {
-							const auto& [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
-
-							if (!meshRenderer.active)
-								continue;
-
-							shader->SetMat4("model", transform.GetTransform());
+						for (const auto& [distance, transform, meshFilter] : sortedEntities) {
+							shader->SetMat4("u_Model", transform.GetTransform());
 
 							for (const auto& mesh : *meshFilter.Meshes)
 								Renderer::DrawMesh(mesh);
 						}
+
+						shader->UnBind();
 
 						glBindFramebuffer(GL_FRAMEBUFFER, 0);
 					}
@@ -246,7 +265,6 @@ namespace Louron {
 		}
 	}
 
-	// TODO: Do testing to ensure that this is working as desired
 	void ForwardPlusPipeline::ConductLightCull(Camera* camera) {
 		
 		// Conduct Light Cull
@@ -254,12 +272,11 @@ namespace Louron {
 
 		lightCull->Bind();
 
-
-		lightCull->SetMat4("view", camera->GetViewMatrix());
-		lightCull->SetMat4("proj", camera->GetProjMatrix());
-		lightCull->SetiVec2("screenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight()));
+		lightCull->SetMat4("u_View", camera->GetViewMatrix());
+		lightCull->SetMat4("u_Proj", camera->GetProjMatrix());
+		lightCull->SetiVec2("u_ScreenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight()));
 		glActiveTexture(GL_TEXTURE4);
-		lightCull->SetInt("depthMap", 4);
+		lightCull->SetInt("u_Depth", 4);
 		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
 
 		glDispatchCompute(FP_Data.workGroupsX, FP_Data.workGroupsY, 1);
@@ -307,9 +324,22 @@ namespace Louron {
 					
 					// Update appropriate uniforms per Material
 					if (material) {
-						material->Bind();
-						material->UpdateUniforms(*camera);
-						material->GetShader()->SetInt("u_TilesX", FP_Data.workGroupsX);
+
+						if (material->Bind()) {
+
+							// Update Standard Material Uniforms
+
+							material->UpdateUniforms(*camera);
+
+							// Update Specific Forward Plus Uniforms
+
+							material->GetShader()->SetInt("u_TilesX", FP_Data.workGroupsX); // Number of tiles across the screen in the X axis
+							material->GetShader()->SetiVec2("u_ScreenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight())); // Size of screen
+
+							glActiveTexture(GL_TEXTURE4);
+							material->GetShader()->SetInt("u_Depth", 4); // Depth texture map
+							glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
+						}
 					}
 					else {
 						std::cout << "[L20] Invalid material encountered during rendering!" << std::endl;
@@ -337,8 +367,12 @@ namespace Louron {
 				}
 
 				// Clean Up Scene Render Pass
-				if (!materialMeshTransMap.empty())
-					materialMeshTransMap.begin()->first->UnBind();
+				for (int i = 0; i < 3; i++) {
+					glActiveTexture(GL_TEXTURE0 + i);
+					glBindTexture(GL_TEXTURE_2D, 0);
+				}
+				glActiveTexture(GL_TEXTURE0);
+				glUseProgram(0);
 			}
 		}
 	}

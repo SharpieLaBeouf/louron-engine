@@ -45,28 +45,28 @@ struct BoundingSphere {
 };
 
 // Point Lights SSBO
-    layout(std430, binding = 0) readonly buffer PL_Buffer {
-        PointLight data[];
-    } PL_Buffer_Data;
+layout(std430, binding = 0) readonly buffer PL_Buffer {
+    PointLight data[];
+} PL_Buffer_Data;
 
-    layout(std430, binding = 1) writeonly buffer PL_IndiciesBuffer {
-        VisibleIndex data[];
-    } PL_IndiciesBuffer_Data;
+layout(std430, binding = 1) writeonly buffer PL_IndiciesBuffer {
+    VisibleIndex data[];
+} PL_IndiciesBuffer_Data;
 
 // Spot Lights SSBO
-    layout(std430, binding = 2) readonly buffer SL_Buffer {
-        SpotLight data[];
-    } SL_Buffer_Data;
+layout(std430, binding = 2) readonly buffer SL_Buffer {
+    SpotLight data[];
+} SL_Buffer_Data;
 
-    layout(std430, binding = 3) writeonly buffer SL_IndiciesBuffer {
-        VisibleIndex data[];
-    } SL_IndiciesBuffer_Data;
+layout(std430, binding = 3) writeonly buffer SL_IndiciesBuffer {
+    VisibleIndex data[];
+} SL_IndiciesBuffer_Data;
 
 // Declare Uniforms
-uniform mat4 view;
-uniform mat4 proj;
-uniform ivec2 screenSize;
-uniform sampler2D depthMap;
+uniform mat4 u_View;
+uniform mat4 u_Proj;
+uniform ivec2 u_ScreenSize;
+uniform sampler2D u_Depth;
 
 // Declare values that are shared between all threads in workgroup
 shared uint minDepthInt;
@@ -88,13 +88,13 @@ shared int SL_VisibleLightIndices[MAX_LIGHTS];
 
 shared mat4 viewProjection;
 
-#define TILE_SIZE 16
-
 BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax);
 BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar);
 bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere);
 
+#define TILE_SIZE 16
 layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
+
 void main(){
     
 	ivec2 location = ivec2(gl_GlobalInvocationID.xy);
@@ -108,8 +108,14 @@ void main(){
 		maxDepthInt = 0;
 		PL_VisibleLightCount = 0;
 		SL_VisibleLightCount = 0;
-		viewProjection = proj * view;
+		viewProjection = u_Proj * u_View;
 		
+	}
+
+	barrier();
+
+	if(gl_LocalInvocationIndex == 0) {
+	
 		PL_LightCount = 0;
 		SL_LightCount = 0;
 		
@@ -138,10 +144,10 @@ void main(){
 	// Step 1: Calculate the minimum and maximum depth values for the work group tile
 	float maxDepth, minDepth;
 
-	vec2 text = vec2(location) / screenSize;
+	vec2 text = vec2(location) / u_ScreenSize;
 
-	float depth = texture(depthMap, text).r;
-    depth = (0.5 * proj[3][2]) / (depth + 0.5 * proj[2][2] - 0.5);
+	float depth = texture(u_Depth, text).r;
+    depth = (0.5 * u_Proj[3][2]) / (depth + 0.5 * u_Proj[2][2] - 0.5);
 
 	uint depthInt = floatBitsToUint(depth);
 	atomicMin(minDepthInt, depthInt);
@@ -159,7 +165,7 @@ void main(){
 		// Steps based on tile sale
 		vec2 negativeStep = (2.0 * vec2(tileID)) / vec2(tileNumber);
 		vec2 positiveStep = (2.0 * vec2(tileID + ivec2(1, 1))) / vec2(tileNumber);
-
+		
 		// Set up starting values for planes using steps and min and max z values
 		frustumPlanes[0] = vec4(1.0, 0.0, 0.0, 1.0 - negativeStep.x); // Left
 		frustumPlanes[1] = vec4(-1.0, 0.0, 0.0, -1.0 + positiveStep.x); // Right
@@ -175,9 +181,9 @@ void main(){
 		}
 
 		// Transform the depth planes
-		frustumPlanes[4] *= view;
+		frustumPlanes[4] *= u_View;
 		frustumPlanes[4] /= length(frustumPlanes[4].xyz);
-		frustumPlanes[5] *= view;
+		frustumPlanes[5] *= u_View;
 		frustumPlanes[5] /= length(frustumPlanes[5].xyz);
 
 		for (uint i = 0; i < 6; i++) {
@@ -199,9 +205,11 @@ void main(){
 		// Get the lightIndex to test for this thread / pass. If the index is >= light count, then this thread can stop testing lights
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
 		
-		if (lightIndex >= PL_LightCount) {
+		if (lightIndex >= PL_LightCount)
 			break;
-		}
+
+		if(!PL_Buffer_Data.data[lightIndex].activeLight)
+			continue;
 
 		vec4 position = PL_Buffer_Data.data[lightIndex].position;
 		float radius = PL_Buffer_Data.data[lightIndex].radius;
