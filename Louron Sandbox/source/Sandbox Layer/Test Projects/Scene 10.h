@@ -141,11 +141,16 @@ public:
 		glEnable(GL_DEPTH_TEST);
 		lastTime = (float)glfwGetTime();
 		ResetGame();
+
+		// Set Fixed Window Size for Pong
+		glfwSetWindowSize((GLFWwindow*)m_Window.GetNativeWindow(), 1600, 900);
+		glfwSetWindowAttrib((GLFWwindow*)m_Window.GetNativeWindow(), GLFW_RESIZABLE, GL_FALSE);
 	}
 
 	void OnDetach() override {
 
 		glDisable(GL_DEPTH_TEST);
+		glfwSetWindowAttrib((GLFWwindow*)m_Window.GetNativeWindow(), GLFW_RESIZABLE, GL_TRUE);
 	}
 
 	void Update() override {
@@ -447,8 +452,6 @@ private:
 	}
 
 	void Draw() override {
-		// Set Fixed Window Size for Pong
-		glfwSetWindowSize((GLFWwindow*)m_Window.GetNativeWindow(), 1600, 900);
 
 		glClearColor(211.0f / 255.0f, 238.0f / 255.0f, 255.0f / 255.0f, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

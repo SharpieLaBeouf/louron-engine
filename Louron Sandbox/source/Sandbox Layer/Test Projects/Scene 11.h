@@ -181,13 +181,11 @@ public:
 
 		ImGui::Begin("Application Scene Control", (bool*)0,
 			ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoSavedSettings |
 			ImGuiWindowFlags_NoCollapse
 		);
 
 		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
-		ImGui::SetWindowSize(ImVec2(200.0f, 100.0f));
 
 		ImGui::Separator();
 
@@ -203,9 +201,24 @@ public:
 			ImGui::DragFloat("Radius", &lightRadius, 0.05f);
 			ImGui::DragFloat("Intensity", &lightIntensity, 0.05f);
 			ImGui::DragFloat3("Position", &lightPosition[0], 0.1f);
-			ImGui::TreePop();
 
 			if (ImGui::Button("Toggle Active")) lightActive = !lightActive;
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("Profiling")) {
+
+			for (auto& result : Louron::Profiler::Get().GetResults()) {
+
+				char label[128];
+				strcpy_s(label, result.second.Name);
+				strcat_s(label, " %.3fms");
+
+				ImGui::Text(label, result.second.Time);
+			}
+
+			ImGui::TreePop();
 		}
 
 		ImGui::End();

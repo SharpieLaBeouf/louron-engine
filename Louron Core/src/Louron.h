@@ -20,3 +20,5 @@
 
 #include "Renderer/Renderer.h"
 #include "Renderer/RendererPipeline.h"
+
+#include "Debug/Profiler.h"

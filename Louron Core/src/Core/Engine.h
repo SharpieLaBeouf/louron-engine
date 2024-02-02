@@ -10,9 +10,13 @@
 #include "Window.h"
 #include "GuiLayer.h"
 #include "LayerStack.h"
+
 #include "../OpenGL/Shader.h"
 #include "../OpenGL/Texture.h"
+
 #include "../Scene/Mesh.h"
+
+#include "../Debug/Profiler.h"
 
 int main(int argc, char** argv);
 
