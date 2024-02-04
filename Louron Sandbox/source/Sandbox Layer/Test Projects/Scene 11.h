@@ -231,9 +231,8 @@ private:
 
 	void Draw() override {
 
-		glClearColor(back_colour.r, back_colour.g, back_colour.b, back_colour.a);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		Louron::Renderer::ClearColour(back_colour);
+		
 		m_Scene->OnUpdate();
 
 	}

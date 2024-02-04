@@ -22,7 +22,7 @@ namespace Louron {
 
 	public:
 
-		ForwardPlusPipeline();
+		ForwardPlusPipeline() = default;
 
 		void OnUpdate(Scene* scene) override;
 
@@ -31,7 +31,7 @@ namespace Louron {
 
 	private:
 
-		void BindLightSSBO(Scene* scene);
+		void UpdateSSBOData(Scene* scene);
 		void ConductDepthPass(Scene* scene, Camera* camera);
 		void ConductLightCull(Camera* camera);
 		void ConductRenderPass(Scene* scene, Camera* camera);
@@ -40,18 +40,18 @@ namespace Louron {
 
 		struct ForwardPlusData {
 
-			unsigned int PL_Buffer;
-			unsigned int PL_Indices_Buffer;
-			unsigned int SL_Buffer;
-			unsigned int SL_Indices_Buffer;
+			unsigned int PL_Buffer = -1;
+			unsigned int PL_Indices_Buffer = -1;
+			unsigned int SL_Buffer = -1;
+			unsigned int SL_Indices_Buffer = -1;
 
-			unsigned int DL_Buffer;
+			unsigned int DL_Buffer = -1;
 
-			unsigned int DepthMap_FBO;
-			unsigned int DepthMap_Texture;
+			unsigned int DepthMap_FBO = -1;
+			unsigned int DepthMap_Texture = -1;
 
-			unsigned int workGroupsX;
-			unsigned int workGroupsY;
+			unsigned int workGroupsX = -1;
+			unsigned int workGroupsY = -1;
 
 		} FP_Data;
 

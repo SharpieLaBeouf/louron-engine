@@ -6,9 +6,42 @@
 #include <entt/entt.hpp>
 
 namespace Louron {
+		
+	void ForwardPlusPipeline::OnUpdate(Scene* scene) {
+		
+		Camera* camera = nullptr;
+		{
+			const auto& view = scene->GetRegistry()->view<Transform, CameraComponent>();
+			for (const auto& entity : view) {
+				const auto& temp_camera = view.get<CameraComponent>(entity);
 
-	ForwardPlusPipeline::ForwardPlusPipeline() {
+				if (temp_camera.Primary) {
+					camera = temp_camera.Camera.get();
+					break;
+				}
+			}
+		}
 
+		UpdateSSBOData(scene);
+
+		ConductDepthPass(scene, camera);
+		ConductLightCull(camera); // WIP for Spot Lights
+		ConductRenderPass(scene, camera);
+	}
+
+	/// <summary>
+	/// Set OpenGL state configuration required by renderer and FP_Data and Light SSBOs.
+	/// </summary>
+	void ForwardPlusPipeline::OnStartPipeline() {
+
+		LOURON_PROFILE_SCOPE("Forward Plus - Set Up Pipeline");
+
+		glEnable(GL_DEPTH_TEST);
+
+		// Set screen to non-resizeable
+		glfwSetWindowAttrib((GLFWwindow*)Engine::Get().GetWindow().GetNativeWindow(), GLFW_RESIZABLE, GL_FALSE);
+
+		// Calculate workgroups and generate SSBOs from screen size
 		FP_Data.workGroupsX = (unsigned int)std::ceil((float)Engine::Get().GetWindow().GetWidth() / 16.0f);
 		FP_Data.workGroupsY = (unsigned int)std::ceil((float)Engine::Get().GetWindow().GetHeight() / 16.0f);
 		size_t numberOfTiles = static_cast<size_t>(FP_Data.workGroupsX * FP_Data.workGroupsY);
@@ -60,46 +93,35 @@ namespace Louron {
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
-	
-	void ForwardPlusPipeline::OnUpdate(Scene* scene) {
-		
-		Camera* camera = nullptr;
-		{
-			const auto& view = scene->GetRegistry()->view<Transform, CameraComponent>();
-			for (const auto& entity : view) {
-				const auto& temp_camera = view.get<CameraComponent>(entity);
-
-				if (temp_camera.Primary) {
-					camera = temp_camera.Camera.get();
-					break;
-				}
-			}
-		}
-
-		ConductDepthPass(scene, camera);
-		BindLightSSBO(scene);
-		ConductLightCull(camera); // WIP for Spot Lights
-		ConductRenderPass(scene, camera);
-	}
 
 	/// <summary>
-	/// Set OpenGL state configuration required by renderer.
-	/// </summary>
-	void ForwardPlusPipeline::OnStartPipeline() {
-
-		glEnable(GL_DEPTH_TEST); 
-
-	}
-
-	/// <summary>
-	/// Reset OpenGL state configuration required by renderer.
+	/// Reset OpenGL state configuration required by renderer and clean FP_Data and Light SSBOs.
 	/// </summary>
 	void ForwardPlusPipeline::OnStopPipeline() {
 
+		LOURON_PROFILE_SCOPE("Forward Plus - Clean Up Pipeline");
+
 		glDisable(GL_DEPTH_TEST);
+
+		glfwSetWindowAttrib((GLFWwindow*)Engine::Get().GetWindow().GetNativeWindow(), GLFW_RESIZABLE, GL_TRUE);
+
+		glDeleteBuffers(1, &FP_Data.PL_Buffer);
+		glDeleteBuffers(1, &FP_Data.PL_Indices_Buffer);
+		glDeleteBuffers(1, &FP_Data.SL_Buffer);
+		glDeleteBuffers(1, &FP_Data.SL_Indices_Buffer);
+		glDeleteBuffers(1, &FP_Data.DL_Buffer);
+
+		glDeleteFramebuffers(1, &FP_Data.DepthMap_FBO);
+		glDeleteTextures(1, &FP_Data.DepthMap_Texture);
 	}
 
-	void ForwardPlusPipeline::BindLightSSBO(Scene* scene) {
+	/// <summary>
+	/// Updates all Light Data in SSBOs
+	/// </summary>
+	void ForwardPlusPipeline::UpdateSSBOData(Scene* scene) {
+
+		LOURON_PROFILE_SCOPE("Forward Plus - Update SSBO Data");
+
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, FP_Data.PL_Buffer);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, FP_Data.PL_Indices_Buffer);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, FP_Data.SL_Buffer);
@@ -110,104 +132,126 @@ namespace Louron {
 		{
 			// Point Lights
 			{
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
-				PointLightComponent* pointLights = (PointLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
-
-				if (pointLights) {
-					auto view = scene->GetRegistry()->view<Transform, PointLightComponent>();
-
-					int i = 0;
-					for (auto entity : view) {
-						auto [transform, point_light] = view.get<Transform, PointLightComponent>(entity);
-
-						point_light.position = glm::vec4(transform.GetPosition(), 1.0f);
-
-						pointLights[i] = point_light;
-						pointLights[i].lightProperties.lastLight = false;
-
+				// Update Light Objects
+				std::vector<PointLightComponent> pointLightVector;
+				auto view = scene->GetRegistry()->view<Transform, PointLightComponent>();
+				
+				// Add lights to vector that are contained within the scene up to a maximum of 1024
+				int i = 0;
+				for (auto entity : view) {
+					
+					if (i >= MAX_POINT_LIGHTS)
+						break;
+					else
 						i++;
 
-						if (i >= MAX_POINT_LIGHTS)
-							break;
-					}
-					pointLights[i].lightProperties.lastLight = true;
-				}
-				else {
-					std::cout << "[L20] Point Light Buffer Not Mapped Successfully!" << std::endl;
+					auto [transform, point_light] = view.get<Transform, PointLightComponent>(entity);
+
+					point_light.position = glm::vec4(transform.GetPosition(), 1.0f);
+					point_light.lightProperties.lastLight = false;
+
+					pointLightVector.push_back(point_light);
 				}
 
-				glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+				// Create Buffer Light at End of Vector if not full
+				if (i < MAX_POINT_LIGHTS - 1) {
+					PointLightComponent tempLastLight;
+					tempLastLight.lightProperties.lastLight = true;
+					pointLightVector.push_back(tempLastLight);
+				}
+
+				// Update SSBO data with light data
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, pointLightVector.size() * sizeof(PointLightComponent), pointLightVector.data());
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 			}
 
 			// Spot Lights
 			{
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
-				SpotLightComponent* spotLights = (SpotLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
 
-				if (spotLights) {
-					auto view = scene->GetRegistry()->view<Transform, SpotLightComponent>();
+				// Update Light Objects
+				std::vector<SpotLightComponent> spotLightVector;
+				auto view = scene->GetRegistry()->view<Transform, SpotLightComponent>();
 
-					int i = 0;
-					for (auto entity : view) {
-						auto [transform, spot_light] = view.get<Transform, SpotLightComponent>(entity);
+				// Add lights to vector that are contained within the scene up to a maximum of 1024
+				int i = 0;
+				for (auto entity : view) {
 
-						spot_light.position = glm::vec4(transform.GetPosition(), 1.0f);
-
-						spotLights[i] = spot_light;
-						spotLights[i].lastLight = false;
-
+					if (i >= MAX_SPOT_LIGHTS)
+						break;
+					else
 						i++;
 
-						if (i >= MAX_SPOT_LIGHTS)
-							break;
-					}
-					spotLights[i].lastLight = true;
-				}
-				else {
-					std::cout << "[L20] Spot Light Buffer Not Mapped Successfully!" << std::endl;
+					auto [transform, spot_light] = view.get<Transform, SpotLightComponent>(entity);
+
+					spot_light.position = glm::vec4(transform.GetPosition(), 1.0f);
+					spot_light.lastLight = false;
+
+					spotLightVector.push_back(spot_light);
 				}
 
-				glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+				// Create Buffer Light at End of Vector if not full
+				if (i < MAX_SPOT_LIGHTS - 1) {
+					SpotLightComponent tempLastLight;
+					tempLastLight.lastLight = true;
+					spotLightVector.push_back(tempLastLight);
+				}
+
+				// Update SSBO data with light data
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, spotLightVector.size() * sizeof(SpotLightComponent), spotLightVector.data());
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 			}
 
 			// Directional Lights
 			{
-				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
-				DirectionalLightComponent* directionalLights = (DirectionalLightComponent*)glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_WRITE);
+				// Update Light Objects
+				std::vector<DirectionalLightComponent> directionalLightVector;
+				auto view = scene->GetRegistry()->view<Transform, DirectionalLightComponent>();
 
-				if (directionalLights) {
-					auto view = scene->GetRegistry()->view<Transform, DirectionalLightComponent>();
+				// Add lights to vector that are contained within the scene up to a maximum of 1024
+				int i = 0;
+				for (auto entity : view) {
 
-					int i = 0;
-					for (auto entity : view) {
-
-						directionalLights[i] = view.get<DirectionalLightComponent>(entity);
-						directionalLights[i].lastLight = false;
-						directionalLights[i].direction = glm::normalize(
-							glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) *
-							glm::quat(glm::radians(view.get<Transform>(entity).GetRotation())));
-
+					if (i >= MAX_DIRECTIONAL_LIGHTS)
+						break;
+					else
 						i++;
 
-						if (i >= MAX_DIRECTIONAL_LIGHTS)
-							break;
-					}
-					directionalLights[i].lastLight = true;
-				}
-				else {
-					std::cout << "[L20] Spot Light Buffer Not Mapped Successfully!" << std::endl;
+					auto [transform, directional_light] = view.get<Transform, DirectionalLightComponent>(entity);
+
+					directional_light.direction = glm::normalize(
+						glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) *
+						glm::quat(glm::radians(transform.GetRotation())));
+
+					directional_light.lastLight = false;
+
+					directionalLightVector.push_back(directional_light);
 				}
 
-				glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+				// Create Buffer Light at End of Vector if not full
+				if (i < MAX_DIRECTIONAL_LIGHTS - 1) {
+					DirectionalLightComponent tempLastLight;
+					tempLastLight.lastLight = true;
+					directionalLightVector.push_back(tempLastLight);
+				}
+
+				// Update SSBO data with light data
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, directionalLightVector.size() * sizeof(DirectionalLightComponent), directionalLightVector.data());
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 			}
 		}
 
 	}
 
+	/// <summary>
+	/// Conducts a Depth Pass of the scene sorted front to back
+	/// </summary>
 	void ForwardPlusPipeline::ConductDepthPass(Scene* scene, Camera* camera) {
+
+		LOURON_PROFILE_SCOPE("Forward Plus - Pre Depth Pass");
+
 		if (camera) {
 
 			// Call Renderer for all Meshes
@@ -243,7 +287,7 @@ namespace Louron {
 					if (shader)
 					{
 						glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
-						glClear(GL_DEPTH_BUFFER_BIT);
+						Renderer::ClearBuffer(GL_DEPTH_BUFFER_BIT);
 
 						shader->Bind();
 						shader->SetMat4("u_Proj", camera->GetProjMatrix());
@@ -265,8 +309,15 @@ namespace Louron {
 		}
 	}
 
+	/// <summary>
+	/// Conducts main tiled rendering algorithm, split screen into tiles
+	/// and determine which lights impact each tile frustum.
+	/// </summary>
+	/// <param name="camera"></param>
 	void ForwardPlusPipeline::ConductLightCull(Camera* camera) {
-		
+
+		LOURON_PROFILE_SCOPE("Forward Plus - Light Cull");
+
 		// Conduct Light Cull
 		std::shared_ptr<Shader> lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
 
@@ -285,12 +336,20 @@ namespace Louron {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
+	/// <summary>
+	/// Conduct final colour pass. Meshes are sorted by material, then
+	/// sorted by mesh per material, then drawn individually or 
+	/// drawn as instances if the meshes are identical using the same
+	/// material.
+	/// </summary>
 	void ForwardPlusPipeline::ConductRenderPass(Scene* scene, Camera* camera) {
-		
+
+		LOURON_PROFILE_SCOPE("Forward Plus - Colour Render");
+
 		// Render All MeshComponents in Scene
 		if (camera) {
 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// Gather all entities within scene with appropriate components
 			auto view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();

@@ -2,25 +2,38 @@
 
 namespace Louron {
 
+	void Renderer::ClearColour(const glm::vec4 colour) {
+		glClearColor(colour.r, colour.g, colour.b, colour.a);
+	}
+
+	void Renderer::ClearBuffer(GLbitfield mask) {
+		glClear(mask);
+	}
+
 	void Renderer::DrawMesh(std::shared_ptr<Mesh> Mesh) {
 		Mesh->VAO->Bind();
    		glDrawElements(GL_TRIANGLES, Mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 	}
 
-	GLuint InstanceBuffer = -1;
+	static GLuint s_InstanceBuffer = -1;
 
 	void Renderer::DrawInstancedMesh(std::shared_ptr<Mesh> Mesh, std::vector<Transform> Transforms) {
-
-		// TODO: Fine-tune efficiency of instancing
-
+		
 		std::vector<glm::mat4> transformMatrices;
 		for (int i = 0; i < Transforms.size(); i++)
 			transformMatrices.push_back(Transforms[i]);
 
-		glGenBuffers(1, &InstanceBuffer);
+		if (s_InstanceBuffer == -1) {
+			glGenBuffers(1, &s_InstanceBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, s_InstanceBuffer);
+			glBufferData(GL_ARRAY_BUFFER, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0], GL_DYNAMIC_DRAW);
 
-		glBindBuffer(GL_ARRAY_BUFFER, InstanceBuffer);
-		glBufferData(GL_ARRAY_BUFFER, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0], GL_STATIC_DRAW);
+		}
+		else {
+			glBindBuffer(GL_ARRAY_BUFFER, s_InstanceBuffer);
+			glBufferSubData(GL_ARRAY_BUFFER, 0, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0]);
+		}
+
 
 		Mesh->VAO->Bind();
 
@@ -55,7 +68,7 @@ namespace Louron {
 		glVertexAttribDivisor(8, 0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(1, &InstanceBuffer);
+		// TODO: Implement cleaning up of buffer somewhere
 
 	}
 }
