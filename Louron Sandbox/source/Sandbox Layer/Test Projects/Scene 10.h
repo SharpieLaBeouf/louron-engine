@@ -3,8 +3,9 @@
 #include "Louron.h"
 #include "Test Scene Base.h"
 
-// TIME TO MAKE A PONG CLONE
+#include "glm/gtc/random.hpp"
 
+// TIME TO MAKE A PONG CLONE
 
 struct Paddle {
 
@@ -29,12 +30,11 @@ public:
 	Louron::Transform transform;
 	Louron::Material material;
 
-	float speed = 8.0f;
+	float speed = 16.0f;
 
-	glm::vec2 velocity = glm::vec2(speed, speed * -0.6f);
+	glm::vec2 velocity = glm::vec2(speed, 0.0f);
 
 };
-
 
 class Scene10 : public Scene {
 
@@ -174,13 +174,6 @@ public:
 			// GAME LOOP: If timer is up, start the game!
 			else if (m_GameRunning) {
 
-				// TO REMOVE: Manual Pong
-				if (m_Input.GetKeyDown(GLFW_KEY_O))
-					m_Ball->velocity.x = -m_Ball->velocity.x;
-
-				if (m_Input.GetKeyDown(GLFW_KEY_P))
-					m_Ball->velocity.y = -m_Ball->velocity.y;
-
 				// Process Ball Movement
 				ProcessBallMovement();
 
@@ -285,7 +278,7 @@ private:
 
 		paddle->score++;
 
-		m_Ball->velocity = { m_Ball->speed, m_Ball->speed * -0.5f };
+		m_Ball->velocity = { m_Ball->speed, 0.0f };
 		m_Ball->transform.SetPosition(glm::vec3(0.0f));
 		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
 		
@@ -296,6 +289,16 @@ private:
 	void ProcessCollisions() {
 
 		if (CheckPaddleCollision(m_Paddles[0]) || CheckPaddleCollision(m_Paddles[1])) {
+
+			Louron::Audio::Get().PlaySound("assets/Audio/bleep.mp3", false);
+
+			if (m_Ball->velocity.y == 0.0f) {
+				m_Ball->velocity.y = m_Ball->speed * 0.6f;
+			} else {
+				if (glm::linearRand(0, 1) == 1) {
+					m_Ball->velocity.y = -m_Ball->velocity.y;
+				}
+			}
 			m_Ball->velocity.x = -m_Ball->velocity.x;
 		}
 
@@ -315,6 +318,8 @@ private:
 		}
 		
 	}
+
+	// TODO: Fix Paddle Collision Bugs
 
 	bool CheckPaddleCollision(const std::unique_ptr<Paddle>& paddle) {
 
@@ -441,7 +446,7 @@ private:
 		m_GameStartTimer = 3.0f;
 
 		// Reset Ball, Light, and Paddles
-		m_Ball->velocity = { m_Ball->speed, m_Ball->speed * -0.5f };
+		m_Ball->velocity = { m_Ball->speed, 0.0f };
 		m_Ball->transform.SetPosition(glm::vec3(0.0f));
 		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
 		for (auto& paddle : m_Paddles) {

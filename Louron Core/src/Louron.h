@@ -4,6 +4,7 @@
 #include "Core/Layer.h"
 #include "Core/GuiLayer.h"
 #include "Core/Input.h"
+#include "Core/Audio.h"
 
 #include "OpenGL/Buffer.h"
 #include "OpenGL/Material.h"

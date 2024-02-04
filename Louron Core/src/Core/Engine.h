@@ -10,6 +10,7 @@
 #include "Window.h"
 #include "GuiLayer.h"
 #include "LayerStack.h"
+#include "Audio.h"
 
 #include "../OpenGL/Shader.h"
 #include "../OpenGL/Texture.h"

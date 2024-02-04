@@ -113,6 +113,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="libs\glad\glad.c" />
+    <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\Core\Engine.cpp" />
     <ClCompile Include="src\Core\GuiLayer.cpp" />
     <ClCompile Include="src\Core\Input.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="include\glfw\glfw3.h" />
     <ClInclude Include="include\glfw\glfw3native.h" />
     <ClInclude Include="include\khr\khrplatform.h" />
+    <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\Core\Engine.h" />
     <ClInclude Include="src\Core\EngineStart.h" />
     <ClInclude Include="src\Core\GuiLayer.h" />

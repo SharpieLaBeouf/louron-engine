@@ -36,6 +36,7 @@
     <None Include="assets\Shaders\Forward+\FP_Depth.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Material_BP_Shader.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
+    <None Include="irrKlang.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Images\grass_texture.jpg">
