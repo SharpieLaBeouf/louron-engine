@@ -205,6 +205,8 @@
     <None Include="assimp-vc143-mtd.dll">
       <FileType>Document</FileType>
     </None>
+    <None Include="ikpFlac.dll" />
+    <None Include="ikpMP3.dll" />
     <None Include="irrKlang.dll" />
   </ItemGroup>
   <ItemGroup>

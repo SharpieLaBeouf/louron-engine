@@ -37,8 +37,7 @@ namespace Louron {
 			0
 		);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			std::cerr << "[L20] ERROR: " << importer.GetErrorString() << std::endl;
-			assert(false);
+			L_CORE_ASSERT(false, importer.GetErrorString());
 			return GL_FALSE;
 		}
 
@@ -205,8 +204,7 @@ namespace Louron {
 	std::shared_ptr<MeshFilter> ResourceManager::GetMeshFilter(const std::string& name)
 	{
 		if (Meshes[name].first == nullptr) {
-			std::cerr << "[L20] ERROR: Mesh Not Loaded to Scene Resource Manager!" << std::endl;
-			assert(false);
+			L_CORE_ASSERT(false, "Mesh Not Loaded to Scene Resource Manager!");
 		}
 
 		return Meshes[name].first;
@@ -215,8 +213,7 @@ namespace Louron {
 	std::shared_ptr<MeshRenderer> ResourceManager::GetMeshRenderer(const std::string& name)
 	{
 		if (Meshes[name].second == nullptr) {
-			std::cerr << "[L20] ERROR: Mesh Not Loaded to Scene Resource Manager!" << std::endl;
-			assert(false);
+			L_CORE_ASSERT(false, "Mesh Not Loaded to Scene Resource Manager!");
 		}
 
 		return Meshes[name].second;

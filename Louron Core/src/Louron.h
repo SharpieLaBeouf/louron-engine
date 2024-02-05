@@ -22,4 +22,5 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/RendererPipeline.h"
 
+#include "Debug/Assert.h"
 #include "Debug/Profiler.h"

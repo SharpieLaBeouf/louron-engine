@@ -113,13 +113,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="libs\glad\glad.c" />
-    <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\Core\Engine.cpp" />
     <ClCompile Include="src\Core\GuiLayer.cpp" />
     <ClCompile Include="src\Core\Input.cpp" />
     <ClCompile Include="src\Core\LayerStack.cpp" />
     <ClCompile Include="src\Core\Window.cpp" />
-    <ClCompile Include="src\Debug\Profiler.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Renderer\RendererPipeline.cpp" />
     <ClCompile Include="src\Scene\Components.cpp" />
@@ -232,6 +230,7 @@
     <ClInclude Include="src\Core\GuiLayer.h" />
     <ClInclude Include="src\Core\Layer.h" />
     <ClInclude Include="src\Core\LayerStack.h" />
+    <ClInclude Include="src\Debug\Assert.h" />
     <ClInclude Include="src\Debug\Profiler.h" />
     <ClInclude Include="src\Louron.h" />
     <ClInclude Include="src\OpenGL\Buffer.h" />

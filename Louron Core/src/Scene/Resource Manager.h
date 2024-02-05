@@ -5,6 +5,8 @@
 #include "../OpenGL/Texture.h"
 #include "../OpenGL/Material.h"
 
+#include "../Debug/Assert.h"
+
 namespace Louron {
 
 	struct ResourceManager {

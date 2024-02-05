@@ -10,15 +10,10 @@ namespace Louron {
 
 	public:
 
-		static void Init() {
-			s_Instance = new Audio();
-		}
-
 		static Audio& Get() {
-			if (!s_Instance)
-				Init();
+			static Audio s_Instance;
 
-			return *s_Instance;
+			return s_Instance;
 		}
 
 		void PlaySound(const std::string& audioFile, bool looped = false) {
@@ -39,9 +34,7 @@ namespace Louron {
 		Audio& operator=(const Audio&) = delete;
 		Audio& operator=(Audio&&) = delete;
 
-		static Audio* s_Instance;
 		irrklang::ISoundEngine* m_SoundEngine;
-
 
 	};
 }

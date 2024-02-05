@@ -34,8 +34,7 @@ namespace Louron {
 		template<typename T>
 		T& GetComponent() {
 			if (m_EntityHandle == entt::null) {
-				std::cerr << "[L20] ERROR: Attempted to Retrieve Component from NULL Entity!" << std::endl;
-				assert(false);
+				L_CORE_ASSERT(false, "Attempted to Retrieve Component from NULL Entity!");
 			}
 			
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);

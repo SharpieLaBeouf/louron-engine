@@ -59,8 +59,7 @@ namespace Louron {
 			0
 		);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			std::cerr << "[L20] ERROR: " << importer.GetErrorString() << std::endl;
-			assert(false);
+			L_CORE_ASSERT(false, importer.GetErrorString());
 			return GL_FALSE;
 		}
 

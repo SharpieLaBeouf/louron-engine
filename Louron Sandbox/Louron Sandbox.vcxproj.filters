@@ -37,6 +37,8 @@
     <None Include="assets\Shaders\Forward+\FP_Material_BP_Shader.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
     <None Include="irrKlang.dll" />
+    <None Include="ikpFlac.dll" />
+    <None Include="ikpMP3.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Images\grass_texture.jpg">

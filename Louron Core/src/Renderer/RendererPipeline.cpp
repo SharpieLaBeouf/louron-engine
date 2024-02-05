@@ -34,7 +34,7 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::OnStartPipeline() {
 
-		LOURON_PROFILE_SCOPE("Forward Plus - Set Up Pipeline");
+		L_PROFILE_SCOPE("Forward Plus - Set Up Pipeline");
 
 		glEnable(GL_DEPTH_TEST);
 
@@ -99,7 +99,7 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::OnStopPipeline() {
 
-		LOURON_PROFILE_SCOPE("Forward Plus - Clean Up Pipeline");
+		L_PROFILE_SCOPE("Forward Plus - Clean Up Pipeline");
 
 		glDisable(GL_DEPTH_TEST);
 
@@ -120,7 +120,7 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::UpdateSSBOData(Scene* scene) {
 
-		LOURON_PROFILE_SCOPE("Forward Plus - Update SSBO Data");
+		L_PROFILE_SCOPE("Forward Plus - Update SSBO Data");
 
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, FP_Data.PL_Buffer);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, FP_Data.PL_Indices_Buffer);
@@ -250,7 +250,7 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::ConductDepthPass(Scene* scene, Camera* camera) {
 
-		LOURON_PROFILE_SCOPE("Forward Plus - Pre Depth Pass");
+		L_PROFILE_SCOPE("Forward Plus - Pre Depth Pass");
 
 		if (camera) {
 
@@ -316,7 +316,7 @@ namespace Louron {
 	/// <param name="camera"></param>
 	void ForwardPlusPipeline::ConductLightCull(Camera* camera) {
 
-		LOURON_PROFILE_SCOPE("Forward Plus - Light Cull");
+		L_PROFILE_SCOPE("Forward Plus - Light Cull");
 
 		// Conduct Light Cull
 		std::shared_ptr<Shader> lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
@@ -344,7 +344,7 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::ConductRenderPass(Scene* scene, Camera* camera) {
 
-		LOURON_PROFILE_SCOPE("Forward Plus - Colour Render");
+		L_PROFILE_SCOPE("Forward Plus - Colour Render");
 
 		// Render All MeshComponents in Scene
 		if (camera) {
