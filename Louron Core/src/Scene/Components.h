@@ -18,6 +18,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <irrklang/irrKlang.h>
+
 namespace Louron {
 
 	struct TagComponent {
@@ -38,6 +40,16 @@ namespace Louron {
 		CameraComponent(const CameraComponent&) = default;
 
 	};
+
+    // TODO: Implement Audio Components
+
+    struct  AudioListener {
+
+    };
+
+    struct AudioEmitter {
+
+    };
 
 	struct Transform {
 
