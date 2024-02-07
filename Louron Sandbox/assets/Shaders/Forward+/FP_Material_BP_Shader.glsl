@@ -60,9 +60,11 @@ struct DirLight {
     vec4 specular;
 
     bool lastLight;
-
-	// DO NOT USE - this is for SSBO alignment purposes ONLY
-    vec3 m_Alignment;
+    
+	// DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
+	float m_Padding1;
+	float m_Padding2;
+	float m_Padding3;
 };
 
 struct PointLight {
@@ -86,18 +88,18 @@ struct SpotLight {
 	vec4 ambient;
 	vec4 diffuse;
 	vec4 specular;
-
-	float cutOff;
-	float outerCutOff;
-
-	float constant;
-	float linear;
-	float quadratic;
-
+    
+	float range;
+	float angle;
+	float intensity;
+	
+    bool activeLight;
     bool lastLight;
    
 	// DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
-	vec2 m_Alignment;
+	float m_Padding1;
+	float m_Padding2;
+	float m_Padding3;
 };
 
 struct VisibleIndex {
@@ -156,6 +158,7 @@ uint MAX_SPOT_LIGHTS = 1024;
 vec3 CalcDirLights(vec3 normal, vec3 viewDir);
 vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir);
 vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir);
+vec3 CalcNewSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main() {
     
@@ -263,7 +266,7 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
 }
 
 // Calculate Spot Light Lighting in Scene
-vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir){
+vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
     
     vec3 spotResult = vec3(0.0f, 0.0f, 0.0f);
 
@@ -271,36 +274,46 @@ vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir){
     
         if (SL_Buffer_Data.data[i].lastLight == true)
             break;
+            
+        if (SL_Buffer_Data.data[i].activeLight == false)
+            continue;
                 
+        // Setup light
         SpotLight light = SL_Buffer_Data.data[i];
         vec3 lightDir = normalize(light.position.xyz - fragPos);
-       
-       // diffuse shading
-        float diff = max(dot(normal, lightDir), 0.0);
-        
-        // specular shading
-        vec3 reflectDir = reflect(-lightDir, normal);
-        float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shine);
-        
-        // attenuation
+
+        // Fragment culling
         float distance = length(light.position.xyz - fragPos);
-        float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+        float theta = dot(lightDir, normalize(-light.direction.xyz));
+
+        // Test if fragment is within range and radius of cone angle
+        if (distance < light.range && theta > cos(radians(light.angle * 0.5))) {
+            
+            // Diffuse shading
+            float diff = max(dot(normal, lightDir), 0.0);
         
-        // spotlight intensity
-        float theta = dot(lightDir, normalize(-light.direction.xyz)); 
-        float epsilon = light.cutOff - light.outerCutOff;
-        float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
+            // Specular shading
+            vec3 reflectDir = reflect(-lightDir, normal);
+            float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shine);
+
+            // Calculate the angle factor to determine the falloff from the center to the edge of the cone
+            float angleFactor = 1.0 - smoothstep(cos(radians(light.angle * 0.5 - light.angle * 0.25)), cos(radians(light.angle * 0.5)), theta);
+            // Calculate the spotlight intensity based on the angle factor
+            float spotlightIntensity = light.intensity * angleFactor;
+            // Calculate the attenuation based on distance (similar to point light attenuation)
+            float attenuation = spotlightIntensity * pow(max(0.0, 1.0 - (distance / light.range)), 2.0);
+    
+            // Combine results
+            vec3 ambient = light.ambient.xyz * vec3(texture(u_Material.diffuseMap, TexCoord))               * u_Material.diffuse.xyz;
+            vec3 diffuse = light.diffuse.xyz * diff * vec3(texture(u_Material.diffuseMap, TexCoord))        * u_Material.diffuse.xyz;
+            vec3 specular = light.specular.xyz * spec * vec3(texture(u_Material.specularMap, TexCoord))     * u_Material.specular.xyz;
         
-        // combine results
-        vec3 ambient = light.ambient.xyz * vec3(texture(u_Material.diffuseMap, TexCoord))               * u_Material.diffuse.xyz;
-        vec3 diffuse = light.diffuse.xyz * diff * vec3(texture(u_Material.diffuseMap, TexCoord))        * u_Material.diffuse.xyz;
-        vec3 specular = light.specular.xyz * spec * vec3(texture(u_Material.specularMap, TexCoord))     * u_Material.specular.xyz;
+            ambient *= attenuation;
+            diffuse *= attenuation;
+            specular *= attenuation;
         
-        ambient *= attenuation * intensity;
-        diffuse *= attenuation * intensity;
-        specular *= attenuation * intensity;
-        
-        spotResult += (ambient + diffuse + specular);
+            spotResult += (ambient + diffuse + specular);
+        }
      }
 
     return spotResult;

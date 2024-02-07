@@ -21,18 +21,18 @@ struct SpotLight {
 	vec4 ambient;
 	vec4 diffuse;
 	vec4 specular;
-
-	float cutOff;
-	float outerCutOff;
-
-	float constant;
-	float linear;
-	float quadratic;
-
+    
+	float range;
+	float angle;
+	float intensity;
+	
+    bool activeLight;
     bool lastLight;
    
 	// DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
-	vec2 m_Alignment;
+	float m_Padding1;
+	float m_Padding2;
+	float m_Padding3;
 };
 
 struct VisibleIndex {
@@ -74,8 +74,8 @@ shared uint maxDepthInt;
 shared vec4 frustumPlanes[6];
 shared BoundingSphere frustumSpheres[6];
 
-shared int PL_LightCount = 0;
-shared int SL_LightCount = 0;
+shared int PL_LightCount;
+shared int SL_LightCount;
 
 shared uint PL_VisibleLightCount;
 shared uint SL_VisibleLightCount;
@@ -88,9 +88,9 @@ shared int SL_VisibleLightIndices[MAX_LIGHTS];
 
 shared mat4 viewProjection;
 
-BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax);
-BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar);
-bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere);
+//BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax);
+//BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar);
+//bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere);
 
 #define TILE_SIZE 16
 layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
@@ -186,11 +186,11 @@ void main(){
 		frustumPlanes[5] *= u_View;
 		frustumPlanes[5] /= length(frustumPlanes[5].xyz);
 
-		for (uint i = 0; i < 6; i++) {
-			vec3 planeNormal = frustumPlanes[i].xyz;
-			float planeDistance = frustumPlanes[i].w;
-			frustumSpheres[i] = createBoundingSphereForFrustumPlane(planeNormal, planeDistance, minDepth, maxDepth);
-		}
+//		for (uint i = 0; i < 6; i++) {
+//			vec3 planeNormal = frustumPlanes[i].xyz;
+//			float planeDistance = frustumPlanes[i].w;
+//			frustumSpheres[i] = createBoundingSphereForFrustumPlane(planeNormal, planeDistance, minDepth, maxDepth);
+//		}
     }
     
 	barrier();
@@ -238,33 +238,33 @@ void main(){
 	barrier();
 
 	// Step 3b: Cull spot lights in parallel. Max 256 light checks per pass due to workgroup containing 16x16 threads or pixels.
-
-	passCount = (SL_LightCount + threadCount - 1) / threadCount;
-	for (uint i = 0; i < passCount; i++) {
-		
-		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
-		if (lightIndex >= SL_LightCount) {
-			break;
-		}
-
-		// Check if any part of the spotlight cone intersects with the frustum planes
-		bool isVisible = false;
-		for (uint j = 0; j < 6; j++) {
-
-			// Check if the radius intersects with the frustum plane
-			if (SpotlightVsSphere(SL_Buffer_Data.data[lightIndex], frustumSpheres[j])) {
-				isVisible = true;
-				break;  // No need to check other planes if already determined as visible
-			}
-		}
-
-	   // If the spotlight is visible, add its index to the shared array
-		if (isVisible) {
-			uint offset = atomicAdd(SL_VisibleLightCount, 1);
-			SL_VisibleLightIndices[offset] = int(lightIndex);
-		}
-
-	}
+	// TODO : Implement Spot Light Culling and TEST
+//	passCount = (SL_LightCount + threadCount - 1) / threadCount;
+//	for (uint i = 0; i < passCount; i++) {
+//		
+//		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
+//		if (lightIndex >= SL_LightCount) {
+//			break;
+//		}
+//
+//		// Check if any part of the spotlight cone intersects with the frustum planes
+//		bool isVisible = false;
+//		for (uint j = 0; j < 6; j++) {
+//
+//			// Check if the radius intersects with the frustum plane
+//			if (SpotlightVsSphere(SL_Buffer_Data.data[lightIndex], frustumSpheres[j])) {
+//				isVisible = true;
+//				break;  // No need to check other planes if already determined as visible
+//			}
+//		}
+//
+//	   // If the spotlight is visible, add its index to the shared array
+//		if (isVisible) {
+//			uint offset = atomicAdd(SL_VisibleLightCount, 1);
+//			SL_VisibleLightIndices[offset] = int(lightIndex);
+//		}
+//
+//	}
 
 	barrier();
 
@@ -295,37 +295,37 @@ void main(){
 	}
 }
 
-// Create a bounding sphere from an AABB
-BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax) {
-
-    BoundingSphere sphere;
-    sphere.centre = 0.5 * (aabbMin + aabbMax);
-    sphere.radius = length(aabbMax - sphere.centre);
-    return sphere;
-}
-
-// Create a bounding sphere for each frustum plane
-BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar) {
-
-    vec3 frustumCenter = frustumNormal * frustumDistance;
-    vec3 frustumExtents = vec3(zNear, zNear, zFar); // You might need to adjust these extents based on your frustum definition
-    return createBoundingSphere(frustumCenter - frustumExtents, frustumCenter + frustumExtents);
-}
-
-// Function to test if a spotlight cone intersects with a bounding sphere
-bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere) {
-
-    // Calculate the spotlight range based on attenuation factors and a predefined cutoff value
-    float cutoffRange = sqrt(1.0 / max(max(spotlight.constant, spotlight.linear), spotlight.quadratic));
-
-    vec3 v = sphere.centre - spotlight.position.xyz;
-    float lenSq = dot(v, v);
-    float v1Len = dot(v, normalize(spotlight.direction.xyz));
-    float distanceClosestPoint = cos(spotlight.cutOff) * sqrt(lenSq - v1Len * v1Len) - v1Len * sin(spotlight.cutOff);
-
-    bool angleCull = distanceClosestPoint > sphere.radius;
-    bool frontCull = v1Len > sphere.radius + cutoffRange;
-    bool backCull = v1Len < -sphere.radius;
-
-    return !(angleCull || frontCull || backCull);
-}
+//// Create a bounding sphere from an AABB
+//BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax) {
+//
+//    BoundingSphere sphere;
+//    sphere.centre = 0.5 * (aabbMin + aabbMax);
+//    sphere.radius = length(aabbMax - sphere.centre);
+//    return sphere;
+//}
+//
+//// Create a bounding sphere for each frustum plane
+//BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar) {
+//
+//    vec3 frustumCenter = frustumNormal * frustumDistance;
+//    vec3 frustumExtents = vec3(zNear, zNear, zFar); // You might need to adjust these extents based on your frustum definition
+//    return createBoundingSphere(frustumCenter - frustumExtents, frustumCenter + frustumExtents);
+//}
+//
+//// Function to test if a spotlight cone intersects with a bounding sphere
+//bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere) {
+//
+//    // Calculate the spotlight range based on attenuation factors and a predefined cutoff value
+//    float cutoffRange = sqrt(1.0 / max(max(spotlight.constant, spotlight.linear), spotlight.quadratic));
+//
+//    vec3 v = sphere.centre - spotlight.position.xyz;
+//    float lenSq = dot(v, v);
+//    float v1Len = dot(v, normalize(spotlight.direction.xyz));
+//    float distanceClosestPoint = cos(spotlight.cutOff) * sqrt(lenSq - v1Len * v1Len) - v1Len * sin(spotlight.cutOff);
+//
+//    bool angleCull = distanceClosestPoint > sphere.radius;
+//    bool frontCull = v1Len > sphere.radius + cutoffRange;
+//    bool backCull = v1Len < -sphere.radius;
+//
+//    return !(angleCull || frontCull || backCull);
+//}

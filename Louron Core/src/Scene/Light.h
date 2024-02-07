@@ -15,7 +15,7 @@
 
 namespace Louron {
 
-	struct PointLightComponent {
+	struct alignas(16) PointLightComponent {
 
 		glm::vec4 position = { 0.0f, 0.0f, 0.0f, 1.0f };
 
@@ -24,17 +24,17 @@ namespace Louron {
 		glm::vec4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		struct LightProperties {
-			float radius = 10.0f;
-			float intensity = 1.0f;
-			int active = true;
-			int lastLight = false;
+			GLfloat radius = 10.0f;
+			GLfloat intensity = 1.0f;
+			GLint active = true;
+			GLint lastLight = false;
 		} lightProperties;
 
 		PointLightComponent() = default;
 		PointLightComponent(const PointLightComponent&) = default;
 	};
 
-	struct SpotLightComponent {
+	struct alignas(16) SpotLightComponent {
 		glm::vec4 position = glm::vec4(0.0f);
 		glm::vec4 direction = glm::vec4(0.0f);
 
@@ -42,27 +42,27 @@ namespace Louron {
 		glm::vec4 diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
 		glm::vec4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-		float cutOff = glm::cos(glm::radians(12.5f));
-		float outerCutOff = glm::cos(glm::radians(15.0f));
+		struct LightProperties {
+			GLfloat range = 50.0f;
+			GLfloat angle = 45.0f;
+			GLfloat intensity = 1.0f;
+			GLint active = true;
+		} lightProperties;
 
-		float constant = 1.0f;
-		float linear = 0.09f;
-		float quadratic = 0.032f;
-
-		int lastLight = false;
-
-	private:
-
-		// DO NOT USE - this is for SSBO alignment purposes ONLY
-		std::array<float, 2> temp{ 0.0f };
+		GLint lastLight = false;
 
 	public:
+		
+		// DO NOT USE - this is for SSBO padding and alignment purposes ONLY
+		GLfloat m_Padding1 = 0.0f;
+		GLfloat m_Padding2 = 0.0f;
+		GLfloat m_Padding3 = 0.0f;
 
 		SpotLightComponent() = default;
 		SpotLightComponent(const SpotLightComponent&) = default;
 	};
 
-	struct DirectionalLightComponent {
+	struct alignas(16) DirectionalLightComponent {
 	
 	private:
 		// This is private because the Transform Component holds the direction
@@ -75,12 +75,14 @@ namespace Louron {
 		glm::vec4 diffuse = glm::vec4(1.0f);
 		glm::vec4 specular = glm::vec4(0.5f);
 		
-		int lastLight = false;
+		GLint lastLight = false;
 
 	private:
 
-		// DO NOT USE - this is for SSBO alignment purposes ONLY
-		std::array<float, 3> temp{ 0.0f };
+		// DO NOT USE - this is for SSBO padding and alignment purposes ONLY
+		GLfloat m_Padding1 = 0.0f;
+		GLfloat m_Padding2 = 0.0f;
+		GLfloat m_Padding3 = 0.0f;
 
 	public:
 
@@ -88,6 +90,6 @@ namespace Louron {
 	};
 
 	struct VisibleLightIndex {
-		int index;
+		GLint index;
 	};
 }

@@ -151,6 +151,11 @@ public:
 		m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.active = lightActive;
 		m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().SetPosition(lightPosition);
 
+		if (m_Input.GetKeyDown(GLFW_KEY_F)) {
+			Louron::SpotLightComponent& spotLight = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>();
+			spotLight.lightProperties.active = (spotLight.lightProperties.active == GL_TRUE) ? GL_FALSE : GL_TRUE;
+		}
+
 		// Randomly Update Transforms of Point Light Sources
 		if (m_Input.GetKeyDown(GLFW_KEY_ENTER)) {
 			for (int i = 0; i < numLights; i++) {
