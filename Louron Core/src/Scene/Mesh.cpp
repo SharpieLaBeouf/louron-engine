@@ -34,7 +34,8 @@ namespace Louron {
 	/// </summary>
 	int MeshRenderer::LoadModelFromFile(const char* filePath, MeshFilter& meshFilter) {
 		
-		std::string mesh_name = filePath;
+		m_FilePath = filePath;
+		std::string mesh_name = m_FilePath;
 
 		auto lastSlash = mesh_name.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
@@ -83,6 +84,7 @@ namespace Louron {
 	void MeshRenderer::LinkMeshRenderer(const std::shared_ptr<MeshRenderer>& meshRenderer)
 	{
 		Materials = meshRenderer->Materials;
+		m_FilePath = meshRenderer->m_FilePath;
 	}
 
 	/// <summary>
@@ -103,6 +105,14 @@ namespace Louron {
 			}
 		}
 
+	}
+
+	void MeshRenderer::SetPath(const std::string& filePath)	{
+		m_FilePath = filePath;
+	}
+
+	std::string MeshRenderer::GetPath() const {
+		return m_FilePath;
 	}
 
 	/// <summary>

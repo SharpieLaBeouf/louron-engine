@@ -56,6 +56,9 @@ namespace Louron {
 
 		void ManualDraw(const MeshFilter& meshFilter, const Camera& camera, const Transform& transform);
 
+		void SetPath(const std::string& filePath);
+		std::string GetPath() const;
+
 		MeshRenderer() = default;
 		MeshRenderer(const MeshRenderer&) = default;
 		~MeshRenderer() = default;
@@ -63,6 +66,7 @@ namespace Louron {
 	private:
 
 		std::string m_Directory;
+		std::string m_FilePath = "";
 
 		void ProcessNode(aiNode* node, const aiScene* scene, MeshFilter& meshFilter, const std::string& directory, std::shared_ptr<Shader> shader, const std::string& modelName);
 		void ProcessMesh(aiMesh* mesh, const aiScene* scene, MeshFilter& meshFilter, const std::string& directory, std::shared_ptr<Shader> shader, const std::string& modelName);

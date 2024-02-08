@@ -17,6 +17,7 @@
 #include "Test Projects/Scene 9.h"
 #include "Test Projects/Scene 10.h"
 #include "Test Projects/Scene 11.h"
+#include "Test Projects/Scene 12.h"
 
 class MainMenuLayer : public Louron::Layer {
 public:
@@ -31,5 +32,5 @@ public:
 
 private:
 	int m_SceneSelector = 0;
-	std::vector<std::unique_ptr<Scene>> m_Scenes;
+	std::vector<std::unique_ptr<TestScene>> m_Scenes;
 };

@@ -1,0 +1,531 @@
+Scene Name: Scene 11
+Entities:
+  - Entity: Directional Light
+    TagComponent:
+      Tag: Directional Light
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [50, -30, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Ambient: [0.200000003, 0.200000003, 0.200000003, 1]
+      Diffuse: [0.5, 0.5, 0.5, 1]
+      Specular: [1, 1, 1, 1]
+  - Entity: Main Camera
+    TagComponent:
+      Tag: Main Camera
+    TransformComponent:
+      Translation: [-30, 10, -1.20000005]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        FOV: 60
+        MovementSpeed: 10
+        MovementYDamp: 0.649999976
+        MouseSensitivity: 0.100000001
+        MouseToggledOff: true
+        Position: [-30, 10, -1.20000005]
+        Yaw: 0
+        Pitch: -20
+      Primary: true
+    SpotLightComponent:
+      Position: [-30, 10, -1.20000005, 1]
+      Direction: [0.939692736, -0.342020154, 0, 1]
+      Ambient: [0, 0, 0, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Range: 50
+      Angle: 45
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 24
+    TagComponent:
+      Tag: Light Source 24
+    TransformComponent:
+      Translation: [15.5839539, 30.7694626, -0.636505127]
+      Rotation: [-50.9063721, 80.6972046, 148.314819]
+      Scale: [1.04594517, 1.04594517, 1.04594517]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [15.5839539, 30.7694626, -0.636505127, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 23
+    TagComponent:
+      Tag: Light Source 23
+    TransformComponent:
+      Translation: [-26.5662956, 36.7855988, 1.24836397]
+      Rotation: [9.75497437, -168.526398, -153.774017]
+      Scale: [1.07117391, 1.07117391, 1.07117391]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-26.5662956, 36.7855988, 1.24836397, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 22
+    TagComponent:
+      Tag: Light Source 22
+    TransformComponent:
+      Translation: [25.2600136, 48.9490662, -2.49053979]
+      Rotation: [10.9695282, -174.549866, -105.785751]
+      Scale: [0.555729151, 0.555729151, 0.555729151]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [25.2600136, 48.9490662, -2.49053979, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 21
+    TagComponent:
+      Tag: Light Source 21
+    TransformComponent:
+      Translation: [-28.8805237, 32.2118416, -4.01895428]
+      Rotation: [3.4708252, 119.231354, -148.771072]
+      Scale: [1.69961452, 1.69961452, 1.69961452]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-28.8805237, 32.2118416, -4.01895428, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 20
+    TagComponent:
+      Tag: Light Source 20
+    TransformComponent:
+      Translation: [1.25949097, 29.7638111, -1.81889081]
+      Rotation: [134.420227, -124.50882, 87.0358582]
+      Scale: [0.725285172, 0.725285172, 0.725285172]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [1.25949097, 29.7638111, -1.81889081, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 19
+    TagComponent:
+      Tag: Light Source 19
+    TransformComponent:
+      Translation: [8.34981918, 15.9369917, -3.83945918]
+      Rotation: [109.554657, -116.326736, -10.0400696]
+      Scale: [0.630553007, 0.630553007, 0.630553007]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [8.34981918, 15.9369917, -3.83945918, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 18
+    TagComponent:
+      Tag: Light Source 18
+    TransformComponent:
+      Translation: [-25.2108498, 35.2869301, -1.97133255]
+      Rotation: [84.6914978, 35.8298645, 119.134277]
+      Scale: [0.676846266, 0.676846266, 0.676846266]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-25.2108498, 35.2869301, -1.97133255, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 17
+    TagComponent:
+      Tag: Light Source 17
+    TransformComponent:
+      Translation: [3.75150681, 17.6084633, -3.90968704]
+      Rotation: [-42.9801941, -128.527634, 55.0473785]
+      Scale: [0.918540657, 0.918540657, 0.918540657]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [3.75150681, 17.6084633, -3.90968704, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 16
+    TagComponent:
+      Tag: Light Source 16
+    TransformComponent:
+      Translation: [-9.28479576, 23.1581135, 1.75863838]
+      Rotation: [73.1360474, -165.892181, -168.189056]
+      Scale: [1.41201138, 1.41201138, 1.41201138]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-9.28479576, 23.1581135, 1.75863838, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 15
+    TagComponent:
+      Tag: Light Source 15
+    TransformComponent:
+      Translation: [10.5322342, 31.6938362, 1.19240284]
+      Rotation: [-16.1956482, 18.2483368, 117.171356]
+      Scale: [1.50645542, 1.50645542, 1.50645542]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [10.5322342, 31.6938362, 1.19240284, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 14
+    TagComponent:
+      Tag: Light Source 14
+    TransformComponent:
+      Translation: [-9.87231636, 21.1860104, -0.366396427]
+      Rotation: [44.988678, 154.658905, 55.3137207]
+      Scale: [1.30597687, 1.30597687, 1.30597687]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-9.87231636, 21.1860104, -0.366396427, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 13
+    TagComponent:
+      Tag: Light Source 13
+    TransformComponent:
+      Translation: [6.61425781, 23.0380478, -0.642470598]
+      Rotation: [171.890381, -11.3995209, 148.94931]
+      Scale: [0.951767445, 0.951767445, 0.951767445]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [6.61425781, 23.0380478, -0.642470598, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 12
+    TagComponent:
+      Tag: Light Source 12
+    TransformComponent:
+      Translation: [-11.2900867, 32.1406441, -3.68993568]
+      Rotation: [-155.412781, -12.7795715, -88.3584137]
+      Scale: [0.616201222, 0.616201222, 0.616201222]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-11.2900867, 32.1406441, -3.68993568, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 11
+    TagComponent:
+      Tag: Light Source 11
+    TransformComponent:
+      Translation: [-14.7924204, 32.6376457, -3.90466809]
+      Rotation: [64.8409424, 80.9501648, 36.1558838]
+      Scale: [1.95607507, 1.95607507, 1.95607507]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-14.7924204, 32.6376457, -3.90466809, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 10
+    TagComponent:
+      Tag: Light Source 10
+    TransformComponent:
+      Translation: [16.852459, 18.3470078, 1.2257967]
+      Rotation: [137.866974, -146.689087, 49.6335449]
+      Scale: [0.706162691, 0.706162691, 0.706162691]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [16.852459, 18.3470078, 1.2257967, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 9
+    TagComponent:
+      Tag: Light Source 9
+    TransformComponent:
+      Translation: [-15.6497173, 26.4979897, -1.57837415]
+      Rotation: [6.03070068, 142.687073, 115.616272]
+      Scale: [1.57397568, 1.57397568, 1.57397568]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-15.6497173, 26.4979897, -1.57837415, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 8
+    TagComponent:
+      Tag: Light Source 8
+    TransformComponent:
+      Translation: [0.00472450256, 35.3676071, -3.28803873]
+      Rotation: [61.8000031, -175.920547, -47.2970276]
+      Scale: [1.08331907, 1.08331907, 1.08331907]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [0.00472450256, 35.3676071, -3.28803873, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 7
+    TagComponent:
+      Tag: Light Source 7
+    TransformComponent:
+      Translation: [27.1351509, 46.19561, -1.00404668]
+      Rotation: [-105.893738, -71.2473373, 92.3965454]
+      Scale: [0.9953264, 0.9953264, 0.9953264]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [27.1351509, 46.19561, -1.00404668, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 6
+    TagComponent:
+      Tag: Light Source 6
+    TransformComponent:
+      Translation: [-0.274501801, 25.050745, -1.4185679]
+      Rotation: [89.690094, -118.955383, -91.7145309]
+      Scale: [0.869903564, 0.869903564, 0.869903564]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-0.274501801, 25.050745, -1.4185679, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 5
+    TagComponent:
+      Tag: Light Source 5
+    TransformComponent:
+      Translation: [2.18713379, 44.2031479, 1.70893431]
+      Rotation: [-108.247093, -174.188385, 121.23172]
+      Scale: [1.77769995, 1.77769995, 1.77769995]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [2.18713379, 44.2031479, 1.70893431, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 4
+    TagComponent:
+      Tag: Light Source 4
+    TransformComponent:
+      Translation: [0.528503418, 29.8613014, -1.25962901]
+      Rotation: [78.5148315, -83.9358978, 116.981842]
+      Scale: [1.07634974, 1.07634974, 1.07634974]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [0.528503418, 29.8613014, -1.25962901, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 3
+    TagComponent:
+      Tag: Light Source 3
+    TransformComponent:
+      Translation: [22.0112572, 25.5593586, -3.90469337]
+      Rotation: [81.1273499, 128.797089, 91.3846741]
+      Scale: [0.628451169, 0.628451169, 0.628451169]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [22.0112572, 25.5593586, -3.90469337, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 2
+    TagComponent:
+      Tag: Light Source 2
+    TransformComponent:
+      Translation: [-25.9102821, 26.4224796, -2.93580198]
+      Rotation: [148.584412, -89.3710098, 152.542053]
+      Scale: [0.819019437, 0.819019437, 0.819019437]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-25.9102821, 26.4224796, -2.93580198, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 1
+    TagComponent:
+      Tag: Light Source 1
+    TransformComponent:
+      Translation: [-24.7666168, 43.8828239, 1.89574003]
+      Rotation: [-93.6898117, -33.4866943, -25.9087372]
+      Scale: [0.581761181, 0.581761181, 0.581761181]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [-24.7666168, 43.8828239, 1.89574003, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 20
+      Intensity: 1
+      Active: 1
+  - Entity: Light Source 0
+    TagComponent:
+      Tag: Light Source 0
+    TransformComponent:
+      Translation: [0, 2, 0]
+      Rotation: [151.968292, -64.7873077, 35.5807037]
+      Scale: [1.09366345, 1.09366345, 1.09366345]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+    PointLightComponent:
+      Position: [0, 2, 0, 1]
+      Ambient: [1, 1, 1, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+      Radius: 10
+      Intensity: 1
+      Active: 1
+  - Entity: BackPack
+    TagComponent:
+      Tag: BackPack
+    TransformComponent:
+      Translation: [-40, 4, -1.20000005]
+      Rotation: [0, 90, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/BackPack/BackPack.fbx
+  - Entity: Pink_Monkey
+    TagComponent:
+      Tag: Pink_Monkey
+    TransformComponent:
+      Translation: [-15, 4, 4.19999981]
+      Rotation: [0, -135, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Monkey/Pink_Monkey.fbx
+  - Entity: Monkey
+    TagComponent:
+      Tag: Monkey
+    TransformComponent:
+      Translation: [-15, 4, -6.19999981]
+      Rotation: [0, -45, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Monkey/Monkey.fbx
+  - Entity: Sponza
+    TagComponent:
+      Tag: Sponza
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [0.0399999991, 0.0399999991, 0.0399999991]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Sponza/sponza.obj

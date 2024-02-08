@@ -8,7 +8,7 @@
 #include "Louron.h"
 #include "Test Scene Base.h"
 
-class Scene4 : public Scene {
+class Scene4 : public TestScene {
 
 	//Private Setup Variables
 private:

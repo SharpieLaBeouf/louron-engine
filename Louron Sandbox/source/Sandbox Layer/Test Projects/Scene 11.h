@@ -4,7 +4,7 @@
 #include "Test Scene Base.h"
 #include "glm/gtc/random.hpp"
 
-class Scene11 : public Scene {
+class Scene11 : public TestScene {
 
 private:
 
@@ -43,7 +43,7 @@ public:
 
 		// Scene Configuration Setup
 		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
-		m_Scene = std::make_shared<Louron::Scene>(m_Pipeline);
+		m_Scene = std::make_shared<Louron::Scene>("Scene 11", m_Pipeline);
 
 		// Scene ResourcesSetup
 		const auto& resources = m_Scene->GetResources();
@@ -126,7 +126,6 @@ public:
 		lastTime = (float)glfwGetTime(); 
 
 		m_Scene->OnStart();
-
 	}
 
 	void OnDetach() override {
@@ -141,38 +140,49 @@ public:
 		lastTime = currentTime;
 
 		// Update Camera Component
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
+		if (m_Scene->HasEntity("Main Camera")) {
+
+			m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
+			m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition());
+			m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
+
+			if (m_Input.GetKeyDown(GLFW_KEY_F)) {
+				Louron::SpotLightComponent& spotLight = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>();
+				spotLight.lightProperties.active = (spotLight.lightProperties.active == GL_TRUE) ? GL_FALSE : GL_TRUE;
+			}
+		}
 
 		// Update Cherry Picked Light Properties
-		m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.radius = lightRadius;
-		m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.intensity = lightIntensity;
-		m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.active = lightActive;
-		m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().SetPosition(lightPosition);
+		if (m_Scene->HasEntity("Light Source 0")) {
 
-		if (m_Input.GetKeyDown(GLFW_KEY_F)) {
-			Louron::SpotLightComponent& spotLight = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>();
-			spotLight.lightProperties.active = (spotLight.lightProperties.active == GL_TRUE) ? GL_FALSE : GL_TRUE;
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.radius = lightRadius;
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.intensity = lightIntensity;
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.active = lightActive;
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().SetPosition(lightPosition);
 		}
 
 		// Randomly Update Transforms of Point Light Sources
 		if (m_Input.GetKeyDown(GLFW_KEY_ENTER)) {
 			for (int i = 0; i < numLights; i++) {
-				Louron::Entity entity = m_Scene->FindEntityByName("Light Source " + std::to_string(i));
-				entity.GetComponent<Louron::Transform>().SetPosition({ glm::linearRand(-30.0f, 30.0f), glm::linearRand(15.0f, 50.0f), glm::linearRand(-4.2f, 2.2f)});
-				entity.GetComponent<Louron::Transform>().SetRotation({ glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) });
-				entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(glm::linearRand(0.5f, 2.0f)));
+				if (m_Scene->HasEntity("Light Source " + std::to_string(i))) {
+
+					Louron::Entity entity = m_Scene->FindEntityByName("Light Source " + std::to_string(i));
+					entity.GetComponent<Louron::Transform>().SetPosition({ glm::linearRand(-30.0f, 30.0f), glm::linearRand(15.0f, 50.0f), glm::linearRand(-4.2f, 2.2f) });
+					entity.GetComponent<Louron::Transform>().SetRotation({ glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) });
+					entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(glm::linearRand(0.5f, 2.0f)));
+				}
 			}
 		}
 
 		// Bob Lights Up and Down
 		for (int i = 1; i < numLights; i++) {
-			
-			// Each Light has their own bobbing height
-			float bobbingOffset = sin(currentTime + lightBobOffset[i]) * deltaTime;
 
-			m_Scene->FindEntityByName("Light Source " + std::to_string(i)).GetComponent<Louron::Transform>().TranslateY(bobbingOffset);
+			if (m_Scene->HasEntity("Light Source " + std::to_string(i))) {
+				// Each Light has their own bobbing height
+				float bobbingOffset = sin(currentTime + lightBobOffset[i]) * deltaTime;
+
+				m_Scene->FindEntityByName("Light Source " + std::to_string(i)).GetComponent<Louron::Transform>().TranslateY(bobbingOffset);
+			}
 		}
 
 		Draw();

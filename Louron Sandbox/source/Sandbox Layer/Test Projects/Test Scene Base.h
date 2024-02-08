@@ -12,11 +12,11 @@ struct ManualLight {
 	ManualLight() = default;
 };
 
-class Scene {
+class TestScene {
 
 public:
-	Scene() = default;
-	virtual ~Scene() = default;
+	TestScene() = default;
+	virtual ~TestScene() = default;
 
 	virtual void OnAttach() { }
 	virtual void OnDetach() { }

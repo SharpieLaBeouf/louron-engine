@@ -8,7 +8,7 @@
 #include "Louron.h"
 #include "Test Scene Base.h"
 
-class Scene3 : public Scene {
+class Scene3 : public TestScene {
 
 private:
 

@@ -22,11 +22,16 @@ namespace Louron {
 			}
 		}
 
-		UpdateSSBOData(scene);
+		if (camera) {
+			UpdateSSBOData(scene);
 
-		ConductDepthPass(scene, camera);
-		ConductLightCull(camera); // WIP for Spot Lights
-		ConductRenderPass(scene, camera);
+			ConductDepthPass(scene, camera);
+			ConductLightCull(camera); // WIP for Spot Lights
+			ConductRenderPass(scene, camera);
+		}
+		else {
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		}
 	}
 
 	/// <summary>
@@ -252,58 +257,55 @@ namespace Louron {
 
 		L_PROFILE_SCOPE("Forward Plus - Pre Depth Pass");
 
-		if (camera) {
+		// Call Renderer for all Meshes
+		{
+			const auto& view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();
 
-			// Call Renderer for all Meshes
-			{
-				const auto& view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();
+			// First: Distance, Second: Transform, Third: MeshFilter
+			std::vector<std::tuple<float, Transform, MeshFilter>> sortedEntities;
 
-				// First: Distance, Second: Transform, Third: MeshFilter
-				std::vector<std::tuple<float, Transform, MeshFilter>> sortedEntities;
+			if (view.begin() != view.end()) {
 
-				if (view.begin() != view.end()) {
+				for (const auto& entity : view) {
+					const auto& [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
 
-					for (const auto& entity : view) {
-						const auto& [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
+					if (!meshRenderer.active)
+						continue;
 
-						if (!meshRenderer.active)
-							continue;
+					glm::vec3 objectPosition = transform.GetPosition();
+					float distance = glm::length(objectPosition - camera->GetPosition());
 
-						glm::vec3 objectPosition = transform.GetPosition();
-						float distance = glm::length(objectPosition - camera->GetPosition());
+					sortedEntities.emplace_back(distance, transform, meshFilter);
+				}
 
-						sortedEntities.emplace_back(distance, transform, meshFilter);
+				// Lambda function compares the distances of two entities (a and b) and orders them in a way that ensures front-to-back sorting
+				std::sort(sortedEntities.begin(), sortedEntities.end(), [](const auto& a, const auto& b) {
+
+					return std::get<0>(a) < std::get<0>(b);
+
+				});
+
+				std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth");
+
+				if (shader)
+				{
+					glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
+					Renderer::ClearBuffer(GL_DEPTH_BUFFER_BIT);
+
+					shader->Bind();
+					shader->SetMat4("u_Proj", camera->GetProjMatrix());
+					shader->SetMat4("u_View", camera->GetViewMatrix());
+
+					for (const auto& [distance, transform, meshFilter] : sortedEntities) {
+						shader->SetMat4("u_Model", transform.GetTransform());
+
+						for (const auto& mesh : *meshFilter.Meshes)
+							Renderer::DrawMesh(mesh);
 					}
 
-					// Lambda function compares the distances of two entities (a and b) and orders them in a way that ensures front-to-back sorting
-					std::sort(sortedEntities.begin(), sortedEntities.end(), [](const auto& a, const auto& b) {
+					shader->UnBind();
 
-						return std::get<0>(a) < std::get<0>(b);
-
-					});
-
-					std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth");
-
-					if (shader)
-					{
-						glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
-						Renderer::ClearBuffer(GL_DEPTH_BUFFER_BIT);
-
-						shader->Bind();
-						shader->SetMat4("u_Proj", camera->GetProjMatrix());
-						shader->SetMat4("u_View", camera->GetViewMatrix());
-
-						for (const auto& [distance, transform, meshFilter] : sortedEntities) {
-							shader->SetMat4("u_Model", transform.GetTransform());
-
-							for (const auto& mesh : *meshFilter.Meshes)
-								Renderer::DrawMesh(mesh);
-						}
-
-						shader->UnBind();
-
-						glBindFramebuffer(GL_FRAMEBUFFER, 0);
-					}
+					glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				}
 			}
 		}
@@ -347,93 +349,92 @@ namespace Louron {
 		L_PROFILE_SCOPE("Forward Plus - Colour Render");
 
 		// Render All MeshComponents in Scene
-		if (camera) {
 
-			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			// Gather all entities within scene with appropriate components
-			auto view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();
-			if (view.begin() != view.end()) {
-				std::unordered_map<std::shared_ptr<Material>, std::unordered_map<std::shared_ptr<Mesh>, std::vector<Transform>>> materialMeshTransMap;
+		// Gather all entities within scene with appropriate components
+		auto view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();
+		if (view.begin() != view.end()) {
+			std::unordered_map<std::shared_ptr<Material>, std::unordered_map<std::shared_ptr<Mesh>, std::vector<Transform>>> materialMeshTransMap;
 
-				// SORT MESHES BY MATERIAL: Loop entities and access relevant components required for rendering
-				for (const auto& entity : view) {
-					auto [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
+			// SORT MESHES BY MATERIAL: Loop entities and access relevant components required for rendering
+			for (const auto& entity : view) {
+				auto [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
 
-					// Check if MeshRenderer is toggled for rendering, if not, continue to next entity
-					if (!meshRenderer.active)
-						continue;
+				// Check if MeshRenderer is toggled for rendering, if not, continue to next entity
+				if (!meshRenderer.active)
+					continue;
 
-					// Loop through each submesh within the meshfilter
-					for (auto& subMesh : *meshFilter.Meshes)
-						if (!(*meshRenderer.Materials).empty())
-							if ((*meshRenderer.Materials)[subMesh->MaterialIndex] != nullptr) {
-								std::shared_ptr<Material> temp_mat = (*meshRenderer.Materials)[subMesh->MaterialIndex];
-								materialMeshTransMap[(*meshRenderer.Materials)[subMesh->MaterialIndex]][subMesh].push_back(transform);
-							}
-							else {
-								std::cout << "[L20] Mesh with invalid material encountered!" << std::endl;
-							}
-				}
-
-				// Colour Render Pass
-				for (const auto& materialMeshPair : materialMeshTransMap) {
-					const auto& material = materialMeshPair.first;
-					const auto& meshes = materialMeshPair.second;
-					
-					// Update appropriate uniforms per Material
-					if (material) {
-
-						if (material->Bind()) {
-
-							// Update Standard Material Uniforms
-
-							material->UpdateUniforms(*camera);
-
-							// Update Specific Forward Plus Uniforms
-
-							material->GetShader()->SetInt("u_TilesX", FP_Data.workGroupsX); // Number of tiles across the screen in the X axis
-							material->GetShader()->SetiVec2("u_ScreenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight())); // Size of screen
-
-							glActiveTexture(GL_TEXTURE4);
-							material->GetShader()->SetInt("u_Depth", 4); // Depth texture map
-							glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
+				// Loop through each submesh within the meshfilter
+				for (auto& subMesh : *meshFilter.Meshes)
+					if (!(*meshRenderer.Materials).empty())
+						if ((*meshRenderer.Materials)[subMesh->MaterialIndex] != nullptr) {
+							std::shared_ptr<Material> temp_mat = (*meshRenderer.Materials)[subMesh->MaterialIndex];
+							materialMeshTransMap[(*meshRenderer.Materials)[subMesh->MaterialIndex]][subMesh].push_back(transform);
 						}
-					}
-					else {
-						std::cout << "[L20] Invalid material encountered during rendering!" << std::endl;
-						continue;
-					}
-
-					// Render all Meshes per material
-					for (auto& meshAndTransform : meshes) {
-
-						// IF singular mesh, draw individually
-						if (meshAndTransform.second.size() == 1) {
-							material->GetShader()->SetBool("u_UseInstanceData", false);
-
-							Transform trans = meshAndTransform.second[0];
-							material->GetShader()->SetMat4("model", trans.GetTransform());
-							Renderer::DrawMesh(meshAndTransform.first);
+						else {
+							std::cout << "[L20] Mesh with invalid material encountered!" << std::endl;
 						}
-						// IF multiple of the same mesh, draw them using instancing
-						else if (meshAndTransform.second.size() > 1) {
-
-							material->GetShader()->SetBool("u_UseInstanceData", true);
-							Renderer::DrawInstancedMesh(meshAndTransform.first, meshAndTransform.second);
-						}
-					}
-				}
-
-				// Clean Up Scene Render Pass
-				for (int i = 0; i < 3; i++) {
-					glActiveTexture(GL_TEXTURE0 + i);
-					glBindTexture(GL_TEXTURE_2D, 0);
-				}
-				glActiveTexture(GL_TEXTURE0);
-				glUseProgram(0);
 			}
+
+			// Colour Render Pass
+			for (const auto& materialMeshPair : materialMeshTransMap) {
+				const auto& material = materialMeshPair.first;
+				const auto& meshes = materialMeshPair.second;
+					
+				// Update appropriate uniforms per Material
+				if (material) {
+
+					if (material->Bind()) {
+
+						// Update Standard Material Uniforms
+
+						material->UpdateUniforms(*camera);
+
+						// Update Specific Forward Plus Uniforms
+
+						material->GetShader()->SetInt("u_TilesX", FP_Data.workGroupsX); // Number of tiles across the screen in the X axis
+						material->GetShader()->SetiVec2("u_ScreenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight())); // Size of screen
+
+						glActiveTexture(GL_TEXTURE4);
+						material->GetShader()->SetInt("u_Depth", 4); // Depth texture map
+						glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
+					}
+				}
+				else {
+					std::cout << "[L20] Invalid material encountered during rendering!" << std::endl;
+					continue;
+				}
+
+				// Render all Meshes per material
+				for (auto& meshAndTransform : meshes) {
+
+					// IF singular mesh, draw individually
+					if (meshAndTransform.second.size() == 1) {
+						material->GetShader()->SetBool("u_UseInstanceData", false);
+
+						Transform trans = meshAndTransform.second[0];
+						material->GetShader()->SetMat4("model", trans.GetTransform());
+						Renderer::DrawMesh(meshAndTransform.first);
+					}
+					// IF multiple of the same mesh, draw them using instancing
+					else if (meshAndTransform.second.size() > 1) {
+
+						material->GetShader()->SetBool("u_UseInstanceData", true);
+						Renderer::DrawInstancedMesh(meshAndTransform.first, meshAndTransform.second);
+					}
+				}
+			}
+
+			// Clean Up Scene Render Pass
+			for (int i = 0; i < 3; i++) {
+				glActiveTexture(GL_TEXTURE0 + i);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+			glActiveTexture(GL_TEXTURE0);
+			glUseProgram(0);
 		}
+		
 	}
 
 }

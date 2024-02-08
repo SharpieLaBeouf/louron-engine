@@ -25,15 +25,18 @@ namespace Louron {
 		~Camera() { }
 
 		glm::mat4 GetViewMatrix() const { return glm::lookAt(m_CameraPos, m_CameraPos + m_CameraFront, m_CameraUp); }
-		glm::vec3 GetPosition() const { return m_CameraPos; }
 		glm::mat4 GetProjMatrix() const { return m_ProjectionMatrix; }
 
 		glm::vec3 GetCameraDirection() const { return m_CameraFront; }
 
 		void setPosition(glm::vec3 pos) { m_CameraPos = pos; }
+		glm::vec3 GetPosition() const { return m_CameraPos; }
 
 		void setPitch(float pitch) { m_Pitch = pitch; }
+		float GetPitch() const { return m_Pitch; }
+
 		void setYaw(float yaw) { m_Yaw = yaw; }
+		float GetYaw() const { return m_Yaw; }
 
 		void toggleMovement() { m_Movement = !m_Movement; }
 
