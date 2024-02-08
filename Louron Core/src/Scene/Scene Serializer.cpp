@@ -1,5 +1,6 @@
 #include "Scene Serializer.h"
 
+#include "UUID.h"
 #include "Entity.h"
 #include "Components.h"
 
@@ -86,6 +87,23 @@ namespace YAML {
 			return true;
 		}
 	};
+
+	template<>
+	struct convert<Louron::UUID>
+	{
+		static Node encode(const Louron::UUID& uuid)
+		{
+			Node node;
+			node.push_back((uint64_t)uuid);
+			return node;
+		}
+
+		static bool decode(const Node& node, Louron::UUID& uuid)
+		{
+			uuid = node.as<uint64_t>();
+			return true;
+		}
+	};
 }
 
 namespace Louron {
@@ -99,7 +117,7 @@ namespace Louron {
 
 		// TODO: implement UUID
 		out << YAML::BeginMap;
-		out << YAML::Key << "Entity" << YAML::Value << entity.GetName();
+		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 
 		if (entity.HasComponent<TagComponent>()) {
 
@@ -425,14 +443,15 @@ namespace Louron {
 
 				for (auto entity : entities){
 
-					std::string name;
+					uint64_t uuid = entity["Entity"].as<uint64_t>();
 
 					// Tag
+					std::string name;
 					auto tag = entity["TagComponent"];
 					if (tag) 
 						name = tag["Tag"].as<std::string>();
 
-					Entity deserializedEntity = m_Scene->CreateEntity(name);
+					Entity deserializedEntity = m_Scene->CreateEntity(uuid, name);
 
 					// Transform
 					auto transform = entity["TransformComponent"];
