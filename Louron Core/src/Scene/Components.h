@@ -9,9 +9,10 @@
 
 #include <map>
 
+#include "UUID.h"
+#include "Mesh.h"
 #include "Light.h"
 #include "Camera.h"
-#include "Mesh.h"
 #include "../OpenGL/Material.h"
 
 #include <assimp/Importer.hpp>
@@ -21,6 +22,14 @@
 #include <irrklang/irrKlang.h>
 
 namespace Louron {
+
+    struct IDComponent {
+        UUID ID;
+
+        IDComponent() = default;
+        IDComponent(UUID uuid) : ID(uuid) { }
+        IDComponent(const IDComponent&) = default;
+    };
 
 	struct TagComponent {
 

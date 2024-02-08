@@ -70,13 +70,26 @@ namespace Louron {
 
 	}
 
-	// Creates Entity in Scene
+	/// <summary>
+	/// Creates Entity in Scene and Generates New UUID
+	/// </summary>
 	Entity Scene::CreateEntity(const std::string& name) {
+		return CreateEntity(UUID(), name);
+	}
+
+	/// <summary>
+	/// Create Entity in Scene with UUID
+	/// </summary>
+	Entity Scene::CreateEntity(UUID uuid, const std::string& name)
+	{
 		Entity entity = { m_Registry.create(), this };
+		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<Transform>();
 
 		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
+		tag.Tag = name.empty() ? "Untitled Entity" : name;
+
+		m_EntityMap[uuid] = entity;
 
 		return entity;
 	}
@@ -88,6 +101,7 @@ namespace Louron {
 
 	// Destroys Entity in Scene
 	void Scene::DestroyEntity(Entity entity) {
+		m_EntityMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);
 	}
 
@@ -102,6 +116,12 @@ namespace Louron {
 		}
 
 		return {};
+	}
+
+	Entity Scene::FindEntityByUUID(UUID uuid)
+	{
+		L_CORE_ASSERT(m_EntityMap.find(uuid) != m_EntityMap.end(), "Entity UUID not found in scene!");
+		return { m_EntityMap.at(uuid), this };
 	}
 
 	// Returns Primary Camera Entity
