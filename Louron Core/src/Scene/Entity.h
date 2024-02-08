@@ -2,9 +2,10 @@
 
 #include <iostream>
 
+#include "UUID.h"
+#include "Mesh.h"
 #include "Scene.h"
 #include "Components.h"
-#include "Mesh.h"
 
 #include "entt/entt.hpp"
 
@@ -55,6 +56,8 @@ namespace Louron {
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 
+		// This returns the UUID reference to the Component
+		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
 		// This returns the tag reference to the Component
 		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
 

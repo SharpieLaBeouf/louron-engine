@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Resource Manager.h"
+#include "UUID.h"
 
 #include <vector>
 #include <memory>
@@ -11,7 +12,6 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
 
 #define MAX_DIRECTIONAL_LIGHTS 10
 #define MAX_POINT_LIGHTS 1024
@@ -39,10 +39,13 @@ namespace Louron {
 		~Scene() { }
 
 		Entity CreateEntity(const std::string& name = std::string());
+		Entity CreateEntity(UUID uuid, const std::string& name = std::string());
+
 		Entity DuplicateEntity(Entity entity);
 		void DestroyEntity(Entity entity);
 		
 		Entity FindEntityByName(std::string_view name);
+		Entity FindEntityByUUID(UUID uuid);
 		Entity GetPrimaryCameraEntity();
 
 		bool HasEntity(const std::string& name);
@@ -64,6 +67,8 @@ namespace Louron {
 
 	private:
 		entt::registry m_Registry;
+		std::unordered_map<UUID, entt::entity> m_EntityMap;
+
 		bool m_IsRunning = false;
 		bool m_IsPaused = false;
 
