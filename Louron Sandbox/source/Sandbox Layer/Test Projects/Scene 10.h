@@ -470,7 +470,7 @@ private:
 
 			m_Ball->material.UpdateUniforms(m_SceneCamera);
 
-			m_Ball->material.GetShader()->SetMat4("model", m_Ball->transform);
+			m_Ball->material.GetShader()->SetMat4("u_VertexIn.Model", m_Ball->transform);
 			m_Ball->material.GetShader()->SetVec3("u_Light.position", m_Light.position);
 			m_Ball->material.GetShader()->SetVec4("u_Light.ambient", m_Light.ambient);
 			m_Ball->material.GetShader()->SetVec4("u_Light.diffuse", m_Light.diffuse);
@@ -485,7 +485,7 @@ private:
 			if (paddle->material.Bind()) {
 
 				paddle->material.UpdateUniforms(m_SceneCamera);
-				paddle->material.GetShader()->SetMat4("model", paddle->transform);
+				paddle->material.GetShader()->SetMat4("u_VertexIn.Model", paddle->transform);
 
 				paddle->material.GetShader()->SetVec3("u_Light.position", m_Light.position);
 				paddle->material.GetShader()->SetVec4("u_Light.ambient", m_Light.ambient);

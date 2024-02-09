@@ -10,14 +10,19 @@ layout (location = 4) in vec3 aBitangent;
 
 out vec2 TexCoord;
 
-uniform mat4 proj;
-uniform mat4 view;
-uniform mat4 model;
+struct VertexData {
+    
+    mat4 Proj;
+    mat4 View;
+    mat4 Model;
 
+};
+
+uniform VertexData u_VertexIn;
 
 void main() {
 
-	gl_Position = proj * view * model * vec4(aPos, 1.0);
+	gl_Position = u_VertexIn.Proj * u_VertexIn.View * u_VertexIn.Model * vec4(aPos, 1.0);
 	TexCoord = aTexCoord;
 }
 

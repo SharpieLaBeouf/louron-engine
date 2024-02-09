@@ -230,7 +230,7 @@ private:
 		if (flat_cube_mat->Bind())
 		{
 			flat_cube_mat->UpdateUniforms(*m_SceneCamera);
-			flat_cube_mat->GetShader()->SetMat4("model", glm::scale(glm::translate(glm::mat4(1.0f), light_properties.position), lightScale));
+			flat_cube_mat->GetShader()->SetMat4("u_VertexIn.Model", glm::scale(glm::translate(glm::mat4(1.0f), light_properties.position), lightScale));
 
 			// Light Render
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
@@ -246,11 +246,11 @@ private:
 			phong_cube_mat->GetShader()->SetVec4("u_Light.specular", light_properties.specular);
 
 			// Player 1 Render
-			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube1_position));
+			phong_cube_mat->GetShader()->SetMat4("u_VertexIn.Model", glm::translate(glm::mat4(1.0f), cube1_position));
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 			// Player 2 Render
-			phong_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), cube2_position));
+			phong_cube_mat->GetShader()->SetMat4("u_VertexIn.Model", glm::translate(glm::mat4(1.0f), cube2_position));
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 			phong_cube_mat->UnBind();

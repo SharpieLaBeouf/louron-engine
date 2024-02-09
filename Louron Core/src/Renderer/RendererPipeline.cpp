@@ -284,6 +284,7 @@ namespace Louron {
 
 					std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth");
 
+					L_CORE_ASSERT(shader, "FP Depth Shader Not Found!");
 					if (shader)
 					{
 						glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
@@ -317,23 +318,25 @@ namespace Louron {
 	void ForwardPlusPipeline::ConductLightCull(Camera* camera) {
 
 		L_PROFILE_SCOPE("Forward Plus - Light Cull");
-
 		// Conduct Light Cull
 		std::shared_ptr<Shader> lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
 
-		lightCull->Bind();
+		L_CORE_ASSERT(lightCull, "FP Light Cull Compute Shader Not Found!");
+		if (lightCull) {
+			lightCull->Bind();
 
-		lightCull->SetMat4("u_View", camera->GetViewMatrix());
-		lightCull->SetMat4("u_Proj", camera->GetProjMatrix());
-		lightCull->SetiVec2("u_ScreenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight()));
-		glActiveTexture(GL_TEXTURE4);
-		lightCull->SetInt("u_Depth", 4);
-		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
+			lightCull->SetMat4("u_View", camera->GetViewMatrix());
+			lightCull->SetMat4("u_Proj", camera->GetProjMatrix());
+			lightCull->SetiVec2("u_ScreenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight()));
+			glActiveTexture(GL_TEXTURE4);
+			lightCull->SetInt("u_Depth", 4);
+			glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
 
-		glDispatchCompute(FP_Data.workGroupsX, FP_Data.workGroupsY, 1);
+			glDispatchCompute(FP_Data.workGroupsX, FP_Data.workGroupsY, 1);
 
-		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 	}
 
 	/// <summary>
@@ -413,7 +416,7 @@ namespace Louron {
 							material->GetShader()->SetBool("u_UseInstanceData", false);
 
 							Transform trans = meshAndTransform.second[0];
-							material->GetShader()->SetMat4("model", trans.GetTransform());
+							material->GetShader()->SetMat4("u_VertexIn.Model", trans.GetTransform());
 							Renderer::DrawMesh(meshAndTransform.first);
 						}
 						// IF multiple of the same mesh, draw them using instancing
