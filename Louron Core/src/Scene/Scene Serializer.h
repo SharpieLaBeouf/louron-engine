@@ -13,9 +13,8 @@ namespace Louron {
 
 		SceneSerializer(const std::shared_ptr<Scene>& scene);
 
-		void Serialize(const std::string& sceneFilePath = "");
-
-		bool Deserialize(const std::string& sceneFilePath = "");
+		void Serialize(const std::filesystem::path& sceneFilePath = "");
+		bool Deserialize(const std::filesystem::path& sceneFilePath);
 
 	private:
 		std::shared_ptr<Scene> m_Scene;

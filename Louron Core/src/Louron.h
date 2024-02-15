@@ -19,6 +19,8 @@
 #include "Scene/Mesh.h"
 #include "Scene/Scene.h"
 
+#include "Project/Project.h"
+
 #include "Renderer/Renderer.h"
 #include "Renderer/RendererPipeline.h"
 

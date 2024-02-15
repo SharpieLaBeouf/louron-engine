@@ -4,6 +4,8 @@
 #include "Entity.h"
 #include "Components.h"
 
+#include "../Renderer/RendererPipeline.h"
+
 #include <fstream>
 
 #define YAML_CPP_STATIC_DEFINE
@@ -366,24 +368,19 @@ namespace Louron {
 		out << YAML::EndMap;
 	}
 
-	void SceneSerializer::Serialize(const std::string& sceneFilePath) {
+	void SceneSerializer::Serialize(const std::filesystem::path& sceneFilePath) {
 
-		std::string outFilePath;
+		std::filesystem::path outFilePath = (sceneFilePath.empty()) ? m_Scene->m_SceneFilePath : sceneFilePath;
 
-		if (sceneFilePath == "")
-			outFilePath = m_Scene->m_SceneConfig->AssetDirectory.string() + "Scenes/" + m_Scene->m_SceneConfig->Name + ".lscene";
-		else
-			outFilePath = sceneFilePath;
+		L_CORE_ASSERT((outFilePath.extension() == ".lscene"), "Incompatible Scene File Extension! Extension used: " + outFilePath.extension().string() + ", Extension Required: .lscene");
 
-		auto extensionPos = outFilePath.rfind('.');
-		std::string sceneExtension = (extensionPos != std::string::npos)
-			? outFilePath.substr(extensionPos) : "No Extension Found";
-
-		if (sceneExtension == ".lscene") {
+		if (outFilePath.extension() == ".lscene") {
 
 			YAML::Emitter out;
 			out << YAML::BeginMap;
-			out << YAML::Key << "Scene Name" << YAML::Value << m_Scene->m_SceneConfig->Name;
+			out << YAML::Key << "Scene Name" << YAML::Value << m_Scene->m_SceneConfig.Name;
+			out << YAML::Key << "Scene Asset Directory" << YAML::Value << m_Scene->m_SceneConfig.AssetDirectory.string();
+			out << YAML::Key << "Scene Pipeline Type" << YAML::Value << (int)m_Scene->m_SceneConfig.ScenePipelineType;
 
 			out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
@@ -395,53 +392,73 @@ namespace Louron {
 						return;
 
 					SerializeEntity(out, entity);
-
-					m_Scene->DestroyEntity(entity);
 				});
 
-			out << YAML::EndMap;
+			out << YAML::EndSeq << YAML::EndMap;
+
+			std::filesystem::create_directories(outFilePath.parent_path());
 
 			std::ofstream fout(outFilePath);
 			fout << out.c_str();
 		}
-		else {
-			L_CORE_ASSERT(false, "Incompatible Scene File Extension! Extension used: " + sceneExtension + ", Extension Required: .lscene");
-		}
-
 	}
 
-	bool SceneSerializer::Deserialize(const std::string& sceneFilePath) {
-		std::string outFilePath;
+	bool SceneSerializer::Deserialize(const std::filesystem::path& sceneFilePath) {
 
-		if (sceneFilePath == "")
-			outFilePath = m_Scene->m_SceneConfig->AssetDirectory.string() + "Scenes/" + m_Scene->m_SceneConfig->Name + ".lscene";
-		else
-			outFilePath = sceneFilePath;
+		L_CORE_ASSERT((sceneFilePath.extension() == ".lscene"), "Incompatible Scene File Extension! Extension used: " + sceneFilePath.extension().string() + ", Extension Required: .lscene");
 
-		auto extensionPos = outFilePath.rfind('.');
-		std::string sceneExtension = (extensionPos != std::string::npos)
-			? outFilePath.substr(extensionPos) : "No Extension Found";
-
-		if (sceneExtension == ".lscene") {
+		if (sceneFilePath.extension() == ".lscene") {
 
 			YAML::Node data;
 
 			try {
-				data = YAML::LoadFile(outFilePath);
+				data = YAML::LoadFile(sceneFilePath.string());
 			}
 			catch (YAML::ParserException e) {
-				L_CORE_ASSERT(false, "Failed to load scene file: " + outFilePath);
+				L_CORE_ASSERT(false, "YAML-CPP Failed to Load Scene File: " + sceneFilePath.string() + ", " + e.what());
+				return false;
 			}
 
-			if (!data["Scene Name"])
+			if (!data["Scene Name"]) {
+				L_CORE_ASSERT(false, "Scene Name Node Not Correctly Declared in File : " + sceneFilePath.string());
 				return false;
+			}
+			else {
+				m_Scene->m_SceneConfig.Name = data["Scene Name"].as<std::string>();
+			}
 
-			std::string sceneName = data["Scene Name"].as<std::string>();
+			if (!data["Scene Asset Directory"]) {
+				L_CORE_ASSERT(false, "Scene Asset Directory Node Not Correctly Declared in File : " + sceneFilePath.string());
+				return false;
+			}
+			else {
+				m_Scene->m_SceneConfig.AssetDirectory = data["Scene Asset Directory"].as<std::string>();
+			}
+
+			if (!data["Scene Pipeline Type"]) {
+				L_CORE_ASSERT(false, "Scene Pipeline Type Node Not Correctly Declared in File : " + sceneFilePath.string());
+				return false;
+			}
+			else {
+				m_Scene->m_SceneConfig.ScenePipelineType = (L_RENDER_PIPELINE)data["Scene Pipeline Type"].as<int>();
+
+				switch (m_Scene->m_SceneConfig.ScenePipelineType) {
+				case L_RENDER_PIPELINE::FORWARD:
+					m_Scene->m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+					break;
+				case L_RENDER_PIPELINE::FORWARD_PLUS:
+					m_Scene->m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
+					break;
+				case L_RENDER_PIPELINE::DEFERRED:
+					m_Scene->m_SceneConfig.ScenePipeline = std::make_shared<DeferredPipeline>();
+					break;
+				}
+			}
 			
 			auto entities = data["Entities"];
 			if (entities) {
 
-				for (auto entity : entities){
+				for (auto entity : entities) {
 
 					uint64_t uuid = entity["Entity"].as<uint64_t>();
 
@@ -487,11 +504,11 @@ namespace Louron {
 					auto meshRenderer = entity["MeshRendererComponent"];
 					if (meshRenderer) {
 
-						m_Scene->m_SceneConfig->ResourceManager->LoadMesh(meshRenderer["MeshFilePath"].as<std::string>().c_str(), Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
+						m_Scene->m_SceneConfig.SceneResourceManager->LoadMesh(meshRenderer["MeshFilePath"].as<std::string>().c_str(), Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
 
-						deserializedEntity.AddComponent<MeshFilter>().LinkMeshFilter(m_Scene->m_SceneConfig->ResourceManager->GetMeshFilter(meshRenderer["MeshFilePath"].as<std::string>()));
+						deserializedEntity.AddComponent<MeshFilter>().LinkMeshFilter(m_Scene->m_SceneConfig.SceneResourceManager->GetMeshFilter(meshRenderer["MeshFilePath"].as<std::string>()));
 						auto& entityMeshRenderer = deserializedEntity.AddComponent<MeshRenderer>();
-						entityMeshRenderer.LinkMeshRenderer(m_Scene->m_SceneConfig->ResourceManager->GetMeshRenderer(meshRenderer["MeshFilePath"].as<std::string>()));
+						entityMeshRenderer.LinkMeshRenderer(m_Scene->m_SceneConfig.SceneResourceManager->GetMeshRenderer(meshRenderer["MeshFilePath"].as<std::string>()));
 						entityMeshRenderer.active = meshRenderer["MeshActive"].as<bool>();
 					}
 
@@ -542,12 +559,10 @@ namespace Louron {
 
 				}
 			}
-		}
-		else {
-			L_CORE_ASSERT(false, "Incompatible Scene File Extension! Extension used: " + sceneExtension + ", Extension Required: .lscene");
+			return true;
 		}
 
-		return true;
+		return false;
 	}
 }
 

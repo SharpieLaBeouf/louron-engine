@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Resource Manager.h"
 #include "UUID.h"
+#include "Resource Manager.h"
+#include "../Renderer/RendererPipeline.h"
 
 #include <vector>
 #include <memory>
@@ -20,23 +21,26 @@
 namespace Louron {
 
 	class Entity;
-	class RenderPipeline;
 
 	struct SceneConfig {
 
 		std::string Name = "Untitled Scene";
 		std::filesystem::path AssetDirectory;
+
 		std::shared_ptr<RenderPipeline> ScenePipeline;
-		std::shared_ptr<ResourceManager> ResourceManager;
+		std::shared_ptr<ResourceManager> SceneResourceManager;
+
+		L_RENDER_PIPELINE ScenePipelineType;
 	};
 
-	class Scene {
+	class Scene : public std::enable_shared_from_this<Scene> {
 
 	public:
 
-		Scene() = delete;
-		Scene(const std::string& sceneName, std::shared_ptr<RenderPipeline> pipeline);
+		Scene();
+		Scene(const std::filesystem::path& sceneFilePath, L_RENDER_PIPELINE pipelineType = L_RENDER_PIPELINE::FORWARD);
 		~Scene() { }
+
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntity(UUID uuid, const std::string& name = std::string());
@@ -46,7 +50,6 @@ namespace Louron {
 		
 		Entity FindEntityByName(std::string_view name);
 		Entity FindEntityByUUID(UUID uuid);
-		Entity GetPrimaryCameraEntity();
 
 		bool HasEntity(const std::string& name);
 
@@ -61,9 +64,14 @@ namespace Louron {
 		template<typename... Components>
 		auto GetAllEntitiesWith() {	return m_Registry.view<Components...>(); }
 
-		const std::shared_ptr<ResourceManager>& GetResources() { return m_SceneConfig->ResourceManager; }
+		Entity GetPrimaryCameraEntity();
+
+		void SetConfig(const SceneConfig& config) { m_SceneConfig = config; }
+		const SceneConfig& GetConfig() { return m_SceneConfig; }
+		const std::shared_ptr<ResourceManager>& GetResources() { return m_SceneConfig.SceneResourceManager; }
 
 		entt::registry* GetRegistry() { return &m_Registry; }
+		bool CopyRegistry(std::shared_ptr<Scene> otherScene);
 
 	private:
 		entt::registry m_Registry;
@@ -72,9 +80,11 @@ namespace Louron {
 		bool m_IsRunning = false;
 		bool m_IsPaused = false;
 
-		std::unique_ptr<SceneConfig> m_SceneConfig = std::make_unique<SceneConfig>();
+		std::filesystem::path m_SceneFilePath;
+		SceneConfig m_SceneConfig;
 		
 		friend class Entity;
+		friend class Project;
 		friend class SceneSerializer;
 	};
 }

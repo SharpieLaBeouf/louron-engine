@@ -9,13 +9,15 @@ class Scene12 : public TestScene {
 
 private:
 
+	std::shared_ptr<Louron::Project> m_Project;
 	std::shared_ptr<Louron::Scene> m_Scene;
-	std::shared_ptr<Louron::ForwardPlusPipeline> m_Pipeline;
 
 	Louron::Window& m_Window;
 	Louron::InputManager& m_Input;
 	Louron::ShaderLibrary& m_ShaderLib;
 	Louron::TextureLibrary& m_TextureLib;
+
+	glm::vec3 m_LightPosition = glm::vec3(0.0);
 
 	float currentTime = 0;
 	float deltaTime = 0;
@@ -26,19 +28,16 @@ public:
 		m_Window(Louron::Engine::Get().GetWindow()),
 		m_Input(Louron::Engine::Get().GetInput()),
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
-		m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
-		m_Pipeline(nullptr),
-		m_Scene(nullptr) 
+		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
 		std::cout << "[L20] Loading Scene 12..." << std::endl;
+		
+		// Load Project and Get Active Scene Handle
+		m_Project = Louron::Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
+		m_Scene = Louron::Project::GetActiveScene();
 
-		// Scene Configuration Setup
-		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
-		m_Scene = std::make_shared<Louron::Scene>("Scene 12", m_Pipeline);
-
-		Louron::SceneSerializer serializer{ m_Scene };
-
-		serializer.Deserialize();
+		if (m_Scene->HasEntity("Light Source 0")) 
+			m_LightPosition = m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().GetPosition();
 	}
 
 	~Scene12() {
@@ -75,6 +74,12 @@ public:
 
 		}
 
+		// Update Cherry Picked Light Properties
+		if (m_Scene->HasEntity("Light Source 0")) {
+
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().SetPosition(m_LightPosition);
+		}
+
 		Draw();
 	}
 
@@ -91,6 +96,43 @@ public:
 		ImGui::SetWindowPos(ImVec2(0.0f, 0.0f));
 
 		ImGui::Separator();
+
+		if (ImGui::TreeNode("Project and Scene Menu")) {
+
+			std::string pipeline;
+			switch (m_Scene->GetConfig().ScenePipelineType) {
+			case Louron::L_RENDER_PIPELINE::FORWARD:
+				pipeline = "Forward";
+				break;
+			case Louron::L_RENDER_PIPELINE::FORWARD_PLUS:
+				pipeline = "Forward Plus";
+				break;
+			case Louron::L_RENDER_PIPELINE::DEFERRED:
+				pipeline = "Deferred";
+				break;
+			}
+
+			ImGui::Text(("Project Loaded: " + m_Project->GetConfig().Name).c_str());
+			ImGui::Text(("Scene Loaded: " + m_Scene->GetConfig().Name).c_str());
+			
+			ImGui::Separator();
+
+			ImGui::Text(("Asset Directory: " + m_Scene->GetConfig().AssetDirectory.string()).c_str());
+			ImGui::Text(("Rendering Technique: " + pipeline).c_str());
+
+			ImGui::Separator();
+
+			if (ImGui::Button("Save Project")) m_Project->SaveProject();
+			if (ImGui::Button("Save Scene")) m_Project->SaveScene();
+			
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("Light Properties")) {
+			ImGui::DragFloat3("Position", &m_LightPosition[0], 0.1f);
+			ImGui::TreePop();
+		}
 
 		if (ImGui::TreeNode("Profiling")) {
 

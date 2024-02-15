@@ -132,7 +132,7 @@ public:
 	}
 
 	~Scene10() {
-		std::cout << "[L20] Unloading Scene 10+..." << std::endl;
+		std::cout << "[L20] Unloading Scene 10..." << std::endl;
 
 
 	}

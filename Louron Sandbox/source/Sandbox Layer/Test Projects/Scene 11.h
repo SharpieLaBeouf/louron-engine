@@ -43,7 +43,7 @@ public:
 
 		// Scene Configuration Setup
 		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
-		m_Scene = std::make_shared<Louron::Scene>("Scene 11", m_Pipeline);
+		m_Scene = std::make_shared<Louron::Scene>("Scene 11", Louron::L_RENDER_PIPELINE::FORWARD_PLUS);
 
 		// Scene ResourcesSetup
 		const auto& resources = m_Scene->GetResources();
@@ -106,6 +106,7 @@ public:
 		camera.Camera->setPitch(-20.0f);
 		camera.Camera->setYaw(0.0f);
 		camera.Camera->setPosition({ -30.0f, 10.0f, -1.2f });
+		camera.Camera->MouseToggledOff = false;
 
 		m_Scene->FindEntityByName("Main Camera").AddComponent<Louron::SpotLightComponent>();
 

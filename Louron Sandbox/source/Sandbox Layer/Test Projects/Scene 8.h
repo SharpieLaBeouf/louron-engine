@@ -34,7 +34,7 @@ public:
 		std::cout << "[L20] Loading Scene 8..." << std::endl;
 
 		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
-		m_Scene = std::make_shared<Louron::Scene>("Scene 8", m_Pipeline);
+		m_Scene = std::make_shared<Louron::Scene>("Scene 8", Louron::L_RENDER_PIPELINE::FORWARD_PLUS);
 
 		const auto& resources = m_Scene->GetResources();
 		resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));

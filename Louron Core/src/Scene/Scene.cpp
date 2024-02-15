@@ -3,9 +3,9 @@
 #include "Mesh.h"
 #include "Entity.h"
 #include "Components.h"
+#include "Scene Serializer.h"
 
 #include "../Renderer/Renderer.h"
-#include "../Renderer/RendererPipeline.h"
 
 #include <glm/gtc/quaternion.hpp>
 
@@ -15,11 +15,73 @@
 
 // Scene Management
 namespace Louron {
-	Scene::Scene(const std::string& sceneName, std::shared_ptr<RenderPipeline> pipeline) {
-		m_SceneConfig->Name = sceneName;
-		m_SceneConfig->AssetDirectory = "Assets/";
-		m_SceneConfig->ScenePipeline = pipeline;
-		m_SceneConfig->ResourceManager = std::make_shared<ResourceManager>();
+
+	Scene::Scene() {
+		m_SceneFilePath = "Scenes/Untitled Scene.lscene";
+
+		m_SceneConfig.Name = m_SceneFilePath.filename().replace_extension().string();
+		m_SceneConfig.AssetDirectory = "Assets/";
+		m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
+
+		m_SceneConfig.ScenePipelineType = L_RENDER_PIPELINE::FORWARD;
+
+	}
+
+	Scene::Scene(const std::filesystem::path& sceneFilePath, L_RENDER_PIPELINE pipelineType) {
+
+		std::filesystem::path outFilePath = sceneFilePath;
+
+		// Check if Scene File Path is Empty.
+		if (outFilePath.empty()) {
+			// TODO: Add Log Here
+			outFilePath = "Scenes/Untitled Scene.lscene";
+		}
+
+		// Check if Scene File Extension is Incompatible.
+		if (outFilePath.extension() != ".lscene") {
+			// TODO: Add Log Here
+			outFilePath.replace_extension();
+			outFilePath = outFilePath.string() + ".lscene";
+		}
+
+		// Load Existing Scene File or Create New Scene.
+		if (std::filesystem::exists(outFilePath)) {
+
+			std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+
+			SceneSerializer serializer(scene);
+			if (serializer.Deserialize(outFilePath)) {
+				m_SceneFilePath = outFilePath;
+				m_SceneConfig = std::move(scene->m_SceneConfig);
+				CopyRegistry(scene);
+
+				return;
+			}
+
+			// TODO: Add Log Here - Could Not Load Scene File.
+		}
+
+		// If Existing Scene File Load Unsuccessful, Set Default Values
+		m_SceneFilePath = outFilePath;
+
+		m_SceneConfig.Name = outFilePath.filename().replace_extension().string();
+		m_SceneConfig.AssetDirectory = "Assets/";
+		m_SceneConfig.ScenePipelineType = pipelineType;
+		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
+
+		switch (pipelineType) {
+			case L_RENDER_PIPELINE::FORWARD:
+				m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+			break;
+			case L_RENDER_PIPELINE::FORWARD_PLUS:
+				m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
+			break;
+			case L_RENDER_PIPELINE::DEFERRED:
+				m_SceneConfig.ScenePipeline = std::make_shared<DeferredPipeline>();
+			break;
+		}
+
 	}
 
 	/// <summary>
@@ -27,6 +89,71 @@ namespace Louron {
 	/// </summary>
 	Entity Scene::CreateEntity(const std::string& name) {
 		return CreateEntity(UUID(), name);
+	}
+
+	template<typename... Component>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		([&]()
+			{
+				auto view = src.view<Component>();
+				for (auto srcEntity : view)
+				{
+					entt::entity dstEntity = enttMap.at(src.get<IDComponent>(srcEntity).ID);
+
+					auto& srcComponent = src.get<Component>(srcEntity);
+					dst.emplace_or_replace<Component>(dstEntity, srcComponent);
+				}
+			}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		CopyComponent<Component...>(dst, src, enttMap);
+	}
+
+	template<typename... Component>
+	static void CopyComponentIfExists(Entity dst, Entity src)
+	{
+		([&]()
+			{
+				if (src.HasComponent<Component>())
+					dst.AddComponent<Component>(src.GetComponent<Component>());
+			}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponentIfExists(ComponentGroup<Component...>, Entity dst, Entity src)
+	{
+		CopyComponentIfExists<Component...>(dst, src);
+	}
+
+	/// <summary>
+	/// Copy Constructor and Operator Deleted in ENTT for Registry.
+	/// Have to Manually Copy Over Data.
+	/// </summary>
+	/// <param name="otherScene"></param>
+	/// <returns></returns>
+	bool Scene::CopyRegistry(std::shared_ptr<Scene> otherScene)
+	{
+		auto& srcSceneRegistry = otherScene->m_Registry;
+		auto& dstSceneRegistry = m_Registry;
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		// Create entities in new scene
+		auto idView = srcSceneRegistry.view<IDComponent>();
+		for (auto e : idView)
+		{
+			UUID uuid = srcSceneRegistry.get<IDComponent>(e).ID;
+			const auto& name = srcSceneRegistry.get<TagComponent>(e).Tag;
+			Entity newEntity = CreateEntity(uuid, name);
+			enttMap[uuid] = (entt::entity)newEntity;
+		}
+
+		// Copy components (except IDComponent and TagComponent)
+		CopyComponent(AllComponents{}, dstSceneRegistry, srcSceneRegistry, enttMap);
+		return true;
 	}
 
 	/// <summary>
@@ -98,14 +225,14 @@ namespace Louron {
 
 		m_IsRunning = true;
 
-		m_SceneConfig->ScenePipeline->OnStartPipeline();
+		m_SceneConfig.ScenePipeline->OnStartPipeline();
 
 	}
 	
 	void Scene::OnUpdate() {
 
 		if (!m_IsPaused) {
-			m_SceneConfig->ScenePipeline->OnUpdate(this);
+			m_SceneConfig.ScenePipeline->OnUpdate(this);
 		}
 	}
 
@@ -119,6 +246,6 @@ namespace Louron {
 
 		m_IsRunning = false;
 
-		m_SceneConfig->ScenePipeline->OnStopPipeline();
+		m_SceneConfig.ScenePipeline->OnStopPipeline();
 	}
 }

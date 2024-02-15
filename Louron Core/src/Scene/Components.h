@@ -115,5 +115,15 @@ namespace Louron {
 
 	};
 
+    template<typename... Component>
+    struct ComponentGroup
+    {
+    };
+
+    using AllComponents =
+        ComponentGroup<CameraComponent,
+        Transform, MeshFilter, MeshRenderer,
+        PointLightComponent, SpotLightComponent, 
+        DirectionalLightComponent>;
 
 }
