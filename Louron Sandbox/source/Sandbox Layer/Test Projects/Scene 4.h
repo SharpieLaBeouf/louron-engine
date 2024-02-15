@@ -8,7 +8,7 @@
 #include "Louron.h"
 #include "Test Scene Base.h"
 
-class Scene4 : public Scene {
+class Scene4 : public TestScene {
 
 	//Private Setup Variables
 private:
@@ -188,10 +188,10 @@ private:
 			glBindVertexArray(plane_VAO);
 
 			shader->Bind();
-			shader->SetMat4("model", plane_trans);
-			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			shader->SetMat4("view", sceneCamera->GetViewMatrix());
-			shader->SetVec4("ourColour", plane_colour);
+			shader->SetMat4("u_VertexIn.Model", plane_trans);
+			shader->SetMat4("u_VertexIn.Proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
+			shader->SetMat4("u_VertexIn.View", sceneCamera->GetViewMatrix());
+			shader->SetVec4("u_OurColour", plane_colour);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		}
 
@@ -203,11 +203,14 @@ private:
 			glBindVertexArray(cube_VAO);
 
 			shader->Bind();
-			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			shader->SetMat4("view", sceneCamera->GetViewMatrix());
-			shader->SetVec4("ourColour", box_colour);
+			shader->SetMat4("u_VertexIn.Proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
+			shader->SetMat4("u_VertexIn.View", sceneCamera->GetViewMatrix());
+			shader->SetVec4("u_OurColour", box_colour);
 
+			shader->SetInt("u_OurTexture", 0);
+			glActiveTexture(GL_TEXTURE0);
 			m_TextureLib.GetTexture("cube_texture")->Bind();
+
 			glm::vec3 pos = glm::vec3(0.0f);
 			for (int x = 1; x <= waveSize; x++)
 			{
@@ -219,7 +222,7 @@ private:
 					double time = glfwGetTime();
 					pos.y = (float)sin((time * waveSpeed + floor(x - waveSize) + floor(z - waveSize))) / waveSize * waveHeight;
 
-					shader->SetMat4("model", glm::translate(cube_trans.GetTransform(), pos));
+					shader->SetMat4("u_VertexIn.Model", glm::translate(cube_trans.GetTransform(), pos));
 					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				}
 			}

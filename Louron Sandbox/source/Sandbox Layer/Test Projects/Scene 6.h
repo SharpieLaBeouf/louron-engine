@@ -8,7 +8,7 @@
 #include "Louron.h"
 #include "Test Scene Base.h"
 
-class Scene6 : public Scene {
+class Scene6 : public TestScene {
 
 	//Private Setup Variables
 private:
@@ -176,7 +176,7 @@ private:
 		if (flat_cube_mat->Bind())
 		{
 			flat_cube_mat->UpdateUniforms(*m_SceneCamera);
-			flat_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), light_properties.position));
+			flat_cube_mat->GetShader()->SetMat4("u_VertexIn.Model", glm::translate(glm::mat4(1.0f), light_properties.position));
 			
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 			flat_cube_mat->UnBind();
@@ -185,7 +185,7 @@ private:
 		if (stone_cube_mat->Bind()) {
 			stone_cube_mat->UpdateUniforms(*m_SceneCamera);
 			
-			stone_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
+			stone_cube_mat->GetShader()->SetMat4("u_VertexIn.Model", glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f)));
 
 			stone_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			stone_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);
@@ -199,7 +199,7 @@ private:
 		if (box_cube_mat->Bind()) {
 			box_cube_mat->UpdateUniforms(*m_SceneCamera);
 
-			box_cube_mat->GetShader()->SetMat4("model", glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, 0.0f)));
+			box_cube_mat->GetShader()->SetMat4("u_VertexIn.Model", glm::translate(glm::mat4(1.0f), glm::vec3(-2.0f, 0.0f, 0.0f)));
 			
 			box_cube_mat->GetShader()->SetVec3("u_Light.position", light_properties.position);
 			box_cube_mat->GetShader()->SetVec4("u_Light.ambient", light_properties.ambient);

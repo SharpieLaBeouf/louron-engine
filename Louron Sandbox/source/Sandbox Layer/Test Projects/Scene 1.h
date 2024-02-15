@@ -8,7 +8,7 @@
 #include "Louron.h"
 #include "Test Scene Base.h"
 
-class Scene1 : public Scene {
+class Scene1 : public TestScene {
 
 private:
 
@@ -105,10 +105,10 @@ private:
 			glBindVertexArray(triangleVAO);
 
 			shader->Bind();
-			shader->SetMat4("model", glm::mat4(1.0f));
-			shader->SetMat4("proj", glm::mat4(1.0f));
-			shader->SetMat4("view", glm::mat4(1.0f));
-			shader->SetVec4("ourColour", fore_colour);
+			shader->SetMat4("u_VertexIn.Model", glm::mat4(1.0f));
+			shader->SetMat4("u_VertexIn.Proj", glm::mat4(1.0f));
+			shader->SetMat4("u_VertexIn.View", glm::mat4(1.0f));
+			shader->SetVec4("u_OurColour", fore_colour);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		}
 

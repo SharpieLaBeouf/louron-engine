@@ -3,9 +3,9 @@
 #include "Mesh.h"
 #include "Entity.h"
 #include "Components.h"
+#include "Scene Serializer.h"
 
 #include "../Renderer/Renderer.h"
-#include "../Renderer/RendererPipeline.h"
 
 #include <glm/gtc/quaternion.hpp>
 
@@ -15,68 +15,160 @@
 
 // Scene Management
 namespace Louron {
-	Scene::Scene(std::shared_ptr<RenderPipeline> pipeline) : m_Pipeline(pipeline) {
 
-		FP_Data.workGroupsX = (Engine::Get().GetWindow().GetWidth() + (Engine::Get().GetWindow().GetWidth() % 16)) / 16;
-		FP_Data.workGroupsY = (Engine::Get().GetWindow().GetHeight() + (Engine::Get().GetWindow().GetHeight() % 16)) / 16;
-		size_t numberOfTiles = static_cast<size_t>(FP_Data.workGroupsX * FP_Data.workGroupsY);
+	Scene::Scene() {
+		m_SceneFilePath = "Scenes/Untitled Scene.lscene";
 
-		// Setup Light Buffers
+		m_SceneConfig.Name = m_SceneFilePath.filename().replace_extension().string();
+		m_SceneConfig.AssetDirectory = "Assets/";
+		m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
 
-		glGenBuffers(1, &FP_Data.PL_Buffer);
-		glGenBuffers(1, &FP_Data.PL_Indices_Buffer);
-
-		glGenBuffers(1, &FP_Data.SL_Buffer);
-		glGenBuffers(1, &FP_Data.SL_Indices_Buffer);
-
-		glGenBuffers(1, &FP_Data.DL_Buffer);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_POINT_LIGHTS * sizeof(PointLightComponent), 0, GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, 0, GL_STATIC_DRAW);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_SPOT_LIGHTS * sizeof(SpotLightComponent), 0, GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, 0, GL_STATIC_DRAW);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLightComponent), 0, GL_DYNAMIC_DRAW);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
-		// Setup Depth Texture
-
-		glGenFramebuffers(1, &FP_Data.DepthMap_FBO);
-		glGenTextures(1, &FP_Data.DepthMap_Texture);
-
-		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Engine::Get().GetWindow().GetWidth(), Engine::Get().GetWindow().GetHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		GLfloat borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FP_Data.DepthMap_Texture, 0);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		m_SceneConfig.ScenePipelineType = L_RENDER_PIPELINE::FORWARD;
 
 	}
 
-	// Creates Entity in Scene
+	Scene::Scene(const std::filesystem::path& sceneFilePath, L_RENDER_PIPELINE pipelineType) {
+
+		std::filesystem::path outFilePath = sceneFilePath;
+
+		// Check if Scene File Path is Empty.
+		if (outFilePath.empty()) {
+			// TODO: Add Log Here
+			outFilePath = "Scenes/Untitled Scene.lscene";
+		}
+
+		// Check if Scene File Extension is Incompatible.
+		if (outFilePath.extension() != ".lscene") {
+			// TODO: Add Log Here
+			outFilePath.replace_extension();
+			outFilePath = outFilePath.string() + ".lscene";
+		}
+
+		// Load Existing Scene File or Create New Scene.
+		if (std::filesystem::exists(outFilePath)) {
+
+			std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+
+			SceneSerializer serializer(scene);
+			if (serializer.Deserialize(outFilePath)) {
+				m_SceneFilePath = outFilePath;
+				m_SceneConfig = std::move(scene->m_SceneConfig);
+				CopyRegistry(scene);
+
+				return;
+			}
+
+			// TODO: Add Log Here - Could Not Load Scene File.
+		}
+
+		// If Existing Scene File Load Unsuccessful, Set Default Values
+		m_SceneFilePath = outFilePath;
+
+		m_SceneConfig.Name = outFilePath.filename().replace_extension().string();
+		m_SceneConfig.AssetDirectory = "Assets/";
+		m_SceneConfig.ScenePipelineType = pipelineType;
+		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
+
+		switch (pipelineType) {
+			case L_RENDER_PIPELINE::FORWARD:
+				m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+			break;
+			case L_RENDER_PIPELINE::FORWARD_PLUS:
+				m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
+			break;
+			case L_RENDER_PIPELINE::DEFERRED:
+				m_SceneConfig.ScenePipeline = std::make_shared<DeferredPipeline>();
+			break;
+		}
+
+	}
+
+	/// <summary>
+	/// Creates Entity in Scene and Generates New UUID
+	/// </summary>
 	Entity Scene::CreateEntity(const std::string& name) {
+		return CreateEntity(UUID(), name);
+	}
+
+	template<typename... Component>
+	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		([&]()
+			{
+				auto view = src.view<Component>();
+				for (auto srcEntity : view)
+				{
+					entt::entity dstEntity = enttMap.at(src.get<IDComponent>(srcEntity).ID);
+
+					auto& srcComponent = src.get<Component>(srcEntity);
+					dst.emplace_or_replace<Component>(dstEntity, srcComponent);
+				}
+			}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	{
+		CopyComponent<Component...>(dst, src, enttMap);
+	}
+
+	template<typename... Component>
+	static void CopyComponentIfExists(Entity dst, Entity src)
+	{
+		([&]()
+			{
+				if (src.HasComponent<Component>())
+					dst.AddComponent<Component>(src.GetComponent<Component>());
+			}(), ...);
+	}
+
+	template<typename... Component>
+	static void CopyComponentIfExists(ComponentGroup<Component...>, Entity dst, Entity src)
+	{
+		CopyComponentIfExists<Component...>(dst, src);
+	}
+
+	/// <summary>
+	/// Copy Constructor and Operator Deleted in ENTT for Registry.
+	/// Have to Manually Copy Over Data.
+	/// </summary>
+	/// <param name="otherScene"></param>
+	/// <returns></returns>
+	bool Scene::CopyRegistry(std::shared_ptr<Scene> otherScene)
+	{
+		auto& srcSceneRegistry = otherScene->m_Registry;
+		auto& dstSceneRegistry = m_Registry;
+		std::unordered_map<UUID, entt::entity> enttMap;
+
+		// Create entities in new scene
+		auto idView = srcSceneRegistry.view<IDComponent>();
+		for (auto e : idView)
+		{
+			UUID uuid = srcSceneRegistry.get<IDComponent>(e).ID;
+			const auto& name = srcSceneRegistry.get<TagComponent>(e).Tag;
+			Entity newEntity = CreateEntity(uuid, name);
+			enttMap[uuid] = (entt::entity)newEntity;
+		}
+
+		// Copy components (except IDComponent and TagComponent)
+		CopyComponent(AllComponents{}, dstSceneRegistry, srcSceneRegistry, enttMap);
+		return true;
+	}
+
+	/// <summary>
+	/// Create Entity in Scene with UUID
+	/// </summary>
+	Entity Scene::CreateEntity(UUID uuid, const std::string& name)
+	{
 		Entity entity = { m_Registry.create(), this };
+		entity.AddComponent<IDComponent>(uuid);
 		entity.AddComponent<Transform>();
 
 		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Entity" : name;
+		tag.Tag = name.empty() ? "Untitled Entity" : name;
+
+		m_EntityMap[uuid] = entity;
 
 		return entity;
 	}
@@ -88,6 +180,7 @@ namespace Louron {
 
 	// Destroys Entity in Scene
 	void Scene::DestroyEntity(Entity entity) {
+		m_EntityMap.erase(entity.GetUUID());
 		m_Registry.destroy(entity);
 	}
 
@@ -104,6 +197,12 @@ namespace Louron {
 		return {};
 	}
 
+	Entity Scene::FindEntityByUUID(UUID uuid)
+	{
+		L_CORE_ASSERT(m_EntityMap.find(uuid) != m_EntityMap.end(), "Entity UUID not found in scene!");
+		return { m_EntityMap.at(uuid), this };
+	}
+
 	// Returns Primary Camera Entity
 	Entity Scene::GetPrimaryCameraEntity() {
 
@@ -117,18 +216,23 @@ namespace Louron {
 		return {};
 	}
 
+	bool Scene::HasEntity(const std::string& name)
+	{
+		return (FindEntityByName(name)) ? true : false;
+	}
+
 	void Scene::OnStart() {
 
 		m_IsRunning = true;
 
-		m_Pipeline->OnStartPipeline();
+		m_SceneConfig.ScenePipeline->OnStartPipeline();
 
 	}
 	
 	void Scene::OnUpdate() {
 
 		if (!m_IsPaused) {
-			m_Pipeline->OnUpdate(this);
+			m_SceneConfig.ScenePipeline->OnUpdate(this);
 		}
 	}
 
@@ -142,6 +246,6 @@ namespace Louron {
 
 		m_IsRunning = false;
 
-		m_Pipeline->OnStopPipeline();
+		m_SceneConfig.ScenePipeline->OnStopPipeline();
 	}
 }

@@ -16,6 +16,7 @@ void MainMenuLayer::OnAttach() {
 	m_Scenes.push_back(std::make_unique<Scene9>());
 	m_Scenes.push_back(std::make_unique<Scene10>());
 	m_Scenes.push_back(std::make_unique<Scene11>());
+	m_Scenes.push_back(std::make_unique<Scene12>());
 
 	Louron::Engine::Get().GetWindow().SetVSync(false);
 }
@@ -131,6 +132,13 @@ void MainMenuLayer::OnGuiRender() {
 			if (ImGui::Button(" 11. Forward+ Rendering    ")) {
 				std::cout << "[L20] Menu Item 11 Pressed!" << std::endl;
 				m_SceneSelector = 11;
+				m_Scenes[m_SceneSelector - 1]->OnAttach();
+				//m_States->push_back(std::make_unique<Scene9>(m_Engine));
+			}
+
+			if (ImGui::Button(" 12. Scene Serialization   ")) {
+				std::cout << "[L20] Menu Item 12 Pressed!" << std::endl;
+				m_SceneSelector = 12;
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
 				//m_States->push_back(std::make_unique<Scene9>(m_Engine));
 			}

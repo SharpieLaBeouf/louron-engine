@@ -10,19 +10,25 @@ out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
 
-uniform mat4 proj;
-uniform mat4 view;
-uniform mat4 model;
-
 uniform mat3 normalToWorld = mat3(1.0f);
+
+struct VertexData {
+    
+    mat4 Proj;
+    mat4 View;
+    mat4 Model;
+
+};
+
+uniform VertexData u_VertexIn;
 
 void main() {
 
-	gl_Position = proj * view * model * vec4(aPos, 1.0);
-
+	gl_Position = u_VertexIn.Proj * u_VertexIn.View * u_VertexIn.Model * vec4(aPos, 1.0);
+	
 	TexCoord = aTexCoord;
 	Normal = normalToWorld * aNormal;;
-	FragPos = vec3(model * vec4(aPos, 1.0));
+	FragPos = vec3(u_VertexIn.Model * vec4(aPos, 1.0));
 
 }
 
@@ -36,12 +42,12 @@ in vec2 TexCoord;
 in vec3 Normal;
 in vec3 FragPos;
 
-uniform vec3 viewPos;
+uniform vec3 u_ViewPos;
 
-uniform vec3 lightPos;
-uniform vec4 lightColour;
+uniform vec3 u_LightPos;
+uniform vec4 u_LightColour;
 
-uniform vec4 targetColour;
+uniform vec4 u_TargetColour;
 
 float ambientStrength = 0.1;
 float specularStrength = 1.0;
@@ -51,18 +57,18 @@ float specularStrength = 1.0;
 void main() {
 	
 	vec3 norm = normalize(Normal);
-	vec3 lightDir = normalize(lightPos - FragPos);
-	vec3 viewDir = normalize(viewPos - FragPos);
+	vec3 lightDir = normalize(u_LightPos - FragPos);
+	vec3 viewDir = normalize(u_ViewPos - FragPos);
 	vec3 reflectDir = reflect(-lightDir, norm);
 	
-	vec4 ambient  = ambientStrength * lightColour;
+	vec4 ambient  = ambientStrength * u_LightColour;
 
-	vec4 diffuse  = lightColour * max(dot(norm, lightDir), 0.0);
+	vec4 diffuse  = u_LightColour * max(dot(norm, lightDir), 0.0);
 
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-	vec4 specular = specularStrength * spec * lightColour;  
+	vec4 specular = specularStrength * spec * u_LightColour;  
 
-	fragColour = targetColour * (ambient + diffuse + specular);
+	fragColour = u_TargetColour * (ambient + diffuse + specular);
 	
 	//fragColour = texture(ourTexture, vec2(TexCoord.x, TexCoord.y));
 }

@@ -9,16 +9,27 @@
 
 #include <map>
 
+#include "UUID.h"
+#include "Mesh.h"
 #include "Light.h"
 #include "Camera.h"
-#include "Mesh.h"
 #include "../OpenGL/Material.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <irrklang/irrKlang.h>
+
 namespace Louron {
+
+    struct IDComponent {
+        UUID ID;
+
+        IDComponent() = default;
+        IDComponent(UUID uuid) : ID(uuid) { }
+        IDComponent(const IDComponent&) = default;
+    };
 
 	struct TagComponent {
 
@@ -38,6 +49,16 @@ namespace Louron {
 		CameraComponent(const CameraComponent&) = default;
 
 	};
+
+    // TODO: Implement Audio Components
+
+    struct  AudioListener {
+
+    };
+
+    struct AudioEmitter {
+
+    };
 
 	struct Transform {
 
@@ -94,5 +115,15 @@ namespace Louron {
 
 	};
 
+    template<typename... Component>
+    struct ComponentGroup
+    {
+    };
+
+    using AllComponents =
+        ComponentGroup<CameraComponent,
+        Transform, MeshFilter, MeshRenderer,
+        PointLightComponent, SpotLightComponent, 
+        DirectionalLightComponent>;
 
 }

@@ -8,7 +8,7 @@
 #include "Louron.h"
 #include "Test Scene Base.h"
 
-class Scene2 : public Scene {
+class Scene2 : public TestScene {
 
 //Private Setup Variables
 private:
@@ -129,13 +129,17 @@ private:
 			glBindVertexArray(VAO);
 
 			shader->Bind();
-			shader->SetMat4("proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			shader->SetMat4("view", glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-			shader->SetMat4("model", trans);
-			shader->SetVec4("ourColour", fore_colour);
+			shader->SetMat4("u_VertexIn.Proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
+			shader->SetMat4("u_VertexIn.View", glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
+			shader->SetMat4("u_VertexIn.Model", trans);
+			shader->SetVec4("u_OurColour", fore_colour);
 
+			shader->SetInt("u_OurTexture", 0);
+			glActiveTexture(GL_TEXTURE0);
 			m_TextureLib.GetTexture("cube_texture")->Bind();
+
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
 			m_TextureLib.UnBind();
 		}
 		shader->UnBind();

@@ -30,14 +30,19 @@ namespace Louron {
 		if (m_Movement)
 		{
 			processKeyboard(deltaTime);
-			if (MouseToggledOff) processMouse(); else if (!MouseToggledOff) m_FirstMouse = true;
+			if (MouseToggledOff) 
+				processMouse(); 
+			else if (!MouseToggledOff) {
+				m_FirstMouse = true;
+				UpdateCameraVectors();
+			}
 
 		}
 		else UpdateCameraVectors();
 	}
 
 	void Camera::processKeyboard(float deltaTime) {
-		float modifier = (m_Input.GetKey(GLFW_KEY_LEFT_CONTROL)) ? 1.5f : 1.0f;
+		float modifier = (m_Input.GetKey(GLFW_KEY_LEFT_CONTROL)) ? 3.0f : 1.0f;
 		float velocity = modifier * MovementSpeed * deltaTime;
 
 		if (m_Input.GetKey(GLFW_KEY_W))
@@ -89,7 +94,7 @@ namespace Louron {
 
 	void Camera::UpdateCameraVectors()
 	{
-		glm::vec3 front;
+		glm::vec3 front = glm::vec3();
 		front.x = cos(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));
 		front.y = sin(glm::radians(m_Pitch));
 		front.z = sin(glm::radians(m_Yaw)) * cos(glm::radians(m_Pitch));

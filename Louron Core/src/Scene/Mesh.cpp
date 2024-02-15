@@ -34,7 +34,8 @@ namespace Louron {
 	/// </summary>
 	int MeshRenderer::LoadModelFromFile(const char* filePath, MeshFilter& meshFilter) {
 		
-		std::string mesh_name = filePath;
+		m_FilePath = filePath;
+		std::string mesh_name = m_FilePath;
 
 		auto lastSlash = mesh_name.find_last_of("/\\");
 		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
@@ -83,6 +84,7 @@ namespace Louron {
 	void MeshRenderer::LinkMeshRenderer(const std::shared_ptr<MeshRenderer>& meshRenderer)
 	{
 		Materials = meshRenderer->Materials;
+		m_FilePath = meshRenderer->m_FilePath;
 	}
 
 	/// <summary>
@@ -95,7 +97,7 @@ namespace Louron {
 		for (const auto& material : (*Materials)) {
 			if (material.second->Bind()) {
 				material.second->UpdateUniforms(camera);
-				material.second->GetShader()->SetMat4("model", transform.GetTransform());
+				material.second->GetShader()->SetMat4("u_VertexIn.Model", transform.GetTransform());
 
 				for (const auto& mesh : (*meshFilter.Meshes)) 
 					if (mesh->MaterialIndex == material.first) 
@@ -103,6 +105,14 @@ namespace Louron {
 			}
 		}
 
+	}
+
+	void MeshRenderer::SetPath(const std::string& filePath)	{
+		m_FilePath = filePath;
+	}
+
+	std::string MeshRenderer::GetPath() const {
+		return m_FilePath;
 	}
 
 	/// <summary>

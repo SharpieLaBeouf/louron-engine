@@ -47,6 +47,7 @@ namespace Louron {
 		std::pair<std::shared_ptr<MeshFilter>, std::shared_ptr<MeshRenderer>> meshGroup;
 		meshGroup.first = std::make_shared<MeshFilter>();
 		meshGroup.second = std::make_shared<MeshRenderer>();
+		meshGroup.second->SetPath(filePath);
 
 		ProcessNode(scene->mRootNode, scene, meshGroup, directory, shader, mesh_name);
 
@@ -203,20 +204,36 @@ namespace Louron {
 
 	std::shared_ptr<MeshFilter> ResourceManager::GetMeshFilter(const std::string& name)
 	{
-		if (Meshes[name].first == nullptr) {
+		std::string mesh_name = name;
+
+		auto lastSlash = mesh_name.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = mesh_name.rfind('.');
+		auto count = lastDot == std::string::npos ? mesh_name.size() - lastSlash : lastDot - lastSlash;
+		mesh_name = mesh_name.substr(lastSlash, count);
+
+		if (Meshes[mesh_name].first == nullptr) {
 			L_CORE_ASSERT(false, "Mesh Not Loaded to Scene Resource Manager!");
 		}
 
-		return Meshes[name].first;
+		return Meshes[mesh_name].first;
 	}
 
 	std::shared_ptr<MeshRenderer> ResourceManager::GetMeshRenderer(const std::string& name)
 	{
-		if (Meshes[name].second == nullptr) {
+		std::string mesh_name = name;
+
+		auto lastSlash = mesh_name.find_last_of("/\\");
+		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
+		auto lastDot = mesh_name.rfind('.');
+		auto count = lastDot == std::string::npos ? mesh_name.size() - lastSlash : lastDot - lastSlash;
+		mesh_name = mesh_name.substr(lastSlash, count);
+
+		if (Meshes[mesh_name].second == nullptr) {
 			L_CORE_ASSERT(false, "Mesh Not Loaded to Scene Resource Manager!");
 		}
 
-		return Meshes[name].second;
+		return Meshes[mesh_name].second;
 	}
 
 }

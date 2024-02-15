@@ -6,6 +6,12 @@
 
 namespace Louron {
 
+	enum L_RENDER_PIPELINE {
+		FORWARD = 0,
+		FORWARD_PLUS = 1,
+		DEFERRED = 2
+	};
+
 	class Scene;
 
 	class RenderPipeline {
@@ -67,7 +73,7 @@ namespace Louron {
 
 	public:
 
-		DeferredPipeline() = delete;
+		DeferredPipeline() = default;
 		DeferredPipeline(std::shared_ptr<Scene> scene);
 	};
 

@@ -13,10 +13,15 @@ out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
 
-uniform mat4 proj;
-uniform mat4 view;
-uniform mat4 model;
+struct VertexData {
+    
+    mat4 Proj;
+    mat4 View;
+    mat4 Model;
 
+};
+
+uniform VertexData u_VertexIn;
 uniform bool u_UseInstanceData = false;
 
 void main() {
@@ -24,13 +29,13 @@ void main() {
 	TexCoord = aTexCoord;
 
     if (!u_UseInstanceData) {
-        gl_Position = proj * view * model * vec4(aPos, 1.0);
-	    Normal = mat3(transpose(inverse(model))) * aNormal;
-	    FragPos = vec3(model * vec4(aPos, 1.0));
+        gl_Position = u_VertexIn.Proj * u_VertexIn.View * u_VertexIn.Model * vec4(aPos, 1.0);
+	    Normal = mat3(transpose(inverse(u_VertexIn.Model))) * aNormal;
+	    FragPos = vec3(u_VertexIn.Model * vec4(aPos, 1.0));
     }
     else 
     {
-        gl_Position = proj * view * instanceMatrix * vec4(aPos, 1.0);
+        gl_Position = u_VertexIn.Proj * u_VertexIn.View * instanceMatrix * vec4(aPos, 1.0);
 	    Normal = mat3(transpose(inverse(instanceMatrix))) * aNormal;
 	    FragPos = vec3(instanceMatrix * vec4(aPos, 1.0));
     }
@@ -136,7 +141,6 @@ in vec3 FragPos;
 out vec4 fragColour;
 
 // Standard Uniform Variables
-uniform mat4 proj;
 uniform vec3 u_CameraPos;
 uniform Material u_Material;
 
