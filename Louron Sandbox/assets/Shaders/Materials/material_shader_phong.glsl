@@ -12,18 +12,22 @@ out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
 
-uniform mat4 proj;
-uniform mat4 view;
-uniform mat4 model;
+struct VertexData {
+    
+    mat4 Proj;
+    mat4 View;
+    mat4 Model;
+
+};
+
+uniform VertexData u_VertexIn;
 
 void main() {
 
-	gl_Position = proj * view * model * vec4(aPos, 1.0);
-
+	gl_Position = u_VertexIn.Proj * u_VertexIn.View * u_VertexIn.Model * vec4(aPos, 1.0);
 	TexCoord = aTexCoord;
-	Normal = mat3(transpose(inverse(model))) * aNormal;
-	FragPos = vec3(model * vec4(aPos, 1.0));
-
+	Normal = mat3(transpose(inverse(u_VertexIn.Model))) * aNormal;
+	FragPos = vec3(u_VertexIn.Model * vec4(aPos, 1.0));
 }
 
 #SHADER FRAGMENT

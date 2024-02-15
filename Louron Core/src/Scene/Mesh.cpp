@@ -97,7 +97,7 @@ namespace Louron {
 		for (const auto& material : (*Materials)) {
 			if (material.second->Bind()) {
 				material.second->UpdateUniforms(camera);
-				material.second->GetShader()->SetMat4("model", transform.GetTransform());
+				material.second->GetShader()->SetMat4("u_VertexIn.Model", transform.GetTransform());
 
 				for (const auto& mesh : (*meshFilter.Meshes)) 
 					if (mesh->MaterialIndex == material.first) 

@@ -239,10 +239,10 @@ private:
 			glBindVertexArray(light_VAO);
 
 			shader->Bind();
-			shader->SetMat4("view", view);
-			shader->SetMat4("proj", proj);
-			shader->SetVec4("ourColour", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
-			shader->SetMat4("model", light_trans);
+			shader->SetMat4("u_VertexIn.View", view);
+			shader->SetMat4("u_VertexIn.Proj", proj);
+			shader->SetMat4("u_VertexIn.Model", light_trans);
+			shader->SetVec4("u_OurColour", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		}
 
@@ -252,12 +252,12 @@ private:
 			glBindVertexArray(cube_VAO);
 
 			shader->Bind();
-			shader->SetMat4("view", view);
-			shader->SetMat4("proj", proj);
-			shader->SetMat3("normalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.GetTransform()))));
-			shader->SetVec3("viewPos", m_SceneCamera->GetPosition());
-			shader->SetVec3("lightPos", light_trans.GetPosition());
-			shader->SetVec4("lightColour", glm::vec4(1.0f));
+			shader->SetMat4("u_VertexIn.View", view);
+			shader->SetMat4("u_VertexIn.Proj", proj);
+			shader->SetMat3("u_NormalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.GetTransform()))));
+			shader->SetVec3("u_ViewPos", m_SceneCamera->GetPosition());
+			shader->SetVec3("u_LightPos", light_trans.GetPosition());
+			shader->SetVec4("u_LightColour", glm::vec4(1.0f));
 
 			glm::vec3 pos = glm::vec3(0.0f);
 
@@ -272,13 +272,13 @@ private:
 					pos.y = (float)sin((time * 8 + floor(x - 9) + floor(z - 9))) / 9 * 9;
 
 					if (z % 2 != 0 || x % 2 != 0) {
-						shader->SetVec4("targetColour", glm::vec4(box_colour[0], box_colour[1], box_colour[2], box_colour[3]));
+						shader->SetVec4("u_TargetColour", glm::vec4(box_colour[0], box_colour[1], box_colour[2], box_colour[3]));
 					}
 					else {
-						shader->SetVec4("targetColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+						shader->SetVec4("u_TargetColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 					}
 
-					shader->SetMat4("model", glm::translate(cube_trans.GetTransform(), pos));
+					shader->SetMat4("u_VertexIn.Model", glm::translate(cube_trans.GetTransform(), pos));
 					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				}
 			}

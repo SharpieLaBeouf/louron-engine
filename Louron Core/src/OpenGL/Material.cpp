@@ -1,18 +1,17 @@
 #include "Material.h"
 #include "../Core/Engine.h"
 #include "../Scene/Camera.h"
+#include "../Debug/Assert.h"
 
 namespace Louron {
 
 	GLboolean Material::Bind() {
+		L_CORE_ASSERT(m_Shader, "Shader Not Found for Material: " + this->GetName());
 		if (m_Shader) {
 			m_Shader->Bind();
 			return GL_TRUE;
 		}
-		else {
-			std::cout << "[L20] Shader Not Linked to Material - Cannot Bind Shader!" << std::endl;
-			return GL_FALSE;
-		}
+		return GL_FALSE;
 	}
 	void Material::UnBind() {
 
@@ -28,6 +27,7 @@ namespace Louron {
 
 	void Material::UpdateUniforms(const Camera& camera) {
 
+		L_CORE_ASSERT(m_Shader, "Error Updating Uniforms, Shader Not Found for Material: " + this->GetName());
 		if (m_Shader) {
 			m_Shader->SetFloat("u_Material.shine", m_Shine);
 			m_Shader->SetVec4("u_Material.diffuse", m_Diffuse);
@@ -41,13 +41,11 @@ namespace Louron {
 			}
 
 			if (&camera != nullptr) {
-				m_Shader->SetMat4("proj", camera.GetProjMatrix());
-				m_Shader->SetMat4("view", camera.GetViewMatrix());
+				m_Shader->SetMat4("u_VertexIn.Proj", camera.GetProjMatrix());
+				m_Shader->SetMat4("u_VertexIn.View", camera.GetViewMatrix());
 				m_Shader->SetVec3("u_CameraPos", camera.GetPosition());
 			}
 		}
-		else std::cout << "[L20] Shader Not Linked to Material - Cannot Set Uniforms!" << std::endl;
-
 	}
 
 	void Material::SetShader(std::shared_ptr<Shader>& shader) {
