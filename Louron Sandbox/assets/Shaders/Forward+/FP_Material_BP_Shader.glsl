@@ -184,7 +184,7 @@ void main() {
 // Calculate Directional Light Lighting in Scene (MAX 10)
 vec3 CalcDirLights(vec3 normal, vec3 viewDir) {
     
-    vec3 dirResult = vec3(0.0f, 0.0f, 0.0f);
+    vec3 dirResult = vec3(0.0, 0.0, 0.0);
 
     for (int i = 0; i < DL_Buffer_Data.data.length(); i++) {
 
@@ -221,7 +221,7 @@ vec3 CalcDirLights(vec3 normal, vec3 viewDir) {
 // Calculate Point Light Lighting in Scene
 vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
 
-    vec3 pointResult = vec3(0.0f, 0.0f, 0.0f);
+    vec3 pointResult = vec3(0.0, 0.0, 0.0);
     
 	ivec2 location = ivec2(gl_FragCoord.xy);
 	ivec2 tileID = location / ivec2(16, 16);
@@ -272,53 +272,60 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
 // Calculate Spot Light Lighting in Scene
 vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 viewDir) {
     
-    vec3 spotResult = vec3(0.0f, 0.0f, 0.0f);
-
-    for (int i = 0; i < SL_Buffer_Data.data.length(); i++) {
+    vec3 spotResult = vec3(0.0, 0.0, 0.0);
     
-        if (SL_Buffer_Data.data[i].lastLight == true)
-            break;
-            
-        if (SL_Buffer_Data.data[i].activeLight == false)
+	ivec2 location = ivec2(gl_FragCoord.xy);
+	ivec2 tileID = location / ivec2(16, 16);
+	uint index = tileID.y * u_TilesX + tileID.x;
+    uint offset = index * MAX_SPOT_LIGHTS;
+
+    for (int i = 0;  i < MAX_SPOT_LIGHTS && SL_IndiciesBuffer_Data.data[offset + i].index != -1; i++) {
+        
+        uint lightIndex = SL_IndiciesBuffer_Data.data[offset + i].index;
+
+        if (SL_Buffer_Data.data[lightIndex].activeLight == false)
             continue;
-                
-        // Setup light
-        SpotLight light = SL_Buffer_Data.data[i];
-        vec3 lightDir = normalize(light.position.xyz - fragPos);
-
-        // Fragment culling
-        float distance = length(light.position.xyz - fragPos);
-        float theta = dot(lightDir, normalize(-light.direction.xyz));
-
-        // Test if fragment is within range and radius of cone angle
-        if (distance < light.range && theta > cos(radians(light.angle * 0.5))) {
-            
-            // Diffuse shading
-            float diff = max(dot(normal, lightDir), 0.0);
-        
-            // Specular shading
-            vec3 reflectDir = reflect(-lightDir, normal);
-            float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shine);
-
-            // Calculate the angle factor to determine the falloff from the center to the edge of the cone
-            float angleFactor = 1.0 - smoothstep(cos(radians(light.angle * 0.5 - light.angle * 0.25)), cos(radians(light.angle * 0.5)), theta);
-            // Calculate the spotlight intensity based on the angle factor
-            float spotlightIntensity = light.intensity * angleFactor;
-            // Calculate the attenuation based on distance (similar to point light attenuation)
-            float attenuation = spotlightIntensity * pow(max(0.0, 1.0 - (distance / light.range)), 2.0);
     
-            // Combine results
-            vec3 ambient = light.ambient.xyz * vec3(texture(u_Material.diffuseMap, TexCoord))               * u_Material.diffuse.xyz;
-            vec3 diffuse = light.diffuse.xyz * diff * vec3(texture(u_Material.diffuseMap, TexCoord))        * u_Material.diffuse.xyz;
-            vec3 specular = light.specular.xyz * spec * vec3(texture(u_Material.specularMap, TexCoord))     * u_Material.specular.xyz;
+        float dist = length(SL_Buffer_Data.data[lightIndex].position.xyz - fragPos);
         
-            ambient *= attenuation;
-            diffuse *= attenuation;
-            specular *= attenuation;
+        // Check if frag is within distance of the spot light range.
+        if (dist < SL_Buffer_Data.data[lightIndex].range) {
+
+            SpotLight light = SL_Buffer_Data.data[lightIndex];
+            
+            vec3 lightDir = normalize(light.position.xyz - fragPos);
+            float theta = dot(lightDir, normalize(-light.direction.xyz));
+            
+            // Check if frag is within the influence of the cone of the spot light.
+            if (theta > cos(radians(light.angle * 0.5))) {
+
+                // Diffuse shading
+                float diff = max(dot(normal, lightDir), 0.0);
         
-            spotResult += (ambient + diffuse + specular);
+                // Specular shading
+                vec3 reflectDir = reflect(-lightDir, normal);
+                float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Material.shine);
+
+                // Calculate the angle factor to determine the falloff from the center to the edge of the cone
+                float angleFactor = 1.0 - smoothstep(cos(radians(light.angle * 0.5 - light.angle * 0.25)), cos(radians(light.angle * 0.5)), theta);
+                // Calculate the spotlight intensity based on the angle factor
+                float spotlightIntensity = light.intensity * angleFactor;
+                // Calculate the attenuation based on distance (similar to point light attenuation)
+                float attenuation = spotlightIntensity * pow(max(0.0, 1.0 - (dist / light.range)), 2.0);
+    
+                // Combine results
+                vec3 ambient = light.ambient.xyz * vec3(texture(u_Material.diffuseMap, TexCoord))               * u_Material.diffuse.xyz;
+                vec3 diffuse = light.diffuse.xyz * diff * vec3(texture(u_Material.diffuseMap, TexCoord))        * u_Material.diffuse.xyz;
+                vec3 specular = light.specular.xyz * spec * vec3(texture(u_Material.specularMap, TexCoord))     * u_Material.specular.xyz;
+        
+                ambient *= attenuation;
+                diffuse *= attenuation;
+                specular *= attenuation;
+        
+                spotResult += (ambient + diffuse + specular);
+            }
         }
-     }
+    }
 
     return spotResult;
 }

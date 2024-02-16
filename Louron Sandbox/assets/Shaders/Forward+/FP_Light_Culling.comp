@@ -40,7 +40,7 @@ struct VisibleIndex {
 };
 
 struct BoundingSphere {
-	vec3 centre;
+	vec4 centre;
 	float radius;
 };
 
@@ -72,7 +72,6 @@ uniform sampler2D u_Depth;
 shared uint minDepthInt;
 shared uint maxDepthInt;
 shared vec4 frustumPlanes[6];
-shared BoundingSphere frustumSpheres[6];
 
 shared int PL_LightCount;
 shared int SL_LightCount;
@@ -88,9 +87,7 @@ shared int SL_VisibleLightIndices[MAX_LIGHTS];
 
 shared mat4 viewProjection;
 
-//BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax);
-//BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar);
-//bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere);
+BoundingSphere GetConeBoundingSphere(SpotLight light);
 
 #define TILE_SIZE 16
 layout(local_size_x = TILE_SIZE, local_size_y = TILE_SIZE, local_size_z = 1) in;
@@ -185,12 +182,6 @@ void main(){
 		frustumPlanes[4] /= length(frustumPlanes[4].xyz);
 		frustumPlanes[5] *= u_View;
 		frustumPlanes[5] /= length(frustumPlanes[5].xyz);
-
-//		for (uint i = 0; i < 6; i++) {
-//			vec3 planeNormal = frustumPlanes[i].xyz;
-//			float planeDistance = frustumPlanes[i].w;
-//			frustumSpheres[i] = createBoundingSphereForFrustumPlane(planeNormal, planeDistance, minDepth, maxDepth);
-//		}
     }
     
 	barrier();
@@ -238,33 +229,40 @@ void main(){
 	barrier();
 
 	// Step 3b: Cull spot lights in parallel. Max 256 light checks per pass due to workgroup containing 16x16 threads or pixels.
-	// TODO : Implement Spot Light Culling and TEST
-//	passCount = (SL_LightCount + threadCount - 1) / threadCount;
-//	for (uint i = 0; i < passCount; i++) {
-//		
-//		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
-//		if (lightIndex >= SL_LightCount) {
-//			break;
-//		}
-//
-//		// Check if any part of the spotlight cone intersects with the frustum planes
-//		bool isVisible = false;
-//		for (uint j = 0; j < 6; j++) {
-//
-//			// Check if the radius intersects with the frustum plane
-//			if (SpotlightVsSphere(SL_Buffer_Data.data[lightIndex], frustumSpheres[j])) {
-//				isVisible = true;
-//				break;  // No need to check other planes if already determined as visible
-//			}
-//		}
-//
-//	   // If the spotlight is visible, add its index to the shared array
-//		if (isVisible) {
-//			uint offset = atomicAdd(SL_VisibleLightCount, 1);
-//			SL_VisibleLightIndices[offset] = int(lightIndex);
-//		}
-//
-//	}
+	passCount = (SL_LightCount + threadCount - 1) / threadCount;
+	for (uint i = 0; i < passCount; i++) {
+		
+		// Get the lightIndex to test for this thread / pass. If the index is >= light count, then this thread can stop testing lights
+		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
+		if (lightIndex >= SL_LightCount) {
+			break;
+		}
+		
+		if(!SL_Buffer_Data.data[lightIndex].activeLight)
+			continue;
+		
+		// Create bounding sphere around spotlight cone.
+		BoundingSphere sphere = GetConeBoundingSphere(SL_Buffer_Data.data[lightIndex]);
+
+		float distance = 0.0;
+		for (uint j = 0; j < 6; j++) {
+			distance = dot(vec4(sphere.centre.xyz, 1.0), frustumPlanes[j]) + sphere.radius;
+			
+			// If one of the tests fails, then there is no intersection
+			if (distance <= 0.0) {
+				break;
+			}
+		}
+		
+		// If greater than zero, then it is a visible light
+		if (distance > 0.0) {
+			
+			// Add index to the shared array of visible indices
+			uint offset = atomicAdd(SL_VisibleLightCount, 1);
+			SL_VisibleLightIndices[offset] = int(lightIndex);
+		}
+
+	}
 
 	barrier();
 
@@ -295,37 +293,37 @@ void main(){
 	}
 }
 
-//// Create a bounding sphere from an AABB
-//BoundingSphere createBoundingSphere(vec3 aabbMin, vec3 aabbMax) {
-//
-//    BoundingSphere sphere;
-//    sphere.centre = 0.5 * (aabbMin + aabbMax);
-//    sphere.radius = length(aabbMax - sphere.centre);
-//    return sphere;
-//}
-//
-//// Create a bounding sphere for each frustum plane
-//BoundingSphere createBoundingSphereForFrustumPlane(vec3 frustumNormal, float frustumDistance, float zNear, float zFar) {
-//
-//    vec3 frustumCenter = frustumNormal * frustumDistance;
-//    vec3 frustumExtents = vec3(zNear, zNear, zFar); // You might need to adjust these extents based on your frustum definition
-//    return createBoundingSphere(frustumCenter - frustumExtents, frustumCenter + frustumExtents);
-//}
-//
-//// Function to test if a spotlight cone intersects with a bounding sphere
-//bool SpotlightVsSphere(SpotLight spotlight, BoundingSphere sphere) {
-//
-//    // Calculate the spotlight range based on attenuation factors and a predefined cutoff value
-//    float cutoffRange = sqrt(1.0 / max(max(spotlight.constant, spotlight.linear), spotlight.quadratic));
-//
-//    vec3 v = sphere.centre - spotlight.position.xyz;
-//    float lenSq = dot(v, v);
-//    float v1Len = dot(v, normalize(spotlight.direction.xyz));
-//    float distanceClosestPoint = cos(spotlight.cutOff) * sqrt(lenSq - v1Len * v1Len) - v1Len * sin(spotlight.cutOff);
-//
-//    bool angleCull = distanceClosestPoint > sphere.radius;
-//    bool frontCull = v1Len > sphere.radius + cutoffRange;
-//    bool backCull = v1Len < -sphere.radius;
-//
-//    return !(angleCull || frontCull || backCull);
-//}
+// This algorithm is not very efficient regarding false positives. This is due
+// to the tiled based rendering technique. Where I may implement clustered
+// based rendering technique, this will allow greater refinement for spotlight culling
+// due to each cluster frustum having a sphere I can test the spot light against.
+// In this current technique, I have to create a sphere around each spotlight opposed
+// to each clusters frustum, then I have to test that against the 6 planes of the tiles
+// frustum, leading to false positives due to the sphere around cone, opposed to sphere
+// around cluster frustum. Cannot make sphere around frustum in tiled based rendering
+// as the sphere would be huge due to depth values for each tile, leading to even more
+// false positives.
+BoundingSphere GetConeBoundingSphere(SpotLight light){
+	
+	float cosPenumbra = cos(radians(light.angle));
+
+	BoundingSphere sphere;
+	
+	// If the angle is less than or equal to 40.51 degrees, use a bounding 
+	// sphere that encompasses the entire cone of the spotlight.
+	if(cosPenumbra <= 0.707107) {
+
+		float coneSin = sqrt(1.0 - cosPenumbra * cosPenumbra);
+		sphere.centre = light.position + cosPenumbra * light.range * light.direction;
+		sphere.radius = coneSin * light.range;
+
+	} 
+	// If the angle is greater than 40.51 degrees, calculate the bounding sphere 
+	// based on the spotlight's range and angle.
+	else {
+		
+		sphere.radius = light.range / (2.0 * cosPenumbra);
+		sphere.centre = light.position + sphere.radius * light.direction;
+	}
+	return sphere;
+}
