@@ -23,10 +23,14 @@ private:
 
 	std::shared_ptr<Louron::ForwardPlusPipeline> m_Pipeline;
 
-	bool lightActive = true;
-	float lightRadius = 10.0f;
-	float lightIntensity = 1.0f;
-	glm::vec3 lightPosition = glm::vec3(0.0f, 2.0f, 0.0f);
+	struct {
+
+		bool lightActive = true;
+		float lightRadius = 10.0f;
+		float lightIntensity = 1.0f;
+		glm::vec3 lightPosition = glm::vec3(0.0f, 2.0f, 0.0f);
+
+	} m_PointLightProps;
 
 public:
 
@@ -156,10 +160,10 @@ public:
 		// Update Cherry Picked Light Properties
 		if (m_Scene->HasEntity("Light Source 0")) {
 
-			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.radius = lightRadius;
-			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.intensity = lightIntensity;
-			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.active = lightActive;
-			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().SetPosition(lightPosition);
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.radius = m_PointLightProps.lightRadius;
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.intensity = m_PointLightProps.lightIntensity;
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::PointLightComponent>().lightProperties.active = m_PointLightProps.lightActive;
+			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().SetPosition(m_PointLightProps.lightPosition);
 		}
 
 		// Randomly Update Transforms of Point Light Sources
@@ -176,15 +180,15 @@ public:
 		}
 
 		// Bob Lights Up and Down
-		for (int i = 1; i < numLights; i++) {
+			for (int i = 1; i < numLights; i++) {
 
-			if (m_Scene->HasEntity("Light Source " + std::to_string(i))) {
-				// Each Light has their own bobbing height
-				float bobbingOffset = sin(currentTime + lightBobOffset[i]) * deltaTime;
+				if (m_Scene->HasEntity("Light Source " + std::to_string(i))) {
+					// Each Light has their own bobbing height
+					float bobbingOffset = sin(currentTime + lightBobOffset[i]) * deltaTime;
 
-				m_Scene->FindEntityByName("Light Source " + std::to_string(i)).GetComponent<Louron::Transform>().TranslateY(bobbingOffset);
+					m_Scene->FindEntityByName("Light Source " + std::to_string(i)).GetComponent<Louron::Transform>().TranslateY(bobbingOffset);
+				}
 			}
-		}
 
 		Draw();
 	}
@@ -213,12 +217,12 @@ public:
 			ImGui::TreePop();
 		}
 
-		if (ImGui::TreeNode("Light Properties")) {
-			ImGui::DragFloat("Radius", &lightRadius, 0.05f);
-			ImGui::DragFloat("Intensity", &lightIntensity, 0.05f);
-			ImGui::DragFloat3("Position", &lightPosition[0], 0.1f);
+		if (ImGui::TreeNode("Point Light Properties")) {
+			ImGui::DragFloat("Radius", &m_PointLightProps.lightRadius, 0.05f);
+			ImGui::DragFloat("Intensity", &m_PointLightProps.lightIntensity, 0.05f);
+			ImGui::DragFloat3("Position", &m_PointLightProps.lightPosition[0], 0.1f);
 
-			if (ImGui::Button("Toggle Active")) lightActive = !lightActive;
+			if (ImGui::Button("Toggle Active")) m_PointLightProps.lightActive = !m_PointLightProps.lightActive;
 
 			ImGui::TreePop();
 		}
