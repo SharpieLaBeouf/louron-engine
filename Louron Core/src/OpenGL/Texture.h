@@ -5,9 +5,11 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
 #include <unordered_map>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+#include <glm/glm.hpp>
 
 namespace Louron {
 
@@ -15,19 +17,44 @@ namespace Louron {
 
 	public:
 
+		Texture();
+		Texture(const std::filesystem::path& texturePath);
+		~Texture();
+
+	public:
+
+		// Bind and Unbinding
 		void Bind();
 		void UnBind();
 
-		Texture();
-		Texture(const char* texturePath);
-		~Texture();
+		// Getters and Setters
+		const GLuint& GetID() const { return m_TextureId; }
 
-		GLuint getID();
-		std::string getName();
+		void SetWrapMode(GLint parameter);
+		const GLint& GetWrapMode() const { return m_WrapMode; }
+
+		void SetFilterMode(GLint parameter);
+		const GLint& GetFilterMode() const { return m_FilterMode; }
+
+		const GLuint& GetWidth() const { return m_Size.x; }
+		const GLuint& GetHeight() const { return m_Size.y; }
+		const glm::ivec2& GetSize() const { return m_Size; }
+
+		void SetName(const std::string& name) { m_Name = name; }
+		const std::string& GetName() const { return m_Name; }
+
+		const std::filesystem::path& GetFilePath() const { return m_FilePath; }
+
+		operator bool() const { return (m_TextureId != -1); }
 
 	private:
-		GLuint m_TextureID;
-		std::string m_Name;
+		GLuint m_TextureId = -1;
+		GLint m_WrapMode = GL_REPEAT;
+		GLint m_FilterMode = GL_LINEAR;
+
+		glm::ivec2 m_Size = { 0,0 };
+		std::string m_Name = "Untitled Texture";
+		std::filesystem::path m_FilePath;
 
 	};
 
@@ -35,20 +62,20 @@ namespace Louron {
 
 	private:
 
-		std::unordered_map<std::string, Texture*> m_Textures;
+		std::unordered_map<std::string, std::shared_ptr<Texture>> m_Textures;
 
 	public:
 		void UnBind();
 
 		TextureLibrary();
 
-		void Add(Texture* texture);
-		void Add(const std::string& textureName, Texture* texture);
+		void Add(std::shared_ptr<Texture> texture);
+		void Add(const std::string& textureName, std::shared_ptr<Texture> texture);
 
-		Texture* loadTexture(const std::string& textureFile);
-		Texture* loadTexture(const std::string& textureFile, const std::string& textureName);
+		std::shared_ptr<Texture> LoadTexture(const std::string& textureFile);
+		std::shared_ptr<Texture> LoadTexture(const std::string& textureFile, const std::string& textureName);
 
-		Texture* GetTexture(const std::string& textureName);
+		std::shared_ptr<Texture> GetTexture(const std::string& textureName);
 
 		bool textureExists(const std::string& name) const;
 	};

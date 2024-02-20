@@ -155,7 +155,7 @@ namespace Louron {
 
 		// Check if Shader Already Exists
 		if (ShaderExists(shaderName)) {
-			std::cout << "[L20] Shader Already Loaded - Returning " << shaderName << std::endl;
+			std::cout << "[L20] Shader Already Loaded: " << shaderName << std::endl;
 			return m_Shaders[shaderName];
 		}
 
@@ -171,7 +171,7 @@ namespace Louron {
 			return m_DefaultShader;
 		}
 
-		std::cout << "[L20] Shader Loaded - Returning " << shaderName << std::endl;
+		std::cout << "[L20] Shader Loaded: " << shaderName << std::endl;
 		m_Shaders[shaderName] = std::move(shader);
 		return m_Shaders[shaderName];
 	}

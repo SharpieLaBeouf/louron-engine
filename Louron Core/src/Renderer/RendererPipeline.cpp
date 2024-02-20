@@ -376,7 +376,7 @@ namespace Louron {
 							materialMeshTransMap[(*meshRenderer.Materials)[subMesh->MaterialIndex]][subMesh].push_back(transform);
 						}
 						else {
-							std::cout << "[L20] Mesh with invalid material encountered!" << std::endl;
+							std::cout << "[L20] Mesh Has Invalid Material!" << std::endl;
 						}
 			}
 
@@ -405,7 +405,7 @@ namespace Louron {
 					}
 				}
 				else {
-					std::cout << "[L20] Invalid material encountered during rendering!" << std::endl;
+					std::cout << "[L20] Invalid Material Encountered During Rendering!" << std::endl;
 					continue;
 				}
 
@@ -428,6 +428,28 @@ namespace Louron {
 					}
 				}
 			}
+
+			auto skyboxView = scene->GetRegistry()->view<CameraComponent, SkyboxComponent>();
+			if (skyboxView.begin() != skyboxView.end()) {
+
+				for (const auto& entity : skyboxView) {
+					auto [scene_camera, skybox] = skyboxView.get<CameraComponent, SkyboxComponent>(entity);
+
+					if (scene_camera.ClearFlags == L_CAMERA_CLEAR_FLAGS::SKYBOX) {
+
+						if (skybox.Material.Bind()) {
+							glDepthFunc(GL_LEQUAL);
+							
+							skybox.Material.UpdateUniforms(*camera);
+							Renderer::DrawSkybox(skybox);
+							
+							glBindVertexArray(0);
+							glDepthFunc(GL_LESS);
+						}
+					}
+				}
+			}
+
 
 			// Clean Up Scene Render Pass
 			for (int i = 0; i < 3; i++) {

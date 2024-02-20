@@ -16,7 +16,7 @@
     <ProjectGuid>{88caea5c-d73d-491c-8143-2734ae8712de}</ProjectGuid>
     <RootNamespace>LouronSandbox</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-	  <ProjectName>Louron Sandbox</ProjectName>
+    <ProjectName>Louron Sandbox</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -119,6 +119,7 @@
     <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
     <None Include="assets\Shaders\Materials\material_shader_flat.glsl" />
     <None Include="assets\Shaders\Materials\material_shader_phong.glsl" />
+    <None Include="assets\Shaders\Skybox\Skybox.glsl" />
     <None Include="assimp-vc143-mt.dll">
       <FileType>Document</FileType>
     </None>

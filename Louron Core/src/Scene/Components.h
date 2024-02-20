@@ -13,6 +13,7 @@
 #include "Mesh.h"
 #include "Light.h"
 #include "Camera.h"
+#include "Skybox.h"
 #include "../OpenGL/Material.h"
 
 #include <assimp/Importer.hpp>
@@ -40,10 +41,16 @@ namespace Louron {
 		TagComponent(const std::string& name) : Tag(name) { }
 	};
 
+    enum L_CAMERA_CLEAR_FLAGS {
+        COLOUR_ONLY,
+        SKYBOX
+    };
+
 	struct CameraComponent {
 
 		std::shared_ptr<Camera> Camera = nullptr;
 		bool Primary = true;
+        L_CAMERA_CLEAR_FLAGS ClearFlags = L_CAMERA_CLEAR_FLAGS::COLOUR_ONLY;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
@@ -124,6 +131,6 @@ namespace Louron {
         ComponentGroup<CameraComponent,
         Transform, MeshFilter, MeshRenderer,
         PointLightComponent, SpotLightComponent, 
-        DirectionalLightComponent>;
+        DirectionalLightComponent, SkyboxComponent>;
 
 }

@@ -16,7 +16,7 @@ namespace Louron {
 		mesh_name = mesh_name.substr(lastSlash, count);
 
 		if (Meshes[mesh_name].first != nullptr) {
-			std::cout << "[L20] INFO: Mesh Already Loaded!" << std::endl;
+			std::cout << "[L20] Mesh Already Loaded: " << mesh_name << std::endl;
 			return GL_FALSE;
 		}
 
@@ -53,7 +53,7 @@ namespace Louron {
 
 		Meshes[mesh_name] = meshGroup;
 
-		std::cout << "[L20] Loaded Mesh: " << mesh_name.c_str() << std::endl;
+		std::cout << "[L20] Mesh Loaded: " << mesh_name.c_str() << std::endl;
 
 		return GL_TRUE;
 	}
@@ -123,7 +123,7 @@ namespace Louron {
 
 			// Load Textures
 			aiString texture_str;
-			Texture* texture = nullptr;
+			std::shared_ptr<Texture> texture = nullptr;
 
 			{
 				std::string temp;
@@ -135,7 +135,7 @@ namespace Louron {
 					if (temp.rfind("..\\", 0) == 0)
 						temp.erase(0, 3);
 
-					texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
+					texture = Engine::Get().GetTextureLibrary().LoadTexture(directory + "/" + temp);
 					temp_material->AddTextureMap(L20_TEXTURE_DIFFUSE_MAP, texture);
 				}
 				if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
@@ -145,7 +145,7 @@ namespace Louron {
 					if (temp.rfind("..\\", 0) == 0)
 						temp.erase(0, 3);
 
-					texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
+					texture = Engine::Get().GetTextureLibrary().LoadTexture(directory + "/" + temp);
 					temp_material->AddTextureMap(L20_TEXTURE_SPECULAR_MAP, texture);
 				}
 
@@ -156,7 +156,7 @@ namespace Louron {
 					if (temp.rfind("..\\", 0) == 0)
 						temp.erase(0, 3);
 
-					texture = Engine::Get().GetTextureLibrary().loadTexture(directory + "/" + temp);
+					texture = Engine::Get().GetTextureLibrary().LoadTexture(directory + "/" + temp);
 					temp_material->AddTextureMap(L20_TEXTURE_NORMAL_MAP, texture);
 				}
 			}

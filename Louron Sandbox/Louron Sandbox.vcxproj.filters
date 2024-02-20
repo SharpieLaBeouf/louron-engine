@@ -39,6 +39,7 @@
     <None Include="irrKlang.dll" />
     <None Include="ikpFlac.dll" />
     <None Include="ikpMP3.dll" />
+    <None Include="assets\Shaders\Skybox\Skybox.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Images\grass_texture.jpg">

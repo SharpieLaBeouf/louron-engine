@@ -44,11 +44,11 @@ namespace Louron {
         // Load All Textures
         {
             for (const auto& path : FindFilePaths("assets", ".png")) {
-                m_TextureLibrary->loadTexture(path);
+                m_TextureLibrary->LoadTexture(path);
             }
 
             for (const auto& path : FindFilePaths("assets", ".jpg")) {
-                m_TextureLibrary->loadTexture(path);
+                m_TextureLibrary->LoadTexture(path);
             }
         }
 

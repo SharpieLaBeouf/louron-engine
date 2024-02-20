@@ -15,6 +15,11 @@ namespace Louron {
    		glDrawElements(GL_TRIANGLES, Mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 	}
 
+	void Renderer::DrawSkybox(SkyboxComponent& skybox) {
+		skybox.Bind();
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+	}
+
 	static GLuint s_InstanceBuffer = -1;
 
 	void Renderer::DrawInstancedMesh(std::shared_ptr<Mesh> Mesh, std::vector<Transform> Transforms) {

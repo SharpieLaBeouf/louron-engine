@@ -8,7 +8,7 @@ namespace Louron {
 
 	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
 	{
-		
+
 		VAO = std::make_unique<VertexArray>();
 		VertexBuffer* vbo = new VertexBuffer(vertices, (GLuint)vertices.size());
 		BufferLayout layout = {
@@ -68,7 +68,7 @@ namespace Louron {
 		directory = directory.substr(0, directory.find_last_of('/'));
 
 		ProcessNode(scene->mRootNode, scene, meshFilter, directory, Engine::Get().GetShaderLibrary().GetShader("material_shader_flat"), mesh_name);
-		std::cout << "[L20] Loaded Mesh: " << mesh_name.c_str() << std::endl;
+		std::cout << "[L20] Mesh Loaded: " << mesh_name.c_str() << std::endl;
 
 		return GL_TRUE;
 	}
@@ -184,26 +184,26 @@ namespace Louron {
 
 			// Load any applicable texture files
 			aiString texture_str;
-			Texture* texture = nullptr;
+			std::shared_ptr<Texture> texture = nullptr;
 
 			std::string temp;
 			if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
 				material->GetTexture(aiTextureType_DIFFUSE, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
-				texture = Engine::Get().GetTextureLibrary().loadTexture(m_Directory + "/" + temp);
+				texture = Engine::Get().GetTextureLibrary().LoadTexture(m_Directory + "/" + temp);
 				temp_material->AddTextureMap(L20_TEXTURE_DIFFUSE_MAP, texture);
 			}
 			if (material->GetTextureCount(aiTextureType_SPECULAR) > 0) {
 				material->GetTexture(aiTextureType_SPECULAR, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
-				texture = Engine::Get().GetTextureLibrary().loadTexture(m_Directory + "/" + temp);
+				texture = Engine::Get().GetTextureLibrary().LoadTexture(m_Directory + "/" + temp);
 				temp_material->AddTextureMap(L20_TEXTURE_SPECULAR_MAP, texture);
 			}
 
 			if (material->GetTextureCount(aiTextureType_NORMALS) > 0) {
 				material->GetTexture(aiTextureType_NORMALS, 0, &texture_str);
 				temp = texture_str.C_Str(); if (temp.rfind("..\\", 0) == 0) temp.erase(0, 3);
-				texture = Engine::Get().GetTextureLibrary().loadTexture(m_Directory + "/" + temp);
+				texture = Engine::Get().GetTextureLibrary().LoadTexture(m_Directory + "/" + temp);
 				temp_material->AddTextureMap(L20_TEXTURE_NORMAL_MAP, texture);
 			}
 

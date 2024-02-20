@@ -37,7 +37,7 @@ namespace Louron {
 
 				m_Shader->SetInt(std::string("u_Material." + m_TextureUniformNames[i]).c_str(), i);
 				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, m_Textures[i]->getID());
+				glBindTexture(GL_TEXTURE_2D, m_Textures[i]->GetID());
 			}
 
 			if (&camera != nullptr) {
@@ -51,7 +51,7 @@ namespace Louron {
 	void Material::SetShader(std::shared_ptr<Shader>& shader) {
 		m_Shader = shader; 
 	}
-	void Material::SetTexture(Texture* texture, TextureMapType textureType) { 
+	void Material::SetTexture(std::shared_ptr<Texture> texture, TextureMapType textureType) {
 		m_Textures[textureType] = texture; 
 	}
 
@@ -88,7 +88,7 @@ namespace Louron {
 	/// <summary>
 	/// Initialise Material with NO SHADER and TEXTURE PARAMETER
 	/// </summary>
-	Material::Material(Texture* texture) : m_Shader(Engine::Get().GetShaderLibrary().GetShader("Default Shader")) {
+	Material::Material(std::shared_ptr<Texture> texture) : m_Shader(Engine::Get().GetShaderLibrary().GetShader("Default Shader")) {
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
 			m_Textures[i] = texture;
 	}
@@ -96,7 +96,7 @@ namespace Louron {
 	/// <summary>
 	/// Initialise Material with SHADER and TEXTURE PARAMETER
 	/// </summary>
-	Material::Material(std::shared_ptr<Shader> shader, Texture* texture) : m_Shader(shader) {
+	Material::Material(std::shared_ptr<Shader> shader, std::shared_ptr<Texture> texture) : m_Shader(shader) {
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
 			m_Textures[i] = texture;
 	}
@@ -104,7 +104,7 @@ namespace Louron {
 	/// <summary>
 	/// Initialise Material with SHADER and TEXTURE UNORDERED MAP PARAMETER
 	/// </summary>
-	Material::Material(std::shared_ptr<Shader> shader, std::unordered_map<GLint, Texture*>& textures) : m_Shader(shader) {
+	Material::Material(std::shared_ptr<Shader> shader, std::unordered_map<GLint, std::shared_ptr<Texture>>& textures) : m_Shader(shader) {
 		for (int i = 0; i < textures.size(); i++)
 			m_Textures[i] = textures[i];
 	}
@@ -117,7 +117,7 @@ namespace Louron {
 	void Material::SetDiffuse(const glm::vec4& val) { m_Diffuse = val; }
 	void Material::SetSpecular(const glm::vec4& val) { m_Specular = val; }
 
-	void Material::AddTextureMap(GLint type, Texture* val) {
+	void Material::AddTextureMap(GLint type, std::shared_ptr<Texture> val) {
 		if (m_Shader) {
 			m_Shader->Bind();
 			m_Shader->SetInt(std::string("u_Material." + m_TextureUniformNames[type]).c_str(), type);
@@ -131,7 +131,7 @@ namespace Louron {
 		else std::cout << "[L20] Texture Slot Out of Bounds!" << std::endl;
 	}
 
-	Texture* Material::GetTextureMap(GLint type) {
+	std::shared_ptr<Texture> Material::GetTextureMap(GLint type) {
 		return m_Textures[type];
 	}
 }

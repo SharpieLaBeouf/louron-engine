@@ -8,82 +8,15 @@
 
 namespace Louron {
 
-	void Texture::Bind() {
-		glBindTexture(GL_TEXTURE_2D, m_TextureID);
-	}
-
-	void Texture::UnBind() {
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
-
-	Texture::Texture(const char* texturePath) {
-
-
-		glGenTextures(1, &m_TextureID);
-
-		int width, height, nrChannels;
-		stbi_set_flip_vertically_on_load(true);
-		unsigned char* textureData = stbi_load(texturePath, &width, &height, &nrChannels, 0);
-
-		if (textureData)
-		{
-			GLenum format = GL_RGBA;
-			if (nrChannels == 1)
-				format = GL_RED;
-			else if (nrChannels == 3)
-				format = GL_RGB;
-			else if (nrChannels == 4)
-				format = GL_RGBA;
-
-			glBindTexture(GL_TEXTURE_2D, m_TextureID);
-			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
-			glGenerateMipmap(GL_TEXTURE_2D);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-			std::string name = texturePath;
-			auto lastSlash = name.find_last_of("/\\");
-			lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-			auto lastDot = name.rfind('.');
-			auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
-			name = name.substr(lastSlash, count);
-			m_Name = name.c_str();
-
-			std::cout << "[L20] Loaded Texture: " << texturePath << std::endl;
-			stbi_image_free(textureData);
-		}
-		else {
-			std::cout << "[L20] Failed to load texture!: " << texturePath << std::endl;
-		}
-	}
-
-	Texture::~Texture()
-	{
-		glDeleteTextures(1, &m_TextureID);
-	}
-
-	GLuint Texture::getID()
-	{
-		return m_TextureID;
-	}
-
-	std::string Texture::getName() { return m_Name; }
-
-	void TextureLibrary::UnBind() { glBindTexture(GL_TEXTURE_2D, 0); }
-
+#pragma region Texture
 
 	Texture::Texture() {
 
 		m_Name = "blank_texture";
 		GLubyte data[] = { 255, 255, 255, 255 };
 
-		glGenTextures(1, &m_TextureID);
-		glBindTexture(GL_TEXTURE_2D, m_TextureID);
+		glGenTextures(1, &m_TextureId);
+		glBindTexture(GL_TEXTURE_2D, m_TextureId);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -93,25 +26,118 @@ namespace Louron {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	}
 
+	Texture::Texture(const std::filesystem::path& texturePath) {
+
+		glGenTextures(1, &m_TextureId);
+
+		int width, height, nrChannels;
+		stbi_set_flip_vertically_on_load(true);
+		unsigned char* textureData = stbi_load(texturePath.string().c_str(), &width, &height, &nrChannels, 0);
+
+		if (textureData)
+		{
+			GLenum format = GL_RGBA;
+
+			switch (nrChannels) {
+			case 1:
+				format = GL_RED;
+				break;
+			case 3:
+				format = GL_RGB;
+				break;
+			case 4:
+				format = GL_RGBA;
+				break;
+			}
+
+			this->Bind();
+			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
+			glGenerateMipmap(GL_TEXTURE_2D);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_WrapMode);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_WrapMode);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, m_WrapMode);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_FilterMode);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_FilterMode);
+
+			m_Name = texturePath.filename().replace_extension().string();
+			m_Size.x = width;
+			m_Size.y = height;
+
+			std::cout << "[L20] Texture Loaded: " << texturePath.string() << std::endl;
+			stbi_image_free(textureData);
+			this->UnBind();
+		}
+		else {
+			std::cout << "[L20] Texture Not Loaded: " << texturePath.string() << std::endl;
+			stbi_image_free(textureData);
+
+			glDeleteTextures(1, &m_TextureId);
+			m_TextureId = -1;
+		}
+	}
+
+	Texture::~Texture()
+	{
+		if (m_TextureId != -1)
+			glDeleteTextures(1, &m_TextureId);
+	}
+
+	void Texture::Bind() {
+		glBindTexture(GL_TEXTURE_2D, m_TextureId);
+	}
+
+	void Texture::UnBind() {
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void Texture::SetWrapMode(GLint parameter) {
+		m_WrapMode = parameter;
+
+		this->Bind();
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_WrapMode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_WrapMode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, m_WrapMode);
+	}
+
+	void Texture::SetFilterMode(GLint parameter) {
+		m_FilterMode = parameter;
+
+		this->Bind();
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_FilterMode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_FilterMode);
+	}	
+
+#pragma endregion
+
+	// TODO: Fix This Up
+#pragma region TextureLibrary
+
+
+	void TextureLibrary::UnBind() { 
+		glBindTexture(GL_TEXTURE_2D, 0); 
+	}
+
 	TextureLibrary::TextureLibrary() {
-		Texture* blankTex = new Texture();
-		m_Textures[blankTex->getName()] = blankTex;
+		std::shared_ptr<Texture> blankTex = std::make_shared<Texture>();
+		m_Textures[blankTex->GetName()] = blankTex;
 	}
 
-	void TextureLibrary::Add(Texture* texture) {
-		Add(texture->getName(), texture);
+	void TextureLibrary::Add(std::shared_ptr<Texture> texture) {
+		Add(texture->GetName(), texture);
 	}
 
-	void TextureLibrary::Add(const std::string& textureName, Texture* texture) {
+	void TextureLibrary::Add(const std::string& textureName, std::shared_ptr<Texture> texture) {
 		if (textureExists(textureName)) {
-			std::cout << "[L20] Texture Already Loaded! " << textureName << std::endl;
+			std::cout << "[L20] Texture Already Loaded: " << textureName << std::endl;
 		}
 		else {
 			m_Textures[textureName] = texture;
 		}
 	}
 
-	Texture* TextureLibrary::loadTexture(const std::string& textureFile) {
+	std::shared_ptr<Texture> TextureLibrary::LoadTexture(const std::string& textureFile) {
 
 		std::string texture_name = textureFile;
 		auto lastSlash = texture_name.find_last_of("/\\");
@@ -125,26 +151,26 @@ namespace Louron {
 			return GetTexture(texture_name);
 		}
 
-		Texture* texture = new Texture(textureFile.c_str());
+		std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureFile.c_str());
 		Add(texture);
 		return texture;
 	}
 
-	Texture* TextureLibrary::loadTexture(const std::string& textureFile, const std::string& textureName) {
+	std::shared_ptr<Texture> TextureLibrary::LoadTexture(const std::string& textureFile, const std::string& textureName) {
 
 		if (textureExists(textureName)) {
 			std::cout << "[L20] Texture Already Loaded: " << textureName << std::endl;
 			return GetTexture(textureName);
 		}
 
-		Texture* texture = new Texture(textureFile.c_str());
+		std::shared_ptr<Texture> texture = std::make_shared<Texture>(textureFile.c_str());
 		Add(textureName, texture);
 		return texture;
 	}
 
-	Texture* TextureLibrary::GetTexture(const std::string& textureName) {
+	std::shared_ptr<Texture> TextureLibrary::GetTexture(const std::string& textureName) {
 		if (!textureExists(textureName))
-			std::cout << "[L20] Texture Not Loaded! " << textureName << std::endl;
+			std::cout << "[L20] Texture Not Loaded: " << textureName << std::endl;
 		else
 			return m_Textures[textureName];
 		return nullptr;
@@ -153,4 +179,7 @@ namespace Louron {
 	bool TextureLibrary::textureExists(const std::string& name) const {
 		return m_Textures.find(name) != m_Textures.end();
 	}
+
+#pragma endregion
+
 }

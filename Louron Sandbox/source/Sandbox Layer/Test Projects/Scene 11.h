@@ -106,13 +106,27 @@ public:
 		// Main Camera
 		auto& camera = m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>();
 		camera.Camera = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 0.0f, 10.0f));
-		camera.Primary = true;
 		camera.Camera->setPitch(-20.0f);
 		camera.Camera->setYaw(0.0f);
 		camera.Camera->setPosition({ -30.0f, 10.0f, -1.2f });
 		camera.Camera->MouseToggledOff = false;
 
+		camera.Primary = true;
+		camera.ClearFlags = Louron::L_CAMERA_CLEAR_FLAGS::SKYBOX;
+
 		m_Scene->FindEntityByName("Main Camera").AddComponent<Louron::SpotLightComponent>();
+		Louron::SkyboxComponent& skybox = m_Scene->FindEntityByName("Main Camera").AddComponent<Louron::SkyboxComponent>();
+
+		std::vector<std::filesystem::path> skyboxFaces
+		{
+			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/right.png"),
+			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/left.png"),
+			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/top.png"),
+			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/bottom.png"),
+			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/back.png"),
+			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/front.png")
+		};
+		skybox.Material.LoadSkybox(skyboxFaces);
 
 		// Directional Light
 		Louron::Entity dirLight = m_Scene->CreateEntity("Directional Light");

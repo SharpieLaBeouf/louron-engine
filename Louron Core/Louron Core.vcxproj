@@ -140,6 +140,7 @@
     <ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="src\Scene\Skybox.cpp" />
     <ClCompile Include="src\Scene\UUID.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -242,6 +243,7 @@
     <ClInclude Include="src\Project\Project.h" />
     <ClInclude Include="src\Renderer\Renderer.h" />
     <ClInclude Include="src\Renderer\RendererPipeline.h" />
+    <ClInclude Include="src\Scene\Skybox.h" />
     <ClInclude Include="src\Scene\UUID.h" />
     <ClInclude Include="src\Scene\Light.h" />
     <ClInclude Include="src\OpenGL\Material.h" />
