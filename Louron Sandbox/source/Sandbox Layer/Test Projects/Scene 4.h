@@ -72,10 +72,10 @@ public:
 		plane_trans.SetPosition({ 0.0f, -0.6f, 0.0f });
 		plane_trans.SetScale({ 40.0f, 0.0f, 40.0f });
 
-		sceneCamera = new Louron::Camera(glm::vec3(0.0f, 10.0f, 25.0f));
-		sceneCamera->MouseToggledOff = false;
-		sceneCamera->MovementSpeed = 10.0f;
-		sceneCamera->MovementYDamp = 0.65f;
+		m_SceneCamera = new Louron::Camera(glm::vec3(0.0f, 10.0f, 25.0f));
+		m_SceneCamera->MouseToggledOff = false;
+		m_SceneCamera->MovementSpeed = 10.0f;
+		m_SceneCamera->MovementYDamp = 0.65f;
 
 	}
 	~Scene4() override
@@ -90,7 +90,7 @@ public:
 		glDeleteBuffers(1, &cube_VBO);
 		glDeleteBuffers(1, &cube_EBO);
 
-		delete sceneCamera;
+		delete m_SceneCamera;
 	}
 
 
@@ -107,7 +107,7 @@ private:
 
 	Louron::Transform cube_trans;
 	Louron::Transform plane_trans;
-	Louron::Camera* sceneCamera = nullptr;
+	Louron::Camera* m_SceneCamera = nullptr;
 
 	glm::vec4 back_colour = glm::vec4(0.992f, 0.325f, 0.325f, 1.0f);
 	glm::vec4 box_colour = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -116,13 +116,19 @@ private:
 	//Public Functions
 public:
 
+	void OnAttach() override {
+		lastTime = (float)glfwGetTime();
+
+		m_SceneCamera->UpdateProjMatrix();
+	}
+
 	void Update() override {
 
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;
 		lastTime = currentTime;
 			
-		sceneCamera->Update(deltaTime);
+		m_SceneCamera->Update(deltaTime);
 
 		Draw();
 	}
@@ -189,8 +195,8 @@ private:
 
 			shader->Bind();
 			shader->SetMat4("u_VertexIn.Model", plane_trans);
-			shader->SetMat4("u_VertexIn.Proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			shader->SetMat4("u_VertexIn.View", sceneCamera->GetViewMatrix());
+			shader->SetMat4("u_VertexIn.Proj", m_SceneCamera->GetProjMatrix());
+			shader->SetMat4("u_VertexIn.View", m_SceneCamera->GetViewMatrix());
 			shader->SetVec4("u_OurColour", plane_colour);
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		}
@@ -203,8 +209,8 @@ private:
 			glBindVertexArray(cube_VAO);
 
 			shader->Bind();
-			shader->SetMat4("u_VertexIn.Proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
-			shader->SetMat4("u_VertexIn.View", sceneCamera->GetViewMatrix());
+			shader->SetMat4("u_VertexIn.Proj", m_SceneCamera->GetProjMatrix());
+			shader->SetMat4("u_VertexIn.View", m_SceneCamera->GetViewMatrix());
 			shader->SetVec4("u_OurColour", box_colour);
 
 			shader->SetInt("u_OurTexture", 0);

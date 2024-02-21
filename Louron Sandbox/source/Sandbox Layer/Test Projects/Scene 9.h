@@ -60,9 +60,9 @@ public:
 		}
 		
 		m_SceneCamera = new Louron::Camera(glm::vec3(0.0f, 10.0f, 0.0f));
-		m_SceneCamera->setPitch(-90.0f);
-		m_SceneCamera->setYaw(-180.0f);
-		m_SceneCamera->toggleMovement();
+		m_SceneCamera->SetPitch(-90.0f);
+		m_SceneCamera->SetYaw(-180.0f);
+		m_SceneCamera->ToggleMovement();
 		light_properties.position = { 0.0f, 5.0f, 0.0f };
 					
 		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("blank_texture"));
@@ -85,6 +85,12 @@ public:
 		delete flat_cube_mat;
 		delete phong_cube_mat;
 		delete m_SceneCamera;
+	}
+
+	void OnAttach() override {
+		lastTime = (float)glfwGetTime();
+
+		m_SceneCamera->UpdateProjMatrix();
 	}
 
 	void Update() override {

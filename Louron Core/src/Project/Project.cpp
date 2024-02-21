@@ -195,7 +195,7 @@ namespace Louron {
 			L_CORE_ASSERT(!path.empty(), "Cannot Save Scene, File Path Invalid: \'" + path.string() + "\'");
 
 			sceneSerializer.Serialize();
-			std::cout << "[L20] Scene (" << s_ActiveProject->m_Config.Name << ") Saved at : " << path.filename().string() << std::endl;
+			std::cout << "[L20] Scene (" << s_ActiveProject->m_Config.Name << ") Saved at : " << path.string() << std::endl;
 			return true;
 		}
 

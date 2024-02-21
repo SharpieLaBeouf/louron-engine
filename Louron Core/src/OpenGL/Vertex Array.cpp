@@ -57,6 +57,8 @@ namespace Louron {
 		}
 
 		m_VertexBuffers.push_back(vertexBuffer);
+		glBindVertexArray(0);
+		vertexBuffer->Unbind();
 	}
 
 	void VertexArray::SetIndexBuffer(IndexBuffer* indexBuffer) {

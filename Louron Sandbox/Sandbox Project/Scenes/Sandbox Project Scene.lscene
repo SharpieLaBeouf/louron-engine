@@ -1,4 +1,4 @@
-Scene Name: Scene 12
+Scene Name: Sandbox Project Scene
 Scene Asset Directory: Sandbox Project/Assets/
 Scene Pipeline Type: 1
 Entities:
@@ -496,7 +496,7 @@ Entities:
     TagComponent:
       Tag: Main Camera
     TransformComponent:
-      Translation: [-29.8175182, 10.019063, -1.07567537]
+      Translation: [86.6901398, 83.1648865, -63.1366348]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
@@ -506,13 +506,16 @@ Entities:
         MovementYDamp: 0.649999976
         MouseSensitivity: 0.100000001
         MouseToggledOff: false
-        Position: [-29.8175182, 10.019063, -1.07567537]
-        Yaw: -1.4048574
-        Pitch: -20.0000095
+        Position: [86.6901398, 83.1648865, -63.1366348]
+        Yaw: -252.095062
+        Pitch: -6.39971209
       Primary: true
+      ClearFlag: 1
+    SkyboxComponent:
+      MaterialFilePath: Kloppenheim Skybox/Kloppenheim Skybox.lmaterial
     SpotLightComponent:
-      Position: [-29.8175182, 10.019063, -1.07567537, 1]
-      Direction: [0.93941021, -0.342020333, -0.0230383798, 1]
+      Position: [86.6901398, 83.1648865, -63.1366348, 1]
+      Direction: [-0.30552271, -0.111463957, 0.945638299, 1]
       Ambient: [0, 0, 0, 1]
       Diffuse: [1, 1, 1, 1]
       Specular: [1, 1, 1, 1]

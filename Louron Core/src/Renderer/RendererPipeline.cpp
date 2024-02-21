@@ -437,10 +437,10 @@ namespace Louron {
 
 					if (scene_camera.ClearFlags == L_CAMERA_CLEAR_FLAGS::SKYBOX) {
 
-						if (skybox.Material.Bind()) {
+						if (skybox.Material->Bind()) {
 							glDepthFunc(GL_LEQUAL);
 							
-							skybox.Material.UpdateUniforms(*camera);
+							skybox.Material->UpdateUniforms(*camera);
 							Renderer::DrawSkybox(skybox);
 							
 							glBindVertexArray(0);

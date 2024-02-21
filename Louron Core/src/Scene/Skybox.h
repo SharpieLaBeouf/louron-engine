@@ -1,8 +1,9 @@
 #pragma once
 
 #include "../OpenGL/Material.h"
-
 #include "../OpenGL/Vertex Array.h"
+
+#include "../Core/Engine.h"
 
 #include <filesystem>
 
@@ -26,7 +27,7 @@ namespace Louron {
 		SkyboxMaterial();
 		~SkyboxMaterial() = default;
 
-		GLboolean LoadSkybox(const std::vector<std::filesystem::path>& textures);
+		GLboolean LoadSkybox(const std::array<std::filesystem::path, 6>& textures);
 		GLboolean LoadSkyboxTexture(const L_SKYBOX_BINDING& binding, const std::filesystem::path& filePath);
 
 		void UpdateUniforms(const Camera& camera);
@@ -37,17 +38,24 @@ namespace Louron {
 		GLboolean Bind();
 		void UnBind();
 
-		// Getters and Setters
-		void SetSkyboxTexture(const L_SKYBOX_BINDING& binding, std::shared_ptr<Texture> texture) { m_SkyboxTextures[binding] = texture; }
-		std::shared_ptr<Texture> GetSkyboxTexture(const L_SKYBOX_BINDING& binding) { return m_SkyboxTextures[binding]; }
 
-		std::array<std::shared_ptr<Texture>, 6> m_SkyboxTextures;
+		void SetMaterialFilePath(const std::filesystem::path& filePath) { m_MaterialFilePath = filePath; }
+		const std::filesystem::path& GetMaterialFilePath() const { return m_MaterialFilePath; }
+
+		const std::array<std::filesystem::path, 6>& GetTextureFilePaths() const { return m_TextureFilePaths; }
+
+		void SetName(const std::string& name) { m_MaterialName = name; }
+		const std::string& GetName() const { return m_MaterialName; }
+
 	private:
 
 		std::string m_MaterialName = "New Skybox Material";
 
 		GLuint m_SkyboxID = -1;
-		std::shared_ptr<Shader> m_MaterialShader;
+		std::shared_ptr<Shader> m_MaterialShader = Engine::Get().GetShaderLibrary().GetShader("Skybox");
+
+		std::filesystem::path m_MaterialFilePath;
+		std::array<std::filesystem::path, 6> m_TextureFilePaths;
 	};
 
 
@@ -55,17 +63,19 @@ namespace Louron {
 
 	public:
 
-		SkyboxMaterial Material;
+		std::shared_ptr<SkyboxMaterial> Material = std::make_shared<SkyboxMaterial>();
+
+	public:
 
 		SkyboxComponent();
 		SkyboxComponent(const SkyboxComponent&) = default;
 
-		void Bind() { m_VAO.Bind(); }
-		void UnBind() { m_VAO.Unbind(); }
+		void Bind() { m_VAO->Bind(); }
+		void UnBind() { glBindVertexArray(0); }
 
 	private:
 
-		VertexArray m_VAO;
+		std::shared_ptr<VertexArray> m_VAO = nullptr;
 
 	};
 

@@ -42,8 +42,8 @@ namespace Louron {
 	};
 
     enum L_CAMERA_CLEAR_FLAGS {
-        COLOUR_ONLY,
-        SKYBOX
+        COLOUR_ONLY = 0,
+        SKYBOX = 1
     };
 
 	struct CameraComponent {

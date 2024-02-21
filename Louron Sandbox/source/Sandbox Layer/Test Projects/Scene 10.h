@@ -126,9 +126,9 @@ public:
 		m_Light.position.y = 1.0f;
 		m_Light.specular = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
 
-		m_SceneCamera.setPitch(-90.0f);
-		m_SceneCamera.setYaw(-180.0f);
-		m_SceneCamera.toggleMovement();
+		m_SceneCamera.SetPitch(-90.0f);
+		m_SceneCamera.SetYaw(-180.0f);
+		m_SceneCamera.ToggleMovement();
 	}
 
 	~Scene10() {

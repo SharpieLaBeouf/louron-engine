@@ -1,6 +1,5 @@
 #include "Skybox.h"
 
-#include "../Core/Engine.h"
 
 #include "../Debug/Assert.h"
 
@@ -10,6 +9,8 @@
 
 namespace Louron {
 	
+#pragma region SkyboxMaterial
+
 	/// <summary>
 	/// Initialise the Skybox Material in OpenGL.
 	/// </summary>
@@ -17,18 +18,8 @@ namespace Louron {
 		glGenTextures(1, &m_SkyboxID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_SkyboxID);
 
-		//std::shared_ptr<Texture> tex = std::make_shared<Texture>();
-		//for (unsigned int i = 0; i < 6; i++) {
-
-		//	m_SkyboxTextures[i] = tex;
-		//	m_SkyboxTextures[i]->SetWrapMode(GL_CLAMP_TO_EDGE);
-		//	glCopyTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, 0, 0, 0, 0, m_SkyboxTextures[i]->GetWidth(), m_SkyboxTextures[i]->GetHeight());
-		//}
-
-		m_MaterialShader = Engine::Get().GetShaderLibrary().GetShader("Skybox");
 		m_MaterialShader->Bind();
 		m_MaterialShader->SetInt("u_Skybox", 0);
-
 	}
 
 	/// <summary>
@@ -36,15 +27,16 @@ namespace Louron {
 	/// </summary>
 	/// <param name="textures">A vector list of filepaths. Please ensure 
 	/// filepaths are ordered as such: right, left, top, bottom, back, front.</param>
-	/// <returns></returns>
-	GLboolean SkyboxMaterial::LoadSkybox(const std::vector<std::filesystem::path>& textures) {
+	GLboolean SkyboxMaterial::LoadSkybox(const std::array<std::filesystem::path, 6>& textures) {
 		
+		m_TextureFilePaths = textures;
+
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_SkyboxID);
 
 		int width, height, nrChannels;
-		for (unsigned int i = 0; i < textures.size(); i++)
+		for (unsigned int i = 0; i < m_TextureFilePaths.size(); i++)
 		{
-			unsigned char* data = stbi_load(textures[i].string().c_str(), &width, &height, &nrChannels, 0);
+			unsigned char* data = stbi_load(m_TextureFilePaths[i].string().c_str(), &width, &height, &nrChannels, 0);
 			if (data)
 			{
 				GLenum format = GL_RGBA;
@@ -65,7 +57,7 @@ namespace Louron {
 			}
 			else
 			{
-				std::cout << "[L20] Skybox Texture Failed to Load: " << textures[i].string() << std::endl;
+				std::cout << "[L20] Skybox Texture Failed to Load: " << m_TextureFilePaths[i].string() << std::endl;
 				stbi_image_free(data);
 				return GL_FALSE;
 			}
@@ -83,9 +75,7 @@ namespace Louron {
 	/// <summary>
 	/// Load individual texture for indiviaul skybox face.
 	/// </summary>
-	/// <param name="binding"></param>
-	/// <param name="filePath"></param>
-	/// <returns></returns>
+	/// <param name="binding">This is the face of the cube map.</param>
 	GLboolean SkyboxMaterial::LoadSkyboxTexture(const L_SKYBOX_BINDING& binding, const std::filesystem::path& filePath)
 	{
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_SkyboxID);
@@ -136,7 +126,6 @@ namespace Louron {
 			glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
 			m_MaterialShader->SetMat4("u_VertexIn.View", view);
 		}
-
 	}
 
 	GLboolean SkyboxMaterial::Bind() {
@@ -150,16 +139,13 @@ namespace Louron {
 		return GL_FALSE;
 	}
 	void SkyboxMaterial::UnBind() {
-
-		for (int i = 0; i < m_SkyboxTextures.size(); i++) {
-			if (m_SkyboxTextures[i]) {
-				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
-		}
+		
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		glActiveTexture(GL_TEXTURE0);
 		glUseProgram(0);
 	}
+
+#pragma endregion
 
 	SkyboxComponent::SkyboxComponent() {
 
@@ -207,15 +193,13 @@ namespace Louron {
 			-1.0f, -1.0f,  1.0f,
 			 1.0f, -1.0f,  1.0f
 		};
+				
+		// Create Buffer
+		VertexBuffer* vbo = new VertexBuffer(&skyboxVertices[0], sizeof(skyboxVertices));
+		vbo->SetLayout({ { ShaderDataType::Float3, "aPos" } });
 
-		VertexBuffer* vbo = new VertexBuffer(skyboxVertices, sizeof(skyboxVertices));
-		
-		BufferLayout layout = {
-			{ ShaderDataType::Float3, "aPos" }
-		};
-		
-		vbo->SetLayout(layout);
-		m_VAO.AddVertexBuffer(vbo);
+		// Create Vertex Array and Assign Buffer
+		m_VAO = std::make_shared<VertexArray>();
+		m_VAO->AddVertexBuffer(vbo);
 	}
-
 }

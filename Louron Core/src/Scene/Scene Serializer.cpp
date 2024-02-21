@@ -3,6 +3,7 @@
 #include "UUID.h"
 #include "Entity.h"
 #include "Components.h"
+#include "Skybox.h"
 
 #include "../Renderer/RendererPipeline.h"
 
@@ -110,14 +111,10 @@ namespace YAML {
 
 namespace Louron {
 	
-	SceneSerializer::SceneSerializer(const std::shared_ptr<Scene>& scene) : m_Scene(scene)
-	{
-
-	}
+	SceneSerializer::SceneSerializer(const std::shared_ptr<Scene>& scene) : m_Scene(scene) { }
 	
-	static void SerializeEntity(YAML::Emitter& out, Entity entity) {
+	void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity) {
 
-		// TODO: implement UUID
 		out << YAML::BeginMap;
 		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
 
@@ -201,6 +198,7 @@ namespace Louron {
 			}
 
 			out << YAML::Key << "Primary" << YAML::Value << cameraComponent.Primary;
+			out << YAML::Key << "ClearFlag" << YAML::Value << (int)cameraComponent.ClearFlags;
 
 			out << YAML::EndMap;
 		}
@@ -213,6 +211,50 @@ namespace Louron {
 			const MeshRenderer& meshRenderer = entity.GetComponent<MeshRenderer>();
 			out << YAML::Key << "MeshActive" << YAML::Value << meshRenderer.active;
 			out << YAML::Key << "MeshFilePath" << YAML::Value << meshRenderer.GetPath();
+
+			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<SkyboxComponent>()) {
+
+			out << YAML::Key << "SkyboxComponent";
+			out << YAML::BeginMap;
+
+			const SkyboxComponent& skyboxComponent = entity.GetComponent<SkyboxComponent>();
+			out << YAML::Key << "MaterialFilePath" << YAML::Value << skyboxComponent.Material->GetMaterialFilePath().string().substr(skyboxComponent.Material->GetMaterialFilePath().string().find(m_Scene->GetConfig().AssetDirectory.string()) + m_Scene->GetConfig().AssetDirectory.string().length());
+
+			{
+				YAML::Emitter materialOut;
+				materialOut << YAML::BeginMap;
+				materialOut << YAML::Key << "Material Name" << YAML::Value << skyboxComponent.Material->GetName();
+				materialOut << YAML::Key << "Material Type" << YAML::Value << "SkyboxMaterial";
+				materialOut << YAML::Key << "TextureFilePaths" << YAML::Value << YAML::BeginMap;
+
+				const std::array<std::filesystem::path, 6>& fsArray = skyboxComponent.Material->GetTextureFilePaths();
+
+				std::unordered_map<int, std::string> indexKeyMap{
+					{ 0, "Right"},
+					{ 1, "Left"},
+					{ 2, "Top"},
+					{ 3, "Bottom"},
+					{ 4, "Back"},
+					{ 5, "Front"},
+				};
+
+				for (auto& pair : indexKeyMap)
+					materialOut << 
+					YAML::Key	<< pair.second << 
+					YAML::Value << fsArray[pair.first].string().substr(fsArray[pair.first].string().find(m_Scene->GetConfig().AssetDirectory.string()) + m_Scene->GetConfig().AssetDirectory.string().length());
+
+				materialOut << YAML::EndMap << YAML::EndMap;
+
+				std::filesystem::create_directories(skyboxComponent.Material->GetMaterialFilePath().parent_path());
+
+				std::ofstream fout(skyboxComponent.Material->GetMaterialFilePath());
+				fout << materialOut.c_str();
+
+				std::cout << "[L20] Skybox Material (" << skyboxComponent.Material->GetMaterialFilePath().filename().replace_extension().string() << ") Saved at : " << skyboxComponent.Material->GetMaterialFilePath().string() << std::endl;
+			}
 
 			out << YAML::EndMap;
 		}
@@ -493,10 +535,11 @@ namespace Louron {
 						entityCamera.Camera->MouseSensitivity = camera["Camera"]["MouseSensitivity"].as<float>();
 						entityCamera.Camera->MouseToggledOff = camera["Camera"]["MouseToggledOff"].as<bool>();
 
-						entityCamera.Camera->setYaw(camera["Camera"]["Yaw"].as<float>());
-						entityCamera.Camera->setPitch(camera["Camera"]["Pitch"].as<float>());
+						entityCamera.Camera->SetYaw(camera["Camera"]["Yaw"].as<float>());
+						entityCamera.Camera->SetPitch(camera["Camera"]["Pitch"].as<float>());
 
 						entityCamera.Primary = camera["Primary"].as<bool>();
+						entityCamera.ClearFlags = (L_CAMERA_CLEAR_FLAGS)camera["ClearFlag"].as<int>();
 
 					}
 
@@ -510,6 +553,14 @@ namespace Louron {
 						auto& entityMeshRenderer = deserializedEntity.AddComponent<MeshRenderer>();
 						entityMeshRenderer.LinkMeshRenderer(m_Scene->m_SceneConfig.SceneResourceManager->GetMeshRenderer(meshRenderer["MeshFilePath"].as<std::string>()));
 						entityMeshRenderer.active = meshRenderer["MeshActive"].as<bool>();
+					}
+
+					// Skybox Component and Skybox Material
+					auto skybox = entity["SkyboxComponent"];
+					if (skybox) {
+
+						SkyboxComponent& skyboxComponent = deserializedEntity.AddComponent<SkyboxComponent>();
+						skyboxComponent.Material = DeserializeSkyboxMaterial(m_Scene->m_SceneConfig.AssetDirectory / skybox["MaterialFilePath"].as<std::string>());
 					}
 
 					// Point Light
@@ -563,6 +614,67 @@ namespace Louron {
 		}
 
 		return false;
+	}
+
+	std::shared_ptr<SkyboxMaterial> SceneSerializer::DeserializeSkyboxMaterial(const std::filesystem::path& filePath) {
+		
+		L_CORE_ASSERT((filePath.extension() == ".lmaterial"), "Incompatible Skybox Material File Extension! Extension used: " + filePath.extension().string() + ", Extension Required: .lmaterial");
+
+		std::shared_ptr<SkyboxMaterial> material = std::make_shared<SkyboxMaterial>();
+		if (filePath.extension() == ".lmaterial") {
+
+			YAML::Node data;
+
+			try {
+				data = YAML::LoadFile(filePath.string());
+			}
+			catch (YAML::ParserException e) {
+				L_CORE_ASSERT(false, "YAML-CPP Failed to Load Scene File: " + filePath.string() + ", " + e.what());
+				return material;
+			}
+
+			if (!data["Material Type"] || data["Material Type"].as<std::string>() != "SkyboxMaterial") {
+				L_CORE_ASSERT(false, "Material Type Node is Not Skybox Material: " + filePath.string());
+				return material;
+			}
+
+			if (!data["Material Name"]) {
+				L_CORE_ASSERT(false, "Material Name Node Not Correctly Declared in File: " + filePath.string());
+				return material;
+			}
+
+			if (!data["TextureFilePaths"]) {
+				L_CORE_ASSERT(false, "TextureFilePaths Node Not Correctly Declared in File: " + filePath.string());
+				return material;
+			}
+			else {
+
+				std::array<std::filesystem::path, 6> textureFilePathArray;
+
+				std::unordered_map<int, std::string> indexKeyMap{
+				
+					{ 0, "Right"},
+					{ 1, "Left"},
+					{ 2, "Top"},
+					{ 3, "Bottom"},
+					{ 4, "Back"},
+					{ 5, "Front"},
+				
+				};
+
+				auto texturesData = data["TextureFilePaths"];
+				if (texturesData)
+					for (auto& pair : indexKeyMap) 
+						if(texturesData[pair.second])
+							textureFilePathArray[pair.first] = m_Scene->m_SceneConfig.AssetDirectory / texturesData[pair.second].as<std::string>();
+				
+				material->LoadSkybox(textureFilePathArray);
+				material->SetName(data["Material Name"].as<std::string>());
+				material->SetMaterialFilePath(filePath);
+			}
+		}
+
+		return material;
 	}
 }
 

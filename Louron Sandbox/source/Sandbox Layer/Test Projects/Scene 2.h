@@ -71,6 +71,10 @@ private:
 //Public Functions
 public:
 
+	void OnAttach() override {
+		lastTime = (float)glfwGetTime();
+	}
+
 	void Update() override {
 		currentTime = (float)glfwGetTime();
 		deltaTime = currentTime - lastTime;

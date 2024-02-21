@@ -70,13 +70,11 @@ public:
 
 	void OnAttach() override { 
 
-		glEnable(GL_DEPTH_TEST);
 		lastTime = (float)glfwGetTime();
 		m_Scene->OnStart();
 	}
 	void OnDetach() override { 
 
-		glDisable(GL_DEPTH_TEST);
 		m_Scene->OnStop();
 	}
 

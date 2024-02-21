@@ -14,6 +14,9 @@ namespace Louron {
 
 		// Camera Options
 
+		float NearDistance = 0.1f;
+		float FarDistance = 1000.0f;
+
 		float FOV = 60.0f;
 		float MovementSpeed = 10.0f;
 		float MovementYDamp = 0.65f;
@@ -25,25 +28,27 @@ namespace Louron {
 		~Camera() { }
 
 		glm::mat4 GetViewMatrix() const { return glm::lookAt(m_CameraPos, m_CameraPos + m_CameraFront, m_CameraUp); }
+
+		void UpdateProjMatrix() { m_ProjectionMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance); }
 		glm::mat4 GetProjMatrix() const { return m_ProjectionMatrix; }
 
 		glm::vec3 GetCameraDirection() const { return m_CameraFront; }
 
-		void setPosition(glm::vec3 pos) { m_CameraPos = pos; }
+		void SetPosition(glm::vec3 pos) { m_CameraPos = pos; }
 		glm::vec3 GetPosition() const { return m_CameraPos; }
 
-		void setPitch(float pitch) { m_Pitch = pitch; }
+		void SetPitch(float pitch) { m_Pitch = pitch; }
 		float GetPitch() const { return m_Pitch; }
 
-		void setYaw(float yaw) { m_Yaw = yaw; }
+		void SetYaw(float yaw) { m_Yaw = yaw; }
 		float GetYaw() const { return m_Yaw; }
 
-		void toggleMovement() { m_Movement = !m_Movement; }
+		void ToggleMovement() { m_Movement = !m_Movement; }
 
 		void Update(float deltaTime = 0.0f);
 
-		void processKeyboard(float deltaTime);
-		void processMouse(bool constrainPitch = true);
+		void ProcessKeyboard(float deltaTime);
+		void ProcessMouse(bool constrainPitch = true);
 
 	private:
 

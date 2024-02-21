@@ -226,7 +226,16 @@ namespace Louron {
 		m_IsRunning = true;
 
 		m_SceneConfig.ScenePipeline->OnStartPipeline();
+		
+		const auto& view = m_Registry.view<Transform, CameraComponent>();
+		for (const auto& entity : view) {
+			const auto& camera = view.get<CameraComponent>(entity);
 
+			if (camera.Primary) {
+				camera.Camera->UpdateProjMatrix();
+				break;
+			}
+		}
 	}
 	
 	void Scene::OnUpdate() {

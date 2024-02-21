@@ -13,7 +13,7 @@ namespace Louron {
 		m_Yaw = yaw;
 		m_Pitch = pitch;
 
-		m_ProjectionMatrix = glm::perspective(glm::radians(60.0f), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), 0.1f, 1000.0f);
+		m_ProjectionMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance);
 
 		UpdateCameraVectors();
 	}
@@ -29,9 +29,9 @@ namespace Louron {
 
 		if (m_Movement)
 		{
-			processKeyboard(deltaTime);
+			ProcessKeyboard(deltaTime);
 			if (MouseToggledOff) 
-				processMouse(); 
+				ProcessMouse(); 
 			else if (!MouseToggledOff) {
 				m_FirstMouse = true;
 				UpdateCameraVectors();
@@ -41,7 +41,7 @@ namespace Louron {
 		else UpdateCameraVectors();
 	}
 
-	void Camera::processKeyboard(float deltaTime) {
+	void Camera::ProcessKeyboard(float deltaTime) {
 		float modifier = (m_Input.GetKey(GLFW_KEY_LEFT_CONTROL)) ? 3.0f : 1.0f;
 		float velocity = modifier * MovementSpeed * deltaTime;
 
@@ -61,7 +61,7 @@ namespace Louron {
 			m_CameraPos -= velocity * m_CameraRight;
 	}
 
-	void Camera::processMouse(bool constrainPitch) {
+	void Camera::ProcessMouse(bool constrainPitch) {
 		float xpos = m_Input.GetMouseX(), ypos = m_Input.GetMouseY();
 
 		if (m_FirstMouse) {

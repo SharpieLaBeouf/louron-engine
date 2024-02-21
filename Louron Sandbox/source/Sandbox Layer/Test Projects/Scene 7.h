@@ -52,8 +52,10 @@ public:
 	}
 
 	void OnAttach() override {
-
 		glEnable(GL_DEPTH_TEST);
+		lastTime = (float)glfwGetTime();
+
+		m_SceneCamera.UpdateProjMatrix();
 	}
 
 	void OnDetach() override {

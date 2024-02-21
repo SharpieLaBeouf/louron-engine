@@ -45,7 +45,8 @@ public:
 	}
 
 	void OnAttach() override {
-
+		lastTime = (float)glfwGetTime();
+	
 		m_Scene->OnStart();
 	}
 

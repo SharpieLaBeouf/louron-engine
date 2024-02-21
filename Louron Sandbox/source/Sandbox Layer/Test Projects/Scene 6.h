@@ -98,6 +98,12 @@ public:
 		delete m_SceneCamera;
 	}
 
+	void OnAttach() override {
+		lastTime = (float)glfwGetTime();
+
+		m_SceneCamera->UpdateProjMatrix();
+	}
+
 	void Update() override {
 
 		currentTime = (float)glfwGetTime();
