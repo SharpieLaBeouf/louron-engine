@@ -7,29 +7,77 @@
 
 namespace Louron {
 		
-	void ForwardPlusPipeline::OnUpdate(Scene* scene) {
-		
-		Camera* camera = nullptr;
-		{
-			const auto& view = scene->GetRegistry()->view<Transform, CameraComponent>();
-			for (const auto& entity : view) {
-				const auto& temp_camera = view.get<CameraComponent>(entity);
 
-				if (temp_camera.Primary) {
-					camera = temp_camera.Camera.get();
-					break;
-				}
-			}
-		}
+#pragma region ForwardPipeline
 
-		if (camera) {
-			UpdateSSBOData(scene);
+	void RenderPipeline::OnUpdate() { 
+	
+	}
 
-			ConductDepthPass(scene, camera);
-			ConductLightCull(camera); // WIP for Spot Lights
-			ConductRenderPass(scene, camera);
+	void RenderPipeline::OnStartPipeline(std::shared_ptr<Louron::Scene> scene) { 
+		m_Scene = scene; 
+	}
+
+	void RenderPipeline::OnStopPipeline() { 
+	
+	}
+
+	void RenderPipeline::UpdateActiveScene(std::shared_ptr<Louron::Scene> scene) {
+
+		if (scene) {
+
+			std::cout << "[L20] Changing Scene To: " << scene->GetConfig().Name <<std::endl;
+			m_Scene = scene;
 		}
 		else {
+			std::cerr << "[L20] Cannot Change to Invalid Scene!" << std::endl;
+		}
+
+	}
+
+	void RenderPipeline::ConductRenderPass(Camera* camera) {
+
+
+	}
+
+#pragma endregion
+
+#pragma region ForwardPlusPipeline
+
+	/// <summary>
+	/// This is the main loop for rendering logic
+	/// in the Forward+ Pipeline.
+	/// </summary>
+	void ForwardPlusPipeline::OnUpdate() {
+		
+		if (!m_Scene) {
+			std::cerr << "[L20] Invalid Scene! Please Use ForwardPlusPipeline::OnStartPipeline() Before Updating." << std::endl;
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			return;
+		}
+
+		Camera* camera = nullptr;
+		if (Entity cameraEntity = m_Scene->GetPrimaryCameraEntity())
+			camera = cameraEntity.GetComponent<CameraComponent>().Camera.get();
+
+		if (camera) {
+
+			glm::uvec2 frameSize = Engine::Get().GetWindow().GetSize();
+			if (m_FrameSize != frameSize) {
+				m_FrameSize = frameSize;
+
+				UpdateComputeData();
+				camera->UpdateProjMatrix();
+			}
+
+			UpdateSSBOData();
+
+			ConductDepthPass(camera);
+			ConductLightCull(camera);
+			ConductRenderPass(camera);
+		}
+		else {
+			std::cerr << "[L20] No Primary Camera Found in Scene!" << std::endl;
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 	}
@@ -37,18 +85,21 @@ namespace Louron {
 	/// <summary>
 	/// Set OpenGL state configuration required by renderer and FP_Data and Light SSBOs.
 	/// </summary>
-	void ForwardPlusPipeline::OnStartPipeline() {
+	void ForwardPlusPipeline::OnStartPipeline(std::shared_ptr<Louron::Scene> scene) {
 
 		L_PROFILE_SCOPE("Forward Plus - Set Up Pipeline");
 
 		glEnable(GL_DEPTH_TEST);
 
-		// Set screen to non-resizeable
-		glfwSetWindowAttrib((GLFWwindow*)Engine::Get().GetWindow().GetNativeWindow(), GLFW_RESIZABLE, GL_FALSE);
+		m_Scene = scene;
+		m_FrameSize = Engine::Get().GetWindow().GetSize();
+
+		if (Entity cameraEntity = m_Scene->GetPrimaryCameraEntity())
+			cameraEntity.GetComponent<CameraComponent>().Camera->UpdateProjMatrix();
 
 		// Calculate workgroups and generate SSBOs from screen size
-		FP_Data.workGroupsX = (unsigned int)std::ceil((float)Engine::Get().GetWindow().GetWidth() / 16.0f);
-		FP_Data.workGroupsY = (unsigned int)std::ceil((float)Engine::Get().GetWindow().GetHeight() / 16.0f);
+		FP_Data.workGroupsX = (unsigned int)std::ceil((float)m_FrameSize.x / 16.0f);
+		FP_Data.workGroupsY = (unsigned int)std::ceil((float)m_FrameSize.y / 16.0f);
 		size_t numberOfTiles = static_cast<size_t>(FP_Data.workGroupsX * FP_Data.workGroupsY);
 
 		// Setup Light Buffers
@@ -62,19 +113,19 @@ namespace Louron {
 		glGenBuffers(1, &FP_Data.DL_Buffer);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_POINT_LIGHTS * sizeof(PointLightComponent), 0, GL_DYNAMIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_POINT_LIGHTS * sizeof(PointLightComponent), nullptr, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, 0, GL_STATIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, nullptr, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_SPOT_LIGHTS * sizeof(SpotLightComponent), 0, GL_DYNAMIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_SPOT_LIGHTS * sizeof(SpotLightComponent), nullptr, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, 0, GL_STATIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, nullptr, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLightComponent), 0, GL_DYNAMIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLightComponent), nullptr, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -84,7 +135,7 @@ namespace Louron {
 		glGenTextures(1, &FP_Data.DepthMap_Texture);
 
 		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, Engine::Get().GetWindow().GetWidth(), Engine::Get().GetWindow().GetHeight(), 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_FrameSize.x, m_FrameSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -107,9 +158,7 @@ namespace Louron {
 		L_PROFILE_SCOPE("Forward Plus - Clean Up Pipeline");
 
 		glDisable(GL_DEPTH_TEST);
-
-		glfwSetWindowAttrib((GLFWwindow*)Engine::Get().GetWindow().GetNativeWindow(), GLFW_RESIZABLE, GL_TRUE);
-
+		
 		glDeleteBuffers(1, &FP_Data.PL_Buffer);
 		glDeleteBuffers(1, &FP_Data.PL_Indices_Buffer);
 		glDeleteBuffers(1, &FP_Data.SL_Buffer);
@@ -121,9 +170,36 @@ namespace Louron {
 	}
 
 	/// <summary>
+	/// This updates the Forward+ data for the applicable Compute and Vertex/Fragment shaders.
+	/// </summary>
+	void ForwardPlusPipeline::UpdateComputeData() {
+
+		// Calculate Workgroups and Generate SSBOs from Screen Size
+
+		FP_Data.workGroupsX = (unsigned int)std::ceil((float)m_FrameSize.x / 16.0f);
+		FP_Data.workGroupsY = (unsigned int)std::ceil((float)m_FrameSize.y / 16.0f);
+		size_t numberOfTiles = static_cast<size_t>(FP_Data.workGroupsX * FP_Data.workGroupsY);
+
+		// Update Light Indice Buffers
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Indices_Buffer);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, nullptr, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Indices_Buffer);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, nullptr, GL_STATIC_DRAW);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+		// Update Depth Texture Size
+
+		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_FrameSize.x, m_FrameSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	}
+
+	/// <summary>
 	/// Updates all Light Data in SSBOs
 	/// </summary>
-	void ForwardPlusPipeline::UpdateSSBOData(Scene* scene) {
+	void ForwardPlusPipeline::UpdateSSBOData() {
 
 		L_PROFILE_SCOPE("Forward Plus - Update SSBO Data");
 
@@ -139,7 +215,7 @@ namespace Louron {
 			{
 				// Update Light Objects
 				std::vector<PointLightComponent> pointLightVector;
-				auto view = scene->GetRegistry()->view<Transform, PointLightComponent>();
+				auto view = m_Scene->GetAllEntitiesWith<Transform, PointLightComponent>();
 				
 				// Add lights to vector that are contained within the scene up to a maximum of 1024
 				int i = 0;
@@ -176,7 +252,7 @@ namespace Louron {
 
 				// Update Light Objects
 				std::vector<SpotLightComponent> spotLightVector;
-				auto view = scene->GetRegistry()->view<Transform, SpotLightComponent>();
+				auto view = m_Scene->GetAllEntitiesWith<Transform, SpotLightComponent>();
 
 				// Add lights to vector that are contained within the scene up to a maximum of 1024
 				int i = 0;
@@ -212,7 +288,7 @@ namespace Louron {
 			{
 				// Update Light Objects
 				std::vector<DirectionalLightComponent> directionalLightVector;
-				auto view = scene->GetRegistry()->view<Transform, DirectionalLightComponent>();
+				auto view = m_Scene->GetAllEntitiesWith<Transform, DirectionalLightComponent>();
 
 				// Add lights to vector that are contained within the scene up to a maximum of 1024
 				int i = 0;
@@ -253,13 +329,13 @@ namespace Louron {
 	/// <summary>
 	/// Conducts a Depth Pass of the scene sorted front to back
 	/// </summary>
-	void ForwardPlusPipeline::ConductDepthPass(Scene* scene, Camera* camera) {
+	void ForwardPlusPipeline::ConductDepthPass(Camera* camera) {
 
 		L_PROFILE_SCOPE("Forward Plus - Pre Depth Pass");
 
 		// Call Renderer for all Meshes
 		{
-			const auto& view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();
+			const auto& view = m_Scene->GetAllEntitiesWith<Transform, MeshRenderer, MeshFilter>();
 
 			// First: Distance, Second: Transform, Third: MeshFilter
 			std::vector<std::tuple<float, Transform, MeshFilter>> sortedEntities;
@@ -316,7 +392,6 @@ namespace Louron {
 	/// Conducts main tiled rendering algorithm, split screen into tiles
 	/// and determine which lights impact each tile frustum.
 	/// </summary>
-	/// <param name="camera"></param>
 	void ForwardPlusPipeline::ConductLightCull(Camera* camera) {
 
 		L_PROFILE_SCOPE("Forward Plus - Light Cull");
@@ -329,7 +404,7 @@ namespace Louron {
 
 			lightCull->SetMat4("u_View", camera->GetViewMatrix());
 			lightCull->SetMat4("u_Proj", camera->GetProjMatrix());
-			lightCull->SetiVec2("u_ScreenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight()));
+			lightCull->SetiVec2("u_ScreenSize", (glm::ivec2)m_FrameSize);
 			glActiveTexture(GL_TEXTURE4);
 			lightCull->SetInt("u_Depth", 4);
 			glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
@@ -347,7 +422,7 @@ namespace Louron {
 	/// drawn as instances if the meshes are identical using the same
 	/// material.
 	/// </summary>
-	void ForwardPlusPipeline::ConductRenderPass(Scene* scene, Camera* camera) {
+	void ForwardPlusPipeline::ConductRenderPass(Camera* camera) {
 
 		L_PROFILE_SCOPE("Forward Plus - Colour Render");
 
@@ -356,7 +431,7 @@ namespace Louron {
 		Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Gather all entities within scene with appropriate components
-		auto view = scene->GetRegistry()->view<Transform, MeshRenderer, MeshFilter>();
+		auto view = m_Scene->GetAllEntitiesWith<Transform, MeshRenderer, MeshFilter>();
 		if (view.begin() != view.end()) {
 			std::unordered_map<std::shared_ptr<Material>, std::unordered_map<std::shared_ptr<Mesh>, std::vector<Transform>>> materialMeshTransMap;
 
@@ -397,7 +472,7 @@ namespace Louron {
 						// Update Specific Forward Plus Uniforms
 
 						material->GetShader()->SetInt("u_TilesX", FP_Data.workGroupsX); // Number of tiles across the screen in the X axis
-						material->GetShader()->SetiVec2("u_ScreenSize", glm::ivec2((int)Engine::Get().GetWindow().GetWidth(), (int)Engine::Get().GetWindow().GetHeight())); // Size of screen
+						material->GetShader()->SetiVec2("u_ScreenSize", (glm::ivec2)m_FrameSize); // Size of screen
 
 						glActiveTexture(GL_TEXTURE4);
 						material->GetShader()->SetInt("u_Depth", 4); // Depth texture map
@@ -429,7 +504,7 @@ namespace Louron {
 				}
 			}
 
-			auto skyboxView = scene->GetRegistry()->view<CameraComponent, SkyboxComponent>();
+			auto skyboxView = m_Scene->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
 			if (skyboxView.begin() != skyboxView.end()) {
 
 				for (const auto& entity : skyboxView) {
@@ -443,16 +518,15 @@ namespace Louron {
 							skybox.Material->UpdateUniforms(*camera);
 							Renderer::DrawSkybox(skybox);
 							
-							glBindVertexArray(0);
+							skybox.UnBind();
 							glDepthFunc(GL_LESS);
 						}
 					}
 				}
 			}
 
-
 			// Clean Up Scene Render Pass
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 4; i++) {
 				glActiveTexture(GL_TEXTURE0 + i);
 				glBindTexture(GL_TEXTURE_2D, 0);
 			}
@@ -461,5 +535,23 @@ namespace Louron {
 		}
 		
 	}
+
+#pragma endregion
+
+#pragma region DeferredPipeline
+
+	void DeferredPipeline::OnUpdate() {
+
+	}
+
+	void DeferredPipeline::OnStartPipeline(std::shared_ptr<Louron::Scene> scene) {
+
+	}
+
+	void DeferredPipeline::OnStopPipeline() {
+
+	}
+
+#pragma endregion
 
 }

@@ -15,13 +15,25 @@ namespace Louron {
 	class Scene;
 
 	class RenderPipeline {
+
 	public:
 
 		RenderPipeline() = default;
 
-		virtual void OnUpdate(Scene* scene) { }
-		virtual void OnStartPipeline() { }
-		virtual void OnStopPipeline() { }
+		virtual void OnUpdate();
+		virtual void OnStartPipeline(std::shared_ptr<Louron::Scene> scene);
+		virtual void OnStopPipeline();
+
+		virtual void UpdateActiveScene(std::shared_ptr<Louron::Scene> scene);
+
+	private:
+
+		void ConductRenderPass(Camera* camera);
+
+	protected:
+
+		glm::uvec2 m_FrameSize{ 0, 0 };
+		std::shared_ptr<Louron::Scene> m_Scene;
 	};
 
 	class ForwardPlusPipeline : public RenderPipeline {
@@ -30,17 +42,18 @@ namespace Louron {
 
 		ForwardPlusPipeline() = default;
 
-		void OnUpdate(Scene* scene) override;
-
-		void OnStartPipeline() override;
+		void OnUpdate() override;
+		void OnStartPipeline(std::shared_ptr<Louron::Scene> scene) override;
 		void OnStopPipeline() override;
 
 	private:
 
-		void UpdateSSBOData(Scene* scene);
-		void ConductDepthPass(Scene* scene, Camera* camera);
+		void UpdateComputeData();
+
+		void UpdateSSBOData();
+		void ConductDepthPass(Camera* camera);
 		void ConductLightCull(Camera* camera);
-		void ConductRenderPass(Scene* scene, Camera* camera);
+		void ConductRenderPass(Camera* camera);
 
 	private:
 
@@ -67,14 +80,14 @@ namespace Louron {
 
 	public:
 
-		void OnUpdate(Scene* scene) override {
-			// Deferred Rendering Pass
-		}
-
-	public:
-
 		DeferredPipeline() = default;
-		DeferredPipeline(std::shared_ptr<Scene> scene);
+
+		void OnUpdate() override;
+		void OnStartPipeline(std::shared_ptr<Louron::Scene> scene) override;
+		void OnStopPipeline() override;
+
+	private:
+
 	};
 
 }

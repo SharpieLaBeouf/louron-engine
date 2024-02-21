@@ -32,6 +32,8 @@ namespace Louron {
 		unsigned int GetWidth() const { return m_Data->Width; }
 		unsigned int GetHeight() const { return m_Data->Height; }
 
+		glm::uvec2 GetSize() const { return { m_Data->Width, m_Data->Height }; }
+
 		void* GetNativeWindow() const { return m_Window; }
 
 		void SetVSync(bool enabled);

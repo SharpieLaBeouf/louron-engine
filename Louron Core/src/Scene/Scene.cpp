@@ -225,23 +225,13 @@ namespace Louron {
 
 		m_IsRunning = true;
 
-		m_SceneConfig.ScenePipeline->OnStartPipeline();
-		
-		const auto& view = m_Registry.view<Transform, CameraComponent>();
-		for (const auto& entity : view) {
-			const auto& camera = view.get<CameraComponent>(entity);
-
-			if (camera.Primary) {
-				camera.Camera->UpdateProjMatrix();
-				break;
-			}
-		}
+		m_SceneConfig.ScenePipeline->OnStartPipeline(shared_from_this());
 	}
 	
 	void Scene::OnUpdate() {
 
 		if (!m_IsPaused) {
-			m_SceneConfig.ScenePipeline->OnUpdate(this);
+			m_SceneConfig.ScenePipeline->OnUpdate();
 		}
 	}
 

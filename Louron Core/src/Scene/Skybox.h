@@ -71,7 +71,10 @@ namespace Louron {
 		SkyboxComponent(const SkyboxComponent&) = default;
 
 		void Bind() { m_VAO->Bind(); }
-		void UnBind() { glBindVertexArray(0); }
+		void UnBind() { 
+			Material->UnBind();
+			glBindVertexArray(0); 
+		}
 
 	private:
 
