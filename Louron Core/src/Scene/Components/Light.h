@@ -1,12 +1,15 @@
 #pragma once
 
-#include "../OpenGL/Shader.h"
-#include "../OpenGL/Texture.h"
+// Louron Core Headers
+#include "../../OpenGL/Shader.h"
+#include "../../OpenGL/Texture.h"
 
+// C++ Standard Library Headers
 #include <string>
 #include <unordered_map>
 #include <array>
 
+// External Vendor Library Headers
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 

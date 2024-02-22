@@ -1,7 +1,12 @@
 #pragma once
 
+// Louron Core Headers
+
+// C++ Standard Library Headers
 #include <cstdint>
 #include <cstddef>
+
+// External Vendor Library Headers
 
 namespace Louron {
 

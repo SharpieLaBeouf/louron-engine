@@ -1,13 +1,17 @@
 #pragma once
 
+// Louron Core Headers
+#include "Scene.h"
+
+#include "Components/UUID.h"
+#include "Components/Mesh.h"
+#include "Components/Components.h"
+
+// C++ Standard Library Headers
 #include <iostream>
 
-#include "UUID.h"
-#include "Mesh.h"
-#include "Scene.h"
-#include "Components.h"
-
-#include "entt/entt.hpp"
+// External Vendor Library Headers
+#include <entt/entt.hpp>
 
 namespace Louron {
 

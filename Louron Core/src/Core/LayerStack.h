@@ -1,7 +1,12 @@
 #pragma once
 
+// Louron Core Headers
 #include "Layer.h"
+
+// C++ Standard Library Headers
 #include <vector>
+
+// External Vendor Library Headers
 
 namespace Louron {
 

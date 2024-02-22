@@ -1,14 +1,18 @@
 #include "Scene Serializer.h"
 
-#include "UUID.h"
+// Louron Core Headers
 #include "Entity.h"
-#include "Components.h"
-#include "Skybox.h"
+
+#include "Components/UUID.h"
+#include "Components/Components.h"
+#include "Components/Skybox.h"
 
 #include "../Renderer/RendererPipeline.h"
 
+// C++ Standard Library Headers
 #include <fstream>
 
+// External Vendor Library Headers
 #define YAML_CPP_STATIC_DEFINE
 #include <yaml-cpp/yaml.h>
 

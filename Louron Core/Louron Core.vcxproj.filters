@@ -27,7 +27,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Scene\Mesh.cpp">
+    <ClCompile Include="src\Scene\Components\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\OpenGL\Vertex Array.cpp">
@@ -69,7 +69,7 @@
     <ClCompile Include="src\Core\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\Camera.cpp">
+    <ClCompile Include="src\Scene\Components\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\OpenGL\Material.cpp">
@@ -114,13 +114,13 @@
     <ClCompile Include="src\Scene\Resource Manager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\Components.cpp">
+    <ClCompile Include="src\Scene\Components\Components.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer\RendererPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\UUID.cpp">
+    <ClCompile Include="src\Scene\Components\UUID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Project\Project.cpp">
@@ -132,7 +132,7 @@
     <ClCompile Include="src\Scene\Scene Serializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\Skybox.cpp">
+    <ClCompile Include="src\Scene\Components\Skybox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -140,13 +140,13 @@
     <ClInclude Include="src\OpenGL\Buffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Scene\Light.h">
+    <ClInclude Include="src\Scene\Components\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\OpenGL\Vertex Array.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Scene\Components.h">
+    <ClInclude Include="src\Scene\Components\Components.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\Entity.h">
@@ -194,7 +194,7 @@
     <ClInclude Include="include\imgui\imstb_truetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Scene\Camera.h">
+    <ClInclude Include="src\Scene\Components\Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\OpenGL\Material.h">
@@ -497,7 +497,7 @@
     <ClInclude Include="src\Core\EngineStart.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Scene\Mesh.h">
+    <ClInclude Include="src\Scene\Components\Mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Renderer\Renderer.h">
@@ -524,13 +524,16 @@
     <ClInclude Include="src\Project\Project.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Scene\UUID.h">
+    <ClInclude Include="src\Scene\Components\UUID.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\Scene Serializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Scene\Skybox.h">
+    <ClInclude Include="src\Scene\Components\Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Logging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

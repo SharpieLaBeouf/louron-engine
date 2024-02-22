@@ -1,10 +1,14 @@
 #include "Window.h"
 
+// Louron Core Headers
+#include "Engine.h"
+
+// C++ Standard Library Headers
+
+// External Vendor Library Headers
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION    
 #include <stb_image/stb_image.h>
-
-#include "Engine.h"
 
 namespace Louron {
 	

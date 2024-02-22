@@ -1,8 +1,13 @@
 #include "Mesh.h"
-#include "Components.h"
-#include "../Renderer/Renderer.h"
 
+// Louron Core Headers
+#include "Components.h"
+#include "../../Renderer/Renderer.h"
+
+// C++ Standard Library Headers
 #include <iomanip>
+
+// External Vendor Library Headers
 
 namespace Louron {
 

@@ -1,11 +1,14 @@
 #pragma once
 
+// Louron Core Headers
+#include "Input.h"
+
+// C++ Standard Library Headers
 #include <iostream>
 
+// External Vendor Library Headers
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
-
-#include "Input.h"
 
 namespace Louron {
 

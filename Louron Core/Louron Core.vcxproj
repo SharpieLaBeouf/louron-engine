@@ -121,9 +121,9 @@
     <ClCompile Include="src\Project\Project Serializer.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Renderer\RendererPipeline.cpp" />
-    <ClCompile Include="src\Scene\Components.cpp" />
-    <ClCompile Include="src\Scene\Mesh.cpp" />
-    <ClCompile Include="src\Scene\Camera.cpp" />
+    <ClCompile Include="src\Scene\Components\Components.cpp" />
+    <ClCompile Include="src\Scene\Components\Mesh.cpp" />
+    <ClCompile Include="src\Scene\Components\Camera.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
     <ClCompile Include="src\Project\Project.cpp" />
     <ClCompile Include="src\Scene\Resource Manager.cpp" />
@@ -140,8 +140,8 @@
     <ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\Scene\Skybox.cpp" />
-    <ClCompile Include="src\Scene\UUID.cpp" />
+    <ClCompile Include="src\Scene\Components\Skybox.cpp" />
+    <ClCompile Include="src\Scene\Components\UUID.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\assimp\aabb.h" />
@@ -235,6 +235,7 @@
     <ClInclude Include="src\Core\GuiLayer.h" />
     <ClInclude Include="src\Core\Layer.h" />
     <ClInclude Include="src\Core\LayerStack.h" />
+    <ClInclude Include="src\Core\Logging.h" />
     <ClInclude Include="src\Debug\Assert.h" />
     <ClInclude Include="src\Debug\Profiler.h" />
     <ClInclude Include="src\Louron.h" />
@@ -243,14 +244,14 @@
     <ClInclude Include="src\Project\Project.h" />
     <ClInclude Include="src\Renderer\Renderer.h" />
     <ClInclude Include="src\Renderer\RendererPipeline.h" />
-    <ClInclude Include="src\Scene\Skybox.h" />
-    <ClInclude Include="src\Scene\UUID.h" />
-    <ClInclude Include="src\Scene\Light.h" />
+    <ClInclude Include="src\Scene\Components\Skybox.h" />
+    <ClInclude Include="src\Scene\Components\UUID.h" />
+    <ClInclude Include="src\Scene\Components\Light.h" />
     <ClInclude Include="src\OpenGL\Material.h" />
-    <ClInclude Include="src\Scene\Mesh.h" />
+    <ClInclude Include="src\Scene\Components\Mesh.h" />
     <ClInclude Include="src\OpenGL\Vertex Array.h" />
-    <ClInclude Include="src\Scene\Camera.h" />
-    <ClInclude Include="src\Scene\Components.h" />
+    <ClInclude Include="src\Scene\Components\Camera.h" />
+    <ClInclude Include="src\Scene\Components\Components.h" />
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\OpenGL\Texture.h" />
     <ClInclude Include="src\Scene\Resource Manager.h" />

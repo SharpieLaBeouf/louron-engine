@@ -1,14 +1,18 @@
 #include "GuiLayer.h"
 
+// Louron Core Headers
+#include "Engine.h"
+
+// C++ Standard Library Headers
+
+// External Vendor Library Headers
+#include <GLFW/glfw3.h>
+#include <glad/glad.h>
+
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 #include <imgui/imgui_impl_glfw.h>
 #include <imgui/imgui_impl_opengl3.h>
-
-#include "Engine.h"
-
-#include <GLFW/glfw3.h>
-#include <glad/glad.h>
 
 namespace Louron {
 

@@ -1,6 +1,5 @@
 #include "Shader.h"
 
-
 namespace Louron {
 
 // -- Shader --

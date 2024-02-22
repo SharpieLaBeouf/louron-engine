@@ -1,12 +1,6 @@
 #pragma once
 
-#include <memory>
-
-// VENDOR OPENGL
-#include <glad/glad.h>
-#include <glfw/glfw3.h>
-
-// ENGINE SYSTEMS
+// Louron Core Headers
 #include "Window.h"
 #include "GuiLayer.h"
 #include "LayerStack.h"
@@ -15,9 +9,12 @@
 #include "../OpenGL/Shader.h"
 #include "../OpenGL/Texture.h"
 
-#include "../Scene/Mesh.h"
+// C++ Standard Library Headers
+#include <memory>
 
-#include "../Debug/Profiler.h"
+// External Vendor Library Headers
+#include <glad/glad.h>
+#include <glfw/glfw3.h>
 
 int main(int argc, char** argv);
 

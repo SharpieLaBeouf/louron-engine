@@ -1,11 +1,17 @@
 #pragma once
 
-#include "Mesh.h"
+// Louron Core Headers
+#include "Components/Mesh.h"
+
 #include "../OpenGL/Shader.h"
 #include "../OpenGL/Texture.h"
 #include "../OpenGL/Material.h"
 
 #include "../Debug/Assert.h"
+
+// C++ Standard Library Headers
+
+// External Vendor Library Headers
 
 namespace Louron {
 

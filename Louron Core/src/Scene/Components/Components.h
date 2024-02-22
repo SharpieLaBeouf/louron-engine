@@ -1,20 +1,23 @@
 #pragma once
 
+// Louron Core Headers
+#include "UUID.h"
+#include "Mesh.h"
+#include "Light.h"
+#include "Camera.h"
+#include "Skybox.h"
+#include "../../OpenGL/Material.h"
+
+// C++ Standard Library Headers
+#include <map>
+
+// External Vendor Library Headers
 #include <glad/glad.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
-
-#include <map>
-
-#include "UUID.h"
-#include "Mesh.h"
-#include "Light.h"
-#include "Camera.h"
-#include "Skybox.h"
-#include "../OpenGL/Material.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>

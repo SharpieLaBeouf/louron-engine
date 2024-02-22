@@ -12,12 +12,14 @@
 #include "OpenGL/Texture.h"
 #include "OpenGL/Vertex Array.h"
 
-#include "Scene/Camera.h"
-#include "Scene/Components.h"
 #include "Scene/Entity.h"
-#include "Scene/Light.h"
-#include "Scene/Mesh.h"
 #include "Scene/Scene.h"
+
+#include "Scene/Components/Camera.h"
+#include "Scene/Components/Components.h"
+#include "Scene/Components/Light.h"
+#include "Scene/Components/Mesh.h"
+#include "Scene/Components/Skybox.h"
 
 #include "Project/Project.h"
 

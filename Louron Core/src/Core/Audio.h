@@ -1,8 +1,14 @@
 #pragma once
 
-#include "irrklang/irrKlang.h"
+// Louron Core Headers
+
+// C++ Standard Library Headers
 
 #include <string>
+
+// External Vendor Library Headers
+
+#include <irrklang/irrKlang.h>
 
 namespace Louron {
 

@@ -1,10 +1,14 @@
 #pragma once
 
+// Louron Core Headers
+
+// C++ Standard Library Headers
 #include <vector>
 #include <string>
 #include <iostream>
 #include <initializer_list>
 
+// External Vendor Library Headers
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 

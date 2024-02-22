@@ -1,17 +1,20 @@
 #pragma once
 
+// Louron Core Headers
 #include "Camera.h"
 
-#include "../Core/Engine.h"
+#include "../../Core/Engine.h"
 
-#include "../OpenGL/Texture.h"
-#include "../OpenGL/Material.h"
-#include "../OpenGL/Vertex Array.h"
+#include "../../OpenGL/Texture.h"
+#include "../../OpenGL/Material.h"
+#include "../../OpenGL/Vertex Array.h"
 
+// C++ Standard Library Headers
 #include <string>
 #include <vector>
 #include <map>
 
+// External Vendor Library Headers
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

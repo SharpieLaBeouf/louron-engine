@@ -1,7 +1,11 @@
 #include "Project Serializer.h"
 
+// Louron Core Headers
+
+// C++ Standard Library Headers
 #include <fstream>
 
+// External Vendor Library Headers
 #define YAML_CPP_STATIC_DEFINE
 #include <yaml-cpp/yaml.h>
 

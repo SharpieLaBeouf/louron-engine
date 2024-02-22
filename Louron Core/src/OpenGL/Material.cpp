@@ -1,7 +1,15 @@
 #include "Material.h"
+
+// Louron Core Headers
 #include "../Core/Engine.h"
-#include "../Scene/Camera.h"
+
 #include "../Debug/Assert.h"
+
+#include "../Scene/Components/Camera.h"
+
+// C++ Standard Library Headers
+
+// External Vendor Library Headers
 
 namespace Louron {
 

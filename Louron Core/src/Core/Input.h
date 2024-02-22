@@ -1,8 +1,14 @@
 #pragma once
+
+// Louron Core Headers
+
+// C++ Standard Library Headers
 #include <string>
 
+// External Vendor Library Headers
 #include <glfw/glfw3.h>
 #include <glm/glm.hpp>
+
 #include <imgui/imgui.h>
 
 const inline int MAX_KEYS = 1024;

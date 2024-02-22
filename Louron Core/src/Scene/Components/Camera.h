@@ -1,8 +1,12 @@
 #pragma once
+
+// Louron Core Headers
+#include "../../Core/Engine.h"
+
+// C++ Standard Library Headers
 #include <vector>
 
-#include "../Core/Engine.h"
-
+// External Vendor Library Headers
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 

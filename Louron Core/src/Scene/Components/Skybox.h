@@ -1,11 +1,15 @@
 #pragma once
 
-#include "../OpenGL/Material.h"
-#include "../OpenGL/Vertex Array.h"
+// Louron Core Headers
+#include "../../OpenGL/Material.h"
+#include "../../OpenGL/Vertex Array.h"
+		  
+#include "../../Core/Engine.h"
 
-#include "../Core/Engine.h"
-
+// C++ Standard Library Headers
 #include <filesystem>
+
+// External Vendor Library Headers
 
 namespace Louron {
 

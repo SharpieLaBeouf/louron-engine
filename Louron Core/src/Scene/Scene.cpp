@@ -1,19 +1,22 @@
 #include "Scene.h"
 
-#include "Mesh.h"
+// Louron Core Headers
 #include "Entity.h"
-#include "Components.h"
 #include "Scene Serializer.h"
+
+#include "Components/Mesh.h"
+#include "Components/Components.h"
 
 #include "../Renderer/Renderer.h"
 
+// C++ Standard Library Headers
+#include <iomanip>
+
+// External Vendor Library Headers
 #include <glm/gtc/quaternion.hpp>
 
 #include <imgui/imgui.h>
 
-#include <iomanip>
-
-// Scene Management
 namespace Louron {
 
 	Scene::Scene() {

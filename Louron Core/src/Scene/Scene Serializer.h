@@ -1,9 +1,13 @@
 #pragma once
 
+// Louron Core Headers
 #include "Scene.h"
 
+// C++ Standard Library Headers
 #include <string>
 #include <memory>
+
+// External Vendor Library Headers
 
 namespace YAML { class Emitter; }
 

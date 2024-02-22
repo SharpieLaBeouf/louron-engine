@@ -1,8 +1,12 @@
 #pragma once
 
+// Louron Core Headers
+#include "../Scene/Components/Components.h"
+
+// C++ Standard Library Headers
 #include <memory>
 
-#include "../Scene/Components.h"
+// External Vendor Library Headers
 
 namespace Louron {
 

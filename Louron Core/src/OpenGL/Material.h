@@ -1,11 +1,14 @@
 #pragma once
 
+// Louron Core Headers
 #include "Shader.h"
 #include "Texture.h"
 
+// C++ Standard Library Headers
 #include <string>
 #include <array>
 
+// External Vendor Library Headers
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 

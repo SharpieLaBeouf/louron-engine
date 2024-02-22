@@ -1,14 +1,17 @@
 #pragma once
 
-#include "UUID.h"
+// Louron Core Headers
+#include "Components/UUID.h"
 #include "Resource Manager.h"
 #include "../Renderer/RendererPipeline.h"
 
+// C++ Standard Library Headers
 #include <vector>
 #include <memory>
 #include <string>
 #include <filesystem>
 
+// External Vendor Library Headers
 #include <entt/entt.hpp>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -41,6 +44,7 @@ namespace Louron {
 		Scene(const std::filesystem::path& sceneFilePath, L_RENDER_PIPELINE pipelineType = L_RENDER_PIPELINE::FORWARD);
 		~Scene() { }
 
+	public:
 
 		Entity CreateEntity(const std::string& name = std::string());
 		Entity CreateEntity(UUID uuid, const std::string& name = std::string());
@@ -67,13 +71,14 @@ namespace Louron {
 		Entity GetPrimaryCameraEntity();
 
 		void SetConfig(const SceneConfig& config) { m_SceneConfig = config; }
-		const SceneConfig& GetConfig() { return m_SceneConfig; }
-		const std::shared_ptr<ResourceManager>& GetResources() { return m_SceneConfig.SceneResourceManager; }
+		const SceneConfig& GetConfig() const { return m_SceneConfig; }
+		const std::shared_ptr<ResourceManager>& GetResources() const { return m_SceneConfig.SceneResourceManager; }
 
 		entt::registry* GetRegistry() { return &m_Registry; }
 		bool CopyRegistry(std::shared_ptr<Scene> otherScene);
 
 	private:
+
 		entt::registry m_Registry;
 		std::unordered_map<UUID, entt::entity> m_EntityMap;
 

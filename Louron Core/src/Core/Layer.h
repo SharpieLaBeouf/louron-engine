@@ -1,5 +1,11 @@
 #pragma once
+
+// Louron Core Headers
+
+// C++ Standard Library Headers
 #include <string>
+
+// External Vendor Library Headers
 
 namespace Louron {
 

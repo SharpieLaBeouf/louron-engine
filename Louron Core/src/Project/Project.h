@@ -1,13 +1,17 @@
 #pragma once
 
+// Louron Core Headers
 #include "../Debug/Assert.h"
 
 #include "../Scene/Scene.h"
 #include "../Scene/Scene Serializer.h"
 
+// C++ Standard Library Headers
 #include <string>
 #include <memory>
 #include <filesystem>
+
+// External Vendor Library Headers
 
 namespace Louron {
 
