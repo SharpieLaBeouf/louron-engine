@@ -46,13 +46,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(SolutionDir)\Louron Core\libs\irrklang;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\irrklang;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(SolutionDir)\Louron Core\libs\irrklang;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\irrklang;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
@@ -62,7 +62,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Louron Core\src;$(SolutionDir)Louron Core\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Louron Core\src;$(SolutionDir)Louron Core\include;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
@@ -70,7 +70,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;irrklang.lib;yaml-cppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;irrklang.lib;yaml-cppd.lib;spdlogd.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>
       </Profile>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
@@ -84,7 +84,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>GLFW_INCLUDE_NONE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Louron Core\src;$(SolutionDir)Louron Core\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Louron Core\src;$(SolutionDir)Louron Core\include;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>

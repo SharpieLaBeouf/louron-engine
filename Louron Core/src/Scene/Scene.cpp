@@ -176,7 +176,7 @@ namespace Louron {
 		return entity;
 	}
 
-	// Duplicates Entity in Scene
+	// TODO: Duplicates Entity in Scene
 	Entity Scene::DuplicateEntity(Entity entity) {
 		return Entity();
 	}
@@ -197,6 +197,7 @@ namespace Louron {
 				return Entity{ entity, this };
 		}
 
+		std::cerr << "[L20] ERROR: Scene Does Not Have an Entity Named: " << name << std::endl;
 		return {};
 	}
 

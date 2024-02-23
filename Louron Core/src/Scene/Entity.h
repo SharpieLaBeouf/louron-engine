@@ -9,6 +9,8 @@
 
 // C++ Standard Library Headers
 #include <iostream>
+#include <typeindex>
+#include <memory>
 
 // External Vendor Library Headers
 #include <entt/entt.hpp>
@@ -35,13 +37,40 @@ namespace Louron {
 			return component;
 		}
 
-		// This returns the applicable Component
+		/// <summary>
+		/// I want to be able to just call GetComponent, and not have to worry about 
+		/// application breaking error handling when an entity does not have a
+		/// specified component. Why do we want to halt execution when we should
+		/// just log and debug this.
+		/// </summary>
 		template<typename T>
 		T& GetComponent() {
+						
+			// Return Blank Component - I want to be able to just call GetComponent, and 
+			// not have to worry about error handling when an entity does not have a
+			// specified component, rather, it logs in the console the entity does not
+			// have a component.
+
+			static std::unordered_map<std::type_index, std::shared_ptr<T>> blankComponents;
 			if (m_EntityHandle == entt::null) {
-				L_CORE_ASSERT(false, "Attempted to Retrieve Component from NULL Entity!");
+				std::cerr << "[L20] ERROR: Entity Cannot GetComponent as Entity Handle is Null!" << std::endl;
+
+				if (blankComponents.find(typeid(T)) == blankComponents.end())
+					blankComponents[typeid(T)] = std::make_shared<T>();
+
+				return *blankComponents[typeid(T)];
 			}
 			
+			if (!HasComponent<T>()) {
+				std::cerr << "[L20] ERROR: Entity Does Not Have Component! " << m_Scene->m_Registry.get<TagComponent>(m_EntityHandle).Tag << " - " << typeid(T).name() << std::endl;
+
+
+				if (blankComponents.find(typeid(T)) == blankComponents.end())
+					blankComponents[typeid(T)] = std::make_shared<T>();
+
+				return *blankComponents[typeid(T)];
+			}
+
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
 		}
 

@@ -36,8 +36,7 @@ public:
 		m_Project = Louron::Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
 		m_Scene = Louron::Project::GetActiveScene();
 
-		if (m_Scene->HasEntity("Light Source 0")) 
-			m_LightPosition = m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().GetPosition();
+		m_LightPosition = m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().GetPosition();
 	}
 
 	~Scene12() {
@@ -62,24 +61,18 @@ public:
 		lastTime = currentTime;
 
 		// Update Camera Component
-		if (m_Scene->HasEntity("Main Camera")) {
 
-			m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
-			m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition());
-			m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
 
-			if (m_Input.GetKeyDown(GLFW_KEY_F)) {
-				Louron::SpotLightComponent& spotLight = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>();
-				spotLight.lightProperties.active = (spotLight.lightProperties.active == GL_TRUE) ? GL_FALSE : GL_TRUE;
-			}
-
+		if (m_Input.GetKeyDown(GLFW_KEY_F)) {
+			Louron::SpotLightComponent& spotLight = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>();
+			spotLight.lightProperties.active = (spotLight.lightProperties.active == GL_TRUE) ? GL_FALSE : GL_TRUE;
 		}
 
 		// Update Cherry Picked Light Properties
-		if (m_Scene->HasEntity("Light Source 0")) {
-
-			m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().SetPosition(m_LightPosition);
-		}
+		m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().SetPosition(m_LightPosition);
 
 		Draw();
 	}
