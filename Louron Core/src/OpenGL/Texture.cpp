@@ -1,6 +1,7 @@
 #include "Texture.h"
 
 // Louron Core Headers
+#include "../Core/Logging.h"
 
 // C++ Standard Library Headers
 
@@ -70,12 +71,12 @@ namespace Louron {
 			m_Size.x = width;
 			m_Size.y = height;
 
-			std::cout << "[L20] Texture Loaded: " << texturePath.string() << std::endl;
+			L_CORE_INFO("Texture Loaded: {0}", texturePath.string());
 			stbi_image_free(textureData);
 			this->UnBind();
 		}
 		else {
-			std::cout << "[L20] Texture Not Loaded: " << texturePath.string() << std::endl;
+			L_CORE_WARN("Texture Not Loaded: {0}", texturePath.string());
 			stbi_image_free(textureData);
 
 			glDeleteTextures(1, &m_TextureId);
@@ -135,7 +136,7 @@ namespace Louron {
 
 	void TextureLibrary::Add(const std::string& textureName, std::shared_ptr<Texture> texture) {
 		if (textureExists(textureName)) {
-			std::cout << "[L20] Texture Already Loaded: " << textureName << std::endl;
+			L_CORE_INFO("Texture Already Loaded: {0}", textureName);
 		}
 		else {
 			m_Textures[textureName] = texture;
@@ -152,7 +153,7 @@ namespace Louron {
 		texture_name = texture_name.substr(lastSlash, count);
 
 		if (textureExists(texture_name)) {
-			std::cout << "[L20] Texture Already Loaded: " << texture_name << std::endl;
+			L_CORE_INFO("Texture Already Loaded: {0}", texture_name);
 			return GetTexture(texture_name);
 		}
 
@@ -164,7 +165,7 @@ namespace Louron {
 	std::shared_ptr<Texture> TextureLibrary::LoadTexture(const std::string& textureFile, const std::string& textureName) {
 
 		if (textureExists(textureName)) {
-			std::cout << "[L20] Texture Already Loaded: " << textureName << std::endl;
+			L_CORE_INFO("Texture Already Loaded: {0}", textureName);
 			return GetTexture(textureName);
 		}
 
@@ -175,7 +176,7 @@ namespace Louron {
 
 	std::shared_ptr<Texture> TextureLibrary::GetTexture(const std::string& textureName) {
 		if (!textureExists(textureName))
-			std::cout << "[L20] Texture Not Loaded: " << textureName << std::endl;
+			L_CORE_WARN("Texture Not Loaded: {0}", textureName);
 		else
 			return m_Textures[textureName];
 		return nullptr;

@@ -2,6 +2,8 @@
 
 // Louron Core Headers
 #include "Engine.h"
+#include "Logging.h"
+#include "../Debug/Assert.h"
 
 // C++ Standard Library Headers
 
@@ -35,7 +37,14 @@ namespace Louron {
 		// Setup Platform/Renderer bindings
 		bool imGuiGLFWErr = ImGui_ImplGlfw_InitForOpenGL(window, true);
 		bool imGuiGLEWErr = ImGui_ImplOpenGL3_Init("#version 450");
-		std::cout << "[L20] ImGui Initialised " << ((imGuiGLFWErr && imGuiGLEWErr) ? "Successfully!" : "Unsuccessfully!\n[L20] Exiting Now...") << std::endl << std::endl;
+
+		if (imGuiGLFWErr && imGuiGLEWErr)
+			L_CORE_INFO("ImGui Initialised Successfully");
+		else {
+			L_CORE_ASSERT(false, "ImGui Initialised Unsuccessfully");
+			Engine::Get().Close();
+		}
+
 	}
 
 	void GuiLayer::OnDetach() {

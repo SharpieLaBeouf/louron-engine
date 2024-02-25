@@ -13,10 +13,13 @@
 #include <fstream>
 
 // External Vendor Library Headers
+#include <glm/gtx/string_cast.hpp>
+
+#pragma warning( push )
+#pragma warning( disable : 4099)
+
 #define YAML_CPP_STATIC_DEFINE
 #include <yaml-cpp/yaml.h>
-
-#include <glm/gtx/string_cast.hpp>
 
 namespace YAML {
 
@@ -257,7 +260,7 @@ namespace Louron {
 				std::ofstream fout(skyboxComponent.Material->GetMaterialFilePath());
 				fout << materialOut.c_str();
 
-				std::cout << "[L20] Skybox Material (" << skyboxComponent.Material->GetMaterialFilePath().filename().replace_extension().string() << ") Saved at : " << skyboxComponent.Material->GetMaterialFilePath().string() << std::endl;
+				L_CORE_INFO("Skybox Material ({0}) Saved At: {1}", skyboxComponent.Material->GetMaterialFilePath().filename().replace_extension().string(), skyboxComponent.Material->GetMaterialFilePath().string());
 			}
 
 			out << YAML::EndMap;
@@ -682,3 +685,4 @@ namespace Louron {
 	}
 }
 
+#pragma warning( pop )

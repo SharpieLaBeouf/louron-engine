@@ -21,7 +21,7 @@ namespace Louron {
 		mesh_name = mesh_name.substr(lastSlash, count);
 
 		if (Meshes[mesh_name].first != nullptr) {
-			std::cout << "[L20] Mesh Already Loaded: " << mesh_name << std::endl;
+			L_CORE_INFO("Mesh Already Loaded: {0}", mesh_name);
 			return GL_FALSE;
 		}
 
@@ -42,7 +42,7 @@ namespace Louron {
 			0
 		);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			L_CORE_ASSERT(false, importer.GetErrorString());
+			L_CORE_ERROR("Could Not Import Mesh: {0}", importer.GetErrorString());
 			return GL_FALSE;
 		}
 
@@ -58,7 +58,7 @@ namespace Louron {
 
 		Meshes[mesh_name] = meshGroup;
 
-		std::cout << "[L20] Mesh Loaded: " << mesh_name.c_str() << std::endl;
+		L_CORE_INFO("Mesh Loaded: {0}", mesh_name.c_str());
 
 		return GL_TRUE;
 	}
@@ -218,7 +218,8 @@ namespace Louron {
 		mesh_name = mesh_name.substr(lastSlash, count);
 
 		if (Meshes[mesh_name].first == nullptr) {
-			L_CORE_ASSERT(false, "Mesh Not Loaded to Scene Resource Manager!");
+			L_CORE_ERROR("Mesh Not Loaded to Scene Resource Manager");
+			return nullptr;
 		}
 
 		return Meshes[mesh_name].first;
@@ -235,7 +236,8 @@ namespace Louron {
 		mesh_name = mesh_name.substr(lastSlash, count);
 
 		if (Meshes[mesh_name].second == nullptr) {
-			L_CORE_ASSERT(false, "Mesh Not Loaded to Scene Resource Manager!");
+			L_CORE_ERROR("Mesh Not Loaded to Scene Resource Manager");
+			return nullptr;
 		}
 
 		return Meshes[mesh_name].second;

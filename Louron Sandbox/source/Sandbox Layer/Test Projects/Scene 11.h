@@ -43,7 +43,7 @@ public:
 		m_Pipeline(nullptr),
 		m_Scene(nullptr)
 	{
-		std::cout << "[L20] Loading Scene 11..." << std::endl;
+		L_APP_INFO("Loading Scene 11");
 
 		// Scene Configuration Setup
 		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
@@ -138,7 +138,7 @@ public:
 	}
 
 	~Scene11() {
-		std::cout << "[L20] Unloading Scene 11..." << std::endl;
+		L_APP_INFO("Unloading Scene 11");
 	}
 
 	void OnAttach() override {

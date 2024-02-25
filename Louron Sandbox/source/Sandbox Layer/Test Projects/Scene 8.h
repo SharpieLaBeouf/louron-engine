@@ -31,7 +31,7 @@ public:
 		 m_Pipeline(nullptr),
 		 m_Scene(nullptr)
 	{
-		std::cout << "[L20] Loading Scene 8..." << std::endl;
+		L_APP_INFO("Loading Scene 8");
 
 		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
 		m_Scene = std::make_shared<Louron::Scene>("Scene 8", Louron::L_RENDER_PIPELINE::FORWARD_PLUS);
@@ -64,7 +64,7 @@ public:
 
 	~Scene8() override
 	{
-		std::cout << "[L20] Unloading Scene 8..." << std::endl;
+		L_APP_INFO("Unloading Scene 8");
 			
 	}
 

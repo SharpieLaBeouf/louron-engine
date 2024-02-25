@@ -47,14 +47,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs\spdlog;$(ProjectDir)\libs\irrklang;$(ProjectDir)\libs\yaml-cpp;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediates\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs\spdlog;$(ProjectDir)\libs\irrklang;$(ProjectDir)\libs\yaml-cpp;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediates\</IntDir>
   </PropertyGroup>
@@ -117,6 +117,7 @@
     <ClCompile Include="src\Core\GuiLayer.cpp" />
     <ClCompile Include="src\Core\Input.cpp" />
     <ClCompile Include="src\Core\LayerStack.cpp" />
+    <ClCompile Include="src\Core\Logging.cpp" />
     <ClCompile Include="src\Core\Window.cpp" />
     <ClCompile Include="src\Project\Project Serializer.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />

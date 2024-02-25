@@ -197,7 +197,7 @@ namespace Louron {
 				return Entity{ entity, this };
 		}
 
-		std::cerr << "[L20] ERROR: Scene Does Not Have an Entity Named: " << name << std::endl;
+		L_CORE_WARN("Scene Does Not Have an Entity Named: {0}", name);
 		return {};
 	}
 

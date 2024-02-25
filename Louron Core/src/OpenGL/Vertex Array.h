@@ -26,7 +26,7 @@ namespace Louron {
 		case ShaderDataType::Bool:		return GL_BOOL;
 		}
 
-		std::cout << "[L20] OpenGL Data Type Not Defined!" << std::endl;
+		L_CORE_WARN("OpenGL Data Type Not Defined");
 		return 0;
 	}
 

@@ -30,7 +30,7 @@ public:
 		 m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		 m_TextureLib(Louron::Engine::Get().GetTextureLibrary()) 
 	 {
-		std::cout << "[L20] Loading Scene 9..." << std::endl;
+		L_APP_INFO("Loading Scene 9");
 
 		{
 			// Init Cube VAO
@@ -74,7 +74,7 @@ public:
 	}
 
 	~Scene9() override {
-		std::cout << "[L20] Unloading Scene 9..." << std::endl;
+		L_APP_INFO("Unloading Scene 9");
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 

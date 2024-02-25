@@ -78,7 +78,7 @@ public:
 		m_Input(Louron::Engine::Get().GetInput()),
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary())
 	{
-		std::cout << "[L20] Loading Scene 5..." << std::endl;
+		L_APP_INFO("Loading Scene 5");
 
 		// Init Cube VAO
 		glGenVertexArrays(1, &cube_VAO);
@@ -126,7 +126,7 @@ public:
 	}
 	~Scene5() override
 	{
-		std::cout << "[L20] Unloading Scene 5..." << std::endl;
+		L_APP_INFO("Unloading Scene 5");
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 

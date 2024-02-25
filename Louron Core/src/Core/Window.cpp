@@ -2,6 +2,8 @@
 
 // Louron Core Headers
 #include "Engine.h"
+#include "Logging.h"
+#include "../Debug/Assert.h"
 
 // C++ Standard Library Headers
 
@@ -47,15 +49,28 @@ namespace Louron {
 
 		// Initialise GLFW
 		int successGLFW = glfwInit();
-		std::cout << (successGLFW ? "[L20] GLFW Initialised Successfully" : "[L20] GLFW Could Not Initialise!") << std::endl << std::endl;
+		if (successGLFW)
+			L_CORE_INFO("GLFW Initialised Successfully");
+		else {
+			L_CORE_ASSERT(false, "GLFW Not Initialised Successfully");
+			Engine::Get().Close();
+		}
+
 		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data->Title.c_str(), nullptr, nullptr);
 
 		glfwMakeContextCurrent(m_Window);
 
 		// Initialise OpenGL (Graphics Context)
 		int successOPENGL = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		std::cout << (successOPENGL ? "[L20] OpenGL Initialised Successfully" : "[L20] OpenGL Could Not Initialise!") << std::endl;
-		std::cout << "[L20] OpenGL Version: " << (const char*)glGetString(GL_VERSION) << std::endl << std::endl;
+		if (successOPENGL) {
+			L_CORE_INFO("OpenGL Initialised Successfully");
+			L_CORE_INFO("OpenGL Version: {0}", (const char*)glGetString(GL_VERSION));
+		}
+		else {
+			L_CORE_ASSERT(false, "OpenGL Not Initialised Successfully");
+			Engine::Get().Close();
+		}
+
 		glViewport(0, 0, (GLsizei)m_Data->Width, (GLsizei)m_Data->Height);
 		
 		glfwSetWindowUserPointer(m_Window, &m_Data);
@@ -75,7 +90,7 @@ namespace Louron {
 				Engine::Get().Close();
 			});
 
-		std::cout << "[L20] GLFW Created Window: " << m_Data->Width << "x" << m_Data->Height << std::endl;
+		L_CORE_INFO("GLFW Window Created: {0} x {1}", m_Data->Width, m_Data->Height);
 	}
 
 	void Window::Shutdown()	{

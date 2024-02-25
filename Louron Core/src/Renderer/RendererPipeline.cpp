@@ -32,12 +32,11 @@ namespace Louron {
 	void RenderPipeline::UpdateActiveScene(std::shared_ptr<Louron::Scene> scene) {
 
 		if (scene) {
-
-			std::cout << "[L20] Changing Scene To: " << scene->GetConfig().Name <<std::endl;
+			L_CORE_INFO("Changing Scene To: {0}", scene->GetConfig().Name);
 			m_Scene = scene;
 		}
 		else {
-			std::cerr << "[L20] Cannot Change to Invalid Scene!" << std::endl;
+			L_CORE_WARN("Cannot Change to Invalid Scene");
 		}
 
 	}
@@ -58,7 +57,7 @@ namespace Louron {
 	void ForwardPlusPipeline::OnUpdate() {
 		
 		if (!m_Scene) {
-			std::cerr << "[L20] Invalid Scene! Please Use ForwardPlusPipeline::OnStartPipeline() Before Updating." << std::endl;
+			L_CORE_ERROR("Invalid Scene! Please Use ForwardPlusPipeline::OnStartPipeline() Before Updating");
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			return;
 		}
@@ -84,7 +83,7 @@ namespace Louron {
 			ConductRenderPass(camera);
 		}
 		else {
-			std::cerr << "[L20] No Primary Camera Found in Scene!" << std::endl;
+			L_CORE_WARN("No Primary Camera Found in Scene");
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 	}
@@ -458,7 +457,7 @@ namespace Louron {
 							materialMeshTransMap[(*meshRenderer.Materials)[subMesh->MaterialIndex]][subMesh].push_back(transform);
 						}
 						else {
-							std::cout << "[L20] Mesh Has Invalid Material!" << std::endl;
+							L_CORE_WARN("Mesh Has Invalid Material");
 						}
 			}
 
@@ -487,7 +486,7 @@ namespace Louron {
 					}
 				}
 				else {
-					std::cout << "[L20] Invalid Material Encountered During Rendering!" << std::endl;
+					L_CORE_WARN("Invalid Material Encountered During Rendering");
 					continue;
 				}
 

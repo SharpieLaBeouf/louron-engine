@@ -62,7 +62,7 @@ namespace Louron {
 			}
 			else
 			{
-				std::cout << "[L20] Skybox Texture Failed to Load: " << m_TextureFilePaths[i].string() << std::endl;
+				L_CORE_ERROR("Skybox Texture Failed to Load: {0}", m_TextureFilePaths[i].string());
 				stbi_image_free(data);
 				return GL_FALSE;
 			}
@@ -73,7 +73,7 @@ namespace Louron {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-		std::cout << "[L20] All Skybox Textures Loaded Successfully" << std::endl;
+		L_CORE_INFO("All Skybox Textures Loaded Successfully");
 		return GL_TRUE;
 	}
 
@@ -108,7 +108,7 @@ namespace Louron {
 		}
 		else
 		{
-			std::cout << "[L20] Skybox Texture Failed to Load: " << filePath.string() << std::endl;
+			L_CORE_WARN("Skybox Texture Failed to Load: {0}", filePath.string());
 			stbi_image_free(data);
 			return GL_FALSE;
 		}
@@ -119,28 +119,33 @@ namespace Louron {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-		std::cout << "[L20] Skybox Texture Loaded Successfully: " << filePath.filename().replace_extension().string() << std::endl;
+		L_CORE_INFO("Skybox Texture Loaded Successfully: {0}", filePath.filename().replace_extension().string());
 		return GL_TRUE;
 	}
 
 	void SkyboxMaterial::UpdateUniforms(const Camera& camera) {
 
-		L_CORE_ASSERT(m_MaterialShader, "Error Updating Uniforms, Shader Not Found for Skybox Material: " + m_MaterialName);
-		if (m_MaterialShader && &camera != nullptr) {
-			m_MaterialShader->SetMat4("u_VertexIn.Proj", camera.GetProjMatrix());
-			glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-			m_MaterialShader->SetMat4("u_VertexIn.View", view);
+		if (m_MaterialShader) {
+			if (&camera != nullptr) {
+				m_MaterialShader->SetMat4("u_VertexIn.Proj", camera.GetProjMatrix());
+				glm::mat4 view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+				m_MaterialShader->SetMat4("u_VertexIn.View", view);
+			}
+		}
+		else {
+			L_CORE_ERROR("Error Updating Uniforms - Shader Not Found for Skybox Material: {0}", m_MaterialName);
 		}
 	}
 
 	GLboolean SkyboxMaterial::Bind() {
-		L_CORE_ASSERT(m_MaterialShader, "Shader Not Found for Material: " + this->GetName());
 		if (m_MaterialShader) {
 			m_MaterialShader->Bind();
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, m_SkyboxID);
 			return GL_TRUE;
 		}
+
+		L_CORE_ERROR("Shader Not Found for Material: {0}", this->GetName());
 		return GL_FALSE;
 	}
 	void SkyboxMaterial::UnBind() {

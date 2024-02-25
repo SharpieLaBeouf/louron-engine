@@ -72,7 +72,7 @@ public:
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
 		m_SceneCamera(glm::vec3(0.0f, 10.0f, 0.0f))
 	{
-		std::cout << "[L20] Loading Scene 10..." << std::endl;
+		L_APP_INFO("Loading Scene 10");
 
 		// Init Cube VAO
 		{
@@ -132,7 +132,7 @@ public:
 	}
 
 	~Scene10() {
-		std::cout << "[L20] Unloading Scene 10..." << std::endl;
+		L_APP_INFO("Unloading Scene 10");
 
 
 	}

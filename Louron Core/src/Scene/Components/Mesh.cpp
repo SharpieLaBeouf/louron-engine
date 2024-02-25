@@ -65,7 +65,7 @@ namespace Louron {
 			0
 		);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-			L_CORE_ASSERT(false, importer.GetErrorString());
+			L_CORE_ERROR("Could Not Import Mesh: {0}", importer.GetErrorString());
 			return GL_FALSE;
 		}
 
@@ -73,7 +73,7 @@ namespace Louron {
 		directory = directory.substr(0, directory.find_last_of('/'));
 
 		ProcessNode(scene->mRootNode, scene, meshFilter, directory, Engine::Get().GetShaderLibrary().GetShader("material_shader_flat"), mesh_name);
-		std::cout << "[L20] Mesh Loaded: " << mesh_name.c_str() << std::endl;
+		L_CORE_INFO("Mesh Loaded: {0}", mesh_name.c_str());
 
 		return GL_TRUE;
 	}

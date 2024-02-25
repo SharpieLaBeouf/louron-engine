@@ -25,7 +25,7 @@ public:
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
-		std::cout << "[L20] Loading Scene 4..." << std::endl;
+		L_APP_INFO("Loading Scene 4");
 
 		// Init Plane VAO
 		glGenVertexArrays(1, &plane_VAO);
@@ -80,7 +80,7 @@ public:
 	}
 	~Scene4() override
 	{
-		std::cout << "[L20] Unloading Scene 4..." << std::endl;
+		L_APP_INFO("Unloading Scene 4");
 
 		glDeleteVertexArrays(1, &plane_VAO);
 		glDeleteBuffers(1, &plane_VBO);

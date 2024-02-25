@@ -131,12 +131,14 @@ namespace Louron {
 			m_Shader->SetInt(std::string("u_Material." + m_TextureUniformNames[type]).c_str(), type);
 			m_Shader->UnBind();
 		}
-		else std::cout << "[L20] Shader Not Linked to Material - Cannot Set Texture Unit!" << std::endl;
+		else
+			L_CORE_WARN("Shader Not Linked to Material - Cannot Set Texture Unit"); 
 
 		if (type < m_Textures.size() && type > -1) {
 			m_Textures[type] = val;
 		}
-		else std::cout << "[L20] Texture Slot Out of Bounds!" << std::endl;
+		else
+			L_CORE_WARN("Texture Slot Out of Bounds"); 
 	}
 
 	std::shared_ptr<Texture> Material::GetTextureMap(GLint type) {

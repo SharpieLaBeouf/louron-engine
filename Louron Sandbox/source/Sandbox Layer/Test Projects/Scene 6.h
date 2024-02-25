@@ -31,7 +31,7 @@ public:
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
-		std::cout << "[L20] Loading Scene 6..." << std::endl;
+		L_APP_INFO("Loading Scene 6");
 
 		// Init Cube VAO
 		glGenVertexArrays(1, &cube_VAO);
@@ -86,7 +86,7 @@ public:
 
 	~Scene6() override
 	{
-		std::cout << "[L20] Unloading Scene 6..." << std::endl;
+		L_APP_INFO("Unloading Scene 6");
 
 		glDeleteVertexArrays(1, &cube_VAO);
 		glDeleteBuffers(1, &cube_VBO);

@@ -1,6 +1,8 @@
 #pragma once
 
 // Louron Core Headers
+#include "../Core/Logging.h"
+#include "../Debug/Assert.h"
 
 // C++ Standard Library Headers
 #include <vector>
@@ -56,7 +58,7 @@ namespace Louron {
 			case ShaderDataType::Bool:    return 1;
 			}
 
-			std::cout << "[L20] Shader Data Type Not Defined!" << std::endl;
+			L_CORE_WARN("Shader Data Type Not Defined");
 			return 0;
 		}
 	};
@@ -147,7 +149,7 @@ namespace Louron {
 		case ShaderDataType::Bool:     return 1;
 		}
 
-		std::cout << "[L20] Shader Data Type Not Defined!" << std::endl;
+		L_CORE_WARN("Shader Data Type Not Defined");
 		return 0;
 	}
 }

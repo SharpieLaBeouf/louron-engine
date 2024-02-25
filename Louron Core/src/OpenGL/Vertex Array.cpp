@@ -52,7 +52,7 @@ namespace Louron {
 				}
 				break;
 			}
-			default: std::cout << "[L20] Shader Data Type Not Defined!" << std::endl;
+			default: L_CORE_WARN("Shader Data Type Not Defined");
 			}
 		}
 

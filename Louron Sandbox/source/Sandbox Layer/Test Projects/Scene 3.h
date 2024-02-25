@@ -21,7 +21,7 @@ public:
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{			
-		std::cout << "[L20] Loading Scene 3..." << std::endl;
+		L_APP_INFO("Loading Scene 3");
 
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
@@ -47,7 +47,7 @@ public:
 	}
 	~Scene3() override
 	{
-		std::cout << "[L20] Unloading Scene 3..." << std::endl;
+		L_APP_INFO("Unloading Scene 3");
 		glDisable(GL_DEPTH_TEST);
 		glDeleteVertexArrays(1, &VAO);
 		glDeleteBuffers(1, &VBO);

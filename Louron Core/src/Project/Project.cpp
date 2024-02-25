@@ -2,7 +2,7 @@
 
 // Louron Core Headers
 #include "Project Serializer.h"
-
+#include "../Core/Logging.h"
 #include "../Renderer/RendererPipeline.h"
 
 // C++ Standard Library Headers
@@ -66,14 +66,17 @@ namespace Louron {
 		project->m_ProjectFilePath = outFilePath;
 		project->m_ProjectDirectory = projectDirectory;
 
-		if (!s_ActiveProject) 
-			s_ActiveProject = project;
-
 		// Second Save Project Data
 		ProjectSerializer serializer(project);
-		L_CORE_ASSERT(serializer.Serialize(outFilePath), "Project Could Not Be Saved!");
+		if (!serializer.Serialize(outFilePath)) {
+			L_CORE_ERROR("Project Could Not Be Saved");
+			return nullptr;
+		}
 
-		std::cout << "[L20] Project Created: " << project->m_Config.Name << std::endl;
+		L_CORE_INFO("Project Created: {0}", project->m_Config.Name);
+
+		if (!s_ActiveProject)
+			s_ActiveProject = project;
 
 		return project;
 	}
@@ -86,17 +89,17 @@ namespace Louron {
 	std::shared_ptr<Project> Project::LoadProject(const std::filesystem::path& projectFilePath) {
 
 		if (projectFilePath.empty()) {
-			L_CORE_ASSERT(false, "No Project File Path Provided!");
+			L_CORE_ERROR("No Project File Path Provided");
 			return nullptr;
 		}
 
 		if (projectFilePath.extension() != ".lproj") {
-			L_CORE_ASSERT(false, "Incompatible Project File Extension! Extension used: " + projectFilePath.extension().string() + ", Extension Required: .lproj");
+			L_CORE_ERROR("Incompatible Project File Extension! Extension Used: {0}, Extension Required : .lproj", projectFilePath.extension().string());
 			return nullptr;
 		}
 
 		if (!std::filesystem::exists(projectFilePath)) {
-			L_CORE_ASSERT(false, "Project File Path Does Not Exist!");
+			L_CORE_ERROR("Project File Path Does Not Exist");
 			return nullptr;
 		}
 
@@ -116,12 +119,12 @@ namespace Louron {
 			s_ActiveProject->m_ProjectDirectory = projectFilePath.parent_path();
 			s_ActiveProject->m_ActiveScene = scene;
 
-			std::cout << "[L20] Project Loaded: " << s_ActiveProject->m_Config.Name << std::endl;
-			std::cout << "[L20] Scene Loaded: " << scene->GetConfig().Name << std::endl;
+			L_CORE_INFO("Project Loaded: {0}", s_ActiveProject->m_Config.Name);
+			L_CORE_INFO("Scene Loaded: {0}", scene->GetConfig().Name);
 			return s_ActiveProject;
 		}
 		
-		L_CORE_ASSERT(false, "Project Could Not Be Loaded!");
+		L_CORE_ERROR("Project Could Not Be Loaded");
 
 		return nullptr;
 	}
@@ -141,11 +144,11 @@ namespace Louron {
 		if (serializer.Serialize(path)) {
 			s_ActiveProject->m_ProjectFilePath = path;
 			s_ActiveProject->m_ProjectDirectory = path.parent_path();
-			std::cout << "[L20] Project (" << s_ActiveProject->m_Config.Name << ") Saved at : " << path.string() << std::endl;
+			L_CORE_INFO("Project ({0}) Saved At: {1}", s_ActiveProject->m_Config.Name, path.string());
 			return true;
 		}
 		
-		L_CORE_ASSERT(false, "Project Could Not Be Saved!");
+		L_CORE_ERROR("Project Could Not Be Saved");
 
 		return false;
 	}
@@ -173,7 +176,7 @@ namespace Louron {
 			SaveScene();
 
 		m_ActiveScene = std::make_shared<Scene>(sceneFilePath.filename().string());
-		std::cout << "[L20] Scene Created: " << sceneFilePath.filename().string() << std::endl;
+		L_CORE_INFO("Scene Created: {0}", sceneFilePath.filename().string());
 
 		return m_ActiveScene;
 	}
@@ -185,7 +188,7 @@ namespace Louron {
 	/// </summary>
 	std::shared_ptr<Scene> Project::LoadScene(const std::filesystem::path& sceneFilePath) {
 		std::shared_ptr<Scene> scene = std::make_shared<Scene>(sceneFilePath);
-		std::cout << "[L20] Scene Loaded: " << sceneFilePath.filename().string() << std::endl;
+		L_CORE_INFO("Scene Loaded: {0}", sceneFilePath.filename().string());
 		return scene;
 	}
 
@@ -198,10 +201,13 @@ namespace Louron {
 			SceneSerializer sceneSerializer(m_ActiveScene);
 			const std::filesystem::path& path = (sceneFilePath.empty()) ? m_ActiveScene->m_SceneFilePath : sceneFilePath;
 
-			L_CORE_ASSERT(!path.empty(), "Cannot Save Scene, File Path Invalid: \'" + path.string() + "\'");
+			if (path.empty()) {
+				L_CORE_ERROR("Cannot Save Scene, File Path Invalid : \'{0}\'", path.string());
+				return false;
+			}
 
 			sceneSerializer.Serialize();
-			std::cout << "[L20] Scene (" << s_ActiveProject->m_Config.Name << ") Saved at : " << path.string() << std::endl;
+			L_CORE_INFO("Scene ({0}) Saved At: {1}", s_ActiveProject->m_Config.Name, path.string());
 			return true;
 		}
 

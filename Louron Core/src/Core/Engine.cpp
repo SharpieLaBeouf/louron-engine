@@ -1,6 +1,7 @@
 #include "Engine.h"
 
 // Louron Core Headers
+#include "Logging.h"
 
 // C++ Standard Library Headers
 #include <filesystem>
@@ -14,13 +15,7 @@ namespace Louron {
     Engine::Engine(const EngineSpecification& specification) {
         s_Instance = this;
 
-        // Display Louron Banner
-        std::cout << "<---------------------------------------------->" << std::endl;
-        std::cout << "<                                              >" << std::endl;
-        std::cout << "<                 Louron Engine                >" << std::endl;
-        std::cout << "<                  Aaron Sharp                 >" << std::endl;
-        std::cout << "<                                              >" << std::endl;
-        std::cout << "<---------------------------------------------->" << std::endl << std::endl;
+        L_CORE_INFO("Initialising Louron Engine");
 
         if (!m_Specification.WorkingDirectory.empty())
             std::filesystem::current_path(m_Specification.WorkingDirectory);
@@ -126,7 +121,7 @@ namespace Louron {
             }
         }
         catch (const std::exception& e) {
-            std::cerr << "[L20] Error: " << e.what() << std::endl;
+            L_CORE_WARN("Error Finding File Paths: {0}", e.what());
         }
        
         return foundPaths;

@@ -1,5 +1,12 @@
 #include "Shader.h"
 
+// Louron Core Headers
+#include "../Core/Logging.h"
+
+// C++ Standard Library Headers
+
+// External Vendor Library Headers
+
 namespace Louron {
 
 // -- Shader --
@@ -117,7 +124,7 @@ namespace Louron {
 			if (!success)
 			{
 				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-				std::cout << "[L20] ERROR::SHADER_COMPILATION_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+				L_CORE_ERROR("Shader Compilation Error: {0}\n{1}", type, infoLog);
 			}
 		}
 		else
@@ -126,7 +133,7 @@ namespace Louron {
 			if (!success)
 			{
 				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-				std::cout << "[L20] ERROR::PROGRAM_LINKING_ERROR of type: " << type << "\n" << infoLog << "\n -- --------------------------------------------------- -- " << std::endl;
+				L_CORE_ERROR("Shader Linking Error: {0}\n{1}", type, infoLog);
 			}
 		}
 	}
@@ -154,7 +161,7 @@ namespace Louron {
 
 		// Check if Shader Already Exists
 		if (ShaderExists(shaderName)) {
-			std::cout << "[L20] Shader Already Loaded: " << shaderName << std::endl;
+			L_CORE_INFO("Shader Already Loaded: {0}", shaderName);
 			return m_Shaders[shaderName];
 		}
 
@@ -166,11 +173,11 @@ namespace Louron {
 		glGetProgramiv(shader->GetProgram(), GL_LINK_STATUS, &success);
 
 		if (success == GL_FALSE) {
-			std::cout << "[L20] Shader Not Loaded - Returning Default Shader" << std::endl;
+			L_CORE_WARN("Shader Not Loaded - Returning Default Shader");
 			return m_DefaultShader;
 		}
 
-		std::cout << "[L20] Shader Loaded: " << shaderName << std::endl;
+		L_CORE_INFO("Shader Loaded: {0}", shaderName);
 		m_Shaders[shaderName] = std::move(shader);
 		return m_Shaders[shaderName];
 	}
@@ -183,8 +190,8 @@ namespace Louron {
 	std::shared_ptr<Shader>& ShaderLibrary::GetShader(const std::string& shaderName) {
 		if (ShaderExists(shaderName))
 			return m_Shaders[shaderName];
-	
-		std::cout << "[L20] Shader Not Found - Returning Default Shader" << std::endl;
+
+		L_CORE_WARN("Shader Not Loaded - Returning Default Shader");
 		return m_DefaultShader;
 	}
 

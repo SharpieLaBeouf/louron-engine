@@ -6,6 +6,9 @@
 #include <fstream>
 
 // External Vendor Library Headers
+#pragma warning( push )
+#pragma warning( disable : 4099)
+
 #define YAML_CPP_STATIC_DEFINE
 #include <yaml-cpp/yaml.h>
 
@@ -81,3 +84,5 @@ namespace Louron {
     }
 
 }
+
+#pragma warning( pop )

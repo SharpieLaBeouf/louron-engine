@@ -8,4 +8,7 @@
     #define WIN32_LEAN_AND_MEAN
 #endif
 
+#if defined(APIENTRY)
+    #undef APIENTRY
+#endif
 #include <windows.h>

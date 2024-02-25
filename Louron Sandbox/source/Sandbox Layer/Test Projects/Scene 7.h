@@ -34,7 +34,7 @@ public:
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
-		std::cout << "[L20] Loading Scene 7..." << std::endl;
+		L_APP_INFO("Loading Scene 7");
 
 		m_SceneCamera.MouseToggledOff = false;
 		m_SceneCamera.MovementSpeed = 10.0f;
@@ -46,7 +46,7 @@ public:
 
 	~Scene7() override
 	{
-		std::cout << "[L20] Unloading Scene 7..." << std::endl;
+		L_APP_INFO("Unloading Scene 7");
 		glDisable(GL_DEPTH_TEST);
 		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
 	}

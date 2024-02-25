@@ -35,7 +35,7 @@ private:
 public:
 
 	Scene1() : m_Input(Louron::Engine::Get().GetInput()), m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()) {
-		std::cout << "[L20] Loading Scene 1..." << std::endl;
+		L_APP_INFO("Loading Scene 1");
 
 		glGenVertexArrays(1, &triangleVAO);
 		glGenBuffers(1, &triangleVBO);
@@ -56,7 +56,7 @@ public:
 
 	}
 	~Scene1() override {
-		std::cout << "[L20] Unloading Scene 1..." << std::endl;
+		L_APP_INFO("Unloading Scene 1");
 		glDeleteVertexArrays(1, &triangleVAO);
 		glDeleteBuffers(1, &triangleVBO);
 		glDeleteBuffers(1, &triangleEBO);

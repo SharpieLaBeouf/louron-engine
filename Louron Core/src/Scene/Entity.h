@@ -53,7 +53,7 @@ namespace Louron {
 
 			static std::unordered_map<std::type_index, std::shared_ptr<T>> blankComponents;
 			if (m_EntityHandle == entt::null) {
-				std::cerr << "[L20] ERROR: Entity Cannot GetComponent as Entity Handle is Null!" << std::endl;
+				L_CORE_ERROR("Entity Cannot GetComponent as Entity Handle is Null");
 
 				if (blankComponents.find(typeid(T)) == blankComponents.end())
 					blankComponents[typeid(T)] = std::make_shared<T>();
@@ -62,8 +62,7 @@ namespace Louron {
 			}
 			
 			if (!HasComponent<T>()) {
-				std::cerr << "[L20] ERROR: Entity Does Not Have Component! " << m_Scene->m_Registry.get<TagComponent>(m_EntityHandle).Tag << " - " << typeid(T).name() << std::endl;
-
+				L_CORE_ERROR("Entity Does Not Have Component");
 
 				if (blankComponents.find(typeid(T)) == blankComponents.end())
 					blankComponents[typeid(T)] = std::make_shared<T>();
