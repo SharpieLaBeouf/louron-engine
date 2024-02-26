@@ -41,10 +41,9 @@ namespace Louron {
 		if (imGuiGLFWErr && imGuiGLEWErr)
 			L_CORE_INFO("ImGui Initialised Successfully");
 		else {
-			L_CORE_ASSERT(false, "ImGui Initialised Unsuccessfully");
+			L_CORE_FATAL("ImGui Initialised Unsuccessfully");
 			Engine::Get().Close();
 		}
-
 	}
 
 	void GuiLayer::OnDetach() {

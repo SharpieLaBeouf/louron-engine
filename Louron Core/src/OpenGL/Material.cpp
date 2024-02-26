@@ -14,11 +14,11 @@
 namespace Louron {
 
 	GLboolean Material::Bind() {
-		L_CORE_ASSERT(m_Shader, "Shader Not Found for Material: " + this->GetName());
 		if (m_Shader) {
 			m_Shader->Bind();
 			return GL_TRUE;
 		}
+		L_CORE_ERROR("Shader Not Found for Material: {0}", GetName());
 		return GL_FALSE;
 	}
 	void Material::UnBind() {
@@ -35,7 +35,6 @@ namespace Louron {
 
 	void Material::UpdateUniforms(const Camera& camera) {
 
-		L_CORE_ASSERT(m_Shader, "Error Updating Uniforms, Shader Not Found for Material: " + this->GetName());
 		if (m_Shader) {
 			m_Shader->SetFloat("u_Material.shine", m_Shine);
 			m_Shader->SetVec4("u_Material.diffuse", m_Diffuse);
@@ -53,6 +52,9 @@ namespace Louron {
 				m_Shader->SetMat4("u_VertexIn.View", camera.GetViewMatrix());
 				m_Shader->SetVec3("u_CameraPos", camera.GetPosition());
 			}
+		}
+		else {
+			L_CORE_ERROR("Shader Not Found for Material: {0}", GetName());
 		}
 	}
 

@@ -203,8 +203,13 @@ namespace Louron {
 
 	Entity Scene::FindEntityByUUID(UUID uuid)
 	{
-		L_CORE_ASSERT(m_EntityMap.find(uuid) != m_EntityMap.end(), "Entity UUID not found in scene!");
-		return { m_EntityMap.at(uuid), this };
+		if (m_EntityMap.find(uuid) == m_EntityMap.end()) {
+			L_CORE_ERROR("Entity UUID not found in scene");
+			return {};
+		}
+		else {
+			return { m_EntityMap.at(uuid), this };
+		}
 	}
 
 	// Returns Primary Camera Entity

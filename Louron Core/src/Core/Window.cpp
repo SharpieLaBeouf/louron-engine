@@ -52,7 +52,7 @@ namespace Louron {
 		if (successGLFW)
 			L_CORE_INFO("GLFW Initialised Successfully");
 		else {
-			L_CORE_ASSERT(false, "GLFW Not Initialised Successfully");
+			L_CORE_FATAL("GLFW Not Initialised Successfully");
 			Engine::Get().Close();
 		}
 
@@ -67,7 +67,7 @@ namespace Louron {
 			L_CORE_INFO("OpenGL Version: {0}", (const char*)glGetString(GL_VERSION));
 		}
 		else {
-			L_CORE_ASSERT(false, "OpenGL Not Initialised Successfully");
+			L_CORE_FATAL("OpenGL Not Initialised Successfully");
 			Engine::Get().Close();
 		}
 

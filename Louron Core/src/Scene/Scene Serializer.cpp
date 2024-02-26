@@ -417,13 +417,18 @@ namespace Louron {
 		out << YAML::EndMap;
 	}
 
-	void SceneSerializer::Serialize(const std::filesystem::path& sceneFilePath) {
+	bool SceneSerializer::Serialize(const std::filesystem::path& sceneFilePath) {
 
 		std::filesystem::path outFilePath = (sceneFilePath.empty()) ? m_Scene->m_SceneFilePath : sceneFilePath;
 
-		L_CORE_ASSERT((outFilePath.extension() == ".lscene"), "Incompatible Scene File Extension! Extension used: " + outFilePath.extension().string() + ", Extension Required: .lscene");
+		if (outFilePath.extension() != ".lscene") {
 
-		if (outFilePath.extension() == ".lscene") {
+			L_CORE_WARN("Incompatible Scene File Extension");
+			L_CORE_WARN("Extension Used: {0}", outFilePath.extension().string());
+			L_CORE_WARN("Extension Expected: .lscene");
+		}
+		else
+		{
 
 			YAML::Emitter out;
 			out << YAML::BeginMap;
@@ -435,7 +440,6 @@ namespace Louron {
 
 			m_Scene->m_Registry.each([&](auto entityID)
 				{
-
 					Entity entity = { entityID, m_Scene.get() };
 					if (!entity)
 						return;
@@ -449,27 +453,33 @@ namespace Louron {
 
 			std::ofstream fout(outFilePath);
 			fout << out.c_str();
+			return true;
 		}
+		return false;
 	}
 
 	bool SceneSerializer::Deserialize(const std::filesystem::path& sceneFilePath) {
 
-		L_CORE_ASSERT((sceneFilePath.extension() == ".lscene"), "Incompatible Scene File Extension! Extension used: " + sceneFilePath.extension().string() + ", Extension Required: .lscene");
+		if (sceneFilePath.extension() != ".lscene") {
 
-		if (sceneFilePath.extension() == ".lscene") {
-
+			L_CORE_WARN("Incompatible Scene File Extension");
+			L_CORE_WARN("Extension Used: {0}", sceneFilePath.extension().string());
+			L_CORE_WARN("Extension Expected: .lscene");
+		}
+		else
+		{
 			YAML::Node data;
 
 			try {
 				data = YAML::LoadFile(sceneFilePath.string());
 			}
 			catch (YAML::ParserException e) {
-				L_CORE_ASSERT(false, "YAML-CPP Failed to Load Scene File: " + sceneFilePath.string() + ", " + e.what());
+				L_CORE_ERROR("YAML-CPP Failed to Load Scene File: '{0}', {1}", sceneFilePath.string(), e.what());
 				return false;
 			}
 
 			if (!data["Scene Name"]) {
-				L_CORE_ASSERT(false, "Scene Name Node Not Correctly Declared in File : " + sceneFilePath.string());
+				L_CORE_ERROR("Scene Name Node Not Correctly Declared in File: \'{0}\'", sceneFilePath.string());
 				return false;
 			}
 			else {
@@ -477,7 +487,7 @@ namespace Louron {
 			}
 
 			if (!data["Scene Asset Directory"]) {
-				L_CORE_ASSERT(false, "Scene Asset Directory Node Not Correctly Declared in File : " + sceneFilePath.string());
+				L_CORE_ERROR("Scene Asset Directory Node Not Correctly Declared in File: \'{0}\'", sceneFilePath.string());
 				return false;
 			}
 			else {
@@ -485,7 +495,7 @@ namespace Louron {
 			}
 
 			if (!data["Scene Pipeline Type"]) {
-				L_CORE_ASSERT(false, "Scene Pipeline Type Node Not Correctly Declared in File : " + sceneFilePath.string());
+				L_CORE_ERROR("Scene Pipeline Type Node Not Correctly Declared in File: \'{0}\'", sceneFilePath.string());
 				return false;
 			}
 			else {
@@ -619,43 +629,46 @@ namespace Louron {
 			}
 			return true;
 		}
-
 		return false;
 	}
 
 	std::shared_ptr<SkyboxMaterial> SceneSerializer::DeserializeSkyboxMaterial(const std::filesystem::path& filePath) {
 		
-		L_CORE_ASSERT((filePath.extension() == ".lmaterial"), "Incompatible Skybox Material File Extension! Extension used: " + filePath.extension().string() + ", Extension Required: .lmaterial");
+		if (filePath.extension() != ".lmaterial") {
 
-		std::shared_ptr<SkyboxMaterial> material = std::make_shared<SkyboxMaterial>();
-		if (filePath.extension() == ".lmaterial") {
-
+			L_CORE_WARN("Incompatible Material File Extension");
+			L_CORE_WARN("Extension Used: {0}", filePath.extension().string());
+			L_CORE_WARN("Extension Expected: .lmaterial");
+		}
+		else
+		{
 			YAML::Node data;
 
 			try {
 				data = YAML::LoadFile(filePath.string());
 			}
 			catch (YAML::ParserException e) {
-				L_CORE_ASSERT(false, "YAML-CPP Failed to Load Scene File: " + filePath.string() + ", " + e.what());
-				return material;
+				L_CORE_ERROR("YAML-CPP Failed to Load Scene File: '{0}', {1}", filePath.string(), e.what());
+				return nullptr;
 			}
 
 			if (!data["Material Type"] || data["Material Type"].as<std::string>() != "SkyboxMaterial") {
-				L_CORE_ASSERT(false, "Material Type Node is Not Skybox Material: " + filePath.string());
-				return material;
+				L_CORE_ERROR("Material Type Node is Not Skybox Material: '{0}'", filePath.string());
+				return nullptr;
 			}
 
 			if (!data["Material Name"]) {
-				L_CORE_ASSERT(false, "Material Name Node Not Correctly Declared in File: " + filePath.string());
-				return material;
+				L_CORE_ERROR("Material Name Node Not Correctly Declared in File: '{0}'", filePath.string());
+				return nullptr;
 			}
 
 			if (!data["TextureFilePaths"]) {
-				L_CORE_ASSERT(false, "TextureFilePaths Node Not Correctly Declared in File: " + filePath.string());
-				return material;
+				L_CORE_ERROR("TextureFilePaths Node Not Correctly Declared in File: '{0}'", filePath.string());
+				return nullptr;
 			}
 			else {
 
+				std::shared_ptr<SkyboxMaterial> material = std::make_shared<SkyboxMaterial>();
 				std::array<std::filesystem::path, 6> textureFilePathArray;
 
 				std::unordered_map<int, std::string> indexKeyMap{
@@ -678,10 +691,11 @@ namespace Louron {
 				material->LoadSkybox(textureFilePathArray);
 				material->SetName(data["Material Name"].as<std::string>());
 				material->SetMaterialFilePath(filePath);
+
+				return material;
 			}
 		}
-
-		return material;
+		return nullptr;
 	}
 }
 

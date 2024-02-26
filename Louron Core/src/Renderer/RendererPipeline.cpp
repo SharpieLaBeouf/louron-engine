@@ -368,12 +368,10 @@ namespace Louron {
 				});
 
 				std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth");
-
-					L_CORE_ASSERT(shader, "FP Depth Shader Not Found!");
-					if (shader)
-					{
-						glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
-						Renderer::ClearBuffer(GL_DEPTH_BUFFER_BIT);
+				if (shader)
+				{
+					glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
+					Renderer::ClearBuffer(GL_DEPTH_BUFFER_BIT);
 
 					shader->Bind();
 					shader->SetMat4("u_Proj", camera->GetProjMatrix());
@@ -390,6 +388,9 @@ namespace Louron {
 
 					glBindFramebuffer(GL_FRAMEBUFFER, 0);
 				}
+				else {
+					L_CORE_ERROR("FP Depth Shader Not Found");
+				}
 			}
 		}
 	}
@@ -403,8 +404,6 @@ namespace Louron {
 		L_PROFILE_SCOPE("Forward Plus - Light Cull");
 		// Conduct Light Cull
 		std::shared_ptr<Shader> lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
-
-		L_CORE_ASSERT(lightCull, "FP Light Cull Compute Shader Not Found!");
 		if (lightCull) {
 			lightCull->Bind();
 
@@ -419,6 +418,9 @@ namespace Louron {
 
 			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		else {
+			L_CORE_ERROR("FP Light Cull Compute Shader Not Found");
 		}
 	}
 

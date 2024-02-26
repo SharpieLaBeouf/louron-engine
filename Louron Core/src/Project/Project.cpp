@@ -33,18 +33,25 @@ namespace Louron {
 
 		// Check if Project File Extension is Incompatible.
 		if (outFilePath.extension() != ".lproj") {
-			// replace this with error log opposed to assert - L_CORE_ASSERT(false, "Incompatible Project File Extension! Extension used: " + projectFilePath.extension().string() + ", Extension Required: .lproj");
-			outFilePath.replace_extension();
-			outFilePath = outFilePath.string() + ".lproj";
+			
+			L_CORE_WARN("Incompatible Project File Extension");
+			L_CORE_WARN("Extension Used: {0}", projectFilePath.extension().string());
+			L_CORE_WARN("Extension Expected: .lproj");
+			
+			outFilePath.replace_extension(".lproj");
 		}
 
 		// Check if Project Has a Dedicated Parent Project Directory.
-		if (!outFilePath.has_parent_path() || std::filesystem::absolute(outFilePath).parent_path() == std::filesystem::current_path())
+		if (!outFilePath.has_parent_path() || std::filesystem::absolute(outFilePath).parent_path() == std::filesystem::current_path()) {
+			L_CORE_INFO("Created New Project Folder");
 			outFilePath = outFilePath.filename().replace_extension() / outFilePath;
+		}
 
 		// Checks if Project Already Exists and Returns Deserialized Project Instance.
-		if (std::filesystem::exists(outFilePath))
+		if (std::filesystem::exists(outFilePath)) {
+			L_CORE_INFO("Project Already Exists");
 			return Project::LoadProject(outFilePath);
+		}
 		
 		// Initialise Project and Scene Instances.
 		std::shared_ptr<Project> project = std::make_shared<Project>();

@@ -18,10 +18,13 @@ namespace Louron {
 
     bool ProjectSerializer::Serialize(const std::filesystem::path& projectFilePath) {
 
-        L_CORE_ASSERT((projectFilePath.extension() == ".lproj"), "Incompatible Project File Extension! Extension used: " + projectFilePath.extension().string() + ", Extension Required: .lproj");
-        
-        if (projectFilePath.extension() == ".lproj") {
-
+        if (projectFilePath.extension() != ".lproj") {
+            L_CORE_WARN("Incompatible Project File Extension");
+            L_CORE_WARN("Extension Used: {0}", projectFilePath.extension().string());
+            L_CORE_WARN("Extension Expected: .lproj");
+        }
+        else 
+        {
             const auto& config = m_Project->GetConfig();
 
             YAML::Emitter out;
@@ -51,9 +54,13 @@ namespace Louron {
 
     bool ProjectSerializer::Deserialize(const std::filesystem::path& projectFilePath) {
 
-        L_CORE_ASSERT((projectFilePath.extension() == ".lproj"), "Incompatible Project File Extension! Extension used: " + projectFilePath.extension().string() + ", Extension Required: .lproj");
-
-        if (projectFilePath.extension() == ".lproj") {
+        if (projectFilePath.extension() != ".lproj") {
+            L_CORE_WARN("Incompatible Project File Extension");
+            L_CORE_WARN("Extension Used: {0}", projectFilePath.extension().string());
+            L_CORE_WARN("Extension Expected: .lproj");
+        } 
+        else 
+        {
             ProjectConfig config = m_Project->GetConfig();
 
             YAML::Node data;
@@ -61,12 +68,12 @@ namespace Louron {
                 data = YAML::LoadFile(projectFilePath.string());
             }
             catch (YAML::ParserException e) {
-                L_CORE_ASSERT(false, "YAML-CPP Failed to Load Project File: " + projectFilePath.string() + ", " + e.what());
+                L_CORE_ERROR("YAML-CPP Failed to Load Project File: '{0}', {1}", projectFilePath.string(), e.what());
                 return false;
             }
 
             if (!data["Project Name"] || !data["Project Config"]) {
-                L_CORE_ASSERT(false, "Project Node's Not Correctly Declared in File : " + projectFilePath.string());
+                L_CORE_ERROR("Project Node's Not Correctly Declared in File: \'{0}\'", projectFilePath.string());
                 return false;
             }
 
@@ -79,10 +86,8 @@ namespace Louron {
             m_Project->SetConfig(config);
             return true;
         }
-
         return false;
     }
-
 }
 
 #pragma warning( pop )
