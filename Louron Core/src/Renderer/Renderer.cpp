@@ -25,8 +25,9 @@ namespace Louron {
 	void Renderer::DrawInstancedMesh(std::shared_ptr<Mesh> Mesh, std::vector<Transform> Transforms) {
 		
 		std::vector<glm::mat4> transformMatrices;
-		for (int i = 0; i < Transforms.size(); i++)
+		for (int i = 0; i < Transforms.size(); i++) {
 			transformMatrices.push_back(Transforms[i]);
+		}
 
 		if (s_InstanceBuffer == -1) {
 			glGenBuffers(1, &s_InstanceBuffer);
@@ -73,7 +74,12 @@ namespace Louron {
 		glVertexAttribDivisor(8, 0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+	void Renderer::CleanupInstanceData() {
 		// TODO: Implement cleaning up of buffer somewhere
-
+		if (s_InstanceBuffer != -1) {
+			glDeleteBuffers(1, &s_InstanceBuffer);
+			s_InstanceBuffer = -1;
+		}
 	}
 }

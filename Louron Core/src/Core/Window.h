@@ -32,10 +32,10 @@ namespace Louron {
 
 		void OnUpdate();
 
-		unsigned int GetWidth() const { return m_Data->Width; }
-		unsigned int GetHeight() const { return m_Data->Height; }
+		unsigned int GetWidth() const { return m_Data->Width == 0 ? 1 : m_Data->Width; }
+		unsigned int GetHeight() const { return m_Data->Height == 0 ? 1 : m_Data->Height; }
 
-		glm::uvec2 GetSize() const { return { m_Data->Width, m_Data->Height }; }
+		glm::uvec2 GetSize() const { return { m_Data->Width == 0 ? 1 : m_Data->Width, m_Data->Height == 0 ? 1 : m_Data->Height }; }
 
 		void* GetNativeWindow() const { return m_Window; }
 

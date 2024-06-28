@@ -147,19 +147,19 @@ public:
 		ImGui::DragInt("Wave Height", &waveHeight, 1.0f, 0, 100);
 		ImGui::DragFloat("Wave Speed", &waveSpeed, 0.1f);
 
-		glm::vec3 temp = cube_trans.GetPosition();
+		glm::vec3 temp = cube_trans.GetLocalPosition();
 		ImGui::DragFloat3("Translate", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
 		cube_trans.SetPosition(temp);
 
-		temp = cube_trans.GetRotation();
+		temp = cube_trans.GetLocalRotation();
 		ImGui::DragFloat3("Rotate", glm::value_ptr(temp), 1.0f, 0, 0, "%.2f");
 		cube_trans.SetRotation(temp);
 
-		temp = cube_trans.GetScale();
+		temp = cube_trans.GetLocalScale();
 		ImGui::DragFloat3("Scale", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
 		cube_trans.SetScale(temp);
 
-		temp = plane_trans.GetScale();
+		temp = plane_trans.GetLocalScale();
 		ImGui::DragFloat3("Plane Scale", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
 		plane_trans.SetScale(temp);
 
@@ -194,7 +194,7 @@ private:
 			glBindVertexArray(plane_VAO);
 
 			shader->Bind();
-			shader->SetMat4("u_VertexIn.Model", plane_trans);
+			shader->SetMat4("u_VertexIn.Model", plane_trans.GetLocalTransform());
 			shader->SetMat4("u_VertexIn.Proj", m_SceneCamera->GetProjMatrix());
 			shader->SetMat4("u_VertexIn.View", m_SceneCamera->GetViewMatrix());
 			shader->SetVec4("u_OurColour", plane_colour);
@@ -220,15 +220,15 @@ private:
 			glm::vec3 pos = glm::vec3(0.0f);
 			for (int x = 1; x <= waveSize; x++)
 			{
-				pos.x = (float)-waveSize / 2 + x - cube_trans.GetScale().x / 2;
+				pos.x = (float)-waveSize / 2 + x - cube_trans.GetLocalScale().x / 2;
 				for (int z = 1; z <= waveSize; z++)
 				{
-					pos.z = (float)-waveSize / 2 + z - cube_trans.GetScale().z / 2;
+					pos.z = (float)-waveSize / 2 + z - cube_trans.GetLocalScale().z / 2;
 
 					double time = glfwGetTime();
 					pos.y = (float)sin((time * waveSpeed + floor(x - waveSize) + floor(z - waveSize))) / waveSize * waveHeight;
 
-					shader->SetMat4("u_VertexIn.Model", glm::translate(cube_trans.GetTransform(), pos));
+					shader->SetMat4("u_VertexIn.Model", glm::translate(cube_trans.GetLocalTransform(), pos));
 					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				}
 			}

@@ -88,15 +88,15 @@ public:
 
 		ImGui::InputInt("Speed", &speed);
 
-		glm::vec3 temp = trans.GetPosition();
+		glm::vec3 temp = trans.GetLocalPosition();
 		ImGui::DragFloat3("Translate", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
 		trans.SetPosition(temp);
 
-		temp = trans.GetRotation();
+		temp = trans.GetLocalRotation();
 		ImGui::DragFloat3("Rotate", glm::value_ptr(temp), 1.0f, 0, 0, "%.2f");
 		trans.SetRotation(temp);
 
-		temp = trans.GetScale();
+		temp = trans.GetLocalScale();
 		ImGui::DragFloat3("Scale", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
 		trans.SetScale(temp);
 
@@ -135,7 +135,7 @@ private:
 			shader->Bind();
 			shader->SetMat4("u_VertexIn.Proj", glm::perspective(glm::radians(60.0f), (float)Louron::Engine::Get().GetWindow().GetWidth() / (float)Louron::Engine::Get().GetWindow().GetHeight(), 0.1f, 100.0f));
 			shader->SetMat4("u_VertexIn.View", glm::lookAt(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f)));
-			shader->SetMat4("u_VertexIn.Model", trans);
+			shader->SetMat4("u_VertexIn.Model", trans.GetLocalTransform());
 			shader->SetVec4("u_OurColour", fore_colour);
 
 			shader->SetInt("u_OurTexture", 0);

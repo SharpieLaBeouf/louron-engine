@@ -106,6 +106,9 @@ private:
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(back_colour[0], back_colour[1], back_colour[2], back_colour[3]);
 
+		monkeyTransform.SetTransform(monkeyTransform.GetLocalTransform());
+		backPackTransform.SetTransform(backPackTransform.GetLocalTransform());
+
 		monkeyRenderer.ManualDraw(monkeyFilter, m_SceneCamera, monkeyTransform);
 		backPackRenderer.ManualDraw(backPackFilter, m_SceneCamera, backPackTransform);
 

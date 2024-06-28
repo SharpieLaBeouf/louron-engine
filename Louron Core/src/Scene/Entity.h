@@ -6,11 +6,16 @@
 #include "Components/UUID.h"
 #include "Components/Mesh.h"
 #include "Components/Components.h"
+#include "Components/Physics/Collider.h"
+#include "Components/Physics/Rigidbody.h"
+
+#include "Scene Systems/Physics System.h"
 
 // C++ Standard Library Headers
 #include <iostream>
 #include <typeindex>
 #include <memory>
+#include <utility>
 
 // External Vendor Library Headers
 #include <entt/entt.hpp>
@@ -25,24 +30,67 @@ namespace Louron {
 		Entity(entt::entity regHandle, Scene* scene);
 		Entity(const Entity&) = default;
 
+
 		// This adds a Component to the applicable Entity, and returns that Component
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) {
 
-			if (HasComponent<T>())
+			#pragma region Rigidbody
+			// Check if Component is Rigidbody Type
+			if constexpr (std::is_same_v<T, Rigidbody>) {
+
+				if (HasComponent<Rigidbody>())
+					return GetComponent<Rigidbody>();
+				
+				Rigidbody& component = PhysicsSystem::AddRigidBody(*this, m_Scene);
+				component.entity = std::make_shared<Entity>(*this);
+
+				return component;
+			}
+
+			#pragma endregion
+
+			#pragma region SphereCollider
+
+			if constexpr (std::is_same_v<T, SphereCollider>) {
+
+				if (HasComponent<SphereCollider>())
+					return GetComponent<SphereCollider>();
+
+				SphereCollider& component = PhysicsSystem::AddSphereCollider({ m_EntityHandle, m_Scene }, m_Scene);
+				component.entity = std::make_shared<Entity>(*this);
+
+				return component;
+			}
+
+			#pragma endregion
+
+			#pragma region BoxCollider
+
+			if constexpr (std::is_same_v<T, BoxCollider>) {
+
+				if (HasComponent<BoxCollider>())
+					return GetComponent<BoxCollider>();
+
+				BoxCollider& component = PhysicsSystem::AddBoxCollider({ m_EntityHandle, m_Scene }, m_Scene);
+				component.entity = std::make_shared<Entity>(*this);
+
+				return component;
+			}
+
+			#pragma endregion
+
+			if (HasComponent<T>()) {
+				L_CORE_WARN("Entity Already Has: {0}", typeid(T).name());
 				return GetComponent<T>();
+			}
 
 			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			component.entity = std::make_shared<Entity>(*this);
 
 			return component;
 		}
 
-		/// <summary>
-		/// I want to be able to just call GetComponent, and not have to worry about 
-		/// application breaking error handling when an entity does not have a
-		/// specified component. Why do we want to halt execution when we should
-		/// just log and debug this.
-		/// </summary>
 		template<typename T>
 		T& GetComponent() {
 						
@@ -78,9 +126,29 @@ namespace Louron {
 		bool HasComponent() {
 			return m_Scene->m_Registry.has<T>(m_EntityHandle);
 		}
+
+		template<typename... Components>
+		bool HasAnyComponent() {
+			return m_Scene->m_Registry.any<Components...>(m_EntityHandle);
+		}
+
 		// This removes any Component within the applicable Entity
 		template <typename T>
 		void RemoveComponent() {
+
+			if constexpr (std::is_same_v<T, Rigidbody>) {
+				if(HasComponent<Rigidbody>())
+					PhysicsSystem::RemoveRigidBody({ m_EntityHandle, m_Scene }, m_Scene);
+			}
+			if constexpr (std::is_same_v<T, SphereCollider>) {
+				if(HasComponent<SphereCollider>())
+					PhysicsSystem::RemoveCollider({ m_EntityHandle, m_Scene }, m_Scene, PxGeometryType::eSPHERE);
+			}
+			if constexpr (std::is_same_v<T, BoxCollider>) {
+				if (HasComponent<BoxCollider>())
+					PhysicsSystem::RemoveCollider({ m_EntityHandle, m_Scene }, m_Scene, PxGeometryType::eBOX);
+			}
+
 			m_Scene->m_Registry.remove_if_exists<T>(m_EntityHandle);
 		}
 
@@ -93,9 +161,12 @@ namespace Louron {
 		// This returns the tag reference to the Component
 		const std::string& GetName() { return GetComponent<TagComponent>().Tag; }
 
+		Scene* GetScene() const { return m_Scene; }
+
 	private:
 		entt::entity m_EntityHandle{ entt::null };
 		Scene* m_Scene = nullptr;
 	};
+
 
 }

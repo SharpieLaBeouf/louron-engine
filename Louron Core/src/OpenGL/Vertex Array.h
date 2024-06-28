@@ -38,7 +38,7 @@ namespace Louron {
 		~VertexArray();
 
 		void Bind() const;
-		void Unbind() const;
+		void UnBind() const;
 
 		void AddVertexBuffer(VertexBuffer* vertexBuffer);
 		void SetIndexBuffer(IndexBuffer* indexBuffer);

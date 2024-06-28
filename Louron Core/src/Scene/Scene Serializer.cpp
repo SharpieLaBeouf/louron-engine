@@ -1,13 +1,25 @@
 #include "Scene Serializer.h"
 
 // Louron Core Headers
+#include "Scene.h"
 #include "Entity.h"
+#include "Resource Manager.h"
 
-#include "Components/UUID.h"
 #include "Components/Components.h"
+#include "Components/Light.h"
 #include "Components/Skybox.h"
+#include "Components/UUID.h"
+
+#include "Components/Physics/Collider.h"
+#include "Components/Physics/Rigidbody.h"
+#include "Components/Physics/PhysicsWrappers.h"
+
+#include "Scene Systems/Physics System.h"
+#include "Scene Systems/Transform System.h"
 
 #include "../Renderer/RendererPipeline.h"
+
+#include "../Core/Time.h"
 
 // C++ Standard Library Headers
 #include <fstream>
@@ -18,7 +30,9 @@
 #pragma warning( push )
 #pragma warning( disable : 4099)
 
+#ifndef YAML_CPP_STATIC_DEFINE
 #define YAML_CPP_STATIC_DEFINE
+#endif
 #include <yaml-cpp/yaml.h>
 
 namespace YAML {
@@ -118,7 +132,7 @@ namespace YAML {
 
 namespace Louron {
 	
-	SceneSerializer::SceneSerializer(const std::shared_ptr<Scene>& scene) : m_Scene(scene) { }
+	SceneSerializer::SceneSerializer(std::shared_ptr<Scene> scene) : m_Scene(scene) { }
 	
 	void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity) {
 
@@ -143,7 +157,7 @@ namespace Louron {
 
 			Transform& transform = entity.GetComponent<Transform>();
 			
-			glm::vec3 v = transform.GetPosition();
+			glm::vec3 v = transform.GetLocalPosition();
 			out << YAML::Key << "Translation" << YAML::Value << YAML::Flow 
 				<< YAML::BeginSeq 
 					<< v.x 
@@ -151,7 +165,7 @@ namespace Louron {
 					<< v.z 
 				<< YAML::EndSeq;
 			
-			v = transform.GetRotation();
+			v = transform.GetLocalRotation();
 			out << YAML::Key << "Rotation" << YAML::Value << YAML::Flow
 				<< YAML::BeginSeq
 				<< v.x
@@ -159,7 +173,7 @@ namespace Louron {
 				<< v.z
 				<< YAML::EndSeq;
 			
-			v = transform.GetScale();
+			v = transform.GetLocalScale();
 			out << YAML::Key << "Scale" << YAML::Value << YAML::Flow
 				<< YAML::BeginSeq
 				<< v.x
@@ -184,6 +198,7 @@ namespace Louron {
 
 				{
 					out << YAML::Key << "FOV" << YAML::Value << camera->FOV;
+					out << YAML::Key << "MovementToggle" << YAML::Value << camera->m_Movement;
 					out << YAML::Key << "MovementSpeed" << YAML::Value << camera->MovementSpeed;
 					out << YAML::Key << "MovementYDamp" << YAML::Value << camera->MovementYDamp;
 					out << YAML::Key << "MouseSensitivity" << YAML::Value << camera->MouseSensitivity;
@@ -224,46 +239,56 @@ namespace Louron {
 
 		if (entity.HasComponent<SkyboxComponent>()) {
 
-			out << YAML::Key << "SkyboxComponent";
-			out << YAML::BeginMap;
-
 			const SkyboxComponent& skyboxComponent = entity.GetComponent<SkyboxComponent>();
-			out << YAML::Key << "MaterialFilePath" << YAML::Value << skyboxComponent.Material->GetMaterialFilePath().string().substr(skyboxComponent.Material->GetMaterialFilePath().string().find(m_Scene->GetConfig().AssetDirectory.string()) + m_Scene->GetConfig().AssetDirectory.string().length());
+			if (!skyboxComponent.Material->GetMaterialFilePath().empty()) {
 
-			{
-				YAML::Emitter materialOut;
-				materialOut << YAML::BeginMap;
-				materialOut << YAML::Key << "Material Name" << YAML::Value << skyboxComponent.Material->GetName();
-				materialOut << YAML::Key << "Material Type" << YAML::Value << "SkyboxMaterial";
-				materialOut << YAML::Key << "TextureFilePaths" << YAML::Value << YAML::BeginMap;
+				out << YAML::Key << "SkyboxComponent";
+				out << YAML::BeginMap;
 
-				const std::array<std::filesystem::path, 6>& fsArray = skyboxComponent.Material->GetTextureFilePaths();
+				out << YAML::Key << "MaterialFilePath" << YAML::Value << 
+					skyboxComponent.Material->GetMaterialFilePath().string().substr(
+						skyboxComponent.Material->GetMaterialFilePath().string().find(
+							m_Scene.lock()->GetConfig().AssetDirectory.string()) + m_Scene.lock()->GetConfig().AssetDirectory.string().length()
+					);
 
-				std::unordered_map<int, std::string> indexKeyMap{
-					{ 0, "Right"},
-					{ 1, "Left"},
-					{ 2, "Top"},
-					{ 3, "Bottom"},
-					{ 4, "Back"},
-					{ 5, "Front"},
-				};
+				{
+					YAML::Emitter materialOut;
+					materialOut << YAML::BeginMap;
+					materialOut << YAML::Key << "Material Name" << YAML::Value << skyboxComponent.Material->GetName();
+					materialOut << YAML::Key << "Material Type" << YAML::Value << "SkyboxMaterial";
+					materialOut << YAML::Key << "TextureFilePaths" << YAML::Value << YAML::BeginMap;
 
-				for (auto& pair : indexKeyMap)
-					materialOut << 
-					YAML::Key	<< pair.second << 
-					YAML::Value << fsArray[pair.first].string().substr(fsArray[pair.first].string().find(m_Scene->GetConfig().AssetDirectory.string()) + m_Scene->GetConfig().AssetDirectory.string().length());
+					const std::array<std::filesystem::path, 6>& fsArray = skyboxComponent.Material->GetTextureFilePaths();
 
-				materialOut << YAML::EndMap << YAML::EndMap;
+					std::unordered_map<int, std::string> indexKeyMap{
+						{ 0, "Right"},
+						{ 1, "Left"},
+						{ 2, "Top"},
+						{ 3, "Bottom"},
+						{ 4, "Back"},
+						{ 5, "Front"},
+					};
 
-				std::filesystem::create_directories(skyboxComponent.Material->GetMaterialFilePath().parent_path());
+					for (auto& pair : indexKeyMap) {
+						materialOut << 
+						YAML::Key	<< pair.second << 
+						YAML::Value << fsArray[pair.first].string().substr(fsArray[pair.first].string().find(m_Scene.lock()->GetConfig().AssetDirectory.string()) + m_Scene.lock()->GetConfig().AssetDirectory.string().length());
+					}
 
-				std::ofstream fout(skyboxComponent.Material->GetMaterialFilePath());
-				fout << materialOut.c_str();
+					materialOut << YAML::EndMap << YAML::EndMap;
 
-				L_CORE_INFO("Skybox Material ({0}) Saved At: {1}", skyboxComponent.Material->GetMaterialFilePath().filename().replace_extension().string(), skyboxComponent.Material->GetMaterialFilePath().string());
+					std::filesystem::create_directories(skyboxComponent.Material->GetMaterialFilePath().parent_path());
+
+					std::ofstream fout(skyboxComponent.Material->GetMaterialFilePath());
+					fout << materialOut.c_str();
+
+					L_CORE_INFO("Skybox Material ({0}) Saved At: {1}", skyboxComponent.Material->GetMaterialFilePath().filename().replace_extension().string(), skyboxComponent.Material->GetMaterialFilePath().string());
+				}
+
+				out << YAML::EndMap;
 			}
-
-			out << YAML::EndMap;
+			else
+				L_CORE_ERROR("Could Not Save SkyBox Information - No SkyBoxMaterial FilePath Specified!");
 		}
 
 		if (entity.HasComponent<PointLightComponent>()) {
@@ -414,12 +439,118 @@ namespace Louron {
 			out << YAML::EndMap;
 		}
 
+		if (entity.HasComponent<Rigidbody>()) {
+
+			out << YAML::Key << "RigidbodyComponent";
+			out << YAML::BeginMap;
+
+			const Rigidbody& rigidBody = entity.GetComponent<Rigidbody>();
+
+			out << YAML::Key << "Mass" << YAML::Value << rigidBody.GetMass();
+			out << YAML::Key << "Drag" << YAML::Value << rigidBody.GetDrag();
+			out << YAML::Key << "AngularDrag" << YAML::Value << rigidBody.GetAngularDrag();
+
+			out << YAML::Key << "AutomaticCentreOfMass" << YAML::Value << rigidBody.IsAutomaticCentreOfMassEnabled();
+			out << YAML::Key << "UseGravity" << YAML::Value << rigidBody.IsGravityEnabled();
+			out << YAML::Key << "IsKinematic" << YAML::Value << rigidBody.IsKinematicEnabled();
+
+			glm::vec3 v = rigidBody.GetPositionConstraint();
+			out << YAML::Key << "PositionConstraint" << YAML::Value << YAML::Flow
+				<< YAML::BeginSeq
+				<< v.x
+				<< v.y
+				<< v.z
+				<< YAML::EndSeq;
+
+			v = rigidBody.GetRotationConstraint();
+			out << YAML::Key << "RotationConstraint" << YAML::Value << YAML::Flow
+				<< YAML::BeginSeq
+				<< v.x
+				<< v.y
+				<< v.z
+				<< YAML::EndSeq;
+
+			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<SphereCollider>()) {
+
+			out << YAML::Key << "SphereColliderComponent";
+			out << YAML::BeginMap;
+
+			const SphereCollider& sphereCollider = entity.GetComponent<SphereCollider>();
+
+			out << YAML::Key << "IsTrigger" << YAML::Value << sphereCollider.GetIsTrigger();
+
+			out << YAML::Key << "Radius" << YAML::Value << sphereCollider.GetRadius();
+
+			glm::vec3 v = sphereCollider.GetCentre();
+			out << YAML::Key << "Centre" << YAML::Value << YAML::Flow
+				<< YAML::BeginSeq
+				<< v.x
+				<< v.y
+				<< v.z
+				<< YAML::EndSeq;
+
+			std::shared_ptr<PhysicsMaterial> tempMaterial = sphereCollider.GetMaterial();
+			out << YAML::Key << "MaterialProperties" << YAML::Value << YAML::Flow
+				<< YAML::BeginSeq
+				<< tempMaterial->GetStaticFriction()
+				<< tempMaterial->GetDynamicFriction()
+				<< tempMaterial->GetBounciness()
+				<< YAML::EndSeq;
+
+			out << YAML::EndMap;
+		}
+
+		if (entity.HasComponent<BoxCollider>()) {
+
+			out << YAML::Key << "BoxColliderComponent";
+			out << YAML::BeginMap;
+
+			const BoxCollider& boxCollider = entity.GetComponent<BoxCollider>();
+
+			out << YAML::Key << "IsTrigger" << YAML::Value << boxCollider.GetIsTrigger();
+
+			glm::vec3 v = boxCollider.GetCentre();
+			out << YAML::Key << "Centre" << YAML::Value << YAML::Flow
+				<< YAML::BeginSeq
+				<< v.x
+				<< v.y
+				<< v.z
+				<< YAML::EndSeq;
+
+			v = boxCollider.GetSize();
+			out << YAML::Key << "Size" << YAML::Value << YAML::Flow
+				<< YAML::BeginSeq
+				<< v.x
+				<< v.y
+				<< v.z
+				<< YAML::EndSeq;
+
+			std::shared_ptr<PhysicsMaterial> tempMaterial = boxCollider.GetMaterial();
+			out << YAML::Key << "MaterialProperties" << YAML::Value << YAML::Flow
+				<< YAML::BeginSeq
+				<< tempMaterial->GetStaticFriction()
+				<< tempMaterial->GetDynamicFriction()
+				<< tempMaterial->GetBounciness()
+				<< YAML::EndSeq;
+
+			out << YAML::EndMap;
+		}
+
 		out << YAML::EndMap;
 	}
 
 	bool SceneSerializer::Serialize(const std::filesystem::path& sceneFilePath) {
 
-		std::filesystem::path outFilePath = (sceneFilePath.empty()) ? m_Scene->m_SceneFilePath : sceneFilePath;
+		auto scene_ref = m_Scene.lock();
+		if (!scene_ref) {
+			L_CORE_ERROR("Scene Invalid - Cannot Serialize.");
+			return false;
+		}
+
+		std::filesystem::path outFilePath = (sceneFilePath.empty()) ? scene_ref->m_SceneFilePath : sceneFilePath;
 
 		if (outFilePath.extension() != ".lscene") {
 
@@ -432,15 +563,15 @@ namespace Louron {
 
 			YAML::Emitter out;
 			out << YAML::BeginMap;
-			out << YAML::Key << "Scene Name" << YAML::Value << m_Scene->m_SceneConfig.Name;
-			out << YAML::Key << "Scene Asset Directory" << YAML::Value << m_Scene->m_SceneConfig.AssetDirectory.string();
-			out << YAML::Key << "Scene Pipeline Type" << YAML::Value << (int)m_Scene->m_SceneConfig.ScenePipelineType;
+			out << YAML::Key << "Scene Name" << YAML::Value << scene_ref->m_SceneConfig.Name;
+			out << YAML::Key << "Scene Asset Directory" << YAML::Value << scene_ref->m_SceneConfig.AssetDirectory.string();
+			out << YAML::Key << "Scene Pipeline Type" << YAML::Value << (int)scene_ref->m_SceneConfig.ScenePipelineType;
 
 			out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
-			m_Scene->m_Registry.each([&](auto entityID)
+			scene_ref->m_Registry.each([&](auto entityID)
 				{
-					Entity entity = { entityID, m_Scene.get() };
+					Entity entity = { entityID, scene_ref.get()};
 					if (!entity)
 						return;
 
@@ -449,7 +580,8 @@ namespace Louron {
 
 			out << YAML::EndSeq << YAML::EndMap;
 
-			std::filesystem::create_directories(outFilePath.parent_path());
+			if(outFilePath.has_parent_path())
+				std::filesystem::create_directories(outFilePath.parent_path());
 
 			std::ofstream fout(outFilePath);
 			fout << out.c_str();
@@ -459,6 +591,12 @@ namespace Louron {
 	}
 
 	bool SceneSerializer::Deserialize(const std::filesystem::path& sceneFilePath) {
+
+		auto scene_ref = m_Scene.lock();
+		if (!scene_ref) {
+			L_CORE_ERROR("Scene Invalid - Cannot Deserialize.");
+			return false;
+		}
 
 		if (sceneFilePath.extension() != ".lscene") {
 
@@ -483,7 +621,7 @@ namespace Louron {
 				return false;
 			}
 			else {
-				m_Scene->m_SceneConfig.Name = data["Scene Name"].as<std::string>();
+				scene_ref->m_SceneConfig.Name = data["Scene Name"].as<std::string>();
 			}
 
 			if (!data["Scene Asset Directory"]) {
@@ -491,7 +629,7 @@ namespace Louron {
 				return false;
 			}
 			else {
-				m_Scene->m_SceneConfig.AssetDirectory = data["Scene Asset Directory"].as<std::string>();
+				scene_ref->m_SceneConfig.AssetDirectory = data["Scene Asset Directory"].as<std::string>();
 			}
 
 			if (!data["Scene Pipeline Type"]) {
@@ -499,17 +637,17 @@ namespace Louron {
 				return false;
 			}
 			else {
-				m_Scene->m_SceneConfig.ScenePipelineType = (L_RENDER_PIPELINE)data["Scene Pipeline Type"].as<int>();
+				scene_ref->m_SceneConfig.ScenePipelineType = (L_RENDER_PIPELINE)data["Scene Pipeline Type"].as<int>();
 
-				switch (m_Scene->m_SceneConfig.ScenePipelineType) {
+				switch (scene_ref->m_SceneConfig.ScenePipelineType) {
 				case L_RENDER_PIPELINE::FORWARD:
-					m_Scene->m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+					scene_ref->m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
 					break;
 				case L_RENDER_PIPELINE::FORWARD_PLUS:
-					m_Scene->m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
+					scene_ref->m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
 					break;
 				case L_RENDER_PIPELINE::DEFERRED:
-					m_Scene->m_SceneConfig.ScenePipeline = std::make_shared<DeferredPipeline>();
+					scene_ref->m_SceneConfig.ScenePipeline = std::make_shared<DeferredPipeline>();
 					break;
 				}
 			}
@@ -527,7 +665,7 @@ namespace Louron {
 					if (tag) 
 						name = tag["Tag"].as<std::string>();
 
-					Entity deserializedEntity = m_Scene->CreateEntity(uuid, name);
+					Entity deserializedEntity = scene_ref->CreateEntity(uuid, name);
 
 					// Transform
 					auto transform = entity["TransformComponent"];
@@ -547,6 +685,7 @@ namespace Louron {
 						
 						entityCamera.Camera = std::make_shared<Louron::Camera>(camera["Camera"]["Position"].as<glm::vec3>());
 						entityCamera.Camera->FOV = camera["Camera"]["FOV"].as<float>();
+						entityCamera.Camera->m_Movement = camera["Camera"]["MovementToggle"].as<bool>();
 						entityCamera.Camera->MovementSpeed = camera["Camera"]["MovementSpeed"].as<float>();
 						entityCamera.Camera->MovementYDamp = camera["Camera"]["MovementYDamp"].as<float>();
 						entityCamera.Camera->MouseSensitivity = camera["Camera"]["MouseSensitivity"].as<float>();
@@ -556,7 +695,7 @@ namespace Louron {
 						entityCamera.Camera->SetPitch(camera["Camera"]["Pitch"].as<float>());
 
 						entityCamera.Primary = camera["Primary"].as<bool>();
-						entityCamera.ClearFlags = (L_CAMERA_CLEAR_FLAGS)camera["ClearFlag"].as<int>();
+						entityCamera.ClearFlags = (CameraClearFlags)camera["ClearFlag"].as<int>();
 
 					}
 
@@ -564,11 +703,11 @@ namespace Louron {
 					auto meshRenderer = entity["MeshRendererComponent"];
 					if (meshRenderer) {
 
-						m_Scene->m_SceneConfig.SceneResourceManager->LoadMesh(meshRenderer["MeshFilePath"].as<std::string>().c_str(), Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
+						scene_ref->m_SceneConfig.SceneResourceManager->LoadMesh(meshRenderer["MeshFilePath"].as<std::string>().c_str(), Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
 
-						deserializedEntity.AddComponent<MeshFilter>().LinkMeshFilter(m_Scene->m_SceneConfig.SceneResourceManager->GetMeshFilter(meshRenderer["MeshFilePath"].as<std::string>()));
+						deserializedEntity.AddComponent<MeshFilter>().LinkMeshFilter(scene_ref->m_SceneConfig.SceneResourceManager->GetMeshFilter(meshRenderer["MeshFilePath"].as<std::string>()));
 						auto& entityMeshRenderer = deserializedEntity.AddComponent<MeshRenderer>();
-						entityMeshRenderer.LinkMeshRenderer(m_Scene->m_SceneConfig.SceneResourceManager->GetMeshRenderer(meshRenderer["MeshFilePath"].as<std::string>()));
+						entityMeshRenderer.LinkMeshRenderer(scene_ref->m_SceneConfig.SceneResourceManager->GetMeshRenderer(meshRenderer["MeshFilePath"].as<std::string>()));
 						entityMeshRenderer.active = meshRenderer["MeshActive"].as<bool>();
 					}
 
@@ -577,7 +716,7 @@ namespace Louron {
 					if (skybox) {
 
 						SkyboxComponent& skyboxComponent = deserializedEntity.AddComponent<SkyboxComponent>();
-						skyboxComponent.Material = DeserializeSkyboxMaterial(m_Scene->m_SceneConfig.AssetDirectory / skybox["MaterialFilePath"].as<std::string>());
+						skyboxComponent.Material = DeserializeSkyboxMaterial(scene_ref->m_SceneConfig.AssetDirectory / skybox["MaterialFilePath"].as<std::string>());
 					}
 
 					// Point Light
@@ -625,8 +764,69 @@ namespace Louron {
 						entityDirectionalLight.specular = directionalLight["Specular"].as<glm::vec4>();
 					}
 
+					auto rigidBody = entity["RigidbodyComponent"];
+					if (rigidBody) {
+
+						auto& entityRigidBody = deserializedEntity.AddComponent<Rigidbody>();
+
+						entityRigidBody.SetMass(rigidBody["Mass"].as<float>());
+						entityRigidBody.SetDrag(rigidBody["Drag"].as<float>());
+						entityRigidBody.SetAngularDrag(rigidBody["AngularDrag"].as<float>());
+
+						entityRigidBody.SetAutomaticCentreOfMass(rigidBody["AutomaticCentreOfMass"].as<bool>());
+						entityRigidBody.SetGravity(rigidBody["UseGravity"].as<bool>());
+						entityRigidBody.SetKinematic(rigidBody["IsKinematic"].as<bool>());
+
+						entityRigidBody.SetPositionConstraint(rigidBody["PositionConstraint"].as<glm::vec3>());
+						entityRigidBody.SetRotationConstraint(rigidBody["RotationConstraint"].as<glm::vec3>());
+
+						entityRigidBody.GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
+						entityRigidBody.GetActor()->AddFlag(RigidbodyFlag_ShapesUpdated);
+					}
+
+					auto sphereCollider = entity["SphereColliderComponent"];
+					if (sphereCollider) {
+
+						auto& entitySphereCollider = deserializedEntity.AddComponent<SphereCollider>();
+						entitySphereCollider.SetIsTrigger(sphereCollider["IsTrigger"].as<bool>());
+
+						entitySphereCollider.SetRadius(sphereCollider["Radius"].as<float>());
+
+						entitySphereCollider.SetCentre(sphereCollider["Centre"].as<glm::vec3>());
+
+						glm::vec3 materialProps = sphereCollider["MaterialProperties"].as<glm::vec3>();
+						entitySphereCollider.GetMaterial()->SetStaticFriction(materialProps.x);
+						entitySphereCollider.GetMaterial()->SetDynamicFriction(materialProps.y);
+						entitySphereCollider.GetMaterial()->SetBounciness(materialProps.z);
+
+						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
+						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
+					}
+
+					auto boxCollider = entity["BoxColliderComponent"];
+					if (boxCollider) {
+
+						auto& entityBoxCollider = deserializedEntity.AddComponent<BoxCollider>();
+						entityBoxCollider.SetIsTrigger(boxCollider["IsTrigger"].as<bool>());
+
+						entityBoxCollider.SetSize(boxCollider["Size"].as<glm::vec3>());
+
+						entityBoxCollider.SetCentre(boxCollider["Centre"].as<glm::vec3>());
+
+						glm::vec3 materialProps = boxCollider["MaterialProperties"].as<glm::vec3>();
+						entityBoxCollider.GetMaterial()->SetStaticFriction(materialProps.x);
+						entityBoxCollider.GetMaterial()->SetDynamicFriction(materialProps.y);
+						entityBoxCollider.GetMaterial()->SetBounciness(materialProps.z);
+
+						entityBoxCollider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+						entityBoxCollider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
+						entityBoxCollider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
+					}
 				}
 			}
+			TransformSystem::Update(scene_ref);
+			PhysicsSystem::Update(scene_ref);
 			return true;
 		}
 		return false;
@@ -686,7 +886,7 @@ namespace Louron {
 				if (texturesData)
 					for (auto& pair : indexKeyMap) 
 						if(texturesData[pair.second])
-							textureFilePathArray[pair.first] = m_Scene->m_SceneConfig.AssetDirectory / texturesData[pair.second].as<std::string>();
+							textureFilePathArray[pair.first] = m_Scene.lock()->m_SceneConfig.AssetDirectory / texturesData[pair.second].as<std::string>();
 				
 				material->LoadSkybox(textureFilePathArray);
 				material->SetName(data["Material Name"].as<std::string>());

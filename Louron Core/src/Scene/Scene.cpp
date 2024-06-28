@@ -3,23 +3,86 @@
 // Louron Core Headers
 #include "Entity.h"
 #include "Scene Serializer.h"
+#include "Resource Manager.h"
 
-#include "Components/Mesh.h"
+#include "Components/Camera.h"
 #include "Components/Components.h"
+#include "Components/Light.h"
+#include "Components/Mesh.h"
+#include "Components/UUID.h"
+
+#include "Components/Physics/Collider.h"
+#include "Components/Physics/Rigidbody.h"
+#include "Components/Physics/PhysicsWrappers.h"
+
+#include "Scene Systems/Transform System.h"
+#include "Scene Systems/Physics System.h"
+
+#include "../Debug/Profiler.h"
 
 #include "../Renderer/Renderer.h"
+#include "../Renderer/RendererPipeline.h"
+
+#include "../Core/Time.h"
+#include "../Core/Input.h"
 
 // C++ Standard Library Headers
 #include <iomanip>
 
 // External Vendor Library Headers
 #include <glm/gtc/quaternion.hpp>
-
 #include <imgui/imgui.h>
 
 namespace Louron {
 
+#pragma region Initialisation and ECS
+
 	Scene::Scene() {
+		// Create PhysX Scene
+		PxSceneDesc sceneDesc(PxGetPhysics().getTolerancesScale());
+		sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+		sceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2);
+		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		m_PhysxScene = PxGetPhysics().createScene(sceneDesc);
+
+#ifdef _DEBUG
+		PxPvdSceneClient* pvdClient = m_PhysxScene->getScenePvdClient();
+		if (pvdClient)
+		{
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+		}
+#endif
+
+		m_SceneFilePath = "Scenes/Untitled Scene.lscene";
+
+		m_SceneConfig.Name = m_SceneFilePath.filename().replace_extension().string();
+		m_SceneConfig.AssetDirectory = "Assets/";
+		m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
+		
+		m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
+	}
+
+	Scene::Scene(L_RENDER_PIPELINE pipeline) {
+		// Create PhysX Scene
+		PxSceneDesc sceneDesc(PxGetPhysics().getTolerancesScale());
+		sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+		sceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2);
+		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		m_PhysxScene = PxGetPhysics().createScene(sceneDesc);
+
+#ifdef _DEBUG
+		PxPvdSceneClient* pvdClient = m_PhysxScene->getScenePvdClient();
+		if (pvdClient)
+		{
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+		}
+#endif
+
 		m_SceneFilePath = "Scenes/Untitled Scene.lscene";
 
 		m_SceneConfig.Name = m_SceneFilePath.filename().replace_extension().string();
@@ -27,64 +90,59 @@ namespace Louron {
 		m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
 		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
 
-		m_SceneConfig.ScenePipelineType = L_RENDER_PIPELINE::FORWARD;
+		switch (pipeline) {
+		case L_RENDER_PIPELINE::FORWARD:
+			m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+			break;
+		case L_RENDER_PIPELINE::FORWARD_PLUS:
+			m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
+			break;
+		case L_RENDER_PIPELINE::DEFERRED:
+			m_SceneConfig.ScenePipeline = std::make_shared<DeferredPipeline>();
+			break;
+		}
 
 	}
 
-	Scene::Scene(const std::filesystem::path& sceneFilePath, L_RENDER_PIPELINE pipelineType) {
+	Scene::~Scene() {
+
+
+		m_PhysxScene->release();
+
+	}
+
+	/// <summary>
+	/// Once the Scene has been initialised, call this to load the scene from file.
+	/// </summary>
+	/// <returns>Returns true if the SceneFile was loaded successfully, returns false if not.</returns>
+	bool Scene::LoadSceneFile(const std::filesystem::path& sceneFilePath) {
 
 		std::filesystem::path outFilePath = sceneFilePath;
 
 		// Check if Scene File Path is Empty.
 		if (outFilePath.empty()) {
-			// TODO: Add Log Here
-			outFilePath = "Scenes/Untitled Scene.lscene";
+			L_CORE_ERROR("Scene File Path Empty - Cannot Load Scene Data from File!");
+			return false;
 		}
 
 		// Check if Scene File Extension is Incompatible.
 		if (outFilePath.extension() != ".lscene") {
-			// TODO: Add Log Here
-			outFilePath.replace_extension();
-			outFilePath = outFilePath.string() + ".lscene";
+			L_CORE_ERROR("Scene File Path Extension Incompatible - Cannot Load Scene Data from File!");
+			return false;
 		}
 
 		// Load Existing Scene File or Create New Scene.
 		if (std::filesystem::exists(outFilePath)) {
 
-			std::shared_ptr<Scene> scene = std::make_shared<Scene>();
-
-			SceneSerializer serializer(scene);
+			SceneSerializer serializer(shared_from_this());
 			if (serializer.Deserialize(outFilePath)) {
 				m_SceneFilePath = outFilePath;
-				m_SceneConfig = std::move(scene->m_SceneConfig);
-				CopyRegistry(scene);
-
-				return;
+				return true;
 			}
 
-			// TODO: Add Log Here - Could Not Load Scene File.
+			L_CORE_ERROR("Scene File Path Does Not Exist - Cannot Load Scene Data from File!");
 		}
-
-		// If Existing Scene File Load Unsuccessful, Set Default Values
-		m_SceneFilePath = outFilePath;
-
-		m_SceneConfig.Name = outFilePath.filename().replace_extension().string();
-		m_SceneConfig.AssetDirectory = "Assets/";
-		m_SceneConfig.ScenePipelineType = pipelineType;
-		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
-
-		switch (pipelineType) {
-			case L_RENDER_PIPELINE::FORWARD:
-				m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
-			break;
-			case L_RENDER_PIPELINE::FORWARD_PLUS:
-				m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
-			break;
-			case L_RENDER_PIPELINE::DEFERRED:
-				m_SceneConfig.ScenePipeline = std::make_shared<DeferredPipeline>();
-			break;
-		}
-
+		return false;
 	}
 
 	/// <summary>
@@ -93,6 +151,8 @@ namespace Louron {
 	Entity Scene::CreateEntity(const std::string& name) {
 		return CreateEntity(UUID(), name);
 	}
+
+	#pragma region Component Copying
 
 	template<typename... Component>
 	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
@@ -132,12 +192,12 @@ namespace Louron {
 		CopyComponentIfExists<Component...>(dst, src);
 	}
 
+	#pragma endregion
+
 	/// <summary>
 	/// Copy Constructor and Operator Deleted in ENTT for Registry.
 	/// Have to Manually Copy Over Data.
 	/// </summary>
-	/// <param name="otherScene"></param>
-	/// <returns></returns>
 	bool Scene::CopyRegistry(std::shared_ptr<Scene> otherScene)
 	{
 		auto& srcSceneRegistry = otherScene->m_Registry;
@@ -159,19 +219,42 @@ namespace Louron {
 		return true;
 	}
 
+	void Scene::SetPhysScene(PxScene* physScene) {
+
+		// Release PhysX Scene
+		if (m_PhysxScene) {
+			m_PhysxScene->release();
+			m_PhysxScene = physScene;
+			return;
+		}
+
+		if (physScene) {
+			m_PhysxScene = physScene;
+			return;
+		}
+
+		L_CORE_WARN("Physics Scene Not Valid.");
+		m_PhysxScene = nullptr;
+	}
+
 	/// <summary>
 	/// Create Entity in Scene with UUID
 	/// </summary>
 	Entity Scene::CreateEntity(UUID uuid, const std::string& name)
 	{
 		Entity entity = { m_Registry.create(), this };
+		
+		// 1. Add UUID Component
 		entity.AddComponent<IDComponent>(uuid);
+
+		// 2. Add Transform Component
 		entity.AddComponent<Transform>();
 
+		// 3. Add Tag Component
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Untitled Entity" : name;
 
-		m_EntityMap[uuid] = entity;
+		m_EntityMap->emplace(uuid, entity);
 
 		return entity;
 	}
@@ -183,7 +266,37 @@ namespace Louron {
 
 	// Destroys Entity in Scene
 	void Scene::DestroyEntity(Entity entity) {
-		m_EntityMap.erase(entity.GetUUID());
+
+		// 1. Check for children and Destroy them too
+		if (!entity) {
+			L_CORE_WARN("Attempted to Destroy Null Entity.");
+			return;
+		}
+
+		// Check If Entity is Part of the Scene
+		if (!HasEntity(entity.GetUUID())) {
+			L_CORE_WARN("Attempted to Destroy an Entity Not In The Scene.");
+			return;
+		}
+
+		// Call Physics System Remove Methods
+		PhysicsSystem::RemoveRigidBody(entity, this);
+
+		if (entity.HasAnyComponent<SphereCollider, BoxCollider>()) {
+
+			if (entity.HasComponent<SphereCollider>())
+				PhysicsSystem::RemoveCollider(entity, this, PxGeometryType::eSPHERE);
+
+			if (entity.HasComponent<BoxCollider>())
+				PhysicsSystem::RemoveCollider(entity, this, PxGeometryType::eBOX);
+		}
+
+		// 2. Remove Entity from Scene
+
+		// Remove the Entity from the Scene Entity Map
+		m_EntityMap->erase(entity.GetUUID());
+
+		// Destroy the Entity and Components from the ENTT Registry
 		m_Registry.destroy(entity);
 	}
 
@@ -197,18 +310,18 @@ namespace Louron {
 				return Entity{ entity, this };
 		}
 
-		L_CORE_WARN("Scene Does Not Have an Entity Named: {0}", name);
+		L_CORE_ERROR("Scene Does Not Have an Entity Named: {0}", name);
 		return {};
 	}
 
 	Entity Scene::FindEntityByUUID(UUID uuid)
 	{
-		if (m_EntityMap.find(uuid) == m_EntityMap.end()) {
+		if (m_EntityMap->find(uuid) == m_EntityMap->end()) {
 			L_CORE_ERROR("Entity UUID not found in scene");
 			return {};
 		}
 		else {
-			return { m_EntityMap.at(uuid), this };
+			return { m_EntityMap->at(uuid), this };
 		}
 	}
 
@@ -229,6 +342,14 @@ namespace Louron {
 	{
 		return (FindEntityByName(name)) ? true : false;
 	}
+	bool Scene::HasEntity(const UUID& uuid)
+	{
+		return (FindEntityByUUID(uuid)) ? true : false;
+	}
+
+#pragma endregion
+
+#pragma region Scene Logic
 
 	void Scene::OnStart() {
 
@@ -236,11 +357,38 @@ namespace Louron {
 
 		m_SceneConfig.ScenePipeline->OnStartPipeline(shared_from_this());
 	}
-	
+
 	void Scene::OnUpdate() {
 
-		if (!m_IsPaused) {
+		if (!m_IsPaused && m_IsRunning) {
+
+			TransformSystem::Update(shared_from_this());
+
+			PhysicsSystem::UpdatePhysicsObjects(shared_from_this());
+
+
 			m_SceneConfig.ScenePipeline->OnUpdate();
+
+			//// Render Scene to FBO
+			//auto& fbo_props = Engine::Get().GetRenderFBO();
+			// 
+			//// Render RBO to Screen Quad
+			//auto& fbo_shader = Engine::Get().GetShaderLibrary().GetShader("FBO Texture Shader");
+			//if (fbo_shader->GetName() == "FBO Texture Shader") {
+
+			//	fbo_shader->Bind();
+
+			//	glActiveTexture(GL_TEXTURE0);
+			//	fbo_props.RenderTexture->Bind();
+
+			//	fbo_shader->SetInt("u_FBOTexture", 0);
+
+			//	fbo_props.ScreenQuadVAO->Bind();
+			//	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			//	fbo_props.ScreenQuadVAO->UnBind();
+			//	fbo_props.RenderTexture->UnBind();
+			//	fbo_shader->UnBind();
+			//}
 		}
 	}
 
@@ -250,10 +398,22 @@ namespace Louron {
 
 	}
 
+	void Scene::OnFixedUpdate() {
+
+		PhysicsSystem::Update(shared_from_this());
+	}
+
+	void Scene::OnFixedUpdateGUI() {
+
+	}
+
 	void Scene::OnStop() {
 
 		m_IsRunning = false;
 
 		m_SceneConfig.ScenePipeline->OnStopPipeline();
 	}
+
+#pragma endregion
+
 }

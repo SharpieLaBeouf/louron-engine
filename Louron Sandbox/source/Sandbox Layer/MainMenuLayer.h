@@ -18,6 +18,8 @@
 #include "Test Projects/Scene 10.h"
 #include "Test Projects/Scene 11.h"
 #include "Test Projects/Scene 12.h"
+#include "Test Projects/Scene 13.h"
+#include "Test Projects/Scene 14.h"
 
 class MainMenuLayer : public Louron::Layer {
 public:
@@ -28,9 +30,10 @@ public:
 	virtual void OnAttach() override;
 	virtual void OnDetach() override;
 	virtual void OnUpdate() override;
+	virtual void OnFixedUpdate() override;
 	virtual void OnGuiRender() override;
 
 private:
-	int m_SceneSelector = 0;
+	uint32_t m_SceneSelector = 0;
 	std::vector<std::unique_ptr<TestScene>> m_Scenes;
 };

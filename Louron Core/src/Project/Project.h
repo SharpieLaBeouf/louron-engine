@@ -34,7 +34,7 @@ namespace Louron {
 		static void SetActiveScene(std::shared_ptr<Scene> scene);
 
 		static std::shared_ptr<Project> NewProject(const std::filesystem::path& projectFilePath);
-		static std::shared_ptr<Project> LoadProject(const std::filesystem::path& projectFilePath);
+		static std::shared_ptr<Project> LoadProject(const std::filesystem::path& projectFilePath, const std::filesystem::path& startUpScene = "");
 		static bool SaveProject(const std::filesystem::path& projectFilePath = "");
 
 		std::shared_ptr<Scene> NewScene(const std::filesystem::path& sceneFilePath);

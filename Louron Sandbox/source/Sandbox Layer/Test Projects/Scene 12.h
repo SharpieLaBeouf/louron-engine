@@ -32,11 +32,6 @@ public:
 	{
 		L_APP_INFO("Loading Scene 12");
 		
-		// Load Project and Get Active Scene Handle
-		m_Project = Louron::Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
-		m_Scene = Louron::Project::GetActiveScene();
-
-		m_LightPosition = m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().GetPosition();
 	}
 
 	~Scene12() {
@@ -45,6 +40,14 @@ public:
 
 	void OnAttach() override {
 		lastTime = (float)glfwGetTime();
+		// Load Project and Get Active Scene Handle
+		if (!m_Project || !m_Scene) {
+			m_Project = Louron::Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
+			m_Scene = Louron::Project::GetActiveScene();
+			m_LightPosition = m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().GetLocalPosition();
+		}
+
+
 	
 		m_Scene->OnStart();
 	}

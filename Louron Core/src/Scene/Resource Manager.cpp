@@ -218,7 +218,7 @@ namespace Louron {
 		mesh_name = mesh_name.substr(lastSlash, count);
 
 		if (Meshes[mesh_name].first == nullptr) {
-			L_CORE_ERROR("Mesh Not Loaded to Scene Resource Manager");
+			L_CORE_ERROR("Mesh Not Loaded to Scene Resource Manager: {0}", name);
 			return nullptr;
 		}
 
@@ -236,7 +236,7 @@ namespace Louron {
 		mesh_name = mesh_name.substr(lastSlash, count);
 
 		if (Meshes[mesh_name].second == nullptr) {
-			L_CORE_ERROR("Mesh Not Loaded to Scene Resource Manager");
+			L_CORE_ERROR("Mesh Not Loaded to Scene Resource Manager: {0}", name);
 			return nullptr;
 		}
 

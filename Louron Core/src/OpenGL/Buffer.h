@@ -99,7 +99,7 @@ namespace Louron {
 
 	public:
 		VertexBuffer(GLuint size);
-		VertexBuffer(float* vertices, GLuint size);
+		VertexBuffer(float* vertices, GLuint count);
 		VertexBuffer(const std::vector<Vertex>& vertices, GLuint size);
 		~VertexBuffer();
 

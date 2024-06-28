@@ -45,14 +45,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\irrklang;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\irrklang;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
-    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\irrklang;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\irrklang;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
@@ -60,20 +60,22 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLFW_INCLUDE_NONE;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_INCLUDE_NONE;PX_PHYSX_STATIC_LIB;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Louron Core\src;$(SolutionDir)Louron Core\include;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;irrklang.lib;yaml-cppd.lib;spdlogd.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;irrklang.lib;yaml-cppd.lib;spdlogd.lib;debug\PhysX_static_64.lib;debug\PhysXCharacterKinematic_static_64.lib;debug\PhysXCommon_static_64.lib;debug\PhysXCooking_static_64.lib;debug\PhysXExtensions_static_64.lib;debug\PhysXFoundation_static_64.lib;debug\PhysXPvdSDK_static_64.lib;debug\PhysXVehicle_static_64.lib;debug\PhysXVehicle2_static_64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>
       </Profile>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
+      <AdditionalOptions>/ignore:4006,4099</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -82,7 +84,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>GLFW_INCLUDE_NONE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GLFW_INCLUDE_NONE;PX_PHYSX_STATIC_LIB;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)Louron Core\src;$(SolutionDir)Louron Core\include;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
@@ -94,9 +96,10 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;irrklang.lib;yaml-cpp.lib;spdlog.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;irrklang.lib;yaml-cpp.lib;spdlog.lib;release\PhysX_static_64.lib;release\PhysXCharacterKinematic_static_64.lib;release\PhysXCommon_static_64.lib;release\PhysXCooking_static_64.lib;release\PhysXExtensions_static_64.lib;release\PhysXFoundation_static_64.lib;release\PhysXPvdSDK_static_64.lib;release\PhysXVehicle_static_64.lib;release\PhysXVehicle2_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>
       </Profile>
+      <AdditionalOptions>/ignore:4006,4099</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -112,6 +115,7 @@
     <None Include="assets\Shaders\Basic\basic.glsl" />
     <None Include="assets\Shaders\Basic\basic_phong.glsl" />
     <None Include="assets\Shaders\Basic\basic_texture.glsl" />
+    <None Include="assets\Shaders\FBO\FBO Texture Shader.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Depth.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Light_Culling.comp" />
     <None Include="assets\Shaders\Default Shader.glsl" />
@@ -143,6 +147,8 @@
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 10.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 11.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 12.h" />
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 13.h" />
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 14.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 2.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 3.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 4.h" />

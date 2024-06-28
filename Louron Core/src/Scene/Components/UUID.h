@@ -8,6 +8,9 @@
 
 // External Vendor Library Headers
 
+
+#define NULL_UUID UINT64_MAX
+
 namespace Louron {
 
 	class UUID
@@ -20,6 +23,9 @@ namespace Louron {
 		operator uint64_t() const { return m_UUID; }
 	private:
 		uint64_t m_UUID;
+
+		uint64_t GenerateUUID();
+
 	};
 
 }

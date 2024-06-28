@@ -496,26 +496,27 @@ Entities:
     TagComponent:
       Tag: Main Camera
     TransformComponent:
-      Translation: [-82.5021896, 92.4771957, -23.17589]
+      Translation: [-31.8342323, 5.83181477, -6.77288914]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
         FOV: 60
+        MovementToggle: true
         MovementSpeed: 10
         MovementYDamp: 0.649999976
         MouseSensitivity: 0.100000001
         MouseToggledOff: false
-        Position: [-82.5021896, 92.4771957, -23.17589]
-        Yaw: -314.79126
-        Pitch: -18.2997704
+        Position: [-31.8342323, 5.83181477, -6.77288914]
+        Yaw: 1832.20325
+        Pitch: 2.19950891
       Primary: true
       ClearFlag: 1
     SkyboxComponent:
       MaterialFilePath: Kloppenheim Skybox/Kloppenheim Skybox.lmaterial
     SpotLightComponent:
-      Position: [-82.5021896, 92.4771957, -23.17589, 1]
-      Direction: [0.668895841, -0.313988686, 0.673787475, 1]
+      Position: [-31.8342323, 5.83181477, -6.77288914, 1]
+      Direction: [0.845539331, 0.0383792445, 0.532531977, 1]
       Ambient: [0, 0, 0, 1]
       Diffuse: [1, 1, 1, 1]
       Specular: [1, 1, 1, 1]

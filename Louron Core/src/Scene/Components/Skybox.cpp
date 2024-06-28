@@ -205,7 +205,7 @@ namespace Louron {
 		};
 				
 		// Create Buffer
-		VertexBuffer* vbo = new VertexBuffer(&skyboxVertices[0], sizeof(skyboxVertices));
+		VertexBuffer* vbo = new VertexBuffer(skyboxVertices, sizeof(skyboxVertices) / sizeof(float));
 		vbo->SetLayout({ { ShaderDataType::Float3, "aPos" } });
 
 		// Create Vertex Array and Assign Buffer

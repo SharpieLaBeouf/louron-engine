@@ -5,6 +5,7 @@
 // C++ Standard Library Headers
 #include <random>
 #include <unordered_map>
+#include <limits>
 
 // External Vendor Library Headers
 
@@ -22,6 +23,11 @@ namespace Louron {
 	UUID::UUID(uint64_t uuid)
 		: m_UUID(uuid)
 	{
+	}
+
+	uint64_t UUID::GenerateUUID() {
+		std::uniform_int_distribution<uint64_t> distribution(0, std::numeric_limits<uint64_t>::max() - 1);
+		return distribution(s_Engine);
 	}
 
 }

@@ -40,6 +40,7 @@
     <None Include="ikpFlac.dll" />
     <None Include="ikpMP3.dll" />
     <None Include="assets\Shaders\Skybox\Skybox.glsl" />
+    <None Include="assets\Shaders\FBO\FBO Texture Shader.glsl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Images\grass_texture.jpg">
@@ -99,6 +100,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 12.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 13.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 14.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

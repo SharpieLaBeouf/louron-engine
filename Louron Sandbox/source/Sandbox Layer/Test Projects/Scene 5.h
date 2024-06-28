@@ -154,12 +154,12 @@ public:
 
 		//light_trans.position = glm::vec3(0.0f, 10.0f, 0.0f);
 		light_trans.SetPosition({
-			sin(currentTime) * rows * cube_trans.GetScale().x / 2.0f,
+			sin(currentTime) * rows * cube_trans.GetLocalScale().x / 2.0f,
 			10.0f,
 			glm::clamp(
-				tan(currentTime) * cube_trans.GetScale().z,
-				-(float)col * cube_trans.GetScale().z / 2.0f,
-				 (float)col * cube_trans.GetScale().z / 2.0f) });
+				tan(currentTime) * cube_trans.GetLocalScale().z,
+				-(float)col * cube_trans.GetLocalScale().z / 2.0f,
+				 (float)col * cube_trans.GetLocalScale().z / 2.0f) });
 		
 		m_SceneCamera->Update(deltaTime);
 
@@ -189,15 +189,15 @@ public:
 
 		if (ImGui::TreeNode("Cube Transform"))
 		{
-			glm::vec3 temp = cube_trans.GetPosition();
+			glm::vec3 temp = cube_trans.GetLocalPosition();
 			ImGui::DragFloat3("Translate", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
 			cube_trans.SetPosition(temp);
 
-			temp = cube_trans.GetRotation();
+			temp = cube_trans.GetLocalRotation();
 			ImGui::DragFloat3("Rotate", glm::value_ptr(temp), 1.0f, 0, 0, "%.2f");
 			cube_trans.SetRotation(temp);
 
-			temp = cube_trans.GetScale();
+			temp = cube_trans.GetLocalScale();
 			ImGui::DragFloat3("Scale", glm::value_ptr(temp), 0.01f, 0, 0, "%.2f");
 			cube_trans.SetScale(temp);
 			ImGui::TreePop();
@@ -247,7 +247,7 @@ private:
 			shader->Bind();
 			shader->SetMat4("u_VertexIn.View", view);
 			shader->SetMat4("u_VertexIn.Proj", proj);
-			shader->SetMat4("u_VertexIn.Model", light_trans);
+			shader->SetMat4("u_VertexIn.Model", light_trans.GetLocalTransform());
 			shader->SetVec4("u_OurColour", glm::vec4(1.0f, 0.0f, 1.0f, 1.0f));
 			glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 		}
@@ -262,7 +262,7 @@ private:
 			shader->SetMat4("u_VertexIn.Proj", proj);
 			shader->SetMat3("u_NormalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.GetTransform()))));
 			shader->SetVec3("u_ViewPos", m_SceneCamera->GetPosition());
-			shader->SetVec3("u_LightPos", light_trans.GetPosition());
+			shader->SetVec3("u_LightPos", light_trans.GetLocalPosition());
 			shader->SetVec4("u_LightColour", glm::vec4(1.0f));
 
 			glm::vec3 pos = glm::vec3(0.0f);
@@ -284,7 +284,7 @@ private:
 						shader->SetVec4("u_TargetColour", glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 					}
 
-					shader->SetMat4("u_VertexIn.Model", glm::translate(cube_trans.GetTransform(), pos));
+					shader->SetMat4("u_VertexIn.Model", glm::translate(cube_trans.GetLocalTransform(), pos));
 					glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 				}
 			}

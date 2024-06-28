@@ -1,5 +1,14 @@
 #include "Camera.h"
 
+// Louron Core Headers
+#include "../../Core/Engine.h"
+
+// C++ Standard Library Headers
+
+
+// External Vendor Library Headers
+
+
 namespace Louron {
 
 	Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch) : 
@@ -17,6 +26,8 @@ namespace Louron {
 
 		UpdateCameraVectors();
 	}
+	
+	void Camera::UpdateProjMatrix() { m_ProjectionMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance); }
 
 	void Camera::Update(float deltaTime) {
 		if (m_Input.GetKeyUp(GLFW_KEY_LEFT_ALT)) {

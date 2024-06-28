@@ -22,6 +22,7 @@ public:
 	virtual void OnDetach() { }
 
 	virtual void Update() { }
+	virtual void FixedUpdate() { }
 	virtual void UpdateGUI() { }
 
 private:

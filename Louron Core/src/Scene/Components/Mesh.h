@@ -9,6 +9,8 @@
 #include "../../OpenGL/Material.h"
 #include "../../OpenGL/Vertex Array.h"
 
+#include "Components.h"
+
 // C++ Standard Library Headers
 #include <string>
 #include <vector>
@@ -32,7 +34,7 @@ namespace Louron {
 
 	};
 
-	struct MeshFilter {
+	struct MeshFilter : public Component {
 
 		std::shared_ptr<std::vector<std::shared_ptr<Mesh>>> Meshes = std::make_shared<std::vector<std::shared_ptr<Mesh>>>();
 
@@ -45,7 +47,7 @@ namespace Louron {
 
 	struct Transform;
 
-	struct MeshRenderer {
+	struct MeshRenderer : public Component {
 
 	public:
 		bool active = true;

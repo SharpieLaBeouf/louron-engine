@@ -4,6 +4,8 @@
 #include "../../OpenGL/Shader.h"
 #include "../../OpenGL/Texture.h"
 
+#include "Components.h"
+
 // C++ Standard Library Headers
 #include <string>
 #include <unordered_map>
@@ -18,7 +20,7 @@
 
 namespace Louron {
 
-	struct alignas(16) PointLightComponent {
+	struct alignas(16) PointLightComponent : public Component {
 
 		glm::vec4 position = { 0.0f, 0.0f, 0.0f, 1.0f };
 
@@ -37,7 +39,8 @@ namespace Louron {
 		PointLightComponent(const PointLightComponent&) = default;
 	};
 
-	struct alignas(16) SpotLightComponent {
+	struct alignas(16) SpotLightComponent : public Component {
+
 		glm::vec4 position = glm::vec4(0.0f);
 		glm::vec4 direction = glm::vec4(0.0f);
 
@@ -54,18 +57,11 @@ namespace Louron {
 
 		GLint lastLight = false;
 
-	public:
-		
-		// DO NOT USE - this is for SSBO padding and alignment purposes ONLY
-		GLfloat m_Padding1 = 0.0f;
-		GLfloat m_Padding2 = 0.0f;
-		GLfloat m_Padding3 = 0.0f;
-
 		SpotLightComponent() = default;
 		SpotLightComponent(const SpotLightComponent&) = default;
 	};
 
-	struct alignas(16) DirectionalLightComponent {
+	struct alignas(16) DirectionalLightComponent : public Component {
 	
 	private:
 		// This is private because the Transform Component holds the direction
@@ -80,14 +76,9 @@ namespace Louron {
 		
 		GLint lastLight = false;
 
-	private:
-
-		// DO NOT USE - this is for SSBO padding and alignment purposes ONLY
-		GLfloat m_Padding1 = 0.0f;
-		GLfloat m_Padding2 = 0.0f;
-		GLfloat m_Padding3 = 0.0f;
-
 	public:
+
+		const glm::vec4& GetDirection() const { return direction; }
 
 		friend class ForwardPlusPipeline;
 	};

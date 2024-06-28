@@ -2,10 +2,11 @@
 
 // Louron Core Headers
 #include "Renderer.h"
-
-#include "../Debug/Profiler.h"
-
 #include "../Scene/Entity.h"
+#include "../Scene/Components/Components.h"
+#include "../Scene/Components/Light.h"
+#include "../Scene/Components/Mesh.h"
+#include "../Debug/Profiler.h"
 
 // C++ Standard Library Headers
 
@@ -13,8 +14,117 @@
 #include <entt/entt.hpp>
 
 namespace Louron {
-		
 
+	namespace SSBOLightStructs {
+
+		struct alignas(16) PL_SSBO_DATA_LAYOUT {
+
+			glm::vec4 position = { 0.0f, 0.0f, 0.0f, 1.0f };
+
+			glm::vec4 ambient = { 1.0f, 1.0f, 1.0f, 1.0f };
+			glm::vec4 diffuse = { 1.0f, 1.0f, 1.0f, 1.0f };
+			glm::vec4 specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+			struct LightProperties {
+				GLfloat radius = 10.0f;
+				GLfloat intensity = 1.0f;
+				GLint active = true;
+				GLint lastLight = false;
+			} lightProperties;
+
+			PL_SSBO_DATA_LAYOUT(const PointLightComponent& other) {
+
+				position = other.position;
+				ambient = other.ambient;
+				diffuse = other.diffuse;
+				specular = other.specular;
+
+				lightProperties.radius = other.lightProperties.radius;
+				lightProperties.intensity = other.lightProperties.intensity;
+				lightProperties.active = other.lightProperties.active;
+				lightProperties.lastLight = other.lightProperties.lastLight;
+			}
+		};
+
+		struct alignas(16) SL_SSBO_DATA_LAYOUT {
+
+			glm::vec4 position;
+			glm::vec4 direction;
+
+			glm::vec4 ambient;
+			glm::vec4 diffuse;
+			glm::vec4 specular;
+
+			struct LightProperties {
+				GLfloat range;
+				GLfloat angle;
+				GLfloat intensity;
+				GLint active;
+			} lightProperties;
+
+			GLint lastLight;
+
+			GLfloat m_Padding1;
+			GLfloat m_Padding2;
+			GLfloat m_Padding3;
+
+			SL_SSBO_DATA_LAYOUT(const SpotLightComponent& other) {
+
+				position = other.position;
+				direction = other.direction;
+
+				ambient = other.ambient;
+				diffuse = other.diffuse;
+				specular = other.specular;
+
+				lightProperties.range = other.lightProperties.range;
+				lightProperties.angle = other.lightProperties.angle;
+				lightProperties.intensity = other.lightProperties.intensity;
+				lightProperties.active = other.lightProperties.active;
+
+				lastLight = other.lastLight;
+
+				m_Padding1 = 0.0f;
+				m_Padding2 = 0.0f;
+				m_Padding3 = 0.0f;
+			}
+
+		};
+
+		struct alignas(16) DL_SSBO_DATA_LAYOUT {
+
+			glm::vec4 direction;
+
+			glm::vec4 ambient;
+			glm::vec4 diffuse;
+			glm::vec4 specular;
+
+			GLint lastLight;
+
+			GLfloat m_Padding1;
+			GLfloat m_Padding2;
+			GLfloat m_Padding3;
+
+			DL_SSBO_DATA_LAYOUT(const DirectionalLightComponent& other) {
+
+				direction = other.GetDirection();
+
+				ambient = other.ambient;
+				diffuse = other.diffuse;
+				specular = other.specular;
+
+				lastLight = other.lastLight;
+
+				m_Padding1 = 0.0f;
+				m_Padding2 = 0.0f;
+				m_Padding3 = 0.0f;
+
+			}
+
+		};
+
+	}
+		
 #pragma region ForwardPipeline
 
 	void RenderPipeline::OnUpdate() { 
@@ -26,7 +136,8 @@ namespace Louron {
 	}
 
 	void RenderPipeline::OnStopPipeline() { 
-	
+
+		Renderer::CleanupInstanceData();
 	}
 
 	void RenderPipeline::UpdateActiveScene(std::shared_ptr<Louron::Scene> scene) {
@@ -102,6 +213,11 @@ namespace Louron {
 
 		if (Entity cameraEntity = m_Scene->GetPrimaryCameraEntity())
 			cameraEntity.GetComponent<CameraComponent>().Camera->UpdateProjMatrix();
+		else {
+			cameraEntity = m_Scene->CreateEntity("Main Camera");
+			cameraEntity.AddComponent<CameraComponent>();
+			cameraEntity.GetComponent<CameraComponent>().Camera = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
+		}
 
 		// Calculate workgroups and generate SSBOs from screen size
 		FP_Data.workGroupsX = (unsigned int)std::ceil((float)m_FrameSize.x / 16.0f);
@@ -119,19 +235,19 @@ namespace Louron {
 		glGenBuffers(1, &FP_Data.DL_Buffer);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_POINT_LIGHTS * sizeof(PointLightComponent), nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_POINT_LIGHTS * sizeof(SSBOLightStructs::PL_SSBO_DATA_LAYOUT), nullptr, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, nullptr, GL_STATIC_DRAW); 
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_SPOT_LIGHTS * sizeof(SpotLightComponent), nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_SPOT_LIGHTS * sizeof(SSBOLightStructs::SL_SSBO_DATA_LAYOUT), nullptr, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Indices_Buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, nullptr, GL_STATIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLightComponent), nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_DIRECTIONAL_LIGHTS * sizeof(SSBOLightStructs::DL_SSBO_DATA_LAYOUT), nullptr, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -142,10 +258,12 @@ namespace Louron {
 
 		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_FrameSize.x, m_FrameSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
 		GLfloat borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
@@ -167,12 +285,16 @@ namespace Louron {
 		
 		glDeleteBuffers(1, &FP_Data.PL_Buffer);
 		glDeleteBuffers(1, &FP_Data.PL_Indices_Buffer);
+
 		glDeleteBuffers(1, &FP_Data.SL_Buffer);
 		glDeleteBuffers(1, &FP_Data.SL_Indices_Buffer);
+
 		glDeleteBuffers(1, &FP_Data.DL_Buffer);
 
 		glDeleteFramebuffers(1, &FP_Data.DepthMap_FBO);
 		glDeleteTextures(1, &FP_Data.DepthMap_Texture);
+
+		Renderer::CleanupInstanceData();
 	}
 
 	/// <summary>
@@ -219,8 +341,9 @@ namespace Louron {
 		{
 			// Point Lights
 			{
+
 				// Update Light Objects
-				std::vector<PointLightComponent> pointLightVector;
+				std::vector<SSBOLightStructs::PL_SSBO_DATA_LAYOUT> pointLightVector;
 				auto view = m_Scene->GetAllEntitiesWith<Transform, PointLightComponent>();
 				
 				// Add lights to vector that are contained within the scene up to a maximum of 1024
@@ -249,7 +372,7 @@ namespace Louron {
 
 				// Update SSBO data with light data
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
-				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, pointLightVector.size() * sizeof(PointLightComponent), pointLightVector.data());
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, pointLightVector.size() * sizeof(SSBOLightStructs::PL_SSBO_DATA_LAYOUT), pointLightVector.data());
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 			}
 
@@ -257,7 +380,7 @@ namespace Louron {
 			{
 
 				// Update Light Objects
-				std::vector<SpotLightComponent> spotLightVector;
+				std::vector<SSBOLightStructs::SL_SSBO_DATA_LAYOUT> spotLightVector;
 				auto view = m_Scene->GetAllEntitiesWith<Transform, SpotLightComponent>();
 
 				// Add lights to vector that are contained within the scene up to a maximum of 1024
@@ -286,14 +409,14 @@ namespace Louron {
 
 				// Update SSBO data with light data
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
-				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, spotLightVector.size() * sizeof(SpotLightComponent), spotLightVector.data());
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, spotLightVector.size() * sizeof(SSBOLightStructs::SL_SSBO_DATA_LAYOUT), spotLightVector.data());
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 			}
 
 			// Directional Lights
 			{
 				// Update Light Objects
-				std::vector<DirectionalLightComponent> directionalLightVector;
+				std::vector<SSBOLightStructs::DL_SSBO_DATA_LAYOUT> directionalLightVector;
 				auto view = m_Scene->GetAllEntitiesWith<Transform, DirectionalLightComponent>();
 
 				// Add lights to vector that are contained within the scene up to a maximum of 1024
@@ -325,7 +448,7 @@ namespace Louron {
 
 				// Update SSBO data with light data
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
-				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, directionalLightVector.size() * sizeof(DirectionalLightComponent), directionalLightVector.data());
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, directionalLightVector.size() * sizeof(SSBOLightStructs::DL_SSBO_DATA_LAYOUT), directionalLightVector.data());
 				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 			}
 		}
@@ -434,8 +557,9 @@ namespace Louron {
 
 		L_PROFILE_SCOPE("Forward Plus - Colour Render");
 
-		// Render All MeshComponents in Scene
-
+		//// Render All MeshComponents in Scene
+		//glBindFramebuffer(GL_FRAMEBUFFER, Engine::Get().GetRenderFBO().FBO);
+		//glEnable(GL_DEPTH_TEST);
 		Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Gather all entities within scene with appropriate components
@@ -511,37 +635,43 @@ namespace Louron {
 					}
 				}
 			}
+		}
 
-			auto skyboxView = m_Scene->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
-			if (skyboxView.begin() != skyboxView.end()) {
+		auto skyboxView = m_Scene->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
+		if (skyboxView.begin() != skyboxView.end()) {
 
-				for (const auto& entity : skyboxView) {
-					auto [scene_camera, skybox] = skyboxView.get<CameraComponent, SkyboxComponent>(entity);
+			for (const auto& entity : skyboxView) {
+				auto [scene_camera, skybox] = skyboxView.get<CameraComponent, SkyboxComponent>(entity);
 
-					if (scene_camera.ClearFlags == L_CAMERA_CLEAR_FLAGS::SKYBOX) {
+				if (scene_camera.ClearFlags == CameraClearFlags::SKYBOX) {
 
-						if (skybox.Material->Bind()) {
-							glDepthFunc(GL_LEQUAL);
-							
-							skybox.Material->UpdateUniforms(*camera);
-							Renderer::DrawSkybox(skybox);
-							
-							skybox.UnBind();
-							glDepthFunc(GL_LESS);
-						}
+					if (skybox.Material->Bind()) {
+						glDepthFunc(GL_LEQUAL);
+
+						skybox.Material->UpdateUniforms(*camera);
+						Renderer::DrawSkybox(skybox);
+
+						skybox.UnBind();
+						glDepthFunc(GL_LESS);
 					}
 				}
+				else {
+					L_CORE_WARN("Camera Has Skybox But Clear Flags Not Set to Skybox!");
+				}
 			}
-
-			// Clean Up Scene Render Pass
-			for (int i = 0; i < 4; i++) {
-				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
-			glActiveTexture(GL_TEXTURE0);
-			glUseProgram(0);
 		}
-		
+
+		// Clean Up Scene Render Pass
+		for (int i = 0; i < 4; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		glActiveTexture(GL_TEXTURE0);
+		glUseProgram(0);
+
+		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		//glDisable(GL_DEPTH_TEST);
+		//Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT);
 	}
 
 #pragma endregion
@@ -558,6 +688,7 @@ namespace Louron {
 
 	void DeferredPipeline::OnStopPipeline() {
 
+		Renderer::CleanupInstanceData();
 	}
 
 #pragma endregion

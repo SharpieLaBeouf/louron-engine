@@ -6,6 +6,8 @@
 		  
 #include "../../Core/Engine.h"
 
+#include "Components.h"
+
 // C++ Standard Library Headers
 #include <filesystem>
 
@@ -32,6 +34,7 @@ namespace Louron {
 		~SkyboxMaterial() = default;
 
 		GLboolean LoadSkybox(const std::array<std::filesystem::path, 6>& textures);
+		GLboolean LoadMaterial(const std::array<std::filesystem::path, 6>& materialFilePath) { return false; } // TODO: IMPLEMENT
 		GLboolean LoadSkyboxTexture(const L_SKYBOX_BINDING& binding, const std::filesystem::path& filePath);
 
 		void UpdateUniforms(const Camera& camera);
@@ -63,7 +66,7 @@ namespace Louron {
 	};
 
 
-	struct SkyboxComponent {
+	struct SkyboxComponent : public Component {
 
 	public:
 

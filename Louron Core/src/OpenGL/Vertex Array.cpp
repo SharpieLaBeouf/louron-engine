@@ -14,7 +14,7 @@ namespace Louron {
 		glBindVertexArray(m_VAO);
 	}
 
-	void VertexArray::Unbind() const {
+	void VertexArray::UnBind() const {
 		glBindVertexArray(0);
 	}
 

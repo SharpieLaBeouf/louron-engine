@@ -19,6 +19,8 @@ namespace Louron {
 	Texture::Texture() {
 
 		m_Name = "blank_texture";
+		m_Size = { 1,1 };
+
 		GLubyte data[] = { 255, 255, 255, 255 };
 
 		glGenTextures(1, &m_TextureId);
@@ -30,6 +32,22 @@ namespace Louron {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+	}
+
+	Texture::Texture(const std::string& textureName, int textureWidth, int textureHeight) {
+
+		m_Name = textureName;
+		m_Size = { textureWidth, textureHeight };
+
+		glGenTextures(1, &m_TextureId);
+		glBindTexture(GL_TEXTURE_2D, m_TextureId);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_Size.x, m_Size.y, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
 	}
 
 	Texture::Texture(const std::filesystem::path& texturePath) {

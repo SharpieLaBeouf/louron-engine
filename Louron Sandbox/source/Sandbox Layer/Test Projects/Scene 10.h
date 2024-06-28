@@ -7,6 +7,8 @@
 
 // TIME TO MAKE A PONG CLONE
 
+using namespace Louron;
+
 struct Paddle {
 
 public:
@@ -30,7 +32,7 @@ public:
 	Louron::Transform transform;
 	Louron::Material material;
 
-	float speed = 16.0f;
+	float speed = 8.0f;
 
 	glm::vec2 velocity = glm::vec2(speed, 0.0f);
 
@@ -52,10 +54,6 @@ private:
 
 	std::unique_ptr<Ball> m_Ball;
 
-	float currentTime = 0;
-	float deltaTime = 0;
-	float lastTime = 0;
-
 	float m_GameStartTimer = 3.0f;
 
 	bool m_GameOver = false;
@@ -70,7 +68,7 @@ public:
 		m_Input(Louron::Engine::Get().GetInput()),
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
-		m_SceneCamera(glm::vec3(0.0f, 10.0f, 0.0f))
+		m_SceneCamera(glm::vec3(0.0f, 10.0f, 0.0f), glm::vec3(0.f,1.f,0.f), -90.0f, -180.0f)
 	{
 		L_APP_INFO("Loading Scene 10");
 
@@ -119,6 +117,7 @@ public:
 		int index = 0;
 		for (auto& paddle : m_Paddles) {
 			paddle->material.SetShader(m_ShaderLib.GetShader("material_shader_phong"));
+			paddle->material.SetTexture(m_TextureLib.GetTexture("blank_texture"), Louron::L20_TEXTURE_DIFFUSE_MAP);
 			paddle->material.SetDiffuse({ 0.41f, 0.41f, 0.41f, 1.0f });
 			paddle->transform.SetScale(glm::vec3(2.0f, 1.0f, 1.0f));
 		}
@@ -139,7 +138,6 @@ public:
 
 	void OnAttach() override {
 		glEnable(GL_DEPTH_TEST);
-		lastTime = (float)glfwGetTime();
 		ResetGame();
 
 		// Set Fixed Window Size for Pong
@@ -155,11 +153,8 @@ public:
 
 	void Update() override {
 
-		currentTime = (float)glfwGetTime();
-		deltaTime = currentTime - lastTime;
-		lastTime = currentTime;
-
-		m_SceneCamera.Update(deltaTime);
+		m_SceneCamera.Update(Time::GetDeltaTime());
+		m_SceneCamera.UpdateProjMatrix();
 
 		if (!m_GameOver) {
 
@@ -168,7 +163,7 @@ public:
 				if (m_GameStartTimer <= 0.0f)
 					m_GameRunning = true;
 				else 
-					m_GameStartTimer -= deltaTime;
+					m_GameStartTimer -= Time::GetDeltaTime();
 			}
 
 			// GAME LOOP: If timer is up, start the game!
@@ -327,7 +322,7 @@ private:
 		float ballRight		= m_Ball->transform.GetPosition().z + m_Ball->transform.GetScale().z / 2;
 		float ballTop		= m_Ball->transform.GetPosition().x - m_Ball->transform.GetScale().x / 2;
 		float ballBottom	= m_Ball->transform.GetPosition().x + m_Ball->transform.GetScale().x / 2;
-																					
+																				
 		float paddleLeft	= paddle->transform.GetPosition().z - paddle->transform.GetScale().z / 2;
 		float paddleRight	= paddle->transform.GetPosition().z + paddle->transform.GetScale().z / 2;
 		float paddleTop		= paddle->transform.GetPosition().x - paddle->transform.GetScale().x / 2;
@@ -358,15 +353,15 @@ private:
 
 	CollisionType CheckWallCollision() {
 
-		float windowWidth = static_cast<float>(Louron::Engine::Get().GetWindow().GetWidth());
-		float windowHeight = static_cast<float>(Louron::Engine::Get().GetWindow().GetHeight());
+		float windowWidth = static_cast<float>(Engine::Get().GetWindow().GetWidth());
+		float windowHeight = static_cast<float>(Engine::Get().GetWindow().GetHeight());
 
 		// Normalised viewport boundaries
 		float screenLeft = -1.0f;
 		float screenTop = 1.0f;
 
 		// Transform screen boundaries to world space
-		glm::mat4 invProjection = glm::inverse(glm::perspective(glm::radians(60.0f), windowWidth / windowHeight, 0.1f, 100.0f));
+		glm::mat4 invProjection = glm::inverse(m_SceneCamera.GetProjMatrix());
 
 		// 3. Transform the coordinates to eye space (Coordinate of Mouse X & Y on View Space)
 		glm::vec4 rayEye = invProjection * glm::vec4(screenLeft, screenTop, -1.0f, 1.0f);
@@ -415,8 +410,8 @@ private:
 
 	void ProcessBallMovement() {
 
-		m_Ball->transform.TranslateZ(deltaTime * m_Ball->velocity.x);
-		m_Ball->transform.TranslateX(deltaTime * m_Ball->velocity.y);
+		m_Ball->transform.TranslateZ(Time::GetDeltaTime() * m_Ball->velocity.x);
+		m_Ball->transform.TranslateX(Time::GetDeltaTime() * m_Ball->velocity.y);
 
 		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
 	}
@@ -425,18 +420,18 @@ private:
 
 		// Move Paddle 1 Up and Down
 		if (m_Input.GetKey(GLFW_KEY_W)) {
-			m_Paddles[0]->transform.TranslateX( deltaTime * m_Paddles[0]->speed);
+			m_Paddles[0]->transform.TranslateX(Time::GetDeltaTime() * m_Paddles[0]->speed);
 		}
 		if (m_Input.GetKey(GLFW_KEY_S)) {
-			m_Paddles[0]->transform.TranslateX( -deltaTime * m_Paddles[0]->speed);
+			m_Paddles[0]->transform.TranslateX( -Time::GetDeltaTime() * m_Paddles[0]->speed);
 		}
 
 		// Move Paddle 2 Up and Down
 		if (m_Input.GetKey(GLFW_KEY_UP)) {
-			m_Paddles[1]->transform.TranslateX( deltaTime * m_Paddles[1]->speed);
+			m_Paddles[1]->transform.TranslateX(Time::GetDeltaTime() * m_Paddles[1]->speed);
 		}
 		if (m_Input.GetKey(GLFW_KEY_DOWN)) {
-			m_Paddles[1]->transform.TranslateX( -deltaTime * m_Paddles[1]->speed);
+			m_Paddles[1]->transform.TranslateX( -Time::GetDeltaTime() * m_Paddles[1]->speed);
 		}
 	}
 
@@ -470,7 +465,7 @@ private:
 
 			m_Ball->material.UpdateUniforms(m_SceneCamera);
 
-			m_Ball->material.GetShader()->SetMat4("u_VertexIn.Model", m_Ball->transform);
+			m_Ball->material.GetShader()->SetMat4("u_VertexIn.Model", m_Ball->transform.GetLocalTransform());
 			m_Ball->material.GetShader()->SetVec3("u_Light.position", m_Light.position);
 			m_Ball->material.GetShader()->SetVec4("u_Light.ambient", m_Light.ambient);
 			m_Ball->material.GetShader()->SetVec4("u_Light.diffuse", m_Light.diffuse);
@@ -485,7 +480,7 @@ private:
 			if (paddle->material.Bind()) {
 
 				paddle->material.UpdateUniforms(m_SceneCamera);
-				paddle->material.GetShader()->SetMat4("u_VertexIn.Model", paddle->transform);
+				paddle->material.GetShader()->SetMat4("u_VertexIn.Model", paddle->transform.GetLocalTransform());
 
 				paddle->material.GetShader()->SetVec3("u_Light.position", m_Light.position);
 				paddle->material.GetShader()->SetVec4("u_Light.ambient", m_Light.ambient);

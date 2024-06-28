@@ -45,96 +45,6 @@ public:
 	{
 		L_APP_INFO("Loading Scene 11");
 
-		// Scene Configuration Setup
-		m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
-		m_Scene = std::make_shared<Louron::Scene>("Scene 11", Louron::L_RENDER_PIPELINE::FORWARD_PLUS);
-
-		// Scene ResourcesSetup
-		const auto& resources = m_Scene->GetResources();
-		resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
-		resources->LoadMesh("assets/Models/Monkey/Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
-		resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
-		resources->LoadMesh("assets/Models/BackPack/BackPack.fbx", resources->Shaders["FP_Material_BP_Shader"]);
-		resources->LoadMesh("assets/Models/Sponza/sponza.obj", resources->Shaders["FP_Material_BP_Shader"]);
-		resources->LoadMesh("assets/Models/Torch/model/obj/Torch.obj", resources->Shaders["FP_Material_BP_Shader"]);
-
-		// Sponza
-		Louron::Entity entity = m_Scene->CreateEntity("Sponza");
-		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("sponza"));
-		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("sponza"));
-		entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(0.04f));
-
-		// Monkey
-		entity = m_Scene->CreateEntity("Monkey");
-		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Monkey"));
-		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Monkey"));
-		entity.GetComponent<Louron::Transform>().SetPosition({ -15.0f, 4.0f, -6.2f });
-		entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, -45.0f, 0.0f });
-
-		// Pink Monkey
-		entity = m_Scene->CreateEntity("Pink_Monkey");
-		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Pink_Monkey"));
-		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Pink_Monkey"));
-		entity.GetComponent<Louron::Transform>().SetPosition({ -15.0f, 4.0f, 4.2f });
-		entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, -135.0f, 0.0f });
-
-		// BackPack
-		entity = m_Scene->CreateEntity("BackPack");
-		entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("BackPack"));
-		entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("BackPack"));
-		entity.GetComponent<Louron::Transform>().SetPosition({ -40.0f, 4.0f, -1.2f });
-		entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, 90.0f, 0.0f });
-
-		// Point Lights
-		Louron::PointLightComponent PL_Component;
-		for (int i = 0; i < numLights; i++) {
-			
-			Louron::Entity entity = m_Scene->CreateEntity("Light Source " + std::to_string(i));
-
-			entity.AddComponent<Louron::PointLightComponent>();
-			entity.GetComponent<Louron::PointLightComponent>().lightProperties.radius = 20.0f;
-			entity.GetComponent<Louron::Transform>().SetPosition({glm::linearRand(-30.0f, 30.0f), glm::linearRand(15.0f, 50.0f), glm::linearRand(-4.2f, 2.2f)});
-			entity.GetComponent<Louron::Transform>().SetRotation({glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f)});
-			entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(glm::linearRand(0.5f, 2.0f)));
-			
-			entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Torch"));
-			entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Torch"));
-
-			lightBobOffset.push_back(glm::linearRand(-100.0f, 100.0f));
-		}
-
-		// Main Camera
-		auto& camera = m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>();
-		camera.Camera = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 0.0f, 10.0f));
-		camera.Camera->SetPitch(-20.0f);
-		camera.Camera->SetYaw(0.0f);
-		camera.Camera->SetPosition({ -30.0f, 10.0f, -1.2f });
-		camera.Camera->MouseToggledOff = false;
-
-		camera.Primary = true;
-		camera.ClearFlags = Louron::L_CAMERA_CLEAR_FLAGS::SKYBOX;
-
-		m_Scene->FindEntityByName("Main Camera").AddComponent<Louron::SpotLightComponent>();
-		Louron::SkyboxComponent& skybox = m_Scene->FindEntityByName("Main Camera").AddComponent<Louron::SkyboxComponent>();
-
-		std::array<std::filesystem::path, 6> skyboxFaces
-		{
-			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/right.png"),
-			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/left.png"),
-			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/top.png"),
-			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/bottom.png"),
-			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/back.png"),
-			std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/front.png")
-		};
-		skybox.Material->LoadSkybox(skyboxFaces);
-
-		// Directional Light
-		Louron::Entity dirLight = m_Scene->CreateEntity("Directional Light");
-		dirLight.AddComponent<Louron::DirectionalLightComponent>();
-		dirLight.GetComponent<Louron::DirectionalLightComponent>().ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
-		dirLight.GetComponent<Louron::DirectionalLightComponent>().diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
-		dirLight.GetComponent<Louron::DirectionalLightComponent>().specular = { 1.0f, 1.0f, 1.0f, 1.0f };
-		dirLight.GetComponent<Louron::Transform>().SetRotation({ 50.0f, -30.0f, 0.0f });
 	}
 
 	~Scene11() {
@@ -143,6 +53,97 @@ public:
 
 	void OnAttach() override {
 		lastTime = (float)glfwGetTime(); 
+
+		if (!m_Scene || !m_Pipeline) {
+
+			// Scene Configuration Setup
+			m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
+			m_Scene = std::make_shared<Louron::Scene>(Louron::L_RENDER_PIPELINE::FORWARD_PLUS);
+
+			// Scene ResourcesSetup
+			const auto& resources = m_Scene->GetResources();
+			resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
+			resources->LoadMesh("assets/Models/Monkey/Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("assets/Models/BackPack/BackPack.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("assets/Models/Sponza/sponza.obj", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("assets/Models/Torch/model/obj/Torch.obj", resources->Shaders["FP_Material_BP_Shader"]);
+
+			// Sponza
+			Louron::Entity entity = m_Scene->CreateEntity("Sponza");
+			entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("sponza"));
+			entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("sponza"));
+			entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(0.04f));
+
+			// Monkey
+			entity = m_Scene->CreateEntity("Monkey");
+			entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Monkey"));
+			entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Monkey"));
+			entity.GetComponent<Louron::Transform>().SetPosition({ -15.0f, 4.0f, -6.2f });
+			entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, -45.0f, 0.0f });
+
+			// Pink Monkey
+			entity = m_Scene->CreateEntity("Pink_Monkey");
+			entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Pink_Monkey"));
+			entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Pink_Monkey"));
+			entity.GetComponent<Louron::Transform>().SetPosition({ -15.0f, 4.0f, 4.2f });
+			entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, -135.0f, 0.0f });
+
+			// BackPack
+			entity = m_Scene->CreateEntity("BackPack");
+			entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("BackPack"));
+			entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("BackPack"));
+			entity.GetComponent<Louron::Transform>().SetPosition({ -40.0f, 4.0f, -1.2f });
+			entity.GetComponent<Louron::Transform>().SetRotation({ 0.0f, 90.0f, 0.0f });
+
+			// Point Lights
+			Louron::PointLightComponent PL_Component;
+			for (int i = 0; i < numLights; i++) {
+
+				Louron::Entity entity = m_Scene->CreateEntity("Light Source " + std::to_string(i));
+
+				entity.AddComponent<Louron::PointLightComponent>();
+				entity.GetComponent<Louron::PointLightComponent>().lightProperties.radius = 20.0f;
+				entity.GetComponent<Louron::Transform>().SetPosition({ glm::linearRand(-30.0f, 30.0f), glm::linearRand(15.0f, 50.0f), glm::linearRand(-4.2f, 2.2f) });
+				entity.GetComponent<Louron::Transform>().SetRotation({ glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f), glm::linearRand(-180.0f, 180.0f) });
+				entity.GetComponent<Louron::Transform>().SetScale(glm::vec3(glm::linearRand(0.5f, 2.0f)));
+
+				entity.AddComponent<Louron::MeshFilter>().LinkMeshFilter(resources->GetMeshFilter("Torch"));
+				entity.AddComponent<Louron::MeshRenderer>().LinkMeshRenderer(resources->GetMeshRenderer("Torch"));
+
+				lightBobOffset.push_back(glm::linearRand(-100.0f, 100.0f));
+			}
+
+			// Main Camera
+			auto& camera = m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>();
+			camera.Camera = std::make_shared<Louron::Camera>(glm::vec3(-30.0f, 10.0f, -1.2f), glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, -20.0f);
+			camera.Camera->MouseToggledOff = false;
+
+			camera.Primary = true;
+			camera.ClearFlags = Louron::CameraClearFlags::SKYBOX;
+
+			m_Scene->FindEntityByName("Main Camera").AddComponent<Louron::SpotLightComponent>();
+			Louron::SkyboxComponent& skybox = m_Scene->FindEntityByName("Main Camera").AddComponent<Louron::SkyboxComponent>();
+
+			std::array<std::filesystem::path, 6> skyboxFaces
+			{
+				std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/right.png"),
+				std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/left.png"),
+				std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/top.png"),
+				std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/bottom.png"),
+				std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/back.png"),
+				std::filesystem::path("Sandbox Project/Assets/Kloppenheim Skybox/front.png")
+			};
+			skybox.Material->LoadSkybox(skyboxFaces);
+
+			// Directional Light
+			Louron::Entity dirLight = m_Scene->CreateEntity("Directional Light");
+			dirLight.AddComponent<Louron::DirectionalLightComponent>();
+			dirLight.GetComponent<Louron::DirectionalLightComponent>().ambient = { 0.2f, 0.2f, 0.2f, 1.0f };
+			dirLight.GetComponent<Louron::DirectionalLightComponent>().diffuse = { 0.5f, 0.5f, 0.5f, 1.0f };
+			dirLight.GetComponent<Louron::DirectionalLightComponent>().specular = { 1.0f, 1.0f, 1.0f, 1.0f };
+			dirLight.GetComponent<Louron::Transform>().SetRotation({ 50.0f, -30.0f, 0.0f });
+		}
 
 		m_Scene->OnStart();
 	}

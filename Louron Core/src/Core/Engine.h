@@ -5,6 +5,7 @@
 #include "GuiLayer.h"
 #include "LayerStack.h"
 #include "Audio.h"
+#include "Logging.h"
 
 #include "../OpenGL/Shader.h"
 #include "../OpenGL/Texture.h"
@@ -36,12 +37,23 @@ namespace Louron {
 		std::string Name = "Louron Engine";
 		std::string WorkingDirectory;
 		EngineCommandLineArgs CommandLineArgs;
+
+	};
+
+	class VertexArray;
+	struct RenderFBO {
+
+		GLuint FBO = -1;
+		std::unique_ptr<Texture> RenderTexture = nullptr;
+		std::unique_ptr<VertexArray> ScreenQuadVAO = nullptr;
+
+		void Init();
 	};
 
 	class Engine {
 	public:
 		Engine(const EngineSpecification& specification);
-		virtual ~Engine();
+		virtual ~Engine() = default;
 
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* layer);
@@ -53,12 +65,15 @@ namespace Louron {
 		ShaderLibrary& GetShaderLibrary() { return *m_ShaderLibrary; }
 		TextureLibrary& GetTextureLibrary() { return *m_TextureLibrary; }
 
+		RenderFBO& GetRenderFBO() { return m_RenderFBO; }
+
 		static Engine& Get() { return *s_Instance; }
 		void Close();
 
 		const EngineSpecification& GetSpecification() const { return m_Specification; }
 
 	private:
+
 		void Run();
 		bool OnWindowClose();
 		bool OnWindowResize();
@@ -69,7 +84,10 @@ namespace Louron {
 
 		bool m_Running = true;
 		bool m_Minimized = false;
-		float m_LastFrameTime = 0.0f;
+
+		float m_FixedUpdateTimer = 0.0f;
+
+		RenderFBO m_RenderFBO;
 
 		std::unique_ptr <Window> m_Window;
 		GuiLayer* m_GuiLayer;

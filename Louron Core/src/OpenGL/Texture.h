@@ -22,6 +22,7 @@ namespace Louron {
 	public:
 
 		Texture();
+		Texture(const std::string& textureName, int textureWidth, int textureHeight);
 		Texture(const std::filesystem::path& texturePath);
 		~Texture();
 

@@ -1,9 +1,7 @@
 #pragma once
 
 // Louron Core Headers
-#include "Components/UUID.h"
-#include "Resource Manager.h"
-#include "../Renderer/RendererPipeline.h"
+#include "../Core/Logging.h"
 
 // C++ Standard Library Headers
 #include <vector>
@@ -13,17 +11,24 @@
 
 // External Vendor Library Headers
 #include <entt/entt.hpp>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
+#include <physx/PxPhysicsAPI.h>
 
 #define MAX_DIRECTIONAL_LIGHTS 10
 #define MAX_POINT_LIGHTS 1024
 #define MAX_SPOT_LIGHTS 1024
 
+using namespace physx;
+
 namespace Louron {
 
+	// Forward Declarations
 	class Entity;
+	class RenderPipeline;
+	class UUID;
+
+	struct ResourceManager;
+
+	enum L_RENDER_PIPELINE;
 
 	struct SceneConfig {
 
@@ -41,8 +46,10 @@ namespace Louron {
 	public:
 
 		Scene();
-		Scene(const std::filesystem::path& sceneFilePath, L_RENDER_PIPELINE pipelineType = L_RENDER_PIPELINE::FORWARD);
-		~Scene() { }
+		Scene(L_RENDER_PIPELINE pipeline);
+		~Scene();
+
+		bool LoadSceneFile(const std::filesystem::path& sceneFilePath);
 
 	public:
 
@@ -56,14 +63,19 @@ namespace Louron {
 		Entity FindEntityByUUID(UUID uuid);
 
 		bool HasEntity(const std::string& name);
+		bool HasEntity(const UUID& uuid);
 
 		bool IsRunning() const { return m_IsRunning; }
 		bool IsPaused() const { return m_IsPaused; }
 
 		void OnStart();
+		void OnStop();
+
 		void OnUpdate();
 		void OnUpdateGUI();
-		void OnStop();
+
+		void OnFixedUpdate();
+		void OnFixedUpdateGUI();
 
 		template<typename... Components>
 		auto GetAllEntitiesWith() {	return m_Registry.view<Components...>(); }
@@ -72,24 +84,33 @@ namespace Louron {
 
 		void SetConfig(const SceneConfig& config) { m_SceneConfig = config; }
 		const SceneConfig& GetConfig() const { return m_SceneConfig; }
-		const std::shared_ptr<ResourceManager>& GetResources() const { return m_SceneConfig.SceneResourceManager; }
+		std::shared_ptr<ResourceManager> GetResources() const { return m_SceneConfig.SceneResourceManager; }
 
 		entt::registry* GetRegistry() { return &m_Registry; }
 		bool CopyRegistry(std::shared_ptr<Scene> otherScene);
 
+		PxScene* GetPhysScene() const { return m_PhysxScene; }
+		void SetPhysScene(PxScene* physScene);
+
+
 	private:
 
 		entt::registry m_Registry;
-		std::unordered_map<UUID, entt::entity> m_EntityMap;
+		std::shared_ptr<std::unordered_map<UUID, entt::entity>> m_EntityMap = std::make_shared<std::unordered_map<UUID, entt::entity>>();
+
+		PxScene* m_PhysxScene = nullptr;
 
 		bool m_IsRunning = false;
 		bool m_IsPaused = false;
 
 		std::filesystem::path m_SceneFilePath;
 		SceneConfig m_SceneConfig;
-		
+
 		friend class Entity;
 		friend class Project;
 		friend class SceneSerializer;
+
+		friend class TransformSystem;
+		friend class PhysicsSystem;
 	};
 }

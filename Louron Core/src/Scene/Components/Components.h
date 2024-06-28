@@ -2,32 +2,51 @@
 
 // Louron Core Headers
 #include "UUID.h"
-#include "Mesh.h"
-#include "Light.h"
-#include "Camera.h"
-#include "Skybox.h"
-#include "../../OpenGL/Material.h"
 
 // C++ Standard Library Headers
 #include <map>
+#include <memory>
+#include <vector>
+#include <string>
+#include <optional>
 
 // External Vendor Library Headers
-#include <glad/glad.h>
-
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
-#include <irrklang/irrKlang.h>
 
 namespace Louron {
 
-    struct IDComponent {
+    class Scene;
+    class Entity;
+    class Camera;
+
+    /// <summary>
+    /// Flags that are set to determine what state changes have occured
+    /// each frame so the TransformSystem may process these changes.
+    /// </summary>
+    enum TransformFlags : uint32_t {
+
+        TransformFlag_None              = 0,        
+
+        TransformFlag_PositionUpdated   = 1U << 0,  // Only add this flag where there have been changes made to the entities position
+        TransformFlag_RotationUpdated   = 1U << 1,  // Only add this flag where there have been changes made to the entities rotation
+        TransformFlag_ScaleUpdated      = 1U << 2,  // Only add this flag where there have been changes made to the entities scale
+
+    };
+
+    struct Component {
+
+        virtual ~Component() = default;
+
+        std::shared_ptr<Entity> entity;
+
+        template<typename T>
+        T& GetComponent();
+
+        template<typename T>
+        std::vector<T&> GetComponents();
+    };
+
+    struct IDComponent : public Component {
         UUID ID;
 
         IDComponent() = default;
@@ -35,7 +54,7 @@ namespace Louron {
         IDComponent(const IDComponent&) = default;
     };
 
-	struct TagComponent {
+	struct TagComponent : public Component {
 
 		std::string Tag;
 
@@ -44,16 +63,16 @@ namespace Louron {
 		TagComponent(const std::string& name) : Tag(name) { }
 	};
 
-    enum L_CAMERA_CLEAR_FLAGS {
+    enum CameraClearFlags {
         COLOUR_ONLY = 0,
         SKYBOX = 1
     };
 
-	struct CameraComponent {
+	struct CameraComponent : public Component {
 
 		std::shared_ptr<Camera> Camera = nullptr;
 		bool Primary = true;
-        L_CAMERA_CLEAR_FLAGS ClearFlags = L_CAMERA_CLEAR_FLAGS::COLOUR_ONLY;
+        CameraClearFlags ClearFlags = CameraClearFlags::COLOUR_ONLY;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
@@ -62,15 +81,15 @@ namespace Louron {
 
     // TODO: Implement Audio Components
 
-    struct  AudioListener {
+    struct AudioListener : public Component {
+        int i = 0;
+    };
+
+    struct AudioEmitter : public Component {
 
     };
 
-    struct AudioEmitter {
-
-    };
-
-	struct Transform {
+	struct Transform : public Component {
 
 	private:
 		glm::vec3 m_Position = glm::vec3(0.0f);
@@ -78,10 +97,23 @@ namespace Louron {
 		glm::vec3 m_Scale = glm::vec3(1.0f);
 		glm::mat4 m_Transform = glm::mat4(1.0f);
 
+        std::optional<glm::mat4> m_WorldTransform = std::nullopt;
+
+        TransformFlags m_StateFlags = TransformFlag_None;
+
     public:
+
         Transform();
         Transform(const Transform&) = default;
         Transform(const glm::vec3& translation);
+
+        // FLAGS
+        void AddFlag(TransformFlags flag);
+        void RemoveFlag(TransformFlags flag);
+        bool CheckFlag(TransformFlags flag) const;
+        bool NoFlagsSet() const;
+        void ClearFlags();
+        TransformFlags GetFlags() const;
 
         void SetPosition(const glm::vec3& newPosition);
         void SetPositionX(const float& newXPosition);
@@ -113,27 +145,72 @@ namespace Louron {
         void ScaleY(const float& deltaScaleY);
         void ScaleZ(const float& deltaScaleZ);
 
-        const glm::vec3& GetPosition();
-        const glm::vec3& GetRotation();
-        const glm::vec3& GetScale();
-        glm::mat4 GetTransform() const;
+        glm::vec3 GetPosition();
+        glm::vec3 GetRotation();
+        glm::vec3 GetScale();
 
-		operator const glm::mat4()& { return m_Transform; }
+        const glm::vec3& GetLocalPosition();
+        const glm::vec3& GetLocalRotation();
+        const glm::vec3& GetLocalScale();
+
+        glm::mat4 GetTransform() const;
+        glm::mat4 GetLocalTransform() const;
+
+        void SetTransform(const glm::mat4& transform);
+
+        operator const glm::mat4()&;
+        glm::mat4 operator*(const Transform& other) const;
 
     private:
-        void UpdateTransform();
+
+        friend class Scene;
+        friend class SceneSerializer;
+        friend class TransformSystem;
+        friend class PhysicsSystem;
 
 	};
 
     template<typename... Component>
-    struct ComponentGroup
-    {
-    };
+    struct ComponentGroup { };
 
-    using AllComponents =
-        ComponentGroup<CameraComponent,
-        Transform, MeshFilter, MeshRenderer,
-        PointLightComponent, SpotLightComponent, 
-        DirectionalLightComponent, SkyboxComponent>;
+    struct MeshFilter;
+    struct MeshRenderer;
+
+    struct PointLightComponent;
+    struct SpotLightComponent;
+    struct DirectionalLightComponent;
+    struct SkyboxComponent;
+
+    struct Rigidbody;
+    struct SphereCollider;
+    struct BoxCollider;
+
+    using AllComponents = ComponentGroup<
+
+        Component,
+
+        IDComponent,
+        TagComponent,
+
+        CameraComponent,
+
+        AudioListener,
+        AudioEmitter,
+
+        Transform, 
+
+        MeshFilter, 
+        MeshRenderer,
+
+        PointLightComponent, 
+        SpotLightComponent, 
+        DirectionalLightComponent, 
+        SkyboxComponent, 
+
+        Rigidbody,
+        SphereCollider,
+        BoxCollider
+    
+    >;
 
 }

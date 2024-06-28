@@ -1,7 +1,6 @@
 #pragma once
 
 // Louron Core Headers
-#include "../../Core/Engine.h"
 
 // C++ Standard Library Headers
 #include <vector>
@@ -12,7 +11,13 @@
 
 namespace Louron {
 
+
+	class Window;
+	class InputManager;
+
 	class Camera {
+
+		friend class SceneSerializer;
 
 	public:
 
@@ -33,7 +38,7 @@ namespace Louron {
 
 		glm::mat4 GetViewMatrix() const { return glm::lookAt(m_CameraPos, m_CameraPos + m_CameraFront, m_CameraUp); }
 
-		void UpdateProjMatrix() { m_ProjectionMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance); }
+		void UpdateProjMatrix(); 
 		glm::mat4 GetProjMatrix() const { return m_ProjectionMatrix; }
 
 		glm::vec3 GetCameraDirection() const { return m_CameraFront; }
@@ -48,6 +53,7 @@ namespace Louron {
 		float GetYaw() const { return m_Yaw; }
 
 		void ToggleMovement() { m_Movement = !m_Movement; }
+		bool IsMovementEnabled() const { return m_Movement; }
 
 		void Update(float deltaTime = 0.0f);
 

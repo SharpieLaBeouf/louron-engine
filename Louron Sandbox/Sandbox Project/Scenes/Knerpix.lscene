@@ -1,0 +1,340 @@
+Scene Name: Knerpix
+Scene Asset Directory: Sandbox Project/Assets/
+Scene Pipeline Type: 1
+Entities:
+  - Entity: 9629297442917181396
+    TagComponent:
+      Tag: Wall 15
+    TransformComponent:
+      Translation: [17.15, 1.85, 17.15]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 8278505419818944993
+    TagComponent:
+      Tag: Wall 14
+    TransformComponent:
+      Translation: [17.15, 1.85, 5.715]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 7731781974919587665
+    TagComponent:
+      Tag: Wall 13
+    TransformComponent:
+      Translation: [17.15, 1.85, -5.715]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 15717968317764239727
+    TagComponent:
+      Tag: Wall 12
+    TransformComponent:
+      Translation: [17.15, 1.85, -17.15]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 10378486131148499503
+    TagComponent:
+      Tag: Wall 11
+    TransformComponent:
+      Translation: [5.715, 1.85, 17.15]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 9722268682842668484
+    TagComponent:
+      Tag: Wall 10
+    TransformComponent:
+      Translation: [5.715, 1.85, 5.715]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 7315086105392217152
+    TagComponent:
+      Tag: Wall 9
+    TransformComponent:
+      Translation: [5.715, 1.85, -5.715]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 8894452774640234460
+    TagComponent:
+      Tag: Wall 8
+    TransformComponent:
+      Translation: [5.715, 1.85, -17.15]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 15410872281678587607
+    TagComponent:
+      Tag: Wall 7
+    TransformComponent:
+      Translation: [-5.715, 1.85, 17.15]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 5964857689693411665
+    TagComponent:
+      Tag: Wall 6
+    TransformComponent:
+      Translation: [-5.715, 1.85, 5.715]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 4636350122859134444
+    TagComponent:
+      Tag: Wall 5
+    TransformComponent:
+      Translation: [-5.715, 1.85, -5.715]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 7168509458758684233
+    TagComponent:
+      Tag: Wall 4
+    TransformComponent:
+      Translation: [-5.715, 1.85, -17.15]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 17676240715191670652
+    TagComponent:
+      Tag: Wall 3
+    TransformComponent:
+      Translation: [-17.15, 1.85, 17.15]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 12861093991930488758
+    TagComponent:
+      Tag: Wall 2
+    TransformComponent:
+      Translation: [-17.15, 1.85, 5.715]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 18283888323124091986
+    TagComponent:
+      Tag: Wall 1
+    TransformComponent:
+      Translation: [-17.15, 1.85, -5.715]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 8301309435348875184
+    TagComponent:
+      Tag: Wall 0
+    TransformComponent:
+      Translation: [-17.15, 1.85, -17.15]
+      Rotation: [0, 0, 0]
+      Scale: [2.85714293, 2.85714293, 2.85714293]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 5332423492089262043
+    TagComponent:
+      Tag: Directional Light
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [50, -30, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Ambient: [0.330000013, 0.330000013, 0.330000013, 1]
+      Diffuse: [1, 1, 1, 1]
+      Specular: [1, 1, 1, 1]
+  - Entity: 4878922203616022990
+    TagComponent:
+      Tag: Main Camera
+    TransformComponent:
+      Translation: [-27.3004036, 31.5687485, -0.543700576]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        FOV: 60
+        MovementToggle: false
+        MovementSpeed: 10
+        MovementYDamp: 0.649999976
+        MouseSensitivity: 0.100000001
+        MouseToggledOff: false
+        Position: [-27.3004036, 31.5687485, -0.543700576]
+        Yaw: -0.299958855
+        Pitch: -50.6999397
+      Primary: true
+      ClearFlag: 1
+    SkyboxComponent:
+      MaterialFilePath: Kloppenheim Skybox/Kloppenheim Skybox.lmaterial
+  - Entity: 3990945305622428106
+    TagComponent:
+      Tag: Floor
+    TransformComponent:
+      Translation: [0, -2, 0]
+      Rotation: [0, 0, 0]
+      Scale: [20, 1, 20]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Cube.fbx
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 10710177306750850954
+    TagComponent:
+      Tag: Ball1
+    TransformComponent:
+      Translation: [-17.50, 2, -11.20]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Green_Cube.fbx
+    RigidbodyComponent:
+      Mass: 1
+      Drag: 0
+      AngularDrag: 0.0500000007
+      AutomaticCentreOfMass: true
+      UseGravity: true
+      IsKinematic: false
+      PositionConstraint: [0, 0, 0]
+      RotationConstraint: [0, 0, 0]
+    SphereColliderComponent:
+      IsTrigger: false
+      Radius: 0.5
+      Centre: [0, 0, 0]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 10710177306750850952
+    TagComponent:
+      Tag: Ball2
+    TransformComponent:
+      Translation: [17.50, 2, 11.20]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+    RigidbodyComponent:
+      Mass: 1
+      Drag: 0
+      AngularDrag: 0.0500000007
+      AutomaticCentreOfMass: true
+      UseGravity: true
+      IsKinematic: false
+      PositionConstraint: [0, 0, 0]
+      RotationConstraint: [0, 0, 0]
+    SphereColliderComponent:
+      IsTrigger: false
+      Radius: 0.5
+      Centre: [0, 0, 0]
+      MaterialProperties: [0.600000024, 0.600000024, 0]

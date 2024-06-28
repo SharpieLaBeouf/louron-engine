@@ -10,12 +10,13 @@ public:
 		PushLayer(new MainMenuLayer());
 	}
 
+	~SandboxEngine() = default;
 };
 
 Louron::Engine* Louron::CreateEngine(Louron::EngineCommandLineArgs args) {
 	EngineSpecification spec;
-	spec.Name = "Sandbow Engine";
-	spec.WorkingDirectory = "SanboxLayer";
+	spec.Name = "Louron Sandbox Application";
+	spec.WorkingDirectory = "";
 	spec.CommandLineArgs = args;
 
 	return new SandboxEngine(spec);
