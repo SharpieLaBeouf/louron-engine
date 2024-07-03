@@ -2,11 +2,13 @@
 
 // Louron Core Headers
 #include "../Scene/Components/Components.h"
+#include "../OpenGL/Vertex Array.h"
 
 // C++ Standard Library Headers
 #include <memory>
 
 // External Vendor Library Headers
+#include <glad/glad.h>
 
 namespace Louron {
 
@@ -50,6 +52,18 @@ namespace Louron {
 		void OnStartPipeline(std::shared_ptr<Louron::Scene> scene) override;
 		void OnStopPipeline() override;
 
+		GLuint GetRenderFBO() const;
+		GLuint GetRenderColourTexture() const;
+		GLuint GetRenderEntityIDTexture() const;
+		GLuint GetRenderDepthTexture() const;
+
+		// This is used to let the pipeline know if it should
+		// render the screen quad with the colour attachment
+		// of the scene_fbo, or not 
+		void SetRenderScreenQuad(bool shouldRenderScreenQuad);
+
+		UUID PickRenderEntityID(glm::ivec2 screenPos);
+
 	private:
 
 		void UpdateComputeData();
@@ -59,22 +73,30 @@ namespace Louron {
 		void ConductLightCull(Camera* camera);
 		void ConductRenderPass(Camera* camera);
 
+		void RenderFBOQuad();
+
 	private:
 
 		struct ForwardPlusData {
 
-			unsigned int PL_Buffer = -1;
-			unsigned int PL_Indices_Buffer = -1;
-			unsigned int SL_Buffer = -1;
-			unsigned int SL_Indices_Buffer = -1;
+			GLuint PL_Buffer = -1;
+			GLuint PL_Indices_Buffer = -1;
+			GLuint SL_Buffer = -1;
+			GLuint SL_Indices_Buffer = -1;
 
-			unsigned int DL_Buffer = -1;
+			GLuint DL_Buffer = -1;
 
-			unsigned int DepthMap_FBO = -1;
-			unsigned int DepthMap_Texture = -1;
+			GLuint Scene_FBO = -1;
+			GLuint Scene_Colour_Texture = -1;
+			GLuint Scene_EntityID_Texture = -1;
+			GLuint Scene_Depth_Texture = -1;
 
-			unsigned int workGroupsX = -1;
-			unsigned int workGroupsY = -1;
+			GLuint Entity_Texture_Clear = NULL_UUID;
+			std::unique_ptr<VertexArray> Screen_Quad_VAO;
+			bool Render_Screen_Quad = true;
+
+			GLuint workGroupsX = -1;
+			GLuint workGroupsY = -1;
 
 		} FP_Data;
 

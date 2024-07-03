@@ -3,34 +3,28 @@
 // Louron Core Headers
 
 // C++ Standard Library Headers
-
 #include <string>
 
 // External Vendor Library Headers
 
-#include <irrklang/irrKlang.h>
+struct ma_engine;
 
 namespace Louron {
+
 
 	class Audio {
 
 	public:
 
-		static Audio& Get() {
-			static Audio s_Instance;
+		static Audio& Get();
 
-			return s_Instance;
-		}
-
-		void PlaySound(const std::string& audioFile, bool looped = false) {
-			m_SoundEngine->play2D(audioFile.c_str(), looped);
-		}
+		void PlayAudioFile(const std::string& audioFile);
 
 	private:
 
-		Audio() {
-			m_SoundEngine = irrklang::createIrrKlangDevice();
-		}
+		Audio();
+
+		~Audio();
 
 		// Delete copy assignment and move assignment constructors
 		Audio(const Audio&) = delete;
@@ -40,7 +34,7 @@ namespace Louron {
 		Audio& operator=(const Audio&) = delete;
 		Audio& operator=(Audio&&) = delete;
 
-		irrklang::ISoundEngine* m_SoundEngine;
+		ma_engine* m_SoundEngine;
 
 	};
 }

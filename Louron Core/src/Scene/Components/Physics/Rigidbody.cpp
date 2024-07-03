@@ -4,6 +4,7 @@
 #include "PhysicsWrappers.h"
 
 #include "../Components.h"
+#include "../../Entity.h"
 #include "../../../Core/Logging.h"
 
 // C++ Standard Library Headers
@@ -95,16 +96,26 @@ namespace Louron {
 	}
 
 	// Apply force to the rigid body
+	// If the scene is currently in simulation, we want to defer 
+	// this force to next frames physics simulation 
 	void Rigidbody::ApplyForce(const glm::vec3& force, PxForceMode::Enum forceMode) {
 		if (m_RigidDynamic) {
-			m_RigidDynamic->AddForce(PxVec3(force.x, force.y, force.z), forceMode);
+			if (entity->GetScene()->IsPhysicsSimulating())
+				m_DeferredForce.push_back({ force, forceMode });
+			else
+				m_RigidDynamic->AddForce(PxVec3(force.x, force.y, force.z), forceMode);
 		}
 	}
 
 	// Apply torque to the rigid body
+	// If the scene is currently in simulation, we want to defer 
+	// this torque to next frames physics simulation 
 	void Rigidbody::ApplyTorque(const glm::vec3& torque) {
 		if (m_RigidDynamic) {
-			m_RigidDynamic->AddTorque(PxVec3(torque.x, torque.y, torque.z));
+			if (entity->GetScene()->IsPhysicsSimulating())
+				m_DeferredTorque.push_back({ torque });
+			else
+				m_RigidDynamic->AddTorque(PxVec3(torque.x, torque.y, torque.z));
 		}
 	}
 

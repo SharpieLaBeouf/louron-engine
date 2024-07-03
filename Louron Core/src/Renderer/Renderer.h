@@ -26,7 +26,7 @@ namespace Louron {
 		static void DrawSkybox(SkyboxComponent& skybox);
 		static void DrawInstancedMesh(std::shared_ptr<Mesh> Mesh, std::vector<Transform> Transforms);
 
-		static void CleanupInstanceData();
+		static void CleanupRenderData();
 	
 	private:
 				

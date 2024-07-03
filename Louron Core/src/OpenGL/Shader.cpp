@@ -4,6 +4,7 @@
 #include "../Core/Logging.h"
 
 // C++ Standard Library Headers
+#include <filesystem>
 
 // External Vendor Library Headers
 
@@ -104,6 +105,7 @@ namespace Louron {
 
 	void Shader::SetBool(const GLchar* name, bool value) const { glUniform1i(glGetUniformLocation(m_Program, name), (int)value); }
 	void Shader::SetInt(const GLchar* name, int value) const { glUniform1i(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetUInt(const GLchar* name, GLuint value) const { glUniform1ui(glGetUniformLocation(m_Program, name), value); }
 	void Shader::SetFloat(const GLchar* name, float value) const { glUniform1f(glGetUniformLocation(m_Program, name), value); }
 	void Shader::SetiVec2(const GLchar* name, const glm::ivec2& value) const { glUniform2iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
 	void Shader::SetiVec3(const GLchar* name, const glm::ivec3& value) const { glUniform3iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
@@ -146,7 +148,24 @@ namespace Louron {
 	/// Initialises the ShaderLibrary class so that it always holds a default shader.
 	/// </summary>
 	ShaderLibrary::ShaderLibrary() {
-		m_DefaultShader = LoadShader("assets/Shaders/Default Shader.glsl");
+		namespace fs = std::filesystem;
+		try {
+			fs::path currentPath = fs::current_path();
+
+			for (const auto& entry : fs::recursive_directory_iterator(currentPath)) {
+				if (entry.is_regular_file() && entry.path().filename() == "Default Shader.glsl") {
+					m_DefaultShader = LoadShader(entry.path().string());
+					break; // Found the shader, no need to continue searching
+				}
+			}
+
+			if (!m_DefaultShader) {
+				L_CORE_ERROR("Could Not Find Default Shader.");
+			}
+		}
+		catch (const std::exception& e) {
+			L_CORE_ERROR("Error Searching for Default Shader File: {0}", e.what());
+		}
 	}
 
 	/// <summary>

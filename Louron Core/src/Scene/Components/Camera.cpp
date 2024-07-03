@@ -22,12 +22,16 @@ namespace Louron {
 		m_Yaw = yaw;
 		m_Pitch = pitch;
 
-		m_ProjectionMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance);
+		m_ProjMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance);
 
 		UpdateCameraVectors();
 	}
+
+	void Camera::UpdateViewMatrix() {
+		m_ViewMatrix = glm::lookAt(m_CameraPos, m_CameraPos + m_CameraFront, m_CameraUp);
+	}
 	
-	void Camera::UpdateProjMatrix() { m_ProjectionMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance); }
+	void Camera::UpdateProjMatrix() { m_ProjMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance); }
 
 	void Camera::Update(float deltaTime) {
 		if (m_Input.GetKeyUp(GLFW_KEY_LEFT_ALT)) {
@@ -113,5 +117,7 @@ namespace Louron {
 
 		m_CameraRight = glm::normalize(glm::cross(m_CameraFront, m_WorldUp));
 		m_CameraUp = glm::normalize(glm::cross(m_CameraRight, m_CameraFront));
+		
+		UpdateViewMatrix();
 	}
 }

@@ -37,12 +37,20 @@ namespace Louron {
 
 #pragma region Initialisation and ECS
 
+	static PxFilterFlags CustomFilterShader(
+		PxFilterObjectAttributes attributes0, PxFilterData filterData0,
+		PxFilterObjectAttributes attributes1, PxFilterData filterData1,
+		PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize) {
+		pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eNOTIFY_TOUCH_FOUND;
+		return PxFilterFlag::eDEFAULT;
+	}
+
 	Scene::Scene() {
 		// Create PhysX Scene
 		PxSceneDesc sceneDesc(PxGetPhysics().getTolerancesScale());
 		sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
 		sceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2);
-		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		sceneDesc.filterShader = CustomFilterShader;
 		m_PhysxScene = PxGetPhysics().createScene(sceneDesc);
 
 #ifdef _DEBUG
@@ -70,7 +78,7 @@ namespace Louron {
 		PxSceneDesc sceneDesc(PxGetPhysics().getTolerancesScale());
 		sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
 		sceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2);
-		sceneDesc.filterShader = PxDefaultSimulationFilterShader;
+		sceneDesc.filterShader = CustomFilterShader;
 		m_PhysxScene = PxGetPhysics().createScene(sceneDesc);
 
 #ifdef _DEBUG
@@ -355,6 +363,12 @@ namespace Louron {
 
 		m_IsRunning = true;
 
+		if (!m_CollisionCallback) {
+			m_CollisionCallback = std::make_unique<CollisionCallback>(shared_from_this());
+
+			m_PhysxScene->setSimulationEventCallback(m_CollisionCallback.get());
+		}
+
 		m_SceneConfig.ScenePipeline->OnStartPipeline(shared_from_this());
 	}
 
@@ -366,29 +380,8 @@ namespace Louron {
 
 			PhysicsSystem::UpdatePhysicsObjects(shared_from_this());
 
-
 			m_SceneConfig.ScenePipeline->OnUpdate();
 
-			//// Render Scene to FBO
-			//auto& fbo_props = Engine::Get().GetRenderFBO();
-			// 
-			//// Render RBO to Screen Quad
-			//auto& fbo_shader = Engine::Get().GetShaderLibrary().GetShader("FBO Texture Shader");
-			//if (fbo_shader->GetName() == "FBO Texture Shader") {
-
-			//	fbo_shader->Bind();
-
-			//	glActiveTexture(GL_TEXTURE0);
-			//	fbo_props.RenderTexture->Bind();
-
-			//	fbo_shader->SetInt("u_FBOTexture", 0);
-
-			//	fbo_props.ScreenQuadVAO->Bind();
-			//	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			//	fbo_props.ScreenQuadVAO->UnBind();
-			//	fbo_props.RenderTexture->UnBind();
-			//	fbo_shader->UnBind();
-			//}
 		}
 	}
 
@@ -399,8 +392,11 @@ namespace Louron {
 	}
 
 	void Scene::OnFixedUpdate() {
+		m_IsSimulatingPhysics = true;
 
 		PhysicsSystem::Update(shared_from_this());
+
+		m_IsSimulatingPhysics = false;
 	}
 
 	void Scene::OnFixedUpdateGUI() {

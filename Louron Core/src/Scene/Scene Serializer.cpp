@@ -118,13 +118,13 @@ namespace YAML {
 		static Node encode(const Louron::UUID& uuid)
 		{
 			Node node;
-			node.push_back((uint64_t)uuid);
+			node.push_back((uint32_t)uuid);
 			return node;
 		}
 
 		static bool decode(const Node& node, Louron::UUID& uuid)
 		{
-			uuid = node.as<uint64_t>();
+			uuid = node.as<uint32_t>();
 			return true;
 		}
 	};
@@ -656,14 +656,14 @@ namespace Louron {
 			if (entities) {
 
 				for (auto entity : entities) {
-
-					uint64_t uuid = entity["Entity"].as<uint64_t>();
+					
+					// UUID
+					UUID uuid = entity["Entity"].as<UUID>();
 
 					// Tag
 					std::string name;
 					auto tag = entity["TagComponent"];
-					if (tag) 
-						name = tag["Tag"].as<std::string>();
+					if (tag) name = tag["Tag"].as<std::string>();
 
 					Entity deserializedEntity = scene_ref->CreateEntity(uuid, name);
 

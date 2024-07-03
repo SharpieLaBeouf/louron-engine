@@ -46,13 +46,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\irrklang;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\irrklang;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
@@ -69,9 +69,9 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;irrklang.lib;yaml-cppd.lib;spdlogd.lib;debug\PhysX_static_64.lib;debug\PhysXCharacterKinematic_static_64.lib;debug\PhysXCommon_static_64.lib;debug\PhysXCooking_static_64.lib;debug\PhysXExtensions_static_64.lib;debug\PhysXFoundation_static_64.lib;debug\PhysXPvdSDK_static_64.lib;debug\PhysXVehicle_static_64.lib;debug\PhysXVehicle2_static_64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;yaml-cppd.lib;spdlogd.lib;debug\PhysX_static_64.lib;debug\PhysXCharacterKinematic_static_64.lib;debug\PhysXCommon_static_64.lib;debug\PhysXCooking_static_64.lib;debug\PhysXExtensions_static_64.lib;debug\PhysXFoundation_static_64.lib;debug\PhysXPvdSDK_static_64.lib;debug\PhysXVehicle_static_64.lib;debug\PhysXVehicle2_static_64.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>
       </Profile>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
@@ -92,11 +92,11 @@
       </DisableSpecificWarnings>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;irrklang.lib;yaml-cpp.lib;spdlog.lib;release\PhysX_static_64.lib;release\PhysXCharacterKinematic_static_64.lib;release\PhysXCommon_static_64.lib;release\PhysXCooking_static_64.lib;release\PhysXExtensions_static_64.lib;release\PhysXFoundation_static_64.lib;release\PhysXPvdSDK_static_64.lib;release\PhysXVehicle_static_64.lib;release\PhysXVehicle2_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;yaml-cpp.lib;spdlog.lib;release\PhysX_static_64.lib;release\PhysXCharacterKinematic_static_64.lib;release\PhysXCommon_static_64.lib;release\PhysXCooking_static_64.lib;release\PhysXExtensions_static_64.lib;release\PhysXFoundation_static_64.lib;release\PhysXPvdSDK_static_64.lib;release\PhysXVehicle_static_64.lib;release\PhysXVehicle2_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>
       </Profile>
       <AdditionalOptions>/ignore:4006,4099</AdditionalOptions>
@@ -130,9 +130,6 @@
     <None Include="assimp-vc143-mtd.dll">
       <FileType>Document</FileType>
     </None>
-    <None Include="ikpFlac.dll" />
-    <None Include="ikpMP3.dll" />
-    <None Include="irrKlang.dll" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Images\cube_texture.png" />

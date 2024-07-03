@@ -36,10 +36,11 @@ namespace Louron {
 		Camera(glm::vec3 position = glm::vec3(0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = -90.0f, float pitch = 0.0f);
 		~Camera() { }
 
-		glm::mat4 GetViewMatrix() const { return glm::lookAt(m_CameraPos, m_CameraPos + m_CameraFront, m_CameraUp); }
+		void UpdateViewMatrix();
+		glm::mat4 GetViewMatrix() const { return m_ViewMatrix; }
 
 		void UpdateProjMatrix(); 
-		glm::mat4 GetProjMatrix() const { return m_ProjectionMatrix; }
+		glm::mat4 GetProjMatrix() const { return m_ProjMatrix; }
 
 		glm::vec3 GetCameraDirection() const { return m_CameraFront; }
 
@@ -71,7 +72,8 @@ namespace Louron {
 		glm::vec3 m_CameraFront;
 		glm::vec3 m_WorldUp;
 
-		glm::mat4 m_ProjectionMatrix;
+		glm::mat4 m_ProjMatrix;
+		glm::mat4 m_ViewMatrix;
 
 		float m_Yaw;
 		float m_Pitch;

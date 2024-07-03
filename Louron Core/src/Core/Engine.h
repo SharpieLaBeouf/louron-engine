@@ -17,7 +17,8 @@
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
 
-int main(int argc, char** argv);
+int main(int argc, char** argv); 
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 
 namespace Louron {
 
@@ -40,16 +41,6 @@ namespace Louron {
 
 	};
 
-	class VertexArray;
-	struct RenderFBO {
-
-		GLuint FBO = -1;
-		std::unique_ptr<Texture> RenderTexture = nullptr;
-		std::unique_ptr<VertexArray> ScreenQuadVAO = nullptr;
-
-		void Init();
-	};
-
 	class Engine {
 	public:
 		Engine(const EngineSpecification& specification);
@@ -65,8 +56,6 @@ namespace Louron {
 		ShaderLibrary& GetShaderLibrary() { return *m_ShaderLibrary; }
 		TextureLibrary& GetTextureLibrary() { return *m_TextureLibrary; }
 
-		RenderFBO& GetRenderFBO() { return m_RenderFBO; }
-
 		static Engine& Get() { return *s_Instance; }
 		void Close();
 
@@ -78,7 +67,7 @@ namespace Louron {
 		bool OnWindowClose();
 		bool OnWindowResize();
 
-		std::vector<std::string> FindFilePaths(const std::string& directory, const std::string& extension);
+		std::vector<std::string> FindFilePaths(const std::string& extension);
 
 	private:
 
@@ -86,8 +75,6 @@ namespace Louron {
 		bool m_Minimized = false;
 
 		float m_FixedUpdateTimer = 0.0f;
-
-		RenderFBO m_RenderFBO;
 
 		std::unique_ptr <Window> m_Window;
 		GuiLayer* m_GuiLayer;
@@ -102,6 +89,7 @@ namespace Louron {
 	private:
 		static Engine* s_Instance;
 		friend int ::main(int argc, char** argv);
+		friend int WINAPI ::WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
 	};
 
 	Engine* CreateEngine(EngineCommandLineArgs args);

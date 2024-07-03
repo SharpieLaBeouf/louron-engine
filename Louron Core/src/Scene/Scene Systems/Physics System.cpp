@@ -190,6 +190,8 @@ namespace Louron {
 
 		SphereCollider& collider = scene->m_Registry.emplace<SphereCollider>(entity);
 
+		collider.SetColliderUserData(entity.GetUUID());
+
 		collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
 		collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
 		collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
@@ -201,6 +203,8 @@ namespace Louron {
 	BoxCollider& PhysicsSystem::AddBoxCollider(Entity entity, Scene* scene) {
 
 		BoxCollider& collider = scene->m_Registry.emplace<BoxCollider>(entity);
+
+		collider.SetColliderUserData(entity.GetUUID());
 
 		collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
 		collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
@@ -278,6 +282,26 @@ namespace Louron {
 		PxScene* physxScene = scene->GetPhysScene();
 		
 		if (!scene->m_IsPaused) {
+
+			// Process all Deferred forces from last update
+			auto view = scene->GetAllEntitiesWith<Rigidbody>();
+			for (auto& entity_handle : view) {
+				auto& rb_ref = view.get<Rigidbody>(entity_handle);
+				if (!rb_ref.m_DeferredForce.empty()) {
+					for (const auto& action : rb_ref.m_DeferredForce) {
+						PxVec3 force = { action.force.x, action.force.y, action.force.z };
+						rb_ref.GetActor()->AddForce(force, action.forceMode);
+					}
+					rb_ref.m_DeferredForce.clear();
+				}
+				if (!rb_ref.m_DeferredTorque.empty()) {
+					for (const auto& action : rb_ref.m_DeferredTorque) {
+						PxVec3 torque = { action.torque.x, action.torque.y, action.torque.z };
+						rb_ref.GetActor()->AddTorque(torque);
+					}
+					rb_ref.m_DeferredTorque.clear();
+				}
+			}
 						
 			physxScene->simulate(Time::GetUnscaledFixedDeltaTime());
 			physxScene->fetchResults(true);

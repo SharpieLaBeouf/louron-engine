@@ -7,6 +7,7 @@
 #include "../Scene/Components/Light.h"
 #include "../Scene/Components/Mesh.h"
 #include "../Debug/Profiler.h"
+#include "../Core/Time.h"
 
 // C++ Standard Library Headers
 
@@ -137,7 +138,7 @@ namespace Louron {
 
 	void RenderPipeline::OnStopPipeline() { 
 
-		Renderer::CleanupInstanceData();
+		Renderer::CleanupRenderData();
 	}
 
 	void RenderPipeline::UpdateActiveScene(std::shared_ptr<Louron::Scene> scene) {
@@ -169,6 +170,7 @@ namespace Louron {
 		
 		if (!m_Scene) {
 			L_CORE_ERROR("Invalid Scene! Please Use ForwardPlusPipeline::OnStartPipeline() Before Updating");
+			Renderer::ClearColour({ 1.0f, 0.0f, 1.0f, 1.0f });
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			return;
 		}
@@ -189,12 +191,30 @@ namespace Louron {
 
 			UpdateSSBOData();
 
+			// Bind FBO and clear color and depth buffers for the new frame
+			glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.Scene_FBO);
+			glViewport(0, 0, m_FrameSize.x, m_FrameSize.y);
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 			ConductDepthPass(camera);
 			ConductLightCull(camera);
+
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
 			ConductRenderPass(camera);
+
+			// Unbind FBO to render to the screen
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+			// Clear the standard OpenGL back buffer
+			Renderer::ClearColour({ 1.0f, 0.0f, 1.0f, 1.0f });
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			if(FP_Data.Render_Screen_Quad)
+				RenderFBOQuad();
 		}
 		else {
 			L_CORE_WARN("No Primary Camera Found in Scene");
+			Renderer::ClearColour({ 1.0f, 0.0f, 1.0f, 1.0f });
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		}
 	}
@@ -206,7 +226,11 @@ namespace Louron {
 
 		L_PROFILE_SCOPE("Forward Plus - Set Up Pipeline");
 
+		// We want to benefit from the ConductDepthPass depth values in the depth buffer for the 
+		// ConductRenderPass, so we use LEQUAL  to ensure that fragments are not discarded because 
+		// the depth values from the depth pass will be EQUAL to the depth values in the render pass
 		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL); 
 
 		m_Scene = scene;
 		m_FrameSize = Engine::Get().GetWindow().GetSize();
@@ -251,14 +275,29 @@ namespace Louron {
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-		// Setup Depth Texture
+		// Setup Scene FBO
 
-		glGenFramebuffers(1, &FP_Data.DepthMap_FBO);
-		glGenTextures(1, &FP_Data.DepthMap_Texture);
+		// Generate a framebuffer object and textures for color and depth
+		glGenFramebuffers(1, &FP_Data.Scene_FBO);
+		glGenTextures(1, &FP_Data.Scene_Colour_Texture);
+		glGenTextures(1, &FP_Data.Scene_EntityID_Texture);
+		glGenTextures(1, &FP_Data.Scene_Depth_Texture);
 
-		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
+		// Bind the color texture and set its parameters
+		glBindTexture(GL_TEXTURE_2D, FP_Data.Scene_Colour_Texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_FrameSize.x, m_FrameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		// Create texture for entity IDs
+		glBindTexture(GL_TEXTURE_2D, FP_Data.Scene_EntityID_Texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, m_FrameSize.x, m_FrameSize.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		// Bind the depth texture and set its parameters
+		glBindTexture(GL_TEXTURE_2D, FP_Data.Scene_Depth_Texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_FrameSize.x, m_FrameSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -267,11 +306,56 @@ namespace Louron {
 		GLfloat borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, FP_Data.DepthMap_Texture, 0);
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
+		// Bind the framebuffer
+		glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.Scene_FBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FP_Data.Scene_Colour_Texture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, FP_Data.Scene_EntityID_Texture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,  GL_TEXTURE_2D, FP_Data.Scene_Depth_Texture, 0);
+
+		// Set the list of draw buffers
+		GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, drawBuffers);
+
+		// Check FBO completeness
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+			L_CORE_ERROR("Framebuffer is not complete!");
+			OnStopPipeline();
+		}
+
+		// Unbind FBO
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		if(!FP_Data.Screen_Quad_VAO)
+		{
+			FP_Data.Screen_Quad_VAO = std::make_unique<VertexArray>();
+
+			std::vector<Vertex> vertices{
+				Vertex(glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec3(), glm::vec2( 0.0f, 1.0f )),
+				Vertex(glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec3(), glm::vec2( 0.0f, 0.0f )),
+				Vertex(glm::vec3( 1.0f, -1.0f, 0.0f), glm::vec3(), glm::vec2( 1.0f, 0.0f )),
+				Vertex(glm::vec3( 1.0f,  1.0f, 0.0f), glm::vec3(), glm::vec2( 1.0f, 1.0f )),
+			};
+
+			std::vector<GLuint> indices{
+				0, 1, 2,
+				0, 2, 3
+			};
+
+			BufferLayout layout = {
+				{ ShaderDataType::Float3, "aPos" },
+				{ ShaderDataType::Float3, "aNormal" },
+				{ ShaderDataType::Float2, "aTexCoord" }
+			};
+
+			VertexBuffer* vbo = new VertexBuffer(vertices, (GLuint)vertices.size());
+			vbo->SetLayout(layout);
+
+			IndexBuffer* ebo = new IndexBuffer(indices, (GLuint)indices.size());
+
+			FP_Data.Screen_Quad_VAO->AddVertexBuffer(vbo);
+			FP_Data.Screen_Quad_VAO->SetIndexBuffer(ebo);
+
+		}
 	}
 
 	/// <summary>
@@ -291,10 +375,57 @@ namespace Louron {
 
 		glDeleteBuffers(1, &FP_Data.DL_Buffer);
 
-		glDeleteFramebuffers(1, &FP_Data.DepthMap_FBO);
-		glDeleteTextures(1, &FP_Data.DepthMap_Texture);
+		glDeleteFramebuffers(1, &FP_Data.Scene_FBO);
+		glDeleteTextures(1, &FP_Data.Scene_Colour_Texture);
+		glDeleteTextures(1, &FP_Data.Scene_EntityID_Texture);
+		glDeleteTextures(1, &FP_Data.Scene_Depth_Texture);
 
-		Renderer::CleanupInstanceData();
+		if (FP_Data.Screen_Quad_VAO) {
+			FP_Data.Screen_Quad_VAO.reset();
+			FP_Data.Screen_Quad_VAO = nullptr;
+			FP_Data.Render_Screen_Quad = true;
+		}
+
+		Renderer::CleanupRenderData();
+	}
+
+	GLuint ForwardPlusPipeline::GetRenderFBO() const
+	{
+		return FP_Data.Scene_FBO;
+	}
+
+	GLuint ForwardPlusPipeline::GetRenderColourTexture() const
+	{
+		return FP_Data.Scene_Colour_Texture;
+	}
+
+	GLuint ForwardPlusPipeline::GetRenderEntityIDTexture() const
+	{
+		return FP_Data.Scene_EntityID_Texture;
+	}
+
+	GLuint ForwardPlusPipeline::GetRenderDepthTexture() const
+	{
+		return FP_Data.Scene_Depth_Texture;
+	}
+
+	void ForwardPlusPipeline::SetRenderScreenQuad(bool shouldRenderScreenQuad) {
+		FP_Data.Render_Screen_Quad = shouldRenderScreenQuad;
+	}
+
+	UUID ForwardPlusPipeline::PickRenderEntityID(glm::ivec2 screenPos) {
+
+		int adjustedY = m_FrameSize.y - screenPos.y - 1;
+
+		GLuint pickedID{};
+
+		glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.Scene_FBO);
+		glReadBuffer(GL_COLOR_ATTACHMENT1);
+		glReadPixels(screenPos.x, adjustedY, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, &pickedID);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		return UUID(pickedID);
+
 	}
 
 	/// <summary>
@@ -318,9 +449,15 @@ namespace Louron {
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-		// Update Depth Texture Size
+		// Update Colour and Depth Texture Size
 
-		glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
+		glBindTexture(GL_TEXTURE_2D, FP_Data.Scene_Colour_Texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_FrameSize.x, m_FrameSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+
+		glBindTexture(GL_TEXTURE_2D, FP_Data.Scene_EntityID_Texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32UI, m_FrameSize.x, m_FrameSize.y, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, nullptr);
+
+		glBindTexture(GL_TEXTURE_2D, FP_Data.Scene_Depth_Texture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_FrameSize.x, m_FrameSize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
 	}
 
@@ -456,66 +593,70 @@ namespace Louron {
 	}
 
 	/// <summary>
-	/// Conducts a Depth Pass of the scene sorted front to back
+	/// Conducts a Depth Pass of the scene sorted front to back.
+	/// 
+	/// IF VSYNC IS ON, the profiling from this section will wait
+	/// for some reason for the specified time to ensure it's only
+	/// running at the Hz rate of the monitor. 
+	/// 
 	/// </summary>
 	void ForwardPlusPipeline::ConductDepthPass(Camera* camera) {
 
-		L_PROFILE_SCOPE("Forward Plus - Pre Depth Pass");
+		L_PROFILE_SCOPE("Forward Plus - Pre Depth Pass (Not Accurate if VSYNC On)");
+
+		// Clear the Entity ID Buffer
+		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		glClearTexImage(FP_Data.Scene_EntityID_Texture, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, &FP_Data.Entity_Texture_Clear);
 
 		// Call Renderer for all Meshes
-		{
-			const auto& view = m_Scene->GetAllEntitiesWith<Transform, MeshRenderer, MeshFilter>();
+		const auto& view = m_Scene->GetAllEntitiesWith<IDComponent, Transform, MeshRenderer, MeshFilter>();
 
-			// First: Distance, Second: Transform, Third: MeshFilter
-			std::vector<std::tuple<float, Transform, MeshFilter>> sortedEntities;
+		// First: Distance, Second: ID Component Third: Transform, Fourth: MeshFilter
+		std::vector<std::tuple<float, IDComponent, Transform, MeshFilter>> sortedEntities;
 
-			if (view.begin() != view.end()) {
+		if (view.begin() != view.end()) {
 
-				for (const auto& entity : view) {
-					const auto& [transform, meshRenderer, meshFilter] = view.get<Transform, MeshRenderer, MeshFilter>(entity);
+			
+			const glm::vec3& cam_position = camera->GetPosition();
 
-					if (!meshRenderer.active)
-						continue;
+			for (const auto& entity : view) {
+				const auto& [entityUUID, transform, meshRenderer, meshFilter] = view.get<IDComponent, Transform, MeshRenderer, MeshFilter>(entity);
 
-					glm::vec3 objectPosition = transform.GetPosition();
-					float distance = glm::length(objectPosition - camera->GetPosition());
+				if (!meshRenderer.active)
+					continue;
 
-					sortedEntities.emplace_back(distance, transform, meshFilter);
+				const glm::vec3& objectPosition = transform.GetPosition();
+				float distance = glm::length(objectPosition - cam_position);
+
+				sortedEntities.emplace_back(distance, entityUUID, transform, meshFilter);
+			}
+			
+			// Lambda function compares the distances of two entities (a and b) and orders them in a way that ensures front-to-back sorting
+			std::sort(sortedEntities.begin(), sortedEntities.end(), [](const auto& a, const auto& b) {
+				return std::get<0>(a) < std::get<0>(b);
+			});
+			
+			if (std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth"); shader) {
+
+				shader->Bind();
+				shader->SetMat4("u_Proj", camera->GetProjMatrix());
+				shader->SetMat4("u_View", camera->GetViewMatrix());
+
+				for (const auto& [distance, entityUUID, transform, meshFilter] : sortedEntities) {
+					shader->SetMat4("u_Model", transform.GetTransform());
+					shader->SetUInt("u_EntityID", entityUUID.ID);
+
+					for (const auto& mesh : *meshFilter.Meshes)
+						Renderer::DrawMesh(mesh);
 				}
 
-				// Lambda function compares the distances of two entities (a and b) and orders them in a way that ensures front-to-back sorting
-				std::sort(sortedEntities.begin(), sortedEntities.end(), [](const auto& a, const auto& b) {
-
-					return std::get<0>(a) < std::get<0>(b);
-
-				});
-
-				std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth");
-				if (shader)
-				{
-					glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DepthMap_FBO);
-					Renderer::ClearBuffer(GL_DEPTH_BUFFER_BIT);
-
-					shader->Bind();
-					shader->SetMat4("u_Proj", camera->GetProjMatrix());
-					shader->SetMat4("u_View", camera->GetViewMatrix());
-
-					for (const auto& [distance, transform, meshFilter] : sortedEntities) {
-						shader->SetMat4("u_Model", transform.GetTransform());
-
-						for (const auto& mesh : *meshFilter.Meshes)
-							Renderer::DrawMesh(mesh);
-					}
-
-					shader->UnBind();
-
-					glBindFramebuffer(GL_FRAMEBUFFER, 0);
-				}
-				else {
-					L_CORE_ERROR("FP Depth Shader Not Found");
-				}
+				shader->UnBind();
+			}
+			else {
+				L_CORE_ERROR("FP Depth Shader Not Found");
 			}
 		}
+		
 	}
 
 	/// <summary>
@@ -533,14 +674,16 @@ namespace Louron {
 			lightCull->SetMat4("u_View", camera->GetViewMatrix());
 			lightCull->SetMat4("u_Proj", camera->GetProjMatrix());
 			lightCull->SetiVec2("u_ScreenSize", (glm::ivec2)m_FrameSize);
+
+			// Bind depth to texture 4 so this does not interfere with any diffuse, normal, or specular textures used 
 			glActiveTexture(GL_TEXTURE4);
+			glBindTexture(GL_TEXTURE_2D, FP_Data.Scene_Depth_Texture);
 			lightCull->SetInt("u_Depth", 4);
-			glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
 
 			glDispatchCompute(FP_Data.workGroupsX, FP_Data.workGroupsY, 1);
 
-			glActiveTexture(GL_TEXTURE4);
 			glBindTexture(GL_TEXTURE_2D, 0);
+			glActiveTexture(GL_TEXTURE0);
 		}
 		else {
 			L_CORE_ERROR("FP Light Cull Compute Shader Not Found");
@@ -558,9 +701,6 @@ namespace Louron {
 		L_PROFILE_SCOPE("Forward Plus - Colour Render");
 
 		//// Render All MeshComponents in Scene
-		//glBindFramebuffer(GL_FRAMEBUFFER, Engine::Get().GetRenderFBO().FBO);
-		//glEnable(GL_DEPTH_TEST);
-		Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// Gather all entities within scene with appropriate components
 		auto view = m_Scene->GetAllEntitiesWith<Transform, MeshRenderer, MeshFilter>();
@@ -598,17 +738,10 @@ namespace Louron {
 					if (material->Bind()) {
 
 						// Update Standard Material Uniforms
-
 						material->UpdateUniforms(*camera);
 
 						// Update Specific Forward Plus Uniforms
-
 						material->GetShader()->SetInt("u_TilesX", FP_Data.workGroupsX); // Number of tiles across the screen in the X axis
-						material->GetShader()->SetiVec2("u_ScreenSize", (glm::ivec2)m_FrameSize); // Size of screen
-
-						glActiveTexture(GL_TEXTURE4);
-						material->GetShader()->SetInt("u_Depth", 4); // Depth texture map
-						glBindTexture(GL_TEXTURE_2D, FP_Data.DepthMap_Texture);
 					}
 				}
 				else {
@@ -623,12 +756,12 @@ namespace Louron {
 					if (meshAndTransform.second.size() == 1) {
 						material->GetShader()->SetBool("u_UseInstanceData", false);
 
-							Transform trans = meshAndTransform.second[0];
-							material->GetShader()->SetMat4("u_VertexIn.Model", trans.GetTransform());
-							Renderer::DrawMesh(meshAndTransform.first);
-						}
-						// IF multiple of the same mesh, draw them using instancing
-						else if (meshAndTransform.second.size() > 1) {
+						Transform trans = meshAndTransform.second[0];
+						material->GetShader()->SetMat4("u_VertexIn.Model", trans.GetTransform());
+						Renderer::DrawMesh(meshAndTransform.first);
+					}
+					// IF multiple of the same mesh, draw them using instancing
+					else if (meshAndTransform.second.size() > 1) {
 
 						material->GetShader()->SetBool("u_UseInstanceData", true);
 						Renderer::DrawInstancedMesh(meshAndTransform.first, meshAndTransform.second);
@@ -643,16 +776,15 @@ namespace Louron {
 			for (const auto& entity : skyboxView) {
 				auto [scene_camera, skybox] = skyboxView.get<CameraComponent, SkyboxComponent>(entity);
 
-				if (scene_camera.ClearFlags == CameraClearFlags::SKYBOX) {
+				// Only draw the skybox for the primary camera
+				if (scene_camera.Primary && scene_camera.ClearFlags == CameraClearFlags::SKYBOX) {
 
 					if (skybox.Material->Bind()) {
-						glDepthFunc(GL_LEQUAL);
 
 						skybox.Material->UpdateUniforms(*camera);
 						Renderer::DrawSkybox(skybox);
 
 						skybox.UnBind();
-						glDepthFunc(GL_LESS);
 					}
 				}
 				else {
@@ -668,10 +800,29 @@ namespace Louron {
 		}
 		glActiveTexture(GL_TEXTURE0);
 		glUseProgram(0);
+	}
 
-		//glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		//glDisable(GL_DEPTH_TEST);
-		//Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT);
+	void ForwardPlusPipeline::RenderFBOQuad() {
+
+		if (!FP_Data.Screen_Quad_VAO) {
+			return;
+		}
+
+		std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FBO Texture Shader");
+		if (shader)
+		{
+			shader->Bind();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, FP_Data.Scene_Colour_Texture);
+			shader->SetInt("u_ScreenTexture", 0);
+
+			FP_Data.Screen_Quad_VAO->Bind();
+			glDrawElements(GL_TRIANGLES, FP_Data.Screen_Quad_VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+
+			glBindVertexArray(0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		else L_CORE_ERROR("FBO Texture Shader Invalid.");
 	}
 
 #pragma endregion
@@ -688,7 +839,7 @@ namespace Louron {
 
 	void DeferredPipeline::OnStopPipeline() {
 
-		Renderer::CleanupInstanceData();
+		Renderer::CleanupRenderData();
 	}
 
 #pragma endregion

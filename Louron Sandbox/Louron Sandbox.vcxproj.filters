@@ -36,9 +36,6 @@
     <None Include="assets\Shaders\Forward+\FP_Depth.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Material_BP_Shader.glsl" />
     <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
-    <None Include="irrKlang.dll" />
-    <None Include="ikpFlac.dll" />
-    <None Include="ikpMP3.dll" />
     <None Include="assets\Shaders\Skybox\Skybox.glsl" />
     <None Include="assets\Shaders\FBO\FBO Texture Shader.glsl" />
   </ItemGroup>

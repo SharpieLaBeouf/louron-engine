@@ -48,6 +48,37 @@ public:
 			ball[0].starting_position = ball[0].ball.GetComponent<Transform>().GetPosition();
 			ball[1].starting_position = ball[1].ball.GetComponent<Transform>().GetPosition();
 
+			auto customCollisionCallback = [&](Entity& self, Entity& other) -> void {
+
+				if ((self.GetName() == "Ball1" && other.GetName() == "Ball2") || (self.GetName() == "Ball2" && other.GetName() == "Ball1")) {
+
+					if (!self.HasComponent<Rigidbody>() || !other.HasComponent<Rigidbody>())
+						return;
+
+					PxVec3 self_velocity = self.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
+					PxVec3 other_velocity = other.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
+
+					if (self_velocity.magnitude() <= other_velocity.magnitude()) {
+
+						// Calculate the direction from A to B
+						PxVec3 direction = self.GetComponent<Rigidbody>().GetActor()->GetGlobalPose().p - other.GetComponent<Rigidbody>().GetActor()->GetGlobalPose().p;
+						direction.normalize();
+
+						// Calculate impulse magnitude (adjust according to your game's requirements)
+						float impulseMagnitude = 600.0f;
+
+						self.GetComponent<Rigidbody>().ApplyForce(glm::vec3( direction.x, direction.y, direction.z ) * impulseMagnitude, PxForceMode::eFORCE);
+
+
+					}
+
+				}
+
+			};
+
+			ball[0].ball.GetComponent<Louron::SphereCollider>().SetOnCollideCallback(customCollisionCallback);
+			ball[1].ball.GetComponent<Louron::SphereCollider>().SetOnCollideCallback(customCollisionCallback);
+
 		}
 		m_Scene->OnStart();
 	}
@@ -121,6 +152,22 @@ public:
 
 			ProcessWinnerAnimation();
 			
+		}
+
+		// Test Mouse Picking Functionality
+		if (m_Input.GetMouseButtonDown(GLFW_MOUSE_BUTTON_1)) {
+
+			if (auto render_pipeline = std::dynamic_pointer_cast<Louron::ForwardPlusPipeline>(m_Scene->GetConfig().ScenePipeline); render_pipeline) {
+
+				if (auto entity = m_Scene->FindEntityByUUID(render_pipeline->PickRenderEntityID(m_Input.GetMousePosition())); entity) {
+					L_APP_INFO("You Have Clicked On Entity: {0}", entity.GetName().c_str());
+				}
+				else {
+					L_APP_WARN("No Entity Found On Mouse Position.");
+				}
+
+			}
+
 		}
 
 		// Update Camera Component

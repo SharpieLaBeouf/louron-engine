@@ -2,16 +2,16 @@
 
 #version 450 core
 
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec2 aTexCoord;
-layout (location = 3) in vec3 aTangent;
-layout (location = 4) in vec3 aBitangent;
-layout (location = 5) in mat4 instanceMatrix;
+layout (location = 0) in vec3   aPos;
+layout (location = 1) in vec3   aNormal;
+layout (location = 2) in vec2   aTexCoord;
+layout (location = 3) in vec3   aTangent;
+layout (location = 4) in vec3   aBitangent;
+layout (location = 5) in mat4   aInstanceMatrix;
 
-out vec2 TexCoord;
-out vec3 Normal;
-out vec3 FragPos;
+layout (location = 0) out vec2  TexCoord;
+layout (location = 1) out vec3  Normal;
+layout (location = 2) out vec3  FragPos;
 
 struct VertexData {
     
@@ -35,9 +35,9 @@ void main() {
     }
     else 
     {
-        gl_Position = u_VertexIn.Proj * u_VertexIn.View * instanceMatrix * vec4(aPos, 1.0);
-	    Normal = mat3(transpose(inverse(instanceMatrix))) * aNormal;
-	    FragPos = vec3(instanceMatrix * vec4(aPos, 1.0));
+        gl_Position = u_VertexIn.Proj * u_VertexIn.View * aInstanceMatrix * vec4(aPos, 1.0);
+	    Normal = mat3(transpose(inverse(aInstanceMatrix))) * aNormal;
+	    FragPos = vec3(aInstanceMatrix * vec4(aPos, 1.0));
     }
 }
 
@@ -135,10 +135,11 @@ layout(std430, binding = 4) readonly buffer DL_Buffer {
 } DL_Buffer_Data;
 
 // Shader In/Out Variables
-in vec2 TexCoord;
-in vec3 Normal;
-in vec3 FragPos;
-out vec4 fragColour;
+layout (location = 0) in vec2       TexCoord;
+layout (location = 1) in vec3       Normal;
+layout (location = 2) in vec3       FragPos;
+
+layout (location = 0) out vec4      o_FragColour;
 
 // Standard Uniform Variables
 uniform vec3 u_CameraPos;
@@ -178,7 +179,7 @@ void main() {
     result += CalcPointLights(norm, FragPos, viewDir);
     result += CalcSpotLights(norm, FragPos, viewDir);
 
-    fragColour = vec4(result, 1.0);
+    o_FragColour = vec4(result, 1.0);
 }
 
 // Calculate Directional Light Lighting in Scene (MAX 10)

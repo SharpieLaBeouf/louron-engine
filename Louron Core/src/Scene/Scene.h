@@ -2,6 +2,7 @@
 
 // Louron Core Headers
 #include "../Core/Logging.h"
+#include "Components/Physics/CollisionCallback.h"
 
 // C++ Standard Library Headers
 #include <vector>
@@ -67,6 +68,7 @@ namespace Louron {
 
 		bool IsRunning() const { return m_IsRunning; }
 		bool IsPaused() const { return m_IsPaused; }
+		bool IsPhysicsSimulating() const { return m_IsSimulatingPhysics; }
 
 		void OnStart();
 		void OnStop();
@@ -92,16 +94,17 @@ namespace Louron {
 		PxScene* GetPhysScene() const { return m_PhysxScene; }
 		void SetPhysScene(PxScene* physScene);
 
-
 	private:
 
 		entt::registry m_Registry;
 		std::shared_ptr<std::unordered_map<UUID, entt::entity>> m_EntityMap = std::make_shared<std::unordered_map<UUID, entt::entity>>();
 
 		PxScene* m_PhysxScene = nullptr;
+		std::unique_ptr<CollisionCallback> m_CollisionCallback;
 
 		bool m_IsRunning = false;
 		bool m_IsPaused = false;
+		bool m_IsSimulatingPhysics = false;
 
 		std::filesystem::path m_SceneFilePath;
 		SceneConfig m_SceneConfig;

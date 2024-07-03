@@ -20,7 +20,7 @@ namespace Louron {
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
-	static GLuint s_InstanceBuffer = -1;
+	static GLuint s_InstanceTransformBuffer = -1;
 
 	void Renderer::DrawInstancedMesh(std::shared_ptr<Mesh> Mesh, std::vector<Transform> Transforms) {
 		
@@ -29,17 +29,16 @@ namespace Louron {
 			transformMatrices.push_back(Transforms[i]);
 		}
 
-		if (s_InstanceBuffer == -1) {
-			glGenBuffers(1, &s_InstanceBuffer);
-			glBindBuffer(GL_ARRAY_BUFFER, s_InstanceBuffer);
+		if (s_InstanceTransformBuffer == -1) {
+			glGenBuffers(1, &s_InstanceTransformBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, s_InstanceTransformBuffer);
 			glBufferData(GL_ARRAY_BUFFER, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0], GL_DYNAMIC_DRAW);
 
 		}
 		else {
-			glBindBuffer(GL_ARRAY_BUFFER, s_InstanceBuffer);
+			glBindBuffer(GL_ARRAY_BUFFER, s_InstanceTransformBuffer);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0]);
 		}
-
 
 		Mesh->VAO->Bind();
 
@@ -47,10 +46,13 @@ namespace Louron {
 		std::size_t vec4Size = sizeof(glm::vec4);
 		glEnableVertexAttribArray(5);
 		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)0);
+
 		glEnableVertexAttribArray(6);
 		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(1 * vec4Size));
+
 		glEnableVertexAttribArray(7);
 		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(2 * vec4Size));
+
 		glEnableVertexAttribArray(8);
 		glVertexAttribPointer(8, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(3 * vec4Size));
 
@@ -59,6 +61,7 @@ namespace Louron {
 		glVertexAttribDivisor(7, 1);
 		glVertexAttribDivisor(8, 1);
 
+		// DRAW CALL
 		glDrawElementsInstanced(GL_TRIANGLES, Mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, (GLsizei)Transforms.size());
 
 		// Reset state after drawing
@@ -75,11 +78,11 @@ namespace Louron {
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-	void Renderer::CleanupInstanceData() {
+	void Renderer::CleanupRenderData() {
 		// TODO: Implement cleaning up of buffer somewhere
-		if (s_InstanceBuffer != -1) {
-			glDeleteBuffers(1, &s_InstanceBuffer);
-			s_InstanceBuffer = -1;
+		if (s_InstanceTransformBuffer != -1) {
+			glDeleteBuffers(1, &s_InstanceTransformBuffer);
+			s_InstanceTransformBuffer = -1;
 		}
 	}
 }

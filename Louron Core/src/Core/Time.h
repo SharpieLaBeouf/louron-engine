@@ -63,7 +63,9 @@ namespace Louron {
 
 	private:
 
-		Time() { }
+		Time() {
+			m_LastTimeClock = std::chrono::high_resolution_clock::now();
+		}
 
 		// Delete copy assignment and move assignment constructors
 		Time(const Time&) = delete;

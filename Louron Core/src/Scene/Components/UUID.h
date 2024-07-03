@@ -9,7 +9,7 @@
 // External Vendor Library Headers
 
 
-#define NULL_UUID UINT64_MAX
+#define NULL_UUID UINT32_MAX
 
 namespace Louron {
 
@@ -17,14 +17,16 @@ namespace Louron {
 	{
 	public:
 		UUID();
-		UUID(uint64_t uuid);
+		UUID(uint32_t uuid);
 		UUID(const UUID&) = default;
 
-		operator uint64_t() const { return m_UUID; }
-	private:
-		uint64_t m_UUID;
+		uint32_t GetUUID() const { return m_UUID; }
 
-		uint64_t GenerateUUID();
+		operator uint32_t() const { return m_UUID; }
+	private:
+		uint32_t m_UUID;
+
+		uint32_t GenerateUUID();
 
 	};
 
@@ -39,7 +41,7 @@ namespace std {
 	{
 		std::size_t operator()(const Louron::UUID& uuid) const
 		{
-			return (uint64_t)uuid;
+			return (uint32_t)uuid;
 		}
 	};
 

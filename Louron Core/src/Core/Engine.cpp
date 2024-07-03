@@ -27,8 +27,6 @@ namespace Louron {
 
         m_Window = Window::Create(WindowProps(m_Specification.Name));
 
-        m_RenderFBO.Init();
-
         m_GuiLayer = new GuiLayer();
         PushOverlay(m_GuiLayer);
 
@@ -47,11 +45,11 @@ namespace Louron {
 
         // Load All Shaders 
         {
-            for (const auto& path : FindFilePaths("assets", ".glsl")) {
+            for (const auto& path : FindFilePaths(".glsl")) {
                 m_ShaderLibrary->LoadShader(path);
             }
 
-            for (const auto& path : FindFilePaths("assets", ".comp")) {
+            for (const auto& path : FindFilePaths(".comp")) {
                 m_ShaderLibrary->LoadShader(path, true);
             }
         }
@@ -60,11 +58,11 @@ namespace Louron {
 
         // Load All Textures
         {
-            for (const auto& path : FindFilePaths("assets", ".png")) {
+            for (const auto& path : FindFilePaths(".png")) {
                 m_TextureLibrary->LoadTexture(path);
             }
 
-            for (const auto& path : FindFilePaths("assets", ".jpg")) {
+            for (const auto& path : FindFilePaths(".jpg")) {
                 m_TextureLibrary->LoadTexture(path);
             }
         }
@@ -141,68 +139,27 @@ namespace Louron {
         return false;
     }
 
-    std::vector<std::string> Engine::FindFilePaths(const std::string& directory, const std::string& extension)
-    {
-        std::vector<std::string> foundPaths;
+    std::vector<std::string> Engine::FindFilePaths(const std::string& extension) {
+        std::vector<std::string> paths;
+
+        namespace fs = std::filesystem;
 
         try {
-            for (const auto& entry : std::filesystem::directory_iterator(directory)) {
-                if (std::filesystem::is_regular_file(entry) && entry.path().extension() == extension) {
-                    foundPaths.push_back(entry.path().string());
-                }
-                else if (std::filesystem::is_directory(entry)) {
-                   auto subDirectoryPaths = FindFilePaths(entry.path().string(), extension);
-                   foundPaths.insert(foundPaths.end(), subDirectoryPaths.begin(), subDirectoryPaths.end());
+            fs::path currentPath = fs::current_path();
+
+            for (const auto& entry : fs::recursive_directory_iterator(currentPath)) {
+                if (entry.is_regular_file()) {
+                    if (entry.path().extension() == extension) {
+                        paths.push_back(entry.path().string());
+                    }
                 }
             }
         }
         catch (const std::exception& e) {
-            L_CORE_WARN("Error Finding File Paths: {0}", e.what());
+            std::cerr << "Error searching for files: " << e.what() << std::endl;
         }
-       
-        return foundPaths;
-    }
 
-    void RenderFBO::Init() {
-
-        glGenFramebuffers(1, &FBO);
-        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
-        RenderTexture = std::make_unique<Texture>("Engine_Render_Texture", Engine::Get().GetWindow().GetWidth(), Engine::Get().GetWindow().GetHeight());
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, RenderTexture->GetID(), 0);
-        unsigned int rbo;
-        glGenRenderbuffers(1, &rbo);
-        glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, Engine::Get().GetWindow().GetWidth(), Engine::Get().GetWindow().GetHeight()); // use a single renderbuffer object for both a depth AND stencil buffer.
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo); // now actually attach it
-
-        ScreenQuadVAO = std::make_unique<VertexArray>();
-
-        float quadVertices[] = {
-            // Positions       // Texture coordinates
-            -1.0f,  1.0f,      0.0f, 1.0f, // LEFT - TOP
-            -1.0f, -1.0f,      0.0f, 0.0f, // LEFT - BOTTOM
-             1.0f, -1.0f,      1.0f, 0.0f, // RIGHT - BOTTOM
-             1.0f,  1.0f,      1.0f, 1.0f  // RIGHT - TOP
-        };
-        unsigned int indices[] = {
-             0, 1, 2,
-             0, 2, 3
-        };
-
-        VertexBuffer* vbo = new VertexBuffer(quadVertices, 16);
-        BufferLayout layout = {
-            { ShaderDataType::Float2, "aPos" },
-            { ShaderDataType::Float2, "aTexCoord" }
-        };
-        vbo->SetLayout(layout);
-
-        IndexBuffer* ebo = new IndexBuffer(indices, 6);
-
-        ScreenQuadVAO->AddVertexBuffer(vbo);
-        ScreenQuadVAO->SetIndexBuffer(ebo);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        return paths;
     }
 }
 

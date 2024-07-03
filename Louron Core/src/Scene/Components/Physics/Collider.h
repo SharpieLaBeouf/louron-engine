@@ -20,6 +20,7 @@ namespace Louron {
     class RigidDynamic;
     class PhysicsShape;
     class PhysicsMaterial;
+    class Entity;
 
     struct SphereCollider : public Component {
 
@@ -32,11 +33,25 @@ namespace Louron {
         bool m_IsTrigger = false;
         glm::vec3 m_Centre{ 0.0f, 0.0f, 0.0f };
 
+        std::function<void(Entity&, Entity&)> OnCollideCallback;
+        std::function<void(Entity&, Entity&)> OnTriggerCallback;
+
+        // we do this because we store this in the PxShape void* userData,
+        // we don't want any cases when the memory of the entityUUID is 
+        // reallocated or suddenly becomes null! 
+        UUID m_EntityUUID;
+
     public:
 
         SphereCollider();
         SphereCollider(glm::vec3 SphereCentre, float SphereRadius);
         ~SphereCollider();
+
+        void SetColliderUserData(const UUID& uuid);
+        // Setter functions for callbacks
+        void SetOnCollideCallback(const std::function<void(Entity&, Entity&)>& callback) { OnCollideCallback = callback; }
+
+        void SetOnTriggerCallback(const std::function<void(Entity&, Entity&)>& callback) { OnTriggerCallback = callback; }
 
         void Release();
 
@@ -64,6 +79,7 @@ namespace Louron {
         friend class Entity;
         friend class PhysicsSystem;
         friend class TransformSystem;
+        friend class CollisionCallback;
 
     };
 
@@ -78,11 +94,21 @@ namespace Louron {
         glm::vec3 m_Centre{ 0.0f, 0.0f, 0.0f };
         glm::vec3 m_BoxExtents{ 1.0f, 1.0f, 1.0f };
 
+        std::function<void(Entity&, Entity&)> OnCollideCallback;
+        std::function<void(Entity&, Entity&)> OnTriggerCallback;
+
+        // we do this because we store this in the PxShape void* userData,
+        // we don't want any cases when the memory of the entityUUID is 
+        // reallocated or suddenly becomes null! 
+        UUID m_EntityUUID; 
+
     public:
 
         BoxCollider();
         BoxCollider(const glm::vec3& boxCentre, const glm::vec3& boxExtents);
         ~BoxCollider();
+
+        void SetColliderUserData(const UUID& uuid);
 
         void Release();
 
@@ -110,6 +136,7 @@ namespace Louron {
         friend class Entity;
         friend class PhysicsSystem;
         friend class TransformSystem;
+        friend class CollisionCallback;
 
     };
 

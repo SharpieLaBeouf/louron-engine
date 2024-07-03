@@ -8,6 +8,11 @@ namespace Louron {
 
 	VertexArray::~VertexArray() {
 		glDeleteVertexArrays(1, &m_VAO);
+
+		delete m_IndexBuffer;
+
+		for (auto vertex : m_VertexBuffers)
+			delete vertex;
 	}
 
 	void VertexArray::Bind() const {

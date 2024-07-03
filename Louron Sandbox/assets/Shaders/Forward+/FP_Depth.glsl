@@ -16,6 +16,12 @@ void main() {
 
 #version 450 core
 
+layout (location = 0) out uint FragEntityID;
+
+uniform uint u_EntityID;
+
 void main() {
+
+    FragEntityID = u_EntityID;
 
 }

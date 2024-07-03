@@ -431,6 +431,7 @@ namespace Louron {
     PhysicsShape::PhysicsShape(const PxGeometry& geometry, const PxMaterial& material, bool isExclusive, PxShapeFlags shapeFlags) : 
         m_Shape(PxGetPhysics().createShape(geometry, material, isExclusive, shapeFlags))
     {
+        m_Shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
         if (!m_Shape) {
             L_CORE_ERROR("Failed to Create PxShape.");
             m_Shape = nullptr;
@@ -440,6 +441,7 @@ namespace Louron {
     PhysicsShape::PhysicsShape(PhysicsShape&& other) noexcept : 
         m_Shape(other.m_Shape) 
     {
+        m_Shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
         other.m_Shape = nullptr;
     }
 
@@ -447,6 +449,7 @@ namespace Louron {
         if (this != &other) {
             Release();
             m_Shape = other.m_Shape;
+            m_Shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
             other.m_Shape = nullptr;
         }
         return *this;

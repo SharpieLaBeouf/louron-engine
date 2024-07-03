@@ -10,11 +10,27 @@
 
 extern Louron::Engine* Louron::CreateEngine(Louron::EngineCommandLineArgs args);
 
-int main(int argc, char** argv)
-{
+#ifdef _DEBUG
+
+#pragma comment( linker, "/subsystem:console" )
+int main(int argc, char** argv) {
+
 	Louron::LoggingSystem::Init();
 
 	auto app = Louron::CreateEngine({ argc, argv });
+
+#else
+
+#include <Windows.h>
+#pragma comment( linker, "/subsystem:windows" )
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+
+	Louron::LoggingSystem::Init();
+
+	auto app = Louron::CreateEngine({});
+
+#endif
+
 
 	app->Run();
 

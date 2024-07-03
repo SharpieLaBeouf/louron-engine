@@ -78,6 +78,19 @@ namespace Louron {
 
 		void ApplyForce(const glm::vec3& force, PxForceMode::Enum forceMode = PxForceMode::eFORCE);
 		void ApplyTorque(const glm::vec3& torque);
+
+		struct DeferredForce {
+			glm::vec3 force;
+			PxForceMode::Enum forceMode;
+		};
+		struct DeferredTorque {
+			glm::vec3 torque;
+		};
+
+		// This ensures that any force that is applied is not applied 
+		// whilst simulate is processing physics changes
+		std::vector<DeferredForce> m_DeferredForce;
+		std::vector<DeferredTorque> m_DeferredTorque;
 	};
 
 }

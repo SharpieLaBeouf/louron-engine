@@ -32,6 +32,13 @@ namespace Louron {
 
     }
 
+    void SphereCollider::SetColliderUserData(const UUID& uuid) {
+        m_EntityUUID = uuid;
+        if (m_Shape) {
+            m_Shape->GetShape()->userData = reinterpret_cast<void*>(static_cast<uintptr_t>((uint32_t)m_EntityUUID));
+        }
+    }
+
     void SphereCollider::Release() {
 
         if(m_Shape) {
@@ -152,6 +159,13 @@ namespace Louron {
 
     BoxCollider::~BoxCollider() {
 
+    }
+
+    void BoxCollider::SetColliderUserData(const UUID& uuid) {
+        m_EntityUUID = uuid;
+        if (m_Shape) {
+            m_Shape->GetShape()->userData = reinterpret_cast<void*>(static_cast<uintptr_t>(m_EntityUUID));
+        }
     }
 
     void BoxCollider::Release() {
