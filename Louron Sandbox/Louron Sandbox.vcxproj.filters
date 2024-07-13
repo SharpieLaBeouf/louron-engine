@@ -105,5 +105,8 @@
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 14.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 15.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

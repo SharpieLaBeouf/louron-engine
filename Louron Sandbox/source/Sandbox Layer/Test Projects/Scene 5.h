@@ -260,8 +260,8 @@ private:
 			shader->Bind();
 			shader->SetMat4("u_VertexIn.View", view);
 			shader->SetMat4("u_VertexIn.Proj", proj);
-			shader->SetMat3("u_NormalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.GetTransform()))));
-			shader->SetVec3("u_ViewPos", m_SceneCamera->GetPosition());
+			shader->SetMat3("u_NormalToWorld", glm::mat3(glm::transpose(glm::inverse(cube_trans.GetGlobalTransform()))));
+			shader->SetVec3("u_ViewPos", m_SceneCamera->GetGlobalPosition());
 			shader->SetVec3("u_LightPos", light_trans.GetLocalPosition());
 			shader->SetVec4("u_LightColour", glm::vec4(1.0f));
 

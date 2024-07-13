@@ -7,6 +7,8 @@
 #include "Rigidbody.h"
 #include "PhysicsWrappers.h"
 
+#include "../../Entity.h"
+
 #include "../../../Core/Logging.h"
 
 // C++ Standard Library Headers
@@ -49,6 +51,100 @@ namespace Louron {
         if(m_Material)
             m_Material = nullptr;
 
+    }
+
+    void SphereCollider::CreateStaticRigidbody() {
+
+        if (!entity || !*entity || !entity->GetScene()) {
+            L_CORE_ERROR("Cannot Create Static Rigidbody - Current Entity Is Invalid and Cannot Access Scene!");
+            return;
+        }
+
+        ResetRigidbody();
+
+        const glm::vec3& position = entity->GetComponent<Transform>().GetGlobalPosition();
+        const glm::quat& quaternion = glm::quat(glm::radians(entity->GetComponent<Transform>().GetGlobalRotation()));
+        
+        m_Shape->m_StaticBody = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
+
+        m_Shape->m_StaticBody->GetActor()->attachShape(*m_Shape->m_Shape);
+
+        m_Shape->m_StaticBody->SetKinematic(true);
+
+        PxRigidBodyExt::updateMassAndInertia(*m_Shape->m_StaticBody->GetActor(), 1.0f);
+        entity->GetScene()->GetPhysScene()->addActor(*m_Shape->m_StaticBody->GetActor());
+
+        m_Shape->AddFlag(ColliderFlag_TransformUpdated);
+        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+
+        m_Shape->m_RigidbodyRef = m_Shape->m_StaticBody;
+        m_RigidbodyUUID = entity->GetUUID();
+
+    }
+
+    /// <summary>
+    /// Updates the weak_ptr reference to the RigidDynamic, and the Rigidbody entity UUID.
+    /// </summary>
+    void SphereCollider::UpdateRigidbody(const UUID& rigidbodyEntityUUID) {
+
+        if (!entity || !*entity || !entity->GetScene()) {
+            L_CORE_ERROR("Cannot Update Rigidbody - Current Entity Is Invalid and Cannot Access Scene!");
+            return;
+        }
+
+        if (!entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID)) {
+            
+            L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Is Invalid and Cannot Access Scene!");
+            CreateStaticRigidbody();
+            return;
+        }
+        
+        if (!entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<Rigidbody>()) {
+            
+            L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Does Not Have Rigidbody Component!");
+            CreateStaticRigidbody();
+            return;
+        }
+
+        if (auto rb_ref = entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<Rigidbody>().GetActor();  rb_ref && *rb_ref) {
+
+            ResetRigidbody();
+
+            m_Shape->AddFlag(ColliderFlag_RigidbodyUpdated);
+            m_Shape->AddFlag(ColliderFlag_TransformUpdated);
+
+            m_Shape->m_RigidbodyRef = rb_ref;
+            m_RigidbodyUUID = rigidbodyEntityUUID;
+
+            L_CORE_INFO("Successfully Updated Rigidbody Reference in Physics Shape.");
+        }
+        else {
+            L_CORE_WARN("New Rigidbody Reference Invalid - Creating Static Rigidbody for Collider.");
+            CreateStaticRigidbody();
+        }
+
+        return;
+    }
+
+    /// <summary>
+    /// Reset the weak_ptr to the RigidDynamic and the Rigidbody entity UUID.
+    /// </summary>
+    void SphereCollider::ResetRigidbody() {
+
+        if (auto rb_ref = m_Shape->m_RigidbodyRef.lock(); rb_ref && *rb_ref)
+            rb_ref->DetachShape(m_Shape);
+
+        m_Shape->m_RigidbodyRef.reset();
+        m_RigidbodyUUID = NULL_UUID;
+
+        if (m_Shape->m_StaticBody && *m_Shape->m_StaticBody) {
+            m_Shape->m_StaticBody->GetActor()->detachShape(*m_Shape->m_Shape);
+            m_Shape->m_StaticBody->Release();
+            m_Shape->m_StaticBody = nullptr;
+        }
+
+        m_Shape->SetLocalPose({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f });
+        SetRadius(glm::compMax(entity->GetComponent<Transform>().GetGlobalScale()) / 2.0f);
     }
 
     // GETTERS
@@ -99,8 +195,8 @@ namespace Louron {
         glm::vec3 position = glm::vec3(0.0f);
         glm::vec3 scale = glm::vec3(1.0f);
 
-        glm::mat4 collider_matrix = collider_transform.GetTransform();
-        glm::mat4 rigidbody_matrix = rigidbody_transform.GetTransform();
+        glm::mat4 collider_matrix = collider_transform.GetGlobalTransform();
+        glm::mat4 rigidbody_matrix = rigidbody_transform.GetGlobalTransform();
 
         if (m_Shape->IsStatic() || collider_matrix == rigidbody_matrix) {
 
@@ -108,7 +204,7 @@ namespace Louron {
             // apply the custom collider centre, and multiply the transforms
             // largest absolute scale value by the m_Radius modifier.
             position = m_Centre;
-            scale = collider_transform.GetScale();
+            scale = collider_transform.GetGlobalScale();
 
             m_Shape->SetLocalPose(PxTransform(position.x, position.y, position.z));
             m_Shape->SetGeometry(PxSphereGeometry(glm::compMax(glm::abs(scale)) * (m_Radius * 2.0f)));
@@ -125,12 +221,12 @@ namespace Louron {
             // the local pose of the collider relative to the rigidbody, then 
             // add the m_Centre offset to the local position, and multiply the
             // largest absolute scale value by the m_Radius modifier.
-            m_Shape->SetGeometry(PxSphereGeometry(glm::compMax(glm::abs(collider_transform.GetScale())) * (m_Radius * 2.0f)));
+            m_Shape->SetGeometry(PxSphereGeometry(glm::compMax(glm::abs(collider_transform.GetGlobalScale())) * (m_Radius * 2.0f)));
 
             collider_matrix = glm::inverse(rigidbody_matrix) * collider_matrix;
 
             scale = glm::vec3(glm::length(collider_matrix[0]), glm::length(collider_matrix[1]), glm::length(collider_matrix[2]));
-            position = glm::vec3(collider_matrix[3]) * glm::abs(collider_transform.GetScale()) + m_Centre;
+            position = glm::vec3(collider_matrix[3]) * glm::abs(collider_transform.GetGlobalScale()) + m_Centre;
             glm::quat quaternion = glm::quat_cast(collider_matrix);
 
             m_Shape->SetLocalPose(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
@@ -178,6 +274,97 @@ namespace Louron {
         if (m_Material)
             m_Material = nullptr;
 
+    }
+
+    void BoxCollider::CreateStaticRigidbody() {
+
+        if (!entity || !*entity || !entity->GetScene()) {
+            L_CORE_ERROR("Cannot Create Static Rigidbody - Current Entity Is Invalid and Cannot Access Scene!");
+            return;
+        }
+
+        this->ResetRigidbody();
+
+        const glm::vec3& position = entity->GetComponent<Transform>().GetGlobalPosition();
+        const glm::quat& quaternion = glm::quat(glm::radians(entity->GetComponent<Transform>().GetGlobalRotation()));
+
+        m_Shape->m_StaticBody = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
+
+        m_Shape->m_StaticBody->GetActor()->attachShape(*m_Shape->m_Shape);
+
+        m_Shape->m_StaticBody->SetKinematic(true);
+
+        PxRigidBodyExt::updateMassAndInertia(*m_Shape->m_StaticBody->GetActor(), 1.0f);
+        entity->GetScene()->GetPhysScene()->addActor(*m_Shape->m_StaticBody->GetActor());
+
+        m_Shape->AddFlag(ColliderFlag_TransformUpdated);
+        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+
+        m_Shape->m_RigidbodyRef = m_Shape->m_StaticBody;
+        m_RigidbodyUUID = entity->GetUUID();
+
+    }
+
+    /// <summary>
+    /// Updates the weak_ptr reference to the RigidDynamic, and the Rigidbody entity UUID.
+    /// </summary>
+    void BoxCollider::UpdateRigidbody(const UUID& rigidbodyEntityUUID) {
+
+        if (!entity || !*entity || !entity->GetScene()) {
+            L_CORE_ERROR("Cannot Update Rigidbody - Current Entity Is Invalid and Cannot Access Scene!");
+            return;
+        }
+
+        if (!entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID)) {
+
+            L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Is Invalid and Cannot Access Scene!");
+            CreateStaticRigidbody();
+            return;
+        }
+
+        if (!entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<Rigidbody>()) {
+
+            L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Does Not Have Rigidbody Component!");
+            CreateStaticRigidbody();
+            return;
+        }
+
+        if (auto rb_ref = entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<Rigidbody>().GetActor();  rb_ref && *rb_ref) {
+
+            ResetRigidbody();
+
+            m_Shape->AddFlag(ColliderFlag_RigidbodyUpdated);
+            m_Shape->AddFlag(ColliderFlag_TransformUpdated);
+
+            m_Shape->m_RigidbodyRef = rb_ref;
+            m_RigidbodyUUID = rigidbodyEntityUUID;
+
+            L_CORE_INFO("Successfully Updated Rigidbody Reference in Physics Shape.");
+        }
+        else {
+            L_CORE_WARN("New Rigidbody Reference Invalid - Creating Static Rigidbody for Collider.");
+            CreateStaticRigidbody();
+        }
+
+        return;
+    }
+
+    /// <summary>
+    /// Reset the weak_ptr to the RigidDynamic and the Rigidbody entity UUID.
+    /// </summary>
+    void BoxCollider::ResetRigidbody() {
+
+        if (auto rb_ref = m_Shape->m_RigidbodyRef.lock(); rb_ref && *rb_ref)
+            rb_ref->DetachShape(m_Shape);
+
+        m_Shape->m_RigidbodyRef.reset();
+        m_RigidbodyUUID = NULL_UUID;
+
+        if (m_Shape->m_StaticBody && *m_Shape->m_StaticBody) {
+            m_Shape->m_StaticBody->GetActor()->detachShape(*m_Shape->m_Shape);
+            m_Shape->m_StaticBody->Release();
+            m_Shape->m_StaticBody = nullptr;
+        }
     }
 
     // GETTERS
@@ -228,8 +415,8 @@ namespace Louron {
         glm::vec3 position = glm::vec3(0.0f);
         glm::vec3 scale = glm::vec3(1.0f);
 
-        glm::mat4 collider_matrix = collider_transform.GetTransform();
-        glm::mat4 rigidbody_matrix = rigidbody_transform.GetTransform();
+        glm::mat4 collider_matrix = collider_transform.GetGlobalTransform();
+        glm::mat4 rigidbody_matrix = rigidbody_transform.GetGlobalTransform();
 
         if (m_Shape->IsStatic() || collider_matrix == rigidbody_matrix) {
 
@@ -237,7 +424,7 @@ namespace Louron {
             // apply the custom collider centre, and multiply the transforms
             // largest absolute scale value by the m_Radius modifier.
             position = m_Centre; // <- this is the offset of the shape to the rigidbody's origin
-            scale = collider_transform.GetScale();
+            scale = collider_transform.GetGlobalScale();
 
             m_Shape->SetLocalPose(PxTransform(position.x, position.y, position.z));
 

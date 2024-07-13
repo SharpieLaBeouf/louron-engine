@@ -213,8 +213,8 @@ private:
 		rayWorld = glm::normalize(glm::vec4(rayWorld.x, rayWorld.y, rayWorld.z, 0.0f));
 
 		// 6. Calculate the intersection point in world coordinates (Cast Ray and Calculate Position at Custom Intersection on the Y Axis)
-		float t = (customIntersectionY - m_SceneCamera->GetPosition().y) / rayWorld.y;
-		glm::vec3 intersectionPoint = m_SceneCamera->GetPosition() + glm::vec3(rayWorld * t);
+		float t = (customIntersectionY - m_SceneCamera->GetGlobalPosition().y) / rayWorld.y;
+		glm::vec3 intersectionPoint = m_SceneCamera->GetGlobalPosition() + glm::vec3(rayWorld * t);
 
 		// 7. Return World Position Where Ray Hits Y Axis Intersection
 		return intersectionPoint;

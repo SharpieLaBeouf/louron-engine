@@ -20,6 +20,7 @@
 #include "Test Projects/Scene 12.h"
 #include "Test Projects/Scene 13.h"
 #include "Test Projects/Scene 14.h"
+#include "Test Projects/Scene 15.h"
 
 class MainMenuLayer : public Louron::Layer {
 public:

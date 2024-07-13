@@ -43,15 +43,15 @@ namespace Louron {
 			if (entity.HasComponent<Rigidbody>()) {
 
 				// Remove Collider from Previous Rigidbody
-				if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && *rb_ref)
-					rb_ref->DetachShape(collider.GetShape());
+				if (auto old_rb_ref = collider.GetShape()->GetRigidbody(); old_rb_ref && *old_rb_ref)
+					old_rb_ref->DetachShape(collider.GetShape());
 
 				// Update Colliders Reference to New Rigidbody
-				collider.GetShape()->UpdateRigidbody(entity.GetComponent<Rigidbody>().GetActor(), entity.GetUUID());
+				collider.UpdateRigidbody(entity.GetUUID());
 
 				// Attach the Collider to the New Rigidbody
-				if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && *rb_ref)
-					rb_ref->AttachShape(collider.GetShape(), entity.GetUUID());
+				if (auto new_rb_ref = collider.GetShape()->GetRigidbody(); new_rb_ref && *new_rb_ref)
+					new_rb_ref->AttachShape(collider.GetShape(), entity.GetUUID());
 
 				collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
 				collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
@@ -59,7 +59,29 @@ namespace Louron {
 			}
 		}
 
-		// 2. No Rigidbodies Found - Static Collider
+		// 2. Check Parent(s) for Rigidbody
+		if (collider.GetShape()->CheckFlag(ColliderFlag_RigidbodyUpdated)) {
+
+			if (auto rb_ref = collider.GetComponentInParent<Rigidbody>(); rb_ref && rb_ref->GetActor() && *rb_ref->GetActor()) {
+
+				// Remove Collider from Previous Rigidbody
+				if (auto old_rb_ref = collider.GetShape()->GetRigidbody(); old_rb_ref && *old_rb_ref)
+					old_rb_ref->DetachShape(collider.GetShape());
+
+				collider.UpdateRigidbody(rb_ref->entity->GetUUID());
+
+				// Attach the Collider to the New Rigidbody
+				if (auto new_rb_ref = collider.GetShape()->GetRigidbody(); new_rb_ref && *new_rb_ref)
+					new_rb_ref->AttachShape(collider.GetShape(), entity.GetUUID());
+
+				collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
+				collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
+				collider.GetShape()->ClearFlag(ColliderFlag_RigidbodyUpdated);
+			}
+
+		}
+
+		// 3. No Rigidbodies Found - Static Collider
 		// 
 		//    This is the fall through for if there is not a rigidbody attached to the 
 		//	  current entity
@@ -70,7 +92,7 @@ namespace Louron {
 			if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && *rb_ref)
 				rb_ref->DetachShape(collider.GetShape());
 
-			collider.GetShape()->CreateStaticRigidbody(entity.GetComponent<Transform>(), entity.GetScene()->GetPhysScene(), entity.GetUUID());
+			collider.CreateStaticRigidbody();
 
 			collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
 			collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
@@ -82,7 +104,7 @@ namespace Louron {
 			if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && *rb_ref)
 				rb_ref->AddFlag(RigidbodyFlag_TransformUpdated);
 
-			collider.UpdateTransform(entity.GetComponent<Transform>(), entity.GetScene()->FindEntityByUUID(collider.GetShape()->GetRigidbodyUUID()).GetComponent<Transform>());
+			collider.UpdateTransform(entity.GetComponent<Transform>(), entity.GetScene()->FindEntityByUUID(collider.GetRigidbodyUUID()).GetComponent<Transform>());
 		}
 
 		collider.GetShape()->ClearFlags();
@@ -98,29 +120,57 @@ namespace Louron {
 
 	Rigidbody& PhysicsSystem::AddRigidBody(Entity entity, Scene* scene) {
 
+		// We want to first update all flags of colliders within this entity 
+		// and it's children that do not have a rigidbody. If there is a child 
+		// of this entity that has a rigidbody, we won't update their children 
+		// as their children will refer to that rigidbody and that would be 
+		// unchanged for them
+		{
+			std::function<void(Entity)> update_child_collider_flags =
+
+			[&](Entity start_entity) -> void {
+
+				if (!start_entity.HasComponent<Rigidbody>()) {
+
+					// Check if current entity has a collider component, so we 
+					// can link the collider to this rigidbody.
+					if (start_entity.HasComponent<SphereCollider>()) {
+
+						auto& collider = entity.GetComponent<SphereCollider>();
+
+						collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+						collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
+						collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
+					}
+					if (start_entity.HasComponent<BoxCollider>()) {
+
+						auto& collider = entity.GetComponent<BoxCollider>();
+
+						collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+						collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
+						collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
+					}
+
+					if (start_entity.HasComponent<HierarchyComponent>()) {
+
+						for (const auto& child_uuid : start_entity.GetComponent<HierarchyComponent>().GetChildren()) {
+
+							update_child_collider_flags(start_entity.GetScene()->FindEntityByUUID(child_uuid));
+						}
+
+					}
+
+				}
+
+			};
+
+			update_child_collider_flags(entity);
+		}
+
 		Rigidbody& component = scene->m_Registry.emplace<Rigidbody>(entity, entity.GetComponent<Transform>(), scene->GetPhysScene());
 
 		component.GetActor()->AddFlag(RigidbodyFlag_ShapesUpdated);
 		component.GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
-
-		// Check if current entity has a collider component, so we 
-		// can link the collider to this rigidbody.
-		if (entity.HasComponent<SphereCollider>()) {
-
-			auto& collider = entity.GetComponent<SphereCollider>();
-			
-			collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-			collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
-			collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-		}
-		if (entity.HasComponent<BoxCollider>()) {
-
-			auto& collider = entity.GetComponent<BoxCollider>();
-
-			collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-			collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
-			collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-		}
 
 		return component;
 	}
@@ -135,24 +185,26 @@ namespace Louron {
 		}
 
 		// 1. Remove Shapes from Actor
-		for (auto it = component.GetActor()->m_ShapesRef.begin(); it != component.GetActor()->m_ShapesRef.end();) {
-			if (auto shape_ref = it->first.lock(); shape_ref) {
+		std::map<std::weak_ptr<PhysicsShape>, UUID, std::owner_less<>> shape_ref_vector = component.GetActor()->m_ShapesRef;
+		for (auto& shape_weak_ref : shape_ref_vector) {
 
-				Entity shape_entity = scene->FindEntityByUUID(it->second);
+			if (auto shape_ref = shape_weak_ref.first.lock(); shape_ref) {
+
+				Entity shape_entity = scene->FindEntityByUUID(shape_weak_ref.second);
+
+				if (!shape_entity)
+					continue;
+
 				if (shape_entity.HasComponent<SphereCollider>()) {
 
-					shape_entity.GetComponent<SphereCollider>().GetShape()->ResetRigidbody();
+					shape_entity.GetComponent<SphereCollider>().ResetRigidbody();
 					shape_entity.GetComponent<SphereCollider>().GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
 				}
 				if (shape_entity.HasComponent<BoxCollider>()) {
 
-					shape_entity.GetComponent<BoxCollider>().GetShape()->ResetRigidbody();
+					shape_entity.GetComponent<BoxCollider>().ResetRigidbody();
 					shape_entity.GetComponent<BoxCollider>().GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
 				}
-
-				++it; // Move to the next element
-
-				component.GetActor()->DetachShape(shape_ref);
 			}
 		}
 
@@ -230,12 +282,12 @@ namespace Louron {
 				rb_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
 
 				rb_ref->DetachShape(collider.GetShape());
-				collider.GetShape()->ResetRigidbody();
+				collider.ResetRigidbody();
 			}
 			else if (rb_ref && collider.GetShape()->IsStatic()) {
 
 				scene->GetPhysScene()->removeActor(*collider.GetShape()->GetRigidbody()->GetActor());
-				collider.GetShape()->ResetRigidbody();
+				collider.ResetRigidbody();
 			}
 
 			collider.Release();
@@ -258,12 +310,12 @@ namespace Louron {
 				rb_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
 
 				rb_ref->DetachShape(collider.GetShape());
-				collider.GetShape()->ResetRigidbody();
+				collider.ResetRigidbody();
 			}
 			else if (rb_ref && collider.GetShape()->IsStatic()) {
 
 				scene->GetPhysScene()->removeActor(*collider.GetShape()->GetRigidbody()->GetActor());
-				collider.GetShape()->ResetRigidbody();
+				collider.ResetRigidbody();
 			}
 
 			collider.Release();
@@ -302,7 +354,7 @@ namespace Louron {
 					rb_ref.m_DeferredTorque.clear();
 				}
 			}
-						
+									
 			physxScene->simulate(Time::GetUnscaledFixedDeltaTime());
 			physxScene->fetchResults(true);
 
@@ -370,22 +422,59 @@ namespace Louron {
 	void PhysicsSystem::UpdateSimulationChanges(std::shared_ptr<Scene> scene) {
 
 		// 1. Update Rigidbodies
-		auto view = scene->GetAllEntitiesWith<Transform, Rigidbody>();
-		if (view.begin() != view.end()) {
+		// When we have hierarchy relationships of objects that have physics components,
+		// the ordering of updating the GlobalPosition and GlobalRotation MATTERS! We 
+		// need to update the global positions of our entities root down. 
+		// 
+		// If we don't, sometimes child entities may set the global transform first 
+		// based off the parents OLD globaltransform, then when the parent updates
+		// the child's global position is then recalculated - THIS IS BAD!
+		// 
+		// Whoever other than myself who may be reading this, I was stuck on this for the
+		// better half of an entire day... This was honestly just a stab in the dark fix... 
+		//
+		// --------------------------------------------------------------------------------
+		//					alas, the hail mary thus brought fruit!
+		// --------------------------------------------------------------------------------
 
-			for (auto& entityHandle : view) {
+		auto root_view = scene->GetAllEntitiesWith<HierarchyComponent>();
+		std::vector<Entity> root_entities;
 
-				auto [transform, rigidbody] = view.get<Transform, Rigidbody>(entityHandle);
+		if (root_view.begin() != root_view.end()) {
+
+			for (auto& entity_handle : root_view) {
+				if (!root_view.get<HierarchyComponent>(entity_handle).HasParent()) {
+					root_entities.push_back(*root_view.get<HierarchyComponent>(entity_handle).entity);
+				}
+			}
+		}
+
+		std::function<void(Entity)> update_physics = [&](Entity start_entity) -> void {
+			
+			if(start_entity && start_entity.HasComponent<Rigidbody>()) {
+
+				auto& transform = start_entity.GetComponent<Transform>();
+				auto& rigidbody = start_entity.GetComponent<Rigidbody>();
 
 				PxTransform physics_transform = rigidbody.GetActor()->GetGlobalPose();
 				glm::quat quaternion(physics_transform.q.w, physics_transform.q.x, physics_transform.q.y, physics_transform.q.z);
-				glm::vec3 euler = glm::eulerAngles(quaternion);
+				glm::vec3 rotation = glm::degrees(glm::eulerAngles(quaternion));
 
-				transform.m_Position = { physics_transform.p.x, physics_transform.p.y, physics_transform.p.z };
-				transform.m_Rotation = glm::degrees(euler);
+				transform.SetGlobalPosition(glm::vec3(physics_transform.p.x, physics_transform.p.y, physics_transform.p.z));
+				transform.SetGlobalRotation(rotation);
 
-				transform.SetTransform(transform.GetLocalTransform());
 			}
+			for (auto& child_uuid : start_entity.GetComponent<HierarchyComponent>().GetChildren()) {
+
+				update_physics(scene->FindEntityByUUID(child_uuid));
+
+			}
+			
+		};
+
+		for (auto& entity : root_entities) {
+
+			update_physics(entity);
 
 		}
 	}

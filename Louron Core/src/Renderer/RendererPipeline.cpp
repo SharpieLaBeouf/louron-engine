@@ -494,7 +494,7 @@ namespace Louron {
 
 					auto [transform, point_light] = view.get<Transform, PointLightComponent>(entity);
 
-					point_light.position = glm::vec4(transform.GetPosition(), 1.0f);
+					point_light.position = glm::vec4(transform.GetGlobalPosition(), 1.0f);
 					point_light.lightProperties.lastLight = false;
 
 					pointLightVector.push_back(point_light);
@@ -531,7 +531,7 @@ namespace Louron {
 
 					auto [transform, spot_light] = view.get<Transform, SpotLightComponent>(entity);
 
-					spot_light.position = glm::vec4(transform.GetPosition(), 1.0f);
+					spot_light.position = glm::vec4(transform.GetGlobalPosition(), 1.0f);
 					spot_light.lastLight = false;
 
 					spotLightVector.push_back(spot_light);
@@ -569,7 +569,7 @@ namespace Louron {
 
 					directional_light.direction = glm::normalize(
 						glm::vec4(0.0f, 0.0f, -1.0f, 0.0f) *
-						glm::quat(glm::radians(transform.GetRotation())));
+						glm::quat(glm::radians(transform.GetGlobalRotation())));
 
 					directional_light.lastLight = false;
 
@@ -617,7 +617,7 @@ namespace Louron {
 		if (view.begin() != view.end()) {
 
 			
-			const glm::vec3& cam_position = camera->GetPosition();
+			const glm::vec3& cam_position = camera->GetGlobalPosition();
 
 			for (const auto& entity : view) {
 				const auto& [entityUUID, transform, meshRenderer, meshFilter] = view.get<IDComponent, Transform, MeshRenderer, MeshFilter>(entity);
@@ -625,7 +625,7 @@ namespace Louron {
 				if (!meshRenderer.active)
 					continue;
 
-				const glm::vec3& objectPosition = transform.GetPosition();
+				const glm::vec3& objectPosition = transform.GetGlobalPosition();
 				float distance = glm::length(objectPosition - cam_position);
 
 				sortedEntities.emplace_back(distance, entityUUID, transform, meshFilter);
@@ -642,8 +642,8 @@ namespace Louron {
 				shader->SetMat4("u_Proj", camera->GetProjMatrix());
 				shader->SetMat4("u_View", camera->GetViewMatrix());
 
-				for (const auto& [distance, entityUUID, transform, meshFilter] : sortedEntities) {
-					shader->SetMat4("u_Model", transform.GetTransform());
+				for (auto& [distance, entityUUID, transform, meshFilter] : sortedEntities) {
+					shader->SetMat4("u_Model", transform.GetGlobalTransform());
 					shader->SetUInt("u_EntityID", entityUUID.ID);
 
 					for (const auto& mesh : *meshFilter.Meshes)
@@ -757,7 +757,7 @@ namespace Louron {
 						material->GetShader()->SetBool("u_UseInstanceData", false);
 
 						Transform trans = meshAndTransform.second[0];
-						material->GetShader()->SetMat4("u_VertexIn.Model", trans.GetTransform());
+						material->GetShader()->SetMat4("u_VertexIn.Model", trans.GetGlobalTransform());
 						Renderer::DrawMesh(meshAndTransform.first);
 					}
 					// IF multiple of the same mesh, draw them using instancing

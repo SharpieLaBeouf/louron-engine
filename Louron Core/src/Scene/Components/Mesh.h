@@ -59,7 +59,7 @@ namespace Louron {
 
 		void LinkMeshRenderer(const std::shared_ptr<MeshRenderer>& meshRenderer);
 
-		void ManualDraw(const MeshFilter& meshFilter, const Camera& camera, const Transform& transform);
+		void ManualDraw(const MeshFilter& meshFilter, const Camera& camera, Transform& transform) const;
 
 		void SetPath(const std::string& filePath);
 		std::string GetPath() const;

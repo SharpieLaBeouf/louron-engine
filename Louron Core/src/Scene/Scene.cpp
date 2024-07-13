@@ -15,7 +15,6 @@
 #include "Components/Physics/Rigidbody.h"
 #include "Components/Physics/PhysicsWrappers.h"
 
-#include "Scene Systems/Transform System.h"
 #include "Scene Systems/Physics System.h"
 
 #include "../Debug/Profiler.h"
@@ -262,6 +261,9 @@ namespace Louron {
 		auto& tag = entity.AddComponent<TagComponent>();
 		tag.Tag = name.empty() ? "Untitled Entity" : name;
 
+		// 4. Add Hierarchy Component
+		entity.AddComponent<HierarchyComponent>();
+
 		m_EntityMap->emplace(uuid, entity);
 
 		return entity;
@@ -375,8 +377,6 @@ namespace Louron {
 	void Scene::OnUpdate() {
 
 		if (!m_IsPaused && m_IsRunning) {
-
-			TransformSystem::Update(shared_from_this());
 
 			PhysicsSystem::UpdatePhysicsObjects(shared_from_this());
 

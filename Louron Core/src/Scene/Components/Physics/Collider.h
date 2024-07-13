@@ -41,6 +41,13 @@ namespace Louron {
         // reallocated or suddenly becomes null! 
         UUID m_EntityUUID;
 
+        // We hold the UUID of the parent that our collider is attached to.
+        UUID m_RigidbodyUUID = NULL_UUID;
+
+        void CreateStaticRigidbody();
+        void UpdateRigidbody(const UUID& rigidbodyEntityUUID);
+        void ResetRigidbody();
+
     public:
 
         SphereCollider();
@@ -50,8 +57,9 @@ namespace Louron {
         void SetColliderUserData(const UUID& uuid);
         // Setter functions for callbacks
         void SetOnCollideCallback(const std::function<void(Entity&, Entity&)>& callback) { OnCollideCallback = callback; }
-
         void SetOnTriggerCallback(const std::function<void(Entity&, Entity&)>& callback) { OnTriggerCallback = callback; }
+
+        const UUID& GetRigidbodyUUID() const { return m_RigidbodyUUID; }
 
         void Release();
 
@@ -73,6 +81,7 @@ namespace Louron {
         void SetCentre(const glm::vec3& centre);
         void SetRadius(float radius);
 
+
     private:
 
         friend class Scene;
@@ -80,6 +89,11 @@ namespace Louron {
         friend class PhysicsSystem;
         friend class TransformSystem;
         friend class CollisionCallback;
+
+        friend struct HierarchyComponent;
+
+        template<typename ColliderType>
+        friend void ProcessColliderChanges(Entity& entity);
 
     };
 
@@ -102,6 +116,13 @@ namespace Louron {
         // reallocated or suddenly becomes null! 
         UUID m_EntityUUID; 
 
+        // We hold the UUID of the parent that our collider is attached to.
+        UUID m_RigidbodyUUID = NULL_UUID;
+
+        void CreateStaticRigidbody();
+        void UpdateRigidbody(const UUID& rigidbodyEntityUUID);
+        void ResetRigidbody();
+
     public:
 
         BoxCollider();
@@ -109,6 +130,11 @@ namespace Louron {
         ~BoxCollider();
 
         void SetColliderUserData(const UUID& uuid);
+        // Setter functions for callbacks
+        void SetOnCollideCallback(const std::function<void(Entity&, Entity&)>& callback) { OnCollideCallback = callback; }
+        void SetOnTriggerCallback(const std::function<void(Entity&, Entity&)>& callback) { OnTriggerCallback = callback; }
+
+        const UUID& GetRigidbodyUUID() const { return m_RigidbodyUUID; }
 
         void Release();
 
@@ -138,6 +164,10 @@ namespace Louron {
         friend class TransformSystem;
         friend class CollisionCallback;
 
+        friend struct HierarchyComponent;
+
+        template<typename ColliderType>
+        friend void ProcessColliderChanges(Entity& entity);
     };
 
  

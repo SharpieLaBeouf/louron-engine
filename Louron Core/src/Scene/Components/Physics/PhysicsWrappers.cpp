@@ -60,7 +60,7 @@ namespace Louron {
         }
     }
 
-    void RigidDynamic::AttachShape(std::shared_ptr<PhysicsShape> shape, const UUID& shapeEntityUUID) {
+    bool RigidDynamic::AttachShape(std::shared_ptr<PhysicsShape> shape, const UUID& shapeEntityUUID) {
 
         if(shape && *shape) {
             if (!IsShapeAttached(shape)) {
@@ -70,10 +70,12 @@ namespace Louron {
                     m_Actor->attachShape(*shape->GetShape());
                     AddFlag(RigidbodyFlag_ShapesUpdated);
                     L_CORE_INFO("Shape Attached to Rigidbody Successfully.");
+                    return true;
 
                 } else  L_CORE_ERROR("Attempted to Attach Shape - Actor is Invalid.");
             } else      L_CORE_WARN ("Attempted to Attach Shape - Shape Already Attached.");
         } else          L_CORE_ERROR("Attempted to Attach Shape - Shape is Invalid.");
+        return false;
     }
 
     void RigidDynamic::DetachShape(std::shared_ptr<PhysicsShape> shape) {
@@ -183,8 +185,8 @@ namespace Louron {
 
     void RigidDynamic::SetGlobalPose(Transform& transform) {
         if (m_Actor) {
-            glm::vec3 position = transform.GetPosition();
-            glm::quat quaternion = glm::quat(glm::radians(transform.GetRotation()));
+            glm::vec3 position = transform.GetGlobalPosition();
+            glm::quat quaternion = glm::quat(glm::radians(transform.GetGlobalRotation()));
             m_Actor->setGlobalPose(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
         }
         else {
@@ -428,7 +430,7 @@ namespace Louron {
 
     #pragma region Constructors and Class Setup
 
-    PhysicsShape::PhysicsShape(const PxGeometry& geometry, const PxMaterial& material, bool isExclusive, PxShapeFlags shapeFlags) : 
+    PhysicsShape::PhysicsShape(const PxGeometry& geometry, const PxMaterial& material, bool isExclusive, PxShapeFlags shapeFlags) :
         m_Shape(PxGetPhysics().createShape(geometry, material, isExclusive, shapeFlags))
     {
         m_Shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
@@ -476,73 +478,18 @@ namespace Louron {
         }
     }
 
-    void PhysicsShape::CreateStaticRigidbody(Transform& transform, PxScene* scene, const UUID& entityUUID) {
-
-        this->ResetRigidbody();
-
-        const glm::vec3& position = transform.GetPosition();
-        const glm::quat& quaternion = glm::quat(glm::radians(transform.GetRotation()));
-
-        m_StaticBody = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
-       
-        m_StaticBody->GetActor()->attachShape(*m_Shape);
-        
-        m_StaticBody->SetKinematic(true);
-        
-        PxRigidBodyExt::updateMassAndInertia(*m_StaticBody->GetActor(), 1.0f);
-        scene->addActor(*m_StaticBody->GetActor());
-
-        AddFlag(ColliderFlag_TransformUpdated);
-        AddFlag(ColliderFlag_ShapePropsUpdated);
-
-        m_RigidbodyRef = m_StaticBody;
-        m_RigidbodyUUID = entityUUID;
-
-    }
-
-    /// <summary>
-    /// Updates the weak_ptr reference to the RigidDynamic, and the Rigidbody entity UUID.
-    /// </summary>
-    void PhysicsShape::UpdateRigidbody(std::shared_ptr<RigidDynamic> rigidbody, const UUID& rigidbodyEntityUUID) {
-        if (rigidbody && *rigidbody) {
-            this->ResetRigidbody();
-            m_RigidbodyRef = rigidbody;
-            m_RigidbodyUUID = rigidbodyEntityUUID;
-
-            L_CORE_INFO("Successfully Updated Rigidbody Reference in Physics Shape.");
-            return;
-        }
-        L_CORE_ERROR("Attempted to Update Rigidbody - New Rigidbody Reference Invalid.");
-    }
-
-    /// <summary>
-    /// Reset the weak_ptr to the RigidDynamic and the Rigidbody entity UUID.
-    /// </summary>
-    void PhysicsShape::ResetRigidbody() { 
-        m_RigidbodyRef.reset();
-        m_RigidbodyUUID = NULL_UUID;
-       
-        if (m_StaticBody && *m_StaticBody) {
-            m_StaticBody->GetActor()->detachShape(*m_Shape);
-            m_StaticBody->Release();
-            m_StaticBody = nullptr;
-        }
-    }
+    bool PhysicsShape::IsStatic() const { return (m_StaticBody && *m_StaticBody) ? true : false; }
 
     std::shared_ptr<RigidDynamic> PhysicsShape::GetRigidbody() {
-        
+
         if (m_StaticBody && *m_StaticBody)
             return m_StaticBody;
 
-        if(auto rb_ref = m_RigidbodyRef.lock(); rb_ref && *rb_ref)
+        if (auto rb_ref = m_RigidbodyRef.lock(); rb_ref && *rb_ref)
             return rb_ref;
 
         return nullptr;
     }
-
-    const UUID& PhysicsShape::GetRigidbodyUUID() { return m_RigidbodyUUID; }
-
-    bool PhysicsShape::IsStatic() const { return (m_StaticBody && *m_StaticBody) ? true : false; }
 
     #pragma endregion
 

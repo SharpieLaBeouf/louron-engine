@@ -97,12 +97,12 @@ namespace Louron {
 	/// means that no lighting will affect this model. If you attempt to ManualDraw an object
 	/// that has been loaded into the Scene, this will result in undefined behaviour.
 	/// </summary>
-	void MeshRenderer::ManualDraw(const MeshFilter& meshFilter, const Camera& camera, const Transform& transform) {
+	void MeshRenderer::ManualDraw(const MeshFilter& meshFilter, const Camera& camera, Transform& transform) const {
 
 		for (const auto& material : (*Materials)) {
 			if (material.second->Bind()) {
 				material.second->UpdateUniforms(camera);
-				material.second->GetShader()->SetMat4("u_VertexIn.Model", transform.GetTransform());
+				material.second->GetShader()->SetMat4("u_VertexIn.Model", transform.GetGlobalTransform());
 
 				for (const auto& mesh : (*meshFilter.Meshes)) 
 					if (mesh->MaterialIndex == material.first) 

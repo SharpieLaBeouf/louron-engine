@@ -275,7 +275,7 @@ private:
 
 		m_Ball->velocity = { m_Ball->speed, 0.0f };
 		m_Ball->transform.SetPosition(glm::vec3(0.0f));
-		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
+		m_Light.position = glm::vec3(m_Ball->transform.GetGlobalPosition().x, 1.0f, m_Ball->transform.GetGlobalPosition().z);
 		
 		for (auto& paddle : m_Paddles) 
 			paddle->transform.SetPositionX(0.0f);
@@ -318,15 +318,15 @@ private:
 
 	bool CheckPaddleCollision(const std::unique_ptr<Paddle>& paddle) {
 
-		float ballLeft		= m_Ball->transform.GetPosition().z - m_Ball->transform.GetScale().z / 2;
-		float ballRight		= m_Ball->transform.GetPosition().z + m_Ball->transform.GetScale().z / 2;
-		float ballTop		= m_Ball->transform.GetPosition().x - m_Ball->transform.GetScale().x / 2;
-		float ballBottom	= m_Ball->transform.GetPosition().x + m_Ball->transform.GetScale().x / 2;
+		float ballLeft		= m_Ball->transform.GetGlobalPosition().z - m_Ball->transform.GetGlobalScale().z / 2;
+		float ballRight		= m_Ball->transform.GetGlobalPosition().z + m_Ball->transform.GetGlobalScale().z / 2;
+		float ballTop		= m_Ball->transform.GetGlobalPosition().x - m_Ball->transform.GetGlobalScale().x / 2;
+		float ballBottom	= m_Ball->transform.GetGlobalPosition().x + m_Ball->transform.GetGlobalScale().x / 2;
 																				
-		float paddleLeft	= paddle->transform.GetPosition().z - paddle->transform.GetScale().z / 2;
-		float paddleRight	= paddle->transform.GetPosition().z + paddle->transform.GetScale().z / 2;
-		float paddleTop		= paddle->transform.GetPosition().x - paddle->transform.GetScale().x / 2;
-		float paddleBottom	= paddle->transform.GetPosition().x + paddle->transform.GetScale().x / 2;
+		float paddleLeft	= paddle->transform.GetGlobalPosition().z - paddle->transform.GetGlobalScale().z / 2;
+		float paddleRight	= paddle->transform.GetGlobalPosition().z + paddle->transform.GetGlobalScale().z / 2;
+		float paddleTop		= paddle->transform.GetGlobalPosition().x - paddle->transform.GetGlobalScale().x / 2;
+		float paddleBottom	= paddle->transform.GetGlobalPosition().x + paddle->transform.GetGlobalScale().x / 2;
 
 		if (ballLeft >= paddleRight)
 		{
@@ -375,15 +375,15 @@ private:
 		rayWorld = glm::normalize(glm::vec4(rayWorld.x, rayWorld.y, rayWorld.z, 0.0f));
 
 		// 6. Calculate the intersection point in world coordinates (Cast Ray and Calculate Position at Custom Intersection on the Y Axis)
-		float t = (0.0f - m_SceneCamera.GetPosition().y) / rayWorld.y;
-		glm::vec3 boundaryLeftTop = m_SceneCamera.GetPosition() + glm::vec3(rayWorld * t);
+		float t = (0.0f - m_SceneCamera.GetGlobalPosition().y) / rayWorld.y;
+		glm::vec3 boundaryLeftTop = m_SceneCamera.GetGlobalPosition() + glm::vec3(rayWorld * t);
 		glm::vec3 boundaryRightBottom = -boundaryLeftTop;
 
 		// Define Ball Boundaries
-		float ballLeft		= m_Ball->transform.GetPosition().z - m_Ball->transform.GetScale().z / 2;
-		float ballRight		= m_Ball->transform.GetPosition().z + m_Ball->transform.GetScale().z / 2;
-		float ballTop		= m_Ball->transform.GetPosition().x - m_Ball->transform.GetScale().x / 2;
-		float ballBottom	= m_Ball->transform.GetPosition().x + m_Ball->transform.GetScale().x / 2;
+		float ballLeft		= m_Ball->transform.GetGlobalPosition().z - m_Ball->transform.GetGlobalScale().z / 2;
+		float ballRight		= m_Ball->transform.GetGlobalPosition().z + m_Ball->transform.GetGlobalScale().z / 2;
+		float ballTop		= m_Ball->transform.GetGlobalPosition().x - m_Ball->transform.GetGlobalScale().x / 2;
+		float ballBottom	= m_Ball->transform.GetGlobalPosition().x + m_Ball->transform.GetGlobalScale().x / 2;
 
 		if (ballRight >= boundaryRightBottom.z)
 		{
@@ -413,7 +413,7 @@ private:
 		m_Ball->transform.TranslateZ(Time::GetDeltaTime() * m_Ball->velocity.x);
 		m_Ball->transform.TranslateX(Time::GetDeltaTime() * m_Ball->velocity.y);
 
-		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
+		m_Light.position = glm::vec3(m_Ball->transform.GetGlobalPosition().x, 1.0f, m_Ball->transform.GetGlobalPosition().z);
 	}
 
 	void ProcessPaddleMovement() {
@@ -443,7 +443,7 @@ private:
 		// Reset Ball, Light, and Paddles
 		m_Ball->velocity = { m_Ball->speed, 0.0f };
 		m_Ball->transform.SetPosition(glm::vec3(0.0f));
-		m_Light.position = glm::vec3(m_Ball->transform.GetPosition().x, 1.0f, m_Ball->transform.GetPosition().z);
+		m_Light.position = glm::vec3(m_Ball->transform.GetGlobalPosition().x, 1.0f, m_Ball->transform.GetGlobalPosition().z);
 		for (auto& paddle : m_Paddles) {
 			paddle->transform.SetPositionX(0.0f);
 			paddle->score = 0;

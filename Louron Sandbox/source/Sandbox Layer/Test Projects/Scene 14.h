@@ -45,8 +45,8 @@ public:
 			ball[0].ball = m_Scene->FindEntityByName("Ball1");
 			ball[1].ball = m_Scene->FindEntityByName("Ball2");
 
-			ball[0].starting_position = ball[0].ball.GetComponent<Transform>().GetPosition();
-			ball[1].starting_position = ball[1].ball.GetComponent<Transform>().GetPosition();
+			ball[0].starting_position = ball[0].ball.GetComponent<Transform>().GetGlobalPosition();
+			ball[1].starting_position = ball[1].ball.GetComponent<Transform>().GetGlobalPosition();
 
 			auto customCollisionCallback = [&](Entity& self, Entity& other) -> void {
 
@@ -69,6 +69,7 @@ public:
 
 						self.GetComponent<Rigidbody>().ApplyForce(glm::vec3( direction.x, direction.y, direction.z ) * impulseMagnitude, PxForceMode::eFORCE);
 
+						Audio::Get().PlayAudioFile("assets/Audio/impact.mp3");
 
 					}
 
@@ -172,7 +173,7 @@ public:
 
 		// Update Camera Component
 		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->Update((float)Time::Get().GetDeltaTime());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->GetPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->GetGlobalPosition());
 
 		m_Scene->OnUpdate();
 	}
@@ -521,7 +522,7 @@ public:
 			if ((game_properties.current_map & (1U << i)) != 0) {
 
 				auto wall = m_Scene->FindEntityByName("Wall " + std::to_string(i));
-				if (wall && wall.GetComponent<Transform>().GetPosition().y < 51.85f) {
+				if (wall && wall.GetComponent<Transform>().GetGlobalPosition().y < 51.85f) {
 
 					wall.GetComponent<Transform>().TranslateY(translationIncrement);
 				}
@@ -530,7 +531,7 @@ public:
 			else {
 
 				auto wall = m_Scene->FindEntityByName("Wall " + std::to_string(i));
-				if (wall && wall.GetComponent<Transform>().GetPosition().y > 1.85f) {
+				if (wall && wall.GetComponent<Transform>().GetGlobalPosition().y > 1.85f) {
 
 					wall.GetComponent<Transform>().TranslateY(-translationIncrement);
 				}
@@ -597,8 +598,8 @@ public:
 
 		std::array<bool, 2> dead_ball
 		{ 
-			(ball[0].ball.GetComponent<Transform>().GetPosition().y <= DEAD_ZONE_FLOOR), 
-			(ball[1].ball.GetComponent<Transform>().GetPosition().y <= DEAD_ZONE_FLOOR) 
+			(ball[0].ball.GetComponent<Transform>().GetGlobalPosition().y <= DEAD_ZONE_FLOOR), 
+			(ball[1].ball.GetComponent<Transform>().GetGlobalPosition().y <= DEAD_ZONE_FLOOR) 
 		};
 
 		if (!dead_ball[0] && !dead_ball[1]) {
@@ -622,7 +623,7 @@ public:
 				// Flag winner and set rigidbody to kinematic
 				int winner_id = (i == 0) ? 1 : 0;
 				ball[winner_id].winner = true;
-				game_properties.lerp_start_pos = ball[winner_id].ball.GetComponent<Transform>().GetPosition();
+				game_properties.lerp_start_pos = ball[winner_id].ball.GetComponent<Transform>().GetGlobalPosition();
 				ball[winner_id].ball.GetComponent<Rigidbody>().SetKinematic(true);
 
 				// Change loser position and doom to everlasting falling in the world muahah

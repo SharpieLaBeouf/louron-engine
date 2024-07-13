@@ -50,7 +50,7 @@ namespace Louron {
 			if (&camera != nullptr) {
 				m_Shader->SetMat4("u_VertexIn.Proj", camera.GetProjMatrix());
 				m_Shader->SetMat4("u_VertexIn.View", camera.GetViewMatrix());
-				m_Shader->SetVec3("u_CameraPos", camera.GetPosition());
+				m_Shader->SetVec3("u_CameraPos", camera.GetGlobalPosition());
 			}
 		}
 		else {

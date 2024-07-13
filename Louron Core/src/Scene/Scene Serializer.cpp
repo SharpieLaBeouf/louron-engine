@@ -15,7 +15,6 @@
 #include "Components/Physics/PhysicsWrappers.h"
 
 #include "Scene Systems/Physics System.h"
-#include "Scene Systems/Transform System.h"
 
 #include "../Renderer/RendererPipeline.h"
 
@@ -204,7 +203,7 @@ namespace Louron {
 					out << YAML::Key << "MouseSensitivity" << YAML::Value << camera->MouseSensitivity;
 					out << YAML::Key << "MouseToggledOff" << YAML::Value << camera->MouseToggledOff;
 					
-					glm::vec3 v = camera->GetPosition();
+					glm::vec3 v = camera->GetGlobalPosition();
 					out << YAML::Key << "Position" << YAML::Value << YAML::Flow
 						<< YAML::BeginSeq
 						<< v.x
@@ -825,7 +824,6 @@ namespace Louron {
 					}
 				}
 			}
-			TransformSystem::Update(scene_ref);
 			PhysicsSystem::Update(scene_ref);
 			return true;
 		}

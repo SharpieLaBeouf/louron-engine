@@ -21,8 +21,8 @@ namespace Louron {
 			return;
 		}
 
-		glm::vec3 position = transform.GetPosition();
-		glm::quat quaternion = glm::quat(glm::radians(transform.GetRotation()));
+		glm::vec3 position = transform.GetGlobalPosition();
+		glm::quat quaternion = glm::quat(glm::radians(transform.GetGlobalRotation()));
 		m_RigidDynamic = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
 
 		if (!m_RigidDynamic && !*m_RigidDynamic) {

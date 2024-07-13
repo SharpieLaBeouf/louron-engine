@@ -146,7 +146,6 @@
     <ClCompile Include="src\Scene\Resource Manager.cpp" />
     <ClCompile Include="src\Scene\Scene Serializer.cpp" />
     <ClCompile Include="src\Scene\Scene Systems\Physics System.cpp" />
-    <ClCompile Include="src\Scene\Scene Systems\Transform System.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
     <ClCompile Include="src\OpenGL\Shader.cpp" />
     <ClCompile Include="src\OpenGL\Texture.cpp" />
@@ -1080,7 +1079,6 @@
     <ClInclude Include="src\Scene\Resource Manager.h" />
     <ClInclude Include="src\Scene\Scene Serializer.h" />
     <ClInclude Include="src\Scene\Scene Systems\Physics System.h" />
-    <ClInclude Include="src\Scene\Scene Systems\Transform System.h" />
     <ClInclude Include="src\Scene\Scene.h" />
     <ClInclude Include="src\Core\Input.h" />
     <ClInclude Include="src\OpenGL\Shader.h" />

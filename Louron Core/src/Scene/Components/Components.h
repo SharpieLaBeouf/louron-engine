@@ -12,6 +12,7 @@
 
 // External Vendor Library Headers
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 namespace Louron {
 
@@ -23,14 +24,12 @@ namespace Louron {
     /// Flags that are set to determine what state changes have occured
     /// each frame so the TransformSystem may process these changes.
     /// </summary>
-    enum TransformFlags : uint32_t {
+    enum TransformFlags : uint8_t {
 
-        TransformFlag_None              = 0,        
+        TransformFlag_None                      = 0,        
 
-        TransformFlag_PositionUpdated   = 1U << 0,  // Only add this flag where there have been changes made to the entities position
-        TransformFlag_RotationUpdated   = 1U << 1,  // Only add this flag where there have been changes made to the entities rotation
-        TransformFlag_ScaleUpdated      = 1U << 2,  // Only add this flag where there have been changes made to the entities scale
-
+        TransformFlag_PropertiesUpdated         = 1U << 0,  // Only add this flag where there have been changes made to the transform proprties
+        TransformFlag_GlobalTransformUpdated    = 1U << 1,  // Only add this flag where there have been changes made to a parent in the hierarchy
     };
 
     struct Component {
@@ -40,10 +39,20 @@ namespace Louron {
         std::shared_ptr<Entity> entity;
 
         template<typename T>
-        T& GetComponent();
+        T* GetComponent();
 
         template<typename T>
-        std::vector<T&> GetComponents();
+        T* GetComponentInParent();
+
+        template<typename T>
+        std::vector<T*> GetComponentsInParent();
+
+        template<typename T>
+        T* GetComponentInChildren();
+
+        template<typename T>
+        std::vector<T*> GetComponentsInChildren();
+
     };
 
     struct IDComponent : public Component {
@@ -62,6 +71,35 @@ namespace Louron {
 		TagComponent(const TagComponent&) = default;
 		TagComponent(const std::string& name) : Tag(name) { }
 	};
+
+    struct HierarchyComponent : public Component {
+
+    public:
+
+        HierarchyComponent() = default;
+        HierarchyComponent(const HierarchyComponent&) = default;
+
+        void AttachParent(const UUID& newParentID);
+        void DetachParent();
+
+        void DetachChildren();
+        void RehomeChildren(const UUID& newParentID);
+
+        Entity FindChild(const UUID& childUUID) const;
+        Entity FindChild(const std::string& childName) const;
+        const std::vector<UUID>& GetChildren() const;
+
+        Entity GetParentEntity() const;
+        const UUID& GetParentID() const;
+        bool HasParent() const;
+
+    private:
+
+        UUID m_Parent = NULL_UUID;
+        std::vector<UUID> m_Children;
+
+    };
+
 
     enum CameraClearFlags {
         COLOUR_ONLY = 0,
@@ -82,7 +120,7 @@ namespace Louron {
     // TODO: Implement Audio Components
 
     struct AudioListener : public Component {
-        int i = 0;
+
     };
 
     struct AudioEmitter : public Component {
@@ -95,11 +133,14 @@ namespace Louron {
 		glm::vec3 m_Position = glm::vec3(0.0f);
 		glm::vec3 m_Rotation = glm::vec3(0.0f);
 		glm::vec3 m_Scale = glm::vec3(1.0f);
-		glm::mat4 m_Transform = glm::mat4(1.0f);
 
-        std::optional<glm::mat4> m_WorldTransform = std::nullopt;
+		glm::mat4 m_LocalTransform = glm::mat4(1.0f);
+        glm::mat4 m_GlobalTransform = glm::mat4(1.0f);
 
         TransformFlags m_StateFlags = TransformFlag_None;
+
+        void OnTransformUpdated();
+        void UpdateLocalTransformMatrix();
 
     public:
 
@@ -116,16 +157,19 @@ namespace Louron {
         TransformFlags GetFlags() const;
 
         void SetPosition(const glm::vec3& newPosition);
+        void SetGlobalPosition(const glm::vec3& newPosition);
         void SetPositionX(const float& newXPosition);
         void SetPositionY(const float& newYPosition);
         void SetPositionZ(const float& newZPosition);
 
         void SetRotation(const glm::vec3& newRotation);
+        void SetGlobalRotation(const glm::vec3& newRotation);
         void SetRotationX(const float& newXRotation);
         void SetRotationY(const float& newYRotation);
         void SetRotationZ(const float& newZRotation);
 
         void SetScale(const glm::vec3& newScale);
+        void SetGlobalScale(const glm::vec3& newScale);
         void SetScaleX(const float& newXScale);
         void SetScaleY(const float& newYScale);
         void SetScaleZ(const float& newZScale);
@@ -145,16 +189,16 @@ namespace Louron {
         void ScaleY(const float& deltaScaleY);
         void ScaleZ(const float& deltaScaleZ);
 
-        glm::vec3 GetPosition();
-        glm::vec3 GetRotation();
-        glm::vec3 GetScale();
+        glm::vec3 GetGlobalPosition();
+        glm::vec3 GetGlobalRotation();
+        glm::vec3 GetGlobalScale();
 
-        const glm::vec3& GetLocalPosition();
-        const glm::vec3& GetLocalRotation();
-        const glm::vec3& GetLocalScale();
+        const glm::vec3& GetLocalPosition() const;
+        const glm::vec3& GetLocalRotation() const;
+        const glm::vec3& GetLocalScale() const;
 
-        glm::mat4 GetTransform() const;
-        glm::mat4 GetLocalTransform() const;
+        const glm::mat4& GetGlobalTransform();
+        const glm::mat4& GetLocalTransform();
 
         void SetTransform(const glm::mat4& transform);
 
@@ -167,6 +211,8 @@ namespace Louron {
         friend class SceneSerializer;
         friend class TransformSystem;
         friend class PhysicsSystem;
+
+        friend struct HierarchyComponent;
 
 	};
 
@@ -191,6 +237,7 @@ namespace Louron {
 
         IDComponent,
         TagComponent,
+        HierarchyComponent,
 
         CameraComponent,
 

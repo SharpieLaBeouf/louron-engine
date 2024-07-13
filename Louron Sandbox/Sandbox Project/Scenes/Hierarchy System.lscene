@@ -2,7 +2,7 @@ Scene Name: Knerpix
 Scene Asset Directory: Sandbox Project/Assets/
 Scene Pipeline Type: 1
 Entities:
-  - Entity: 10710177306750850952
+  - Entity: 1
     TagComponent:
       Tag: Ball2
     TransformComponent:
@@ -26,7 +26,7 @@ Entities:
       Radius: 0.5
       Centre: [0, 0, 0]
       MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 10710177306750850954
+  - Entity: 2
     TagComponent:
       Tag: Ball1
     TransformComponent:
@@ -50,7 +50,7 @@ Entities:
       Radius: 0.5
       Centre: [0, 0, 0]
       MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 3990945305622428106
+  - Entity: 3
     TagComponent:
       Tag: Floor
     TransformComponent:
@@ -65,7 +65,7 @@ Entities:
       Centre: [0, 0, 0]
       Size: [1, 1, 1]
       MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 4878922203616022990
+  - Entity: 4
     TagComponent:
       Tag: Main Camera
     TransformComponent:
@@ -87,7 +87,7 @@ Entities:
       ClearFlag: 1
     SkyboxComponent:
       MaterialFilePath: Kloppenheim Skybox/Kloppenheim Skybox.lmaterial
-  - Entity: 5332423492089262043
+  - Entity: 5
     TagComponent:
       Tag: Directional Light
     TransformComponent:

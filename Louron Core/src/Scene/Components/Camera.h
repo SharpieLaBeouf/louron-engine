@@ -45,7 +45,7 @@ namespace Louron {
 		glm::vec3 GetCameraDirection() const { return m_CameraFront; }
 
 		void SetPosition(glm::vec3 pos) { m_CameraPos = pos; }
-		glm::vec3 GetPosition() const { return m_CameraPos; }
+		glm::vec3 GetGlobalPosition() const { return m_CameraPos; }
 
 		void SetPitch(float pitch) { m_Pitch = pitch; }
 		float GetPitch() const { return m_Pitch; }

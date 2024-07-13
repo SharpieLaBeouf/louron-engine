@@ -159,9 +159,6 @@
     <ClCompile Include="src\Scene\Scene Systems\Physics System.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Scene\Scene Systems\Transform System.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Scene\Components\Physics\Collider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -2970,9 +2967,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\yaml-cpp\yaml.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Scene\Scene Systems\Transform System.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Scene\Scene Systems\Physics System.h">

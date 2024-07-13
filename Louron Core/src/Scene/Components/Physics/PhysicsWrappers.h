@@ -23,7 +23,7 @@ namespace Louron {
 	/// Flags that are set to determine what state changes have occured
 	/// each frame so the PhysicsSystem may process these changes.
 	/// </summary>
-	enum RigidbodyFlags : uint32_t {
+	enum RigidbodyFlags : uint8_t {
 
 		RigidbodyFlag_None				= 0,
 
@@ -36,7 +36,7 @@ namespace Louron {
 	/// Flags that are set to determine what state changes have occured
 	/// each frame so the PhysicsSystem may process these changes.
 	/// </summary>
-	enum ColliderFlags : uint32_t {
+	enum ColliderFlags : uint8_t {
 
 		ColliderFlag_None				= 0,
 
@@ -71,7 +71,7 @@ namespace Louron {
 		PxRigidDynamic* GetActor() const;
 		void Release();
 
-		void AttachShape(std::shared_ptr<PhysicsShape> shape, const UUID& shapeEntityUUID);
+		bool AttachShape(std::shared_ptr<PhysicsShape> shape, const UUID& shapeEntityUUID);
 		void DetachShape(std::shared_ptr<PhysicsShape> shape);
 		bool IsShapeAttached(std::shared_ptr<PhysicsShape> shape);
 
@@ -164,7 +164,6 @@ namespace Louron {
 
 		std::shared_ptr<RigidDynamic> m_StaticBody = nullptr; // This is only used when there are no other Rigidbodies to attach to.
 		std::weak_ptr<RigidDynamic> m_RigidbodyRef;
-		UUID m_RigidbodyUUID = NULL_UUID;
 
 		ColliderFlags m_StateFlags = ColliderFlag_None;
 
@@ -183,13 +182,8 @@ namespace Louron {
 		PxShape* GetShape() const;
 		void Release();
 
-		void CreateStaticRigidbody(Transform& transform, PxScene* scene, const UUID& entityUUID);
-		void UpdateRigidbody(std::shared_ptr<RigidDynamic> rigidbody, const UUID& rigidbodyEntityUUID);
-		void ResetRigidbody();
-		std::shared_ptr<RigidDynamic> GetRigidbody();
-		const UUID& GetRigidbodyUUID();
-
 		bool IsStatic() const;
+		std::shared_ptr<RigidDynamic> GetRigidbody();
 
 		// FLAGS
 		void AddFlag(ColliderFlags flag);
@@ -221,5 +215,9 @@ namespace Louron {
 
 		#pragma endregion
 
+	private:
+
+		friend struct SphereCollider;
+		friend struct BoxCollider;
 	};
 }

@@ -20,6 +20,7 @@ void MainMenuLayer::OnAttach() {
 	m_Scenes.push_back(std::make_unique<Scene12>());
 	m_Scenes.push_back(std::make_unique<Scene13>());
 	m_Scenes.push_back(std::make_unique<Scene14>());
+	m_Scenes.push_back(std::make_unique<Scene15>());
 
 	Louron::Engine::Get().GetWindow().SetVSync(false);
 }
@@ -154,6 +155,12 @@ void MainMenuLayer::OnGuiRender() {
 			if (ImGui::Button(" 14. Knerpix Remake        ")) {
 				L_APP_INFO("Menu Item 14 Pressed");
 				m_SceneSelector = 14;
+				m_Scenes[m_SceneSelector - 1]->OnAttach();
+			}
+
+			if (ImGui::Button(" 15. Hierarchy System      ")) {
+				L_APP_INFO("Menu Item 15 Pressed");
+				m_SceneSelector = 15;
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
 			}
 		}
