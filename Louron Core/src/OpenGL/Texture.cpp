@@ -18,10 +18,9 @@ namespace Louron {
 
 	Texture::Texture() {
 
-		m_Name = "blank_texture";
 		m_Size = { 1,1 };
 
-		GLubyte data[] = { 255, 255, 255, 255 };
+		GLubyte texture_data[] = { 255, 255, 255, 255 };
 
 		glGenTextures(1, &m_TextureId);
 		glBindTexture(GL_TEXTURE_2D, m_TextureId);
@@ -31,7 +30,22 @@ namespace Louron {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Size.x, m_Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+	}
+
+	Texture::Texture(GLubyte* texture_data, glm::ivec2 texture_size) {
+
+		m_Size = texture_size;
+
+		glGenTextures(1, &m_TextureId);
+		glBindTexture(GL_TEXTURE_2D, m_TextureId);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Size.x, m_Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
 	}
 
 	Texture::Texture(const std::string& textureName, int textureWidth, int textureHeight) {
@@ -144,8 +158,19 @@ namespace Louron {
 	}
 
 	TextureLibrary::TextureLibrary() {
-		std::shared_ptr<Texture> blankTex = std::make_shared<Texture>();
-		m_Textures[blankTex->GetName()] = blankTex;
+
+		GLubyte texture_data[] = { 255, 255, 255, 255 };
+		std::shared_ptr<Texture> default_texture = std::make_shared<Texture>(texture_data, glm::ivec2{ 1, 1 });
+		default_texture->SetName("Default_Texture");
+
+		texture_data[0] = 128;
+		texture_data[1] = 128;
+
+		std::shared_ptr<Texture> default_normal_texture = std::make_shared<Texture>(texture_data, glm::ivec2{ 1, 1 });
+		default_normal_texture->SetName("Default_Normal_Texture");
+
+		m_Textures[default_texture->GetName()] = default_texture;
+		m_Textures[default_normal_texture->GetName()] = default_normal_texture;
 	}
 
 	void TextureLibrary::Add(std::shared_ptr<Texture> texture) {
@@ -153,7 +178,7 @@ namespace Louron {
 	}
 
 	void TextureLibrary::Add(const std::string& textureName, std::shared_ptr<Texture> texture) {
-		if (textureExists(textureName)) {
+		if (TextureExists(textureName)) {
 			L_CORE_INFO("Texture Already Loaded: {0}", textureName);
 		}
 		else {
@@ -170,7 +195,7 @@ namespace Louron {
 		auto count = lastDot == std::string::npos ? texture_name.size() - lastSlash : lastDot - lastSlash;
 		texture_name = texture_name.substr(lastSlash, count);
 
-		if (textureExists(texture_name)) {
+		if (TextureExists(texture_name)) {
 			L_CORE_INFO("Texture Already Loaded: {0}", texture_name);
 			return GetTexture(texture_name);
 		}
@@ -182,7 +207,7 @@ namespace Louron {
 
 	std::shared_ptr<Texture> TextureLibrary::LoadTexture(const std::string& textureFile, const std::string& textureName) {
 
-		if (textureExists(textureName)) {
+		if (TextureExists(textureName)) {
 			L_CORE_INFO("Texture Already Loaded: {0}", textureName);
 			return GetTexture(textureName);
 		}
@@ -193,14 +218,22 @@ namespace Louron {
 	}
 
 	std::shared_ptr<Texture> TextureLibrary::GetTexture(const std::string& textureName) {
-		if (!textureExists(textureName))
+		if (!TextureExists(textureName))
 			L_CORE_WARN("Texture Not Loaded: {0}", textureName);
 		else
 			return m_Textures[textureName];
 		return nullptr;
 	}
 
-	bool TextureLibrary::textureExists(const std::string& name) const {
+	std::shared_ptr<Texture> TextureLibrary::GetDefaultTexture() {
+		return GetTexture("Default_Texture");
+	}
+
+	std::shared_ptr<Texture> TextureLibrary::GetDefaultNormalTexture() {
+		return GetTexture("Default_Normal_Texture");
+	}
+
+	bool TextureLibrary::TextureExists(const std::string& name) const {
 		return m_Textures.find(name) != m_Textures.end();
 	}
 

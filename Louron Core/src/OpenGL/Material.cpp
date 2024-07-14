@@ -13,6 +13,8 @@
 
 namespace Louron {
 
+#pragma region Base Class Material
+
 	GLboolean Material::Bind() {
 		if (m_Shader) {
 			m_Shader->Bind();
@@ -21,6 +23,7 @@ namespace Louron {
 		L_CORE_ERROR("Shader Not Found for Material: {0}", GetName());
 		return GL_FALSE;
 	}
+
 	void Material::UnBind() {
 
 		for (int i = 0; i < m_Textures.size(); i++) {
@@ -65,8 +68,8 @@ namespace Louron {
 		m_Textures[textureType] = texture; 
 	}
 
-	std::shared_ptr<Shader>& Material::GetShader() {
-		return m_Shader; 
+	Shader* Material::GetShader() {
+		return m_Shader.get(); 
 	}
 
 	/// <summary>
@@ -74,7 +77,7 @@ namespace Louron {
 	/// </summary>
 	Material::Material() : m_Shader(Engine::Get().GetShaderLibrary().GetShader("Default Shader")) {
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
-			m_Textures[i] = Engine::Get().GetTextureLibrary().GetTexture("blank_texture");
+			m_Textures[i] = Engine::Get().GetTextureLibrary().GetDefaultTexture();
 	}
 
 	/// <summary>
@@ -84,7 +87,7 @@ namespace Louron {
 	/// <param name="shader"></param>
 	Material::Material(const std::string& name, std::shared_ptr<Shader> shader) : m_Name(name), m_Shader(shader) {
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
-			m_Textures[i] = Engine::Get().GetTextureLibrary().GetTexture("blank_texture");
+			m_Textures[i] = Engine::Get().GetTextureLibrary().GetDefaultTexture();
 	}
 
 	/// <summary>
@@ -92,7 +95,7 @@ namespace Louron {
 	/// </summary>
 	Material::Material(std::shared_ptr<Shader> shader) : m_Shader(shader) {
 		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
-			m_Textures[i] = Engine::Get().GetTextureLibrary().GetTexture("blank_texture");
+			m_Textures[i] = Engine::Get().GetTextureLibrary().GetDefaultTexture();
 	}
 
 	/// <summary>
@@ -146,4 +149,150 @@ namespace Louron {
 	std::shared_ptr<Texture> Material::GetTextureMap(GLint type) {
 		return m_Textures[type];
 	}
+
+#pragma endregion
+
+#pragma region PBR Materials
+
+
+	PBRMaterial::PBRMaterial() {
+		m_AlbedoTexture = Engine::Get().GetTextureLibrary().GetDefaultTexture();
+		m_MetallicTexture = Engine::Get().GetTextureLibrary().GetDefaultTexture();
+		m_NormalTexture = Engine::Get().GetTextureLibrary().GetDefaultNormalTexture();
+	}
+
+	GLboolean PBRMaterial::Bind()  {
+
+		if(auto shader_ref = m_Shader.lock(); shader_ref) {
+			shader_ref->Bind();
+			return GL_TRUE;
+		}
+		L_CORE_ERROR("Shader Not Found for PBR Material: {0}", m_MaterialName);
+		return GL_FALSE;
+	}
+
+	void PBRMaterial::UnBind() {
+
+		for (int i = 0; i < 3; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+
+		glActiveTexture(GL_TEXTURE0);
+		glUseProgram(0);
+	}
+
+	void PBRMaterial::UpdateUniforms(const Camera& camera) {
+
+		if (auto shader_ref = m_Shader.lock(); shader_ref) {
+
+			shader_ref->SetFloat("u_Material.roughness",		m_Roughness);
+			shader_ref->SetFloat("u_Material.metallicScale",	IsMetallicTextureSet() ? 1.0f : m_MetallicScale);
+
+			shader_ref->SetVec4	("u_Material.albedoTint",		m_AlbedoTint);
+
+			shader_ref->SetInt	("u_Material.albedoTexture",	0);
+			shader_ref->SetInt	("u_Material.metallicTexture",	1);
+			shader_ref->SetInt	("u_Material.normalTexture",	2);
+
+			if (auto texture_ref = m_AlbedoTexture.lock(); texture_ref && *texture_ref) {
+				glActiveTexture(GL_TEXTURE0);
+				texture_ref->Bind();
+			}
+
+			if (auto texture_ref = m_MetallicTexture.lock(); texture_ref && *texture_ref) {
+				glActiveTexture(GL_TEXTURE1);
+				texture_ref->Bind();
+			}
+
+			if (auto texture_ref = m_NormalTexture.lock(); texture_ref && *texture_ref) {
+				glActiveTexture(GL_TEXTURE2);
+				texture_ref->Bind();
+			}
+
+			if (&camera != nullptr) {
+				shader_ref->SetMat4("u_VertexIn.Proj", camera.GetProjMatrix());
+				shader_ref->SetMat4("u_VertexIn.View", camera.GetViewMatrix());
+				shader_ref->SetVec3("u_CameraPos", camera.GetGlobalPosition());
+			}
+		}
+		else {
+			L_CORE_ERROR("Shader Not Found for PBR Material: {0}", GetName());
+		}
+
+	}
+
+	bool PBRMaterial::IsAlbedoTextureSet() const {
+		auto texture_ref = m_AlbedoTexture.lock();
+		return (texture_ref && *texture_ref && texture_ref != Engine::Get().GetTextureLibrary().GetDefaultTexture());
+	}
+
+	bool PBRMaterial::IsMetallicTextureSet() const {
+		auto texture_ref = m_MetallicTexture.lock();
+		return (texture_ref && *texture_ref && texture_ref != Engine::Get().GetTextureLibrary().GetDefaultTexture());
+	}
+
+	bool PBRMaterial::IsNormalTextureSet() const {
+		auto texture_ref = m_NormalTexture.lock();
+		return (texture_ref && *texture_ref && texture_ref != Engine::Get().GetTextureLibrary().GetDefaultNormalTexture());
+	}
+
+	#pragma region Getters and Setters
+
+	void PBRMaterial::SetAlbedoTexture(std::shared_ptr<Texture> texture) {
+		if (texture && *texture)
+			m_AlbedoTexture = texture;
+	}
+
+	void PBRMaterial::SetMetallicTexture(std::shared_ptr<Texture> texture) {
+		if (texture && *texture)
+			m_MetallicTexture = texture;
+	}
+
+	void PBRMaterial::SetNormalTexture(std::shared_ptr<Texture> texture) {
+		if (texture && *texture)
+			m_NormalTexture = texture;
+	}
+
+	void PBRMaterial::SetRoughness(float roughness) { m_Roughness = roughness; }
+	void PBRMaterial::SetMetallic(float metallic) { m_MetallicScale = metallic; }
+	void PBRMaterial::SetAlbedoTintColour(const glm::vec4& albedo_colour) { m_AlbedoTint = albedo_colour; }
+
+	void PBRMaterial::SetName(const std::string& name) { m_MaterialName = name; }
+	void PBRMaterial::SetShader(std::shared_ptr<Shader> shader) { if (shader) m_Shader = shader; }
+
+	Texture* PBRMaterial::GetAlbedoTexture() const {
+		if (auto texture_ref = m_AlbedoTexture.lock(); texture_ref && *texture_ref)
+			return texture_ref.get();
+		return nullptr;
+	}
+
+	Texture* PBRMaterial::GetMetallicTexture() const {
+		if (auto texture_ref = m_MetallicTexture.lock(); texture_ref && *texture_ref)
+			return texture_ref.get();
+		return nullptr;
+	}
+
+	Texture* PBRMaterial::GetNormalTexture() const {
+		if (auto texture_ref = m_NormalTexture.lock(); texture_ref && *texture_ref)
+			return texture_ref.get();
+		return nullptr;
+	}
+
+	float PBRMaterial::GetRoughness() const { return m_Roughness; }
+	float PBRMaterial::GetMetallic() const { return m_MetallicScale; }
+	const glm::vec4& PBRMaterial::GetAlbedoTintColour() const { return m_AlbedoTint; }
+
+	Shader* PBRMaterial::GetShader() {
+		if (auto shader_ref = m_Shader.lock(); shader_ref)
+			return shader_ref.get();
+		return nullptr;
+	}
+
+	const std::string& PBRMaterial::GetName() const { return m_MaterialName; }
+
+	#pragma endregion
+
+#pragma endregion
+
 }

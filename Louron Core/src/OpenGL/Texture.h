@@ -24,6 +24,7 @@ namespace Louron {
 		Texture();
 		Texture(const std::string& textureName, int textureWidth, int textureHeight);
 		Texture(const std::filesystem::path& texturePath);
+		Texture(GLubyte* texture_data, glm::ivec2 texture_size);
 		~Texture();
 
 	public:
@@ -58,7 +59,7 @@ namespace Louron {
 		GLint m_FilterMode = GL_LINEAR;
 
 		glm::ivec2 m_Size = { 0,0 };
-		std::string m_Name = "Untitled Texture";
+		std::string m_Name = "New Untitled Texture";
 		std::filesystem::path m_FilePath;
 
 	};
@@ -81,7 +82,9 @@ namespace Louron {
 		std::shared_ptr<Texture> LoadTexture(const std::string& textureFile, const std::string& textureName);
 
 		std::shared_ptr<Texture> GetTexture(const std::string& textureName);
+		std::shared_ptr<Texture> GetDefaultTexture();
+		std::shared_ptr<Texture> GetDefaultNormalTexture();
 
-		bool textureExists(const std::string& name) const;
+		bool TextureExists(const std::string& name) const;
 	};
 }

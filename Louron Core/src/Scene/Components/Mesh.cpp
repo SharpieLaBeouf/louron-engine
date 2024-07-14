@@ -99,7 +99,7 @@ namespace Louron {
 	/// </summary>
 	void MeshRenderer::ManualDraw(const MeshFilter& meshFilter, const Camera& camera, Transform& transform) const {
 
-		for (const auto& material : (*Materials)) {
+		for (const auto& material : Materials) {
 			if (material.second->Bind()) {
 				material.second->UpdateUniforms(camera);
 				material.second->GetShader()->SetMat4("u_VertexIn.Model", transform.GetGlobalTransform());
@@ -171,8 +171,8 @@ namespace Louron {
 		// MATERIALS
 
 		// Check if Material has already been loaded, and apply that material index to the mesh
-		if (Materials) {
-			if (Materials->operator[](mesh->mMaterialIndex)) {
+		if (!Materials.empty()) {
+			if (Materials[mesh->mMaterialIndex]) {
 				std::shared_ptr<Mesh> temp_mesh = std::make_shared<Mesh>(mesh_vertices, mesh_indices);
 				temp_mesh->MaterialIndex = mesh->mMaterialIndex;
 				meshFilter.Meshes->push_back(temp_mesh);
@@ -181,7 +181,7 @@ namespace Louron {
 
 		// Create new Material if not loaded, and gather material data from ASSIMP
 		// Use Forward Plus shader, and Blank Texture as defaults
-		std::shared_ptr<Material> temp_material = std::make_shared<Material>(shader, Engine::Get().GetTextureLibrary().GetTexture("blank_texture"));
+		std::shared_ptr<Material> temp_material = std::make_shared<Material>(shader, Engine::Get().GetTextureLibrary().GetTexture("Default_Texture"));
 
 		if (mesh->mMaterialIndex >= 0) {
 
@@ -230,7 +230,7 @@ namespace Louron {
 
 			temp_material->SetName(materialNameString.str());
 
-			Materials->operator[]((GLuint)mesh->mMaterialIndex) = temp_material;
+			Materials[(GLuint)mesh->mMaterialIndex] = temp_material;
 		}
 
 		std::shared_ptr<Mesh> temp_mesh = std::make_shared<Mesh>(mesh_vertices, mesh_indices);

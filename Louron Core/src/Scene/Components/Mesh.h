@@ -51,7 +51,7 @@ namespace Louron {
 
 	public:
 		bool active = true;
-		std::shared_ptr<std::unordered_map<GLuint, std::shared_ptr<Material>>> Materials = std::make_shared<std::unordered_map<GLuint, std::shared_ptr<Material>>>();
+		std::unordered_map<GLuint, std::shared_ptr<Material>> Materials{};
 
 	public:
 

@@ -45,17 +45,17 @@ namespace Louron {
 	public:
 
 		// Bind and Unbing
-		GLboolean Bind();
-		void UnBind();
+		virtual GLboolean Bind();
+		virtual void UnBind();
 
 		// Update Material Shader Uniforms
-		void UpdateUniforms(const Camera& Camera);
+		virtual void UpdateUniforms(const Camera& camera);
 
 		// Getters and Setters
 
 		void SetTexture(std::shared_ptr<Texture> texture, TextureMapType textureType);
 
-		std::shared_ptr<Shader>& GetShader();
+		virtual Shader* GetShader();
 		void SetShader(std::shared_ptr<Shader>& shader);
 
 		float GetShine() const;
@@ -135,7 +135,7 @@ namespace Louron {
 
 		GLuint m_MaterialIndex;
 		std::shared_ptr<Shader> m_MaterialShader;
-		std::array<std::shared_ptr<Texture>, L20_TOTAL_ELEMENTS> m_MaterialTextures;
+		std::array<std::shared_ptr<Texture>, TextureMapType::L20_TOTAL_ELEMENTS> m_MaterialTextures;
 
 
 	};
@@ -144,8 +144,57 @@ namespace Louron {
 
 	public:
 
-		PBRMaterial() = default;
-		~PBRMaterial() = default;
+		PBRMaterial();
+
+	private:
+
+		std::string m_MaterialName = "New PBR Material";
+		RenderType m_RenderType = RenderType::L_MATERIAL_OPAQUE;
+		
+		float m_Roughness = 0.5f;
+		float m_MetallicScale = 0.0f;
+		glm::vec4 m_AlbedoTint = glm::vec4(1.0f);
+
+		std::weak_ptr<Texture> m_AlbedoTexture;
+		std::weak_ptr<Texture> m_MetallicTexture;
+		std::weak_ptr<Texture> m_NormalTexture;
+
+		std::weak_ptr<Shader> m_Shader;
+
+	public:
+
+		// Bind and Unbing
+		GLboolean Bind() override;
+		void UnBind() override;
+
+		// Update Material Shader Uniforms
+		void UpdateUniforms(const Camera& camera) override;
+
+		bool IsAlbedoTextureSet() const;
+		bool IsMetallicTextureSet() const;
+		bool IsNormalTextureSet() const;
+
+		void SetAlbedoTexture(std::shared_ptr<Texture> texture);
+		void SetMetallicTexture(std::shared_ptr<Texture> texture);
+		void SetNormalTexture(std::shared_ptr<Texture> texture);
+
+		void SetRoughness(float roughness);
+		void SetMetallic(float metallic);
+		void SetAlbedoTintColour(const glm::vec4& albedo_colour);
+
+		void SetShader(std::shared_ptr<Shader> shader);
+		void SetName(const std::string& name);
+
+		Texture* GetAlbedoTexture() const;
+		Texture* GetMetallicTexture() const;
+		Texture* GetNormalTexture() const;
+
+		float GetRoughness() const;
+		float GetMetallic() const;
+		const glm::vec4& GetAlbedoTintColour() const;
+
+		Shader* GetShader() override;
+		const std::string& GetName() const;
 
 	};
 

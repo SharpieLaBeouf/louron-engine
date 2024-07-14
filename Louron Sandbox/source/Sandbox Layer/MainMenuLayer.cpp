@@ -21,6 +21,7 @@ void MainMenuLayer::OnAttach() {
 	m_Scenes.push_back(std::make_unique<Scene13>());
 	m_Scenes.push_back(std::make_unique<Scene14>());
 	m_Scenes.push_back(std::make_unique<Scene15>());
+	m_Scenes.push_back(std::make_unique<Scene16>());
 
 	Louron::Engine::Get().GetWindow().SetVSync(false);
 }
@@ -161,6 +162,12 @@ void MainMenuLayer::OnGuiRender() {
 			if (ImGui::Button(" 15. Hierarchy System      ")) {
 				L_APP_INFO("Menu Item 15 Pressed");
 				m_SceneSelector = 15;
+				m_Scenes[m_SceneSelector - 1]->OnAttach();
+			}
+
+			if (ImGui::Button(" 16. PBR Implementation    ")) {
+				L_APP_INFO("Menu Item 16 Pressed");
+				m_SceneSelector = 16;
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
 			}
 		}

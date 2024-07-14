@@ -717,10 +717,9 @@ namespace Louron {
 
 				// Loop through each submesh within the meshfilter
 				for (auto& subMesh : *meshFilter.Meshes)
-					if (!(*meshRenderer.Materials).empty())
-						if ((*meshRenderer.Materials)[subMesh->MaterialIndex] != nullptr) {
-							std::shared_ptr<Material> temp_mat = (*meshRenderer.Materials)[subMesh->MaterialIndex];
-							materialMeshTransMap[(*meshRenderer.Materials)[subMesh->MaterialIndex]][subMesh].push_back(transform);
+					if (!meshRenderer.Materials.empty())
+						if (meshRenderer.Materials[subMesh->MaterialIndex] != nullptr) {
+							materialMeshTransMap[meshRenderer.Materials[subMesh->MaterialIndex]][subMesh].push_back(transform);
 						}
 						else {
 							L_CORE_WARN("Mesh Has Invalid Material");

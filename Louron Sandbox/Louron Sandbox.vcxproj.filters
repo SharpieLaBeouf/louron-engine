@@ -38,6 +38,7 @@
     <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
     <None Include="assets\Shaders\Skybox\Skybox.glsl" />
     <None Include="assets\Shaders\FBO\FBO Texture Shader.glsl" />
+    <None Include="Sandbox Project\Scenes\PBR Materials.lscene" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Images\grass_texture.jpg">
@@ -106,6 +107,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 15.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 16.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

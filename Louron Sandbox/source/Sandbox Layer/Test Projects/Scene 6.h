@@ -64,17 +64,17 @@ public:
 		m_SceneCamera->MovementSpeed = 10.0f;
 		m_SceneCamera->MovementYDamp = 0.65f;
 
-		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("blank_texture"));
+		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("Default_Texture"));
 		flat_cube_mat->Bind();
 		flat_cube_mat->SetDiffuse(glm::vec4(1.0f));
 		
-		box_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("blank_texture"));
+		box_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("Default_Texture"));
 		box_cube_mat->Bind();
 		box_cube_mat->SetDiffuse(glm::vec4(1.0f));
 		box_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("cube_texture"));
 		box_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("cube_texture_specular"));
 		
-		stone_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("blank_texture"));
+		stone_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("Default_Texture"));
 		stone_cube_mat->Bind();
 		stone_cube_mat->SetDiffuse(glm::vec4(1.0f));
 		stone_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("stone_texture"));

@@ -102,7 +102,7 @@ public:
 		// Create Ball and Assign Shader to Ball Material and Set Colour to Red
 		m_Ball = std::make_unique<Ball>();
 		m_Ball->material.SetShader(m_ShaderLib.GetShader("material_shader_phong"));
-		m_Ball->material.SetTexture(m_TextureLib.GetTexture("blank_texture"), Louron::L20_TEXTURE_DIFFUSE_MAP);
+		m_Ball->material.SetTexture(m_TextureLib.GetTexture("Default_Texture"), Louron::L20_TEXTURE_DIFFUSE_MAP);
 		m_Ball->material.SetDiffuse({ 1.0f, 0.0f, 0.0f, 1.0f });
 
 		// Create Paddles 
@@ -117,7 +117,7 @@ public:
 		int index = 0;
 		for (auto& paddle : m_Paddles) {
 			paddle->material.SetShader(m_ShaderLib.GetShader("material_shader_phong"));
-			paddle->material.SetTexture(m_TextureLib.GetTexture("blank_texture"), Louron::L20_TEXTURE_DIFFUSE_MAP);
+			paddle->material.SetTexture(m_TextureLib.GetTexture("Default_Texture"), Louron::L20_TEXTURE_DIFFUSE_MAP);
 			paddle->material.SetDiffuse({ 0.41f, 0.41f, 0.41f, 1.0f });
 			paddle->transform.SetScale(glm::vec3(2.0f, 1.0f, 1.0f));
 		}

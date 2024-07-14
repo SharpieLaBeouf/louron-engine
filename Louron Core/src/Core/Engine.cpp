@@ -65,6 +65,10 @@ namespace Louron {
             for (const auto& path : FindFilePaths(".jpg")) {
                 m_TextureLibrary->LoadTexture(path);
             }
+
+            for (const auto& path : FindFilePaths(".psd")) {
+                m_TextureLibrary->LoadTexture(path);
+            }
         }
 
         // Init Input Manager

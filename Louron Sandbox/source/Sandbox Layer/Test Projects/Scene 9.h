@@ -65,9 +65,9 @@ public:
 		m_SceneCamera->ToggleMovement();
 		light_properties.position = { 0.0f, 5.0f, 0.0f };
 					
-		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("blank_texture"));
+		flat_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_flat"), m_TextureLib.GetTexture("Default_Texture"));
 		
-		phong_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("blank_texture"));
+		phong_cube_mat = new Louron::Material(m_ShaderLib.GetShader("material_shader_phong"), m_TextureLib.GetTexture("Default_Texture"));
 		phong_cube_mat->SetDiffuse(glm::vec4(1.0f));
 		phong_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_DIFFUSE_MAP, m_TextureLib.GetTexture("cube_texture"));
 		phong_cube_mat->AddTextureMap(Louron::TextureMapType::L20_TEXTURE_SPECULAR_MAP, m_TextureLib.GetTexture("cube_texture_specular"));

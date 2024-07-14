@@ -123,7 +123,7 @@ namespace Louron {
 		}
 
 		// 5. If the Material does not exist, create a new one
-		std::shared_ptr<Material> temp_material = std::make_shared<Material>(shader, Engine::Get().GetTextureLibrary().GetTexture("blank_texture"));
+		std::shared_ptr<Material> temp_material = std::make_shared<Material>(shader, Engine::Get().GetTextureLibrary().GetDefaultTexture());
 		if (mesh->mMaterialIndex >= 0) {
 
 			// Load Textures
@@ -190,7 +190,7 @@ namespace Louron {
 
 		// 7. Add Mesh and Material to Respective Components
 		modelComponentGroup.first->Meshes->push_back(temp_mesh);
-		modelComponentGroup.second->Materials->operator[]((GLuint)mesh->mMaterialIndex) = temp_material;
+		modelComponentGroup.second->Materials[(GLuint)mesh->mMaterialIndex] = temp_material;
 	}
 
 
