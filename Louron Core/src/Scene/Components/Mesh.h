@@ -23,6 +23,36 @@
 
 namespace Louron {
 
+	struct SubMesh {
+
+		std::unique_ptr<VertexArray> VAO;
+		GLuint MaterialIndex = 0;
+
+		SubMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
+
+	};
+
+	struct AssetMesh : public Asset {
+
+		virtual AssetType GetType() const override { return AssetType::Mesh; }
+
+		std::vector<SubMesh> m_SubMeshes;
+
+		AssetMesh() = default;
+		~AssetMesh() = default;
+
+	};
+
+	struct AssetMeshFilter : public Component {
+
+		std::weak_ptr<AssetMesh> m_Mesh;
+
+		AssetMeshFilter() = default;
+		~AssetMeshFilter() = default;
+
+
+	};
+
 	struct Mesh {
 
 		std::unique_ptr<VertexArray> VAO;

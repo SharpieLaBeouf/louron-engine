@@ -23,39 +23,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\Shaders\Materials\material_shader_flat.glsl" />
-    <None Include="assets\Shaders\Materials\material_shader_phong.glsl" />
-    <None Include="assets\Shaders\Basic\basic_texture.glsl" />
-    <None Include="assets\Shaders\Basic\basic_phong.glsl" />
-    <None Include="assets\Shaders\Basic\basic.glsl" />
     <None Include="assimp-vc143-mt.dll" />
     <None Include="assimp-vc143-mtd.dll" />
     <None Include="assets\Shaders\Forward+\FP_Material_Shader.glsl" />
-    <None Include="assets\Shaders\Forward+\FP_Light_Culling.comp" />
-    <None Include="assets\Shaders\Default Shader.glsl" />
-    <None Include="assets\Shaders\Forward+\FP_Depth.glsl" />
-    <None Include="assets\Shaders\Forward+\FP_Material_BP_Shader.glsl" />
-    <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
-    <None Include="assets\Shaders\Skybox\Skybox.glsl" />
-    <None Include="assets\Shaders\FBO\FBO Texture Shader.glsl" />
-    <None Include="Sandbox Project\Scenes\PBR Materials.lscene" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="assets\Images\grass_texture.jpg">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\Images\cube_texture_specular.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\Images\cube_texture.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\Images\stone_texture_specular.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="assets\Images\stone_texture.png">
-      <Filter>Resource Files</Filter>
-    </Image>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 1.h">
@@ -110,6 +80,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 16.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 17.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,7 @@
 #pragma once
 
 // Louron Core Headers
+#include "../Asset/Asset.h"
 
 // C++ Standard Library Headers
 #include <string>
@@ -17,17 +18,19 @@
 
 namespace Louron {
 
-	class Texture {
+	class Texture : public Asset {
 
 	public:
 
 		Texture();
 		Texture(const std::string& textureName, int textureWidth, int textureHeight);
 		Texture(const std::filesystem::path& texturePath);
-		Texture(GLubyte* texture_data, glm::ivec2 texture_size);
+		Texture(GLubyte* texture_data, glm::ivec2 texture_size, GLenum texture_data_format = GL_RGBA);
 		~Texture();
 
 	public:
+
+		virtual AssetType GetType() const override { return AssetType::Texture2D; }
 
 		// Bind and Unbinding
 		void Bind();

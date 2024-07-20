@@ -296,7 +296,6 @@ private:
 		ImGui::End();
 
 	}
-
 	
 	glm::vec4 back_colour = { 0.3137f, 0.7843f, 1.0f, 1.0f };
 	glm::vec4 cube_colour = { 1.0f, 1.0f, 1.0f, 1.0f };

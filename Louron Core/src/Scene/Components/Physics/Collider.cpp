@@ -30,8 +30,58 @@ namespace Louron {
         m_Shape = std::make_shared<PhysicsShape>(PxSphereGeometry(m_Radius * 2.0f), *m_Material->GetMaterial());
     }
 
+    SphereCollider::SphereCollider(const SphereCollider& other) {
+
+        m_Radius = other.m_Radius;
+        m_IsTrigger = other.m_IsTrigger;
+        m_Centre = other.m_Centre;
+
+        if (entity && *entity)
+            m_EntityUUID = entity->GetUUID();
+        else
+            m_EntityUUID = NULL_UUID;
+
+        m_RigidbodyUUID = NULL_UUID;
+
+        if(other.m_Material)
+            m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
+        else
+            m_Material = m_Material = std::make_shared<PhysicsMaterial>();
+
+        m_Shape = std::make_shared<PhysicsShape>(PxSphereGeometry(m_Radius * 2.0f), *m_Material->GetMaterial());
+    }
+
     SphereCollider::~SphereCollider() {
 
+    }
+
+    SphereCollider& SphereCollider::operator=(const SphereCollider& other) {
+
+        m_Radius = other.m_Radius;
+        m_IsTrigger = other.m_IsTrigger;
+        m_Centre = other.m_Centre;
+
+        if (entity && *entity)
+            m_EntityUUID = entity->GetUUID();
+        else
+            m_EntityUUID = NULL_UUID;
+
+        m_RigidbodyUUID = NULL_UUID;
+
+        if (other.m_Material)
+            m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
+        else
+            m_Material = m_Material = std::make_shared<PhysicsMaterial>();
+
+        m_Shape = std::make_shared<PhysicsShape>(PxSphereGeometry(m_Radius * 2.0f), *m_Material->GetMaterial());
+
+        SetColliderUserData(m_EntityUUID);
+
+        m_Shape->AddFlag(ColliderFlag_TransformUpdated);
+        m_Shape->AddFlag(ColliderFlag_RigidbodyUpdated);
+        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+
+        return *this;
     }
 
     void SphereCollider::SetColliderUserData(const UUID& uuid) {
@@ -253,8 +303,50 @@ namespace Louron {
         m_Shape = std::make_shared<PhysicsShape>(PxBoxGeometry(m_BoxExtents.x, m_BoxExtents.y, m_BoxExtents.z), *m_Material->GetMaterial());
     }
 
+    BoxCollider::BoxCollider(const BoxCollider& other) {
+
+        m_BoxExtents = other.m_BoxExtents;
+        m_IsTrigger = other.m_IsTrigger;
+        m_Centre = other.m_Centre;
+
+        if (entity && *entity)
+            m_EntityUUID = entity->GetUUID();
+        else
+            m_EntityUUID = NULL_UUID;
+
+        m_RigidbodyUUID = NULL_UUID;
+
+        m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
+        m_Shape = std::make_shared<PhysicsShape>(PxBoxGeometry(m_BoxExtents.x, m_BoxExtents.y, m_BoxExtents.z), *m_Material->GetMaterial());
+    }
+
     BoxCollider::~BoxCollider() {
 
+    }
+
+    BoxCollider& BoxCollider::operator=(const BoxCollider& other) {
+
+        m_BoxExtents = other.m_BoxExtents;
+        m_IsTrigger = other.m_IsTrigger;
+        m_Centre = other.m_Centre;
+
+        if (entity && *entity)
+            m_EntityUUID = entity->GetUUID();
+        else
+            m_EntityUUID = NULL_UUID;
+
+        m_RigidbodyUUID = NULL_UUID;
+
+        m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
+        m_Shape = std::make_shared<PhysicsShape>(PxBoxGeometry(m_BoxExtents.x, m_BoxExtents.y, m_BoxExtents.z), *m_Material->GetMaterial());
+
+        SetColliderUserData(m_EntityUUID);
+
+        m_Shape->AddFlag(ColliderFlag_TransformUpdated);
+        m_Shape->AddFlag(ColliderFlag_RigidbodyUpdated);
+        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+
+        return *this;
     }
 
     void BoxCollider::SetColliderUserData(const UUID& uuid) {

@@ -393,6 +393,10 @@ namespace Louron {
         m_Material = PxGetPhysics().createMaterial(m_StaticFriction, m_DynamicFriction, m_Bounciness);
     }
 
+    PhysicsMaterial::PhysicsMaterial(const PhysicsMaterial& other) {
+        m_Material = PxGetPhysics().createMaterial(other.m_StaticFriction, other.m_DynamicFriction, other.m_Bounciness);
+    }
+
     PhysicsMaterial::~PhysicsMaterial() {
         if (m_Material) {
             m_Material->release();

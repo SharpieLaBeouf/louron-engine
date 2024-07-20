@@ -317,7 +317,7 @@ namespace Louron {
 
             OnTransformUpdated();
 
-            if (entity && *entity && entity->GetScene() && entity->HasComponent<Rigidbody>())
+            if (entity && *entity && entity->GetScene() && entity->HasComponent<Rigidbody>() && entity->GetComponent<Rigidbody>().GetActor())
                 entity->GetComponent<Rigidbody>().GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
 
             RemoveFlag(TransformFlag_PropertiesUpdated);
@@ -669,13 +669,17 @@ namespace Louron {
 
     void HierarchyComponent::AttachParent(const UUID& newParentID) {
 
-        if (!entity || !*entity || !entity->GetScene()) {
-            L_CORE_ERROR("Cannot Attach Parent - Current Entity Is Invalid and Cannot Access Scene!");
+        if (newParentID == NULL_UUID) {
             return;
         }
 
         if (newParentID == m_Parent) {
             L_CORE_WARN("Cannot Attach Self as Parent!");
+            return;
+        }
+
+        if (!entity || !*entity || !entity->GetScene()) {
+            L_CORE_ERROR("Cannot Attach Parent - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
 

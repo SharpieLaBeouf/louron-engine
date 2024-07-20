@@ -39,7 +39,7 @@ namespace Louron {
         // we do this because we store this in the PxShape void* userData,
         // we don't want any cases when the memory of the entityUUID is 
         // reallocated or suddenly becomes null! 
-        UUID m_EntityUUID;
+        UUID m_EntityUUID = NULL_UUID;
 
         // We hold the UUID of the parent that our collider is attached to.
         UUID m_RigidbodyUUID = NULL_UUID;
@@ -52,7 +52,11 @@ namespace Louron {
 
         SphereCollider();
         SphereCollider(glm::vec3 SphereCentre, float SphereRadius);
+        SphereCollider(const SphereCollider& other);
+        SphereCollider(SphereCollider&& other) = default;
         ~SphereCollider();
+
+        SphereCollider& operator=(const SphereCollider& other);
 
         void SetColliderUserData(const UUID& uuid);
         // Setter functions for callbacks
@@ -127,7 +131,11 @@ namespace Louron {
 
         BoxCollider();
         BoxCollider(const glm::vec3& boxCentre, const glm::vec3& boxExtents);
+        BoxCollider(const BoxCollider& other);
+        BoxCollider(BoxCollider&& other) = default;
         ~BoxCollider();
+
+        BoxCollider& operator=(const BoxCollider& other);
 
         void SetColliderUserData(const UUID& uuid);
         // Setter functions for callbacks

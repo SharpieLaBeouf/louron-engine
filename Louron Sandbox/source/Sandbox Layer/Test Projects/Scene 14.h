@@ -35,11 +35,16 @@ public:
 
 		std::srand((unsigned int)std::time(0));
 
-		if (!m_Project || !m_Scene) {
+		// Load Project and Get Active Scene Handle
+		if (m_Project)
+			Louron::Project::SetActiveProject(m_Project);
+		else
+			m_Project = Project::LoadProject("Sandbox Project/Sandbox Project.lproj", "Knerpix.lscene");
+
+		if (!m_Scene) {
+
 			L_APP_INFO("Loading Scene 14 - KNERPIX :D");
 
-			// Load Project and Get Active Scene Handle
-			m_Project = Project::LoadProject("Sandbox Project/Sandbox Project.lproj", "Knerpix.lscene");
 			m_Scene = Project::GetActiveScene();
 
 			ball[0].ball = m_Scene->FindEntityByName("Ball1");
@@ -55,22 +60,25 @@ public:
 					if (!self.HasComponent<Rigidbody>() || !other.HasComponent<Rigidbody>())
 						return;
 
-					PxVec3 self_velocity = self.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
-					PxVec3 other_velocity = other.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
+					if(self.GetComponent<Rigidbody>().GetActor() && other.GetComponent<Rigidbody>().GetActor()) {
 
-					if (self_velocity.magnitude() <= other_velocity.magnitude()) {
+						PxVec3 self_velocity = self.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
+						PxVec3 other_velocity = other.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
 
-						// Calculate the direction from A to B
-						PxVec3 direction = self.GetComponent<Rigidbody>().GetActor()->GetGlobalPose().p - other.GetComponent<Rigidbody>().GetActor()->GetGlobalPose().p;
-						direction.normalize();
+						if (self_velocity.magnitude() <= other_velocity.magnitude()) {
 
-						// Calculate impulse magnitude (adjust according to your game's requirements)
-						float impulseMagnitude = 600.0f;
+							// Calculate the direction from A to B
+							PxVec3 direction = self.GetComponent<Rigidbody>().GetActor()->GetGlobalPose().p - other.GetComponent<Rigidbody>().GetActor()->GetGlobalPose().p;
+							direction.normalize();
 
-						self.GetComponent<Rigidbody>().ApplyForce(glm::vec3( direction.x, direction.y, direction.z ) * impulseMagnitude, PxForceMode::eFORCE);
+							// Calculate impulse magnitude (adjust according to your game's requirements)
+							float impulseMagnitude = 600.0f;
 
-						Audio::Get().PlayAudioFile("assets/Audio/impact.mp3");
+							self.GetComponent<Rigidbody>().ApplyForce(glm::vec3(direction.x, direction.y, direction.z) * impulseMagnitude, PxForceMode::eFORCE);
 
+							Audio::Get().PlayAudioFile("Sandbox Project/Assets/Audio/impact.mp3");
+
+						}
 					}
 
 				}
@@ -172,8 +180,8 @@ public:
 		}
 
 		// Update Camera Component
-		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->Update((float)Time::Get().GetDeltaTime());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->GetGlobalPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().CameraInstance->Update((float)Time::Get().GetDeltaTime());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
 
 		m_Scene->OnUpdate();
 	}
@@ -359,7 +367,7 @@ public:
 			if (ImGui::TreeNode("Other Scene Settings")) {
 
 				if (ImGui::Button("Toggle Camera Movement")) {
-					m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().Camera->ToggleMovement();
+					m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->ToggleMovement();
 				}
 
 				if (ImGui::Button("Reset Scene")) {
@@ -570,8 +578,10 @@ public:
 			ball[i].ball.GetComponent<Transform>().SetPosition(ball[i].starting_position);
 			ball[i].ball.GetComponent<Transform>().SetRotation(glm::vec3(0.0f));
 
-			ball[i].ball.GetComponent<Rigidbody>().GetActor()->SetLinearVelocity(glm::vec3(0.0f));
-			ball[i].ball.GetComponent<Rigidbody>().GetActor()->SetAngularVelocity(PxVec3(0.0f));
+			if(ball[i].ball.GetComponent<Rigidbody>().GetActor()) {
+				ball[i].ball.GetComponent<Rigidbody>().GetActor()->SetLinearVelocity(glm::vec3(0.0f));
+				ball[i].ball.GetComponent<Rigidbody>().GetActor()->SetAngularVelocity(PxVec3(0.0f));
+			}
 		}
 
 
@@ -668,7 +678,7 @@ public:
 		if (game_properties.game_over)
 			return;
 
-		if (!m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().Camera->IsMovementEnabled()) {
+		if (!m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->IsMovementEnabled()) {
 
 			//ROLL THE SPHERE!
 			if (m_Input.GetKey(GLFW_KEY_W)) {

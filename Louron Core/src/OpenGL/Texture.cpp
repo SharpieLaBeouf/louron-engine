@@ -31,9 +31,10 @@ namespace Louron {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Size.x, m_Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
-	Texture::Texture(GLubyte* texture_data, glm::ivec2 texture_size) {
+	Texture::Texture(GLubyte* texture_data, glm::ivec2 texture_size, GLenum texture_data_format) {
 
 		m_Size = texture_size;
 
@@ -45,7 +46,8 @@ namespace Louron {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Size.x, m_Size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, texture_data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_Size.x, m_Size.y, 0, texture_data_format, GL_UNSIGNED_BYTE, texture_data);
+		glGenerateMipmap(GL_TEXTURE_2D);
 	}
 
 	Texture::Texture(const std::string& textureName, int textureWidth, int textureHeight) {

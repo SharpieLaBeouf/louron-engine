@@ -11,7 +11,7 @@ Entities:
       Scale: [1.35000002, 1.35000002, 1.35000002]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -35,7 +35,7 @@ Entities:
       Scale: [1.35000002, 1.35000002, 1.35000002]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Green_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Green_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -59,7 +59,7 @@ Entities:
       Scale: [20, 1, 20]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -107,7 +107,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -122,7 +122,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -137,7 +137,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -152,7 +152,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -167,7 +167,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -182,7 +182,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -197,7 +197,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -212,7 +212,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -227,7 +227,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -242,7 +242,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -257,7 +257,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -272,7 +272,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -287,7 +287,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -302,7 +302,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -317,7 +317,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
@@ -332,7 +332,7 @@ Entities:
       Scale: [2.85714293, 2.85714293, 2.85714293]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Black_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Black_Cube.fbx
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]

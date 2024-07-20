@@ -57,7 +57,7 @@ namespace Louron {
 				if (HasComponent<SphereCollider>())
 					return GetComponent<SphereCollider>();
 
-				SphereCollider& component = PhysicsSystem::AddSphereCollider({ m_EntityHandle, m_Scene }, m_Scene);
+				SphereCollider& component = PhysicsSystem::AddSphereCollider(*this, m_Scene);
 				component.entity = std::make_shared<Entity>(*this);
 
 				return component;
@@ -152,7 +152,7 @@ namespace Louron {
 			m_Scene->m_Registry.remove_if_exists<T>(m_EntityHandle);
 		}
 
-		operator bool() const { return m_EntityHandle != entt::null; }
+		operator bool() const { return m_Scene ? m_Scene->GetRegistry()->valid(m_EntityHandle) : m_EntityHandle != entt::null; }
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 
@@ -164,6 +164,7 @@ namespace Louron {
 		Scene* GetScene() const { return m_Scene; }
 
 	private:
+
 		entt::entity m_EntityHandle{ entt::null };
 		Scene* m_Scene = nullptr;
 	};

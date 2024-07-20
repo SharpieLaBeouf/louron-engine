@@ -5,12 +5,19 @@
 
 #include "../../Debug/Assert.h"
 
+#include "../../Project/Project.h"
+
 // C++ Standard Library Headers
 
 // External Vendor Library Headers
 #define STB_IMAGE_STATIC
 #define STB_IMAGE_IMPLEMENTATION    
 #include <stb_image/stb_image.h>
+
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
+#include <yaml-cpp/yaml.h>
 
 namespace Louron {
 	
@@ -135,6 +142,112 @@ namespace Louron {
 		else {
 			L_CORE_ERROR("Error Updating Uniforms - Shader Not Found for Skybox Material: {0}", m_MaterialName);
 		}
+	}
+
+	void SkyboxMaterial::Serialize(const std::filesystem::path& path) {
+
+		m_MaterialFilePath = path;
+
+		YAML::Emitter materialOut;
+		materialOut << YAML::BeginMap;
+		materialOut << YAML::Key << "Material Name" << YAML::Value << m_MaterialName;
+		materialOut << YAML::Key << "Material Type" << YAML::Value << "SkyboxMaterial";
+		materialOut << YAML::Key << "TextureFilePaths" << YAML::Value << YAML::BeginMap;
+
+		std::unordered_map<int, std::string> indexKeyMap{
+			{ 0, "Right"},
+			{ 1, "Left"},
+			{ 2, "Top"},
+			{ 3, "Bottom"},
+			{ 4, "Back"},
+			{ 5, "Front"},
+		};
+
+		std::filesystem::path asset_directory;
+		if (auto project_ref = Project::GetActiveProject())
+			asset_directory = project_ref->GetConfig().AssetDirectory;
+
+		for (auto& pair : indexKeyMap) {
+			materialOut <<
+				YAML::Key << pair.second <<
+				YAML::Value << std::filesystem::relative(m_TextureFilePaths[pair.first], asset_directory).string();
+		}
+
+		materialOut << YAML::EndMap << YAML::EndMap;
+
+		std::filesystem::create_directories(m_MaterialFilePath.parent_path());
+
+		std::ofstream fout(m_MaterialFilePath);
+		fout << materialOut.c_str();
+	}
+
+	bool SkyboxMaterial::Deserialize(const std::filesystem::path& path)
+	{
+		if (path.extension() != ".lmaterial") {
+
+			L_CORE_WARN("Incompatible Material File Extension");
+			L_CORE_WARN("Extension Used: {0}", path.extension().string());
+			L_CORE_WARN("Extension Expected: .lmaterial");
+		}
+		else
+		{
+			YAML::Node data;
+
+			try {
+				data = YAML::LoadFile(path.string());
+			}
+			catch (YAML::ParserException e) {
+				L_CORE_ERROR("YAML-CPP Failed to Load Scene File: '{0}', {1}", path.string(), e.what());
+				return false;
+			}
+
+			if (!data["Material Type"] || data["Material Type"].as<std::string>() != "SkyboxMaterial") {
+				L_CORE_ERROR("Material Type Node is Not Skybox Material: '{0}'", path.string());
+				return false;
+			}
+
+			if (!data["Material Name"]) {
+				L_CORE_ERROR("Material Name Node Not Correctly Declared in File: '{0}'", path.string());
+				return false;
+			}
+
+			if (!data["TextureFilePaths"]) {
+				L_CORE_ERROR("TextureFilePaths Node Not Correctly Declared in File: '{0}'", path.string());
+				return false;
+			}
+			else {
+
+				std::array<std::filesystem::path, 6> textureFilePathArray;
+
+				std::unordered_map<int, std::string> indexKeyMap{
+
+					{ 0, "Right"},
+					{ 1, "Left"},
+					{ 2, "Top"},
+					{ 3, "Bottom"},
+					{ 4, "Back"},
+					{ 5, "Front"},
+
+				};
+
+				std::filesystem::path asset_directory;
+				if (auto project_ref = Project::GetActiveProject())
+					asset_directory = project_ref->GetConfig().AssetDirectory;
+
+				auto texturesData = data["TextureFilePaths"];
+				if (texturesData)
+					for (auto& pair : indexKeyMap)
+						if (texturesData[pair.second])
+							textureFilePathArray[pair.first] = asset_directory / texturesData[pair.second].as<std::string>();
+
+				LoadSkybox(textureFilePathArray);
+				SetName(data["Material Name"].as<std::string>());
+				SetMaterialFilePath(path);
+
+				return true;
+			}
+		}
+		return false;
 	}
 
 	GLboolean SkyboxMaterial::Bind() {

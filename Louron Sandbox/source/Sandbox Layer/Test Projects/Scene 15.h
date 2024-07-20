@@ -37,13 +37,16 @@ public:
 
 	void OnAttach() override {
 
-		if (!m_Project || !m_Scene) {
-
-			// Load Project and Get Active Scene Handle
+		// Load Project and Get Active Scene Handle
+		if (m_Project)
+			Louron::Project::SetActiveProject(m_Project);
+		else
 			m_Project = Project::LoadProject("Sandbox Project/Sandbox Project.lproj", "Hierarchy System.lscene");
+
+		if (!m_Scene) 
 			m_Scene = Project::GetActiveScene();
 
-		}
+		
 		m_Scene->OnStart();
 	}
 
@@ -57,15 +60,15 @@ public:
 	void Update() override {
 
 		// Update Camera Component
-		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->Update((float)Time::Get().GetDeltaTime());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->GetGlobalPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().CameraInstance->Update((float)Time::Get().GetDeltaTime());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
 
 		m_Scene->OnUpdate();
 	}
 
 	void FixedUpdate() override {
 
-		if (!m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().Camera->IsMovementEnabled()) {
+		if (!m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->IsMovementEnabled()) {
 
 			//ROLL THE SPHERE!
 			if (m_Input.GetKey(GLFW_KEY_W)) {
@@ -194,8 +197,10 @@ public:
 
 			if(ball.HasComponent<Rigidbody>())
 			{
-				PxVec3 velocity = ball.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
-				ImGui::Text("Velocity: %.2f, %.2f, %.2f", velocity.x, velocity.y, velocity.z);
+				if(ball.GetComponent<Rigidbody>().GetActor()) {
+					PxVec3 velocity = ball.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
+					ImGui::Text("Velocity: %.2f, %.2f, %.2f", velocity.x, velocity.y, velocity.z);
+				}
 			}
 
 			ImGui::TreePop();
@@ -238,14 +243,16 @@ public:
 
 			if (ball.HasComponent<Rigidbody>())
 			{
-				PxVec3 velocity = ball.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
-				ImGui::Text("Velocity: %.2f, %.2f, %.2f", velocity.x, velocity.y, velocity.z);
+				if (ball.GetComponent<Rigidbody>().GetActor()) {
+					PxVec3 velocity = ball.GetComponent<Rigidbody>().GetActor()->GetLinearVelocity();
+					ImGui::Text("Velocity: %.2f, %.2f, %.2f", velocity.x, velocity.y, velocity.z);
+				}
 			}
 
 			ImGui::TreePop();
 		}
 
-		if (ImGui::Button("Toggle Camera Movement")) m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().Camera->ToggleMovement();
+		if (ImGui::Button("Toggle Camera Movement")) m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->ToggleMovement();
 
 		if (ImGui::Button("Reset Scene")) {
 

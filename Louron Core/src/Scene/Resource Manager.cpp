@@ -22,7 +22,7 @@ namespace Louron {
 
 		if (Meshes[mesh_name].first != nullptr) {
 			L_CORE_INFO("Mesh Already Loaded: {0}", mesh_name);
-			return GL_FALSE;
+			return GL_TRUE;
 		}
 
 		Assimp::Importer importer;

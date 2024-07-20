@@ -2,6 +2,7 @@
 
 // Louron Core Headers
 #include "UUID.h"
+#include "Camera.h"
 
 // C++ Standard Library Headers
 #include <map>
@@ -18,7 +19,6 @@ namespace Louron {
 
     class Scene;
     class Entity;
-    class Camera;
 
     /// <summary>
     /// Flags that are set to determine what state changes have occured
@@ -98,6 +98,8 @@ namespace Louron {
         UUID m_Parent = NULL_UUID;
         std::vector<UUID> m_Children;
 
+        friend class Prefab;
+
     };
 
 
@@ -108,12 +110,19 @@ namespace Louron {
 
 	struct CameraComponent : public Component {
 
-		std::shared_ptr<Camera> Camera = nullptr;
+		std::shared_ptr<Camera> CameraInstance = nullptr;
 		bool Primary = true;
         CameraClearFlags ClearFlags = CameraClearFlags::COLOUR_ONLY;
 
 		CameraComponent() = default;
-		CameraComponent(const CameraComponent&) = default;
+        CameraComponent(const CameraComponent& other) {
+
+            this->Primary = other.Primary;
+            this->ClearFlags = other.ClearFlags;
+
+            this->CameraInstance = std::make_shared<Camera>(*other.CameraInstance);
+
+        }
 
 	};
 

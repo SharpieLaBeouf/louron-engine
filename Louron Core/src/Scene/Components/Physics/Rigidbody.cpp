@@ -14,23 +14,27 @@
 
 namespace Louron {
 
-	Rigidbody::Rigidbody(Transform& transform, PxScene* scene) : m_PhysScene(scene)
+	Rigidbody::Rigidbody(Transform* transform, PxScene* scene) : m_PhysScene(scene)
 	{
 		if (!&PxGetPhysics() || !m_PhysScene) {
-			L_CORE_ERROR("PhysXPhysics or PhysXScene Not Initialized!");
+			L_CORE_ERROR("PhysXPhysics or PhysXScene Not Initialized.");
 			return;
 		}
 
-		glm::vec3 position = transform.GetGlobalPosition();
-		glm::quat quaternion = glm::quat(glm::radians(transform.GetGlobalRotation()));
+		if(!transform) {
+			L_CORE_ERROR("Rigidbody Constructor - Transform Pointer Invalid.");
+			return;
+		}
+
+		glm::vec3 position = transform->GetGlobalPosition();
+		glm::quat quaternion = glm::quat(glm::radians(transform->GetGlobalRotation()));
 		m_RigidDynamic = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
 
 		if (!m_RigidDynamic && !*m_RigidDynamic) {
-			L_CORE_ERROR("Could Not Create Rigid Dynamic Actor!");
+			L_CORE_ERROR("Could Not Create Rigid Dynamic Actor.");
 			return;
 		}
 
-		PxRigidBodyExt::updateMassAndInertia(*m_RigidDynamic->GetActor(), 1.0f);
 		m_PhysScene->addActor(*m_RigidDynamic->GetActor());
 
 		// Set initial properties
@@ -39,6 +43,104 @@ namespace Louron {
 		SetAngularDrag(m_AngularDrag);
 		SetGravity(m_UseGravity);
 		SetKinematic(m_IsKinematic);
+
+		PxRigidBodyExt::setMassAndUpdateInertia(*m_RigidDynamic->GetActor(), m_Mass);
+
+		m_RigidDynamic->AddFlag(RigidbodyFlag_ShapesUpdated);
+		m_RigidDynamic->AddFlag(RigidbodyFlag_TransformUpdated);
+	}
+
+	Rigidbody::Rigidbody(const Rigidbody& other) {
+
+		m_Mass = other.m_Mass;
+		m_Drag = other.m_Drag;
+		m_AngularDrag = other.m_AngularDrag;
+
+		m_AutomaticCentreOfMass = other.m_AutomaticCentreOfMass;
+		m_UseGravity = other.m_UseGravity;
+		m_IsKinematic = other.m_IsKinematic;
+
+		m_PositionConstraint = other.m_PositionConstraint;
+		m_RotationConstraint = other.m_RotationConstraint;
+
+		if (entity && *entity && entity->GetScene())
+		{
+			if (!m_RigidDynamic)
+			{
+				m_PhysScene = entity->GetScene()->GetPhysScene();
+				auto& transform = entity->GetComponent<Transform>();
+				glm::vec3 position = transform.GetGlobalPosition();
+				glm::quat quaternion = glm::quat(glm::radians(transform.GetGlobalRotation()));
+				m_RigidDynamic = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
+
+				m_PhysScene->addActor(*m_RigidDynamic->GetActor());
+			}
+
+			// Set initial properties
+			SetMass(m_Mass);
+			SetDrag(m_Drag);
+			SetAngularDrag(m_AngularDrag);
+			SetGravity(m_UseGravity);
+			SetKinematic(m_IsKinematic);
+
+			PxRigidBodyExt::setMassAndUpdateInertia(*m_RigidDynamic->GetActor(), m_Mass);
+
+			m_RigidDynamic->AddFlag(RigidbodyFlag_ShapesUpdated);
+			m_RigidDynamic->AddFlag(RigidbodyFlag_TransformUpdated);
+		}
+		else
+		{
+			m_PhysScene = nullptr;
+			m_RigidDynamic = nullptr;
+		}
+	}
+
+	Rigidbody& Rigidbody::operator=(const Rigidbody& other) {
+
+		m_Mass = other.m_Mass;
+		m_Drag = other.m_Drag;
+		m_AngularDrag = other.m_AngularDrag;
+
+		m_AutomaticCentreOfMass = other.m_AutomaticCentreOfMass;
+		m_UseGravity = other.m_UseGravity;
+		m_IsKinematic = other.m_IsKinematic;
+
+		m_PositionConstraint = other.m_PositionConstraint;
+		m_RotationConstraint = other.m_RotationConstraint;
+
+		if (entity && *entity && entity->GetScene())
+		{
+
+			if(!m_RigidDynamic)
+			{
+				m_PhysScene = entity->GetScene()->GetPhysScene();
+				auto& transform = entity->GetComponent<Transform>();
+				glm::vec3 position = transform.GetGlobalPosition();
+				glm::quat quaternion = glm::quat(glm::radians(transform.GetGlobalRotation()));
+				m_RigidDynamic = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
+
+				m_PhysScene->addActor(*m_RigidDynamic->GetActor());
+			}
+
+			// Set initial properties
+			SetMass(m_Mass);
+			SetDrag(m_Drag);
+			SetAngularDrag(m_AngularDrag);
+			SetGravity(m_UseGravity);
+			SetKinematic(m_IsKinematic);
+
+			PxRigidBodyExt::setMassAndUpdateInertia(*m_RigidDynamic->GetActor(), m_Mass);
+
+			m_RigidDynamic->AddFlag(RigidbodyFlag_ShapesUpdated);
+			m_RigidDynamic->AddFlag(RigidbodyFlag_TransformUpdated);
+
+		}
+		else
+		{
+			m_PhysScene = nullptr;
+			m_RigidDynamic = nullptr;
+		}
+		return *this;
 	}
 
 	std::shared_ptr<RigidDynamic> Rigidbody::GetActor() { return m_RigidDynamic; }

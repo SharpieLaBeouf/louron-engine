@@ -285,7 +285,7 @@ private:
 
 		if (CheckPaddleCollision(m_Paddles[0]) || CheckPaddleCollision(m_Paddles[1])) {
 
-			Louron::Audio::Get().PlayAudioFile("assets/Audio/bleep.mp3");
+			Louron::Audio::Get().PlayAudioFile("Sandbox Project/Assets/Audio/bleep.mp3");
 
 			if (m_Ball->velocity.y == 0.0f) {
 				m_Ball->velocity.y = m_Ball->speed * 0.6f;

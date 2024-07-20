@@ -177,7 +177,7 @@ namespace Louron {
 
 		Camera* camera = nullptr;
 		if (Entity cameraEntity = m_Scene->GetPrimaryCameraEntity())
-			camera = cameraEntity.GetComponent<CameraComponent>().Camera.get();
+			camera = cameraEntity.GetComponent<CameraComponent>().CameraInstance.get();
 
 		if (camera) {
 
@@ -236,11 +236,11 @@ namespace Louron {
 		m_FrameSize = Engine::Get().GetWindow().GetSize();
 
 		if (Entity cameraEntity = m_Scene->GetPrimaryCameraEntity())
-			cameraEntity.GetComponent<CameraComponent>().Camera->UpdateProjMatrix();
+			cameraEntity.GetComponent<CameraComponent>().CameraInstance->UpdateProjMatrix();
 		else {
 			cameraEntity = m_Scene->CreateEntity("Main Camera");
 			cameraEntity.AddComponent<CameraComponent>();
-			cameraEntity.GetComponent<CameraComponent>().Camera = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
+			cameraEntity.GetComponent<CameraComponent>().CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
 		}
 
 		// Calculate workgroups and generate SSBOs from screen size

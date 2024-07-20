@@ -41,15 +41,15 @@ public:
 
 	void OnAttach() override {
 
-		if (!m_Project || !m_Scene) {
+		// Load Project and Get Active Scene Handle
+		if (m_Project)
+			Louron::Project::SetActiveProject(m_Project);
+		else
+			m_Project = Project::LoadProject("Sandbox Project/Sandbox Project.lproj", "Physics Scene.lscene");
 
-			// Load Project and Get Active Scene Handle
-			m_Project = Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
+		if (!m_Scene)
+			m_Scene = m_Project->GetActiveScene();
 
-			m_Scene = m_Project->LoadScene("Physics Scene.lscene");
-			m_Project->SetActiveScene(m_Scene);
-
-		}
 		m_Scene->OnStart();
 	}
 
@@ -72,8 +72,8 @@ public:
 		}
 
 		// Update Camera Component
-		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->Update((float)Time::Get().GetDeltaTime());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->GetGlobalPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().CameraInstance->Update((float)Time::Get().GetDeltaTime());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
 
 		m_Scene->OnUpdate();
 	}
@@ -90,7 +90,7 @@ public:
 				if (rigidbody.IsKinematicEnabled())
 					continue;
 
-				if (rigidbody.GetActor()->GetActor()->isSleeping()) {
+				if (rigidbody.GetActor() && rigidbody.GetActor()->GetActor()->isSleeping()) {
 					mesh_renderer.LinkMeshRenderer(m_Scene->GetResources()->GetMeshRenderer("Red_Cube"));
 				}
 				else {
@@ -108,7 +108,7 @@ public:
 				if (rigidbody.IsKinematicEnabled())
 					continue;
 
-				if (rigidbody.GetActor()->GetActor()->isSleeping()) {
+				if (rigidbody.GetActor() && rigidbody.GetActor()->GetActor()->isSleeping()) {
 					mesh_renderer.LinkMeshRenderer(m_Scene->GetResources()->GetMeshRenderer("Red_Cube"));
 				}
 				else {
@@ -117,7 +117,7 @@ public:
 			}
 		}
 
-		if(!m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().Camera->IsMovementEnabled()) {
+		if(!m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->IsMovementEnabled()) {
 
 			float multiplier = 10.0f;
 
@@ -203,7 +203,7 @@ public:
 			ImGui::TreePop();
 		}
 		
-		if (ImGui::Button("Toggle Camera Movement")) m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().Camera->ToggleMovement();
+		if (ImGui::Button("Toggle Camera Movement")) m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->ToggleMovement();
 		
 		if (ImGui::Button("Reset Physics Cubes")) {
 

@@ -134,6 +134,7 @@ namespace Louron {
 
 		PhysicsMaterial();
 		PhysicsMaterial(float dynamicFriction, float staticFriction, float bounciness);
+		PhysicsMaterial(const PhysicsMaterial& other);
 		~PhysicsMaterial();
 
 		PxMaterial* GetMaterial() const;

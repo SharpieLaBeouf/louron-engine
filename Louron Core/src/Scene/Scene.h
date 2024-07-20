@@ -2,11 +2,14 @@
 
 // Louron Core Headers
 #include "../Core/Logging.h"
+#include "../Asset/Asset.h"
 #include "Components/Physics/CollisionCallback.h"
+#include "Components/Components.h"
 
 // C++ Standard Library Headers
 #include <vector>
 #include <memory>
+#include <optional>
 #include <string>
 #include <filesystem>
 
@@ -24,6 +27,7 @@ namespace Louron {
 
 	// Forward Declarations
 	class Entity;
+	class Prefab;
 	class RenderPipeline;
 	class UUID;
 
@@ -42,7 +46,7 @@ namespace Louron {
 		L_RENDER_PIPELINE ScenePipelineType;
 	};
 
-	class Scene : public std::enable_shared_from_this<Scene> {
+	class Scene : public Asset {
 
 	public:
 
@@ -54,8 +58,10 @@ namespace Louron {
 
 	public:
 
-		Entity CreateEntity(const std::string& name = std::string());
-		Entity CreateEntity(UUID uuid, const std::string& name = std::string());
+		Entity CreateEntity(const std::string& name = "");
+		Entity CreateEntity(UUID uuid, const std::string& name = "");
+
+		Entity InstantiatePrefab(std::shared_ptr<Prefab> prefab, std::optional<Transform> transform = std::nullopt, const UUID& parent_uuid = NULL_UUID);
 
 		Entity DuplicateEntity(Entity entity);
 		void DestroyEntity(Entity entity);
@@ -94,10 +100,14 @@ namespace Louron {
 		PxScene* GetPhysScene() const { return m_PhysxScene; }
 		void SetPhysScene(PxScene* physScene);
 
-	private:
+		virtual AssetType GetType() const override { return AssetType::Scene; }
+
+	protected:
 
 		entt::registry m_Registry;
 		std::shared_ptr<std::unordered_map<UUID, entt::entity>> m_EntityMap = std::make_shared<std::unordered_map<UUID, entt::entity>>();
+
+	private:
 
 		PxScene* m_PhysxScene = nullptr;
 		std::unique_ptr<CollisionCallback> m_CollisionCallback;

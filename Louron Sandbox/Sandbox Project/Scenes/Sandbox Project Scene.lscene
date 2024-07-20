@@ -17,7 +17,7 @@ Entities:
     TagComponent:
       Tag: Main Camera
     TransformComponent:
-      Translation: [-31.8342323, 5.83181477, -6.77288914]
+      Translation: [35.6592789, 6.56340313, -2.07527781]
       Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
     CameraComponent:
@@ -28,23 +28,23 @@ Entities:
         MovementYDamp: 0.649999976
         MouseSensitivity: 0.100000001
         MouseToggledOff: false
-        Position: [-31.8342323, 5.83181477, -6.77288914]
-        Yaw: 1832.20325
-        Pitch: 2.19950891
+        Position: [35.6592789, 6.56340313, -2.07527781]
+        Yaw: 2159.38354
+        Pitch: -0.7001158
       Primary: true
       ClearFlag: 1
     SkyboxComponent:
       MaterialFilePath: Kloppenheim Skybox/Kloppenheim Skybox.lmaterial
     SpotLightComponent:
-      Position: [-31.8342323, 5.83181477, -6.77288914, 1]
-      Direction: [0.845539331, 0.0383792445, 0.532531977, 1]
+      Position: [35.6592789, 6.56340313, -2.07527781, 1]
+      Direction: [0.999867558, -0.012219023, -0.0107601555, 1]
       Ambient: [0, 0, 0, 1]
       Diffuse: [1, 1, 1, 1]
       Specular: [1, 1, 1, 1]
       Range: 50
       Angle: 45
       Intensity: 1
-      Active: 1
+      Active: 0
   - Entity: 3148201112
     TagComponent:
       Tag: Light Source 24
@@ -54,7 +54,7 @@ Entities:
       Scale: [1.04594517, 1.04594517, 1.04594517]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [15.5839539, 30.9547653, -0.636505127, 1]
       Ambient: [1, 1, 1, 1]
@@ -72,7 +72,7 @@ Entities:
       Scale: [1.07117391, 1.07117391, 1.07117391]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-26.5662956, 36.9516487, 1.24836397, 1]
       Ambient: [1, 1, 1, 1]
@@ -90,7 +90,7 @@ Entities:
       Scale: [0.555729151, 0.555729151, 0.555729151]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [25.2600136, 49.9440689, -2.49053979, 1]
       Ambient: [1, 1, 1, 1]
@@ -108,7 +108,7 @@ Entities:
       Scale: [1.69961452, 1.69961452, 1.69961452]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-28.8805237, 32.9888954, -4.01895428, 1]
       Ambient: [1, 1, 1, 1]
@@ -126,7 +126,7 @@ Entities:
       Scale: [0.725285172, 0.725285172, 0.725285172]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [1.25949097, 29.6131554, -1.81889081, 1]
       Ambient: [1, 1, 1, 1]
@@ -144,7 +144,7 @@ Entities:
       Scale: [0.630553007, 0.630553007, 0.630553007]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [8.34981918, 16.8849754, -3.83945918, 1]
       Ambient: [1, 1, 1, 1]
@@ -162,7 +162,7 @@ Entities:
       Scale: [0.676846266, 0.676846266, 0.676846266]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-25.2108498, 36.2250099, -1.97133255, 1]
       Ambient: [1, 1, 1, 1]
@@ -180,7 +180,7 @@ Entities:
       Scale: [0.918540657, 0.918540657, 0.918540657]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [3.75150681, 18.4270439, -3.90968704, 1]
       Ambient: [1, 1, 1, 1]
@@ -198,7 +198,7 @@ Entities:
       Scale: [1.41201138, 1.41201138, 1.41201138]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-9.28479576, 24.1061192, 1.75863838, 1]
       Ambient: [1, 1, 1, 1]
@@ -216,7 +216,7 @@ Entities:
       Scale: [1.50645542, 1.50645542, 1.50645542]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [10.5322342, 32.6658554, 1.19240284, 1]
       Ambient: [1, 1, 1, 1]
@@ -234,7 +234,7 @@ Entities:
       Scale: [1.30597687, 1.30597687, 1.30597687]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-9.87231636, 20.5037327, -0.366396427, 1]
       Ambient: [1, 1, 1, 1]
@@ -252,7 +252,7 @@ Entities:
       Scale: [0.951767445, 0.951767445, 0.951767445]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [6.61425781, 23.538063, -0.642470598, 1]
       Ambient: [1, 1, 1, 1]
@@ -270,7 +270,7 @@ Entities:
       Scale: [0.616201222, 0.616201222, 0.616201222]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-11.2900867, 32.4286308, -3.68993568, 1]
       Ambient: [1, 1, 1, 1]
@@ -288,7 +288,7 @@ Entities:
       Scale: [1.95607507, 1.95607507, 1.95607507]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-14.7924204, 32.7496414, -3.90466809, 1]
       Ambient: [1, 1, 1, 1]
@@ -306,7 +306,7 @@ Entities:
       Scale: [0.706162691, 0.706162691, 0.706162691]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [16.852459, 17.7143345, 1.2257967, 1]
       Ambient: [1, 1, 1, 1]
@@ -324,7 +324,7 @@ Entities:
       Scale: [1.57397568, 1.57397568, 1.57397568]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-15.6497173, 26.740078, -1.57837415, 1]
       Ambient: [1, 1, 1, 1]
@@ -342,7 +342,7 @@ Entities:
       Scale: [1.08331907, 1.08331907, 1.08331907]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [0.00472450256, 35.3394089, -3.28803873, 1]
       Ambient: [1, 1, 1, 1]
@@ -360,7 +360,7 @@ Entities:
       Scale: [0.9953264, 0.9953264, 0.9953264]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [27.1351509, 46.4648705, -1.00404668, 1]
       Ambient: [1, 1, 1, 1]
@@ -378,7 +378,7 @@ Entities:
       Scale: [0.869903564, 0.869903564, 0.869903564]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-0.274501801, 25.9643917, -1.4185679, 1]
       Ambient: [1, 1, 1, 1]
@@ -396,7 +396,7 @@ Entities:
       Scale: [1.77769995, 1.77769995, 1.77769995]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [2.18713379, 43.4065628, 1.70893431, 1]
       Ambient: [1, 1, 1, 1]
@@ -414,7 +414,7 @@ Entities:
       Scale: [1.07634974, 1.07634974, 1.07634974]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [0.528503418, 30.6212177, -1.25962901, 1]
       Ambient: [1, 1, 1, 1]
@@ -432,7 +432,7 @@ Entities:
       Scale: [0.628451169, 0.628451169, 0.628451169]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [22.0112572, 26.5685787, -3.90469337, 1]
       Ambient: [1, 1, 1, 1]
@@ -450,7 +450,7 @@ Entities:
       Scale: [0.819019437, 0.819019437, 0.819019437]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-25.9102821, 26.3200321, -2.93580198, 1]
       Ambient: [1, 1, 1, 1]
@@ -468,7 +468,7 @@ Entities:
       Scale: [0.581761181, 0.581761181, 0.581761181]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [-24.7666168, 43.0252075, 1.89574003, 1]
       Ambient: [1, 1, 1, 1]
@@ -486,7 +486,7 @@ Entities:
       Scale: [1.09366345, 1.09366345, 1.09366345]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Torch/model/obj/Torch.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj
     PointLightComponent:
       Position: [0, 5, 0, 1]
       Ambient: [1, 1, 1, 1]
@@ -504,7 +504,7 @@ Entities:
       Scale: [1, 1, 1]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/BackPack/BackPack.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/BackPack/BackPack.fbx
   - Entity: 562898545
     TagComponent:
       Tag: Pink_Monkey
@@ -514,7 +514,35 @@ Entities:
       Scale: [1, 1, 1]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Monkey/Pink_Monkey.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Monkey/Pink_Monkey.fbx
+  - Entity: 2951701278
+    TagComponent:
+      Tag: Candle
+    TransformComponent:
+      Translation: [49.2400017, -0.140000001, 4.03000021]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: Sandbox Project/Assets/Models/Dungeon Kit/Candelabra/Candelabra_09_Lit.fbx
+    PointLightComponent:
+      Position: [49.2400017, -0.140000001, 4.03000021, 1]
+      Ambient: [1, 0.5, 0.200000003, 1]
+      Diffuse: [1, 0.5, 0.200000003, 1]
+      Specular: [1, 0.5, 0.200000003, 1]
+      Radius: 20
+      Intensity: 4.79716063
+      Active: 1
+  - Entity: 2951701277
+    TagComponent:
+      Tag: Chair
+    TransformComponent:
+      Translation: [47.9500008, -0.140000001, -5.53999996]
+      Rotation: [0, -50, 0]
+      Scale: [1, 1, 1]
+    MeshRendererComponent:
+      MeshActive: true
+      MeshFilePath: Sandbox Project/Assets/Models/Dungeon Kit/Chairs/Chair_Wood_Cloth_Red.fbx
   - Entity: 2951701276
     TagComponent:
       Tag: Monkey
@@ -524,7 +552,7 @@ Entities:
       Scale: [1, 1, 1]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Monkey/Monkey.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Monkey/Monkey.fbx
   - Entity: 1233930152
     TagComponent:
       Tag: Sponza
@@ -534,4 +562,4 @@ Entities:
       Scale: [0.0399999991, 0.0399999991, 0.0399999991]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Sponza/sponza.obj
+      MeshFilePath: Sandbox Project/Assets/Models/Sponza/sponza.obj

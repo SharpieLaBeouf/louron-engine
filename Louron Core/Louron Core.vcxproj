@@ -123,6 +123,9 @@
     <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="libs\glad\glad.c" />
+    <ClCompile Include="src\Asset\Asset Importer.cpp" />
+    <ClCompile Include="src\Asset\Asset.cpp" />
+    <ClCompile Include="src\Asset\Asset Manager.cpp" />
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\Core\Engine.cpp" />
     <ClCompile Include="src\Core\GuiLayer.cpp" />
@@ -143,6 +146,7 @@
     <ClCompile Include="src\Scene\Components\Physics\Rigidbody.cpp" />
     <ClCompile Include="src\Scene\Entity.cpp" />
     <ClCompile Include="src\Project\Project.cpp" />
+    <ClCompile Include="src\Scene\Prefab.cpp" />
     <ClCompile Include="src\Scene\Resource Manager.cpp" />
     <ClCompile Include="src\Scene\Scene Serializer.cpp" />
     <ClCompile Include="src\Scene\Scene Systems\Physics System.cpp" />
@@ -1045,6 +1049,9 @@
     <ClInclude Include="include\yaml-cpp\stlemitter.h" />
     <ClInclude Include="include\yaml-cpp\traits.h" />
     <ClInclude Include="include\yaml-cpp\yaml.h" />
+    <ClInclude Include="src\Asset\Asset Importer.h" />
+    <ClInclude Include="src\Asset\Asset.h" />
+    <ClInclude Include="src\Asset\Asset Manager.h" />
     <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\Core\Engine.h" />
     <ClInclude Include="src\Core\EngineStart.h" />
@@ -1076,6 +1083,7 @@
     <ClInclude Include="src\Scene\Components\Components.h" />
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\OpenGL\Texture.h" />
+    <ClInclude Include="src\Scene\Prefab.h" />
     <ClInclude Include="src\Scene\Resource Manager.h" />
     <ClInclude Include="src\Scene\Scene Serializer.h" />
     <ClInclude Include="src\Scene\Scene Systems\Physics System.h" />

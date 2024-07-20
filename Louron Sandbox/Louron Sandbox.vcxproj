@@ -112,32 +112,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\Shaders\Basic\basic.glsl" />
-    <None Include="assets\Shaders\Basic\basic_phong.glsl" />
-    <None Include="assets\Shaders\Basic\basic_texture.glsl" />
-    <None Include="assets\Shaders\FBO\FBO Texture Shader.glsl" />
-    <None Include="assets\Shaders\Forward+\FP_Depth.glsl" />
-    <None Include="assets\Shaders\Forward+\FP_Light_Culling.comp" />
-    <None Include="assets\Shaders\Default Shader.glsl" />
-    <None Include="assets\Shaders\Forward+\FP_Material_BP_Shader.glsl" />
-    <None Include="assets\Shaders\Forward+\FP_Material_PBR_Shader.glsl" />
-    <None Include="assets\Shaders\Materials\material_shader_flat.glsl" />
-    <None Include="assets\Shaders\Materials\material_shader_phong.glsl" />
-    <None Include="assets\Shaders\Skybox\Skybox.glsl" />
     <None Include="assimp-vc143-mt.dll">
       <FileType>Document</FileType>
     </None>
     <None Include="assimp-vc143-mtd.dll">
       <FileType>Document</FileType>
     </None>
-    <None Include="Sandbox Project\Scenes\PBR Materials.lscene" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="assets\Images\cube_texture.png" />
-    <Image Include="assets\Images\cube_texture_specular.png" />
-    <Image Include="assets\Images\grass_texture.jpg" />
-    <Image Include="assets\Images\stone_texture.png" />
-    <Image Include="assets\Images\stone_texture_specular.png" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Sandbox Layer\MainMenuLayer.h" />
@@ -149,6 +129,7 @@
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 14.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 15.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 16.h" />
+    <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 17.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 2.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 3.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 4.h" />

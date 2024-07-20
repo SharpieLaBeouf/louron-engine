@@ -27,6 +27,35 @@ namespace Louron {
 		UpdateCameraVectors();
 	}
 
+	Camera::Camera(const Camera& other) : m_Window(Engine::Get().GetWindow()), m_Input(Engine::Get().GetInput()) {
+
+		m_CameraPos = other.m_CameraPos;
+		m_CameraUp = other.m_CameraUp;
+		m_CameraRight = other.m_CameraRight;
+		m_CameraFront = other.m_CameraFront;
+		m_WorldUp = other.m_WorldUp;
+
+		m_Yaw = other.m_Yaw;
+		m_Pitch = other.m_Pitch;
+		m_LastMouseX = other.m_LastMouseX;
+		m_LastMouseY = other.m_LastMouseY;
+
+		m_FirstMouse = other.m_FirstMouse;
+		m_Movement = other.m_Movement;
+
+		m_ProjMatrix = other.m_ProjMatrix;
+		m_ViewMatrix = other.m_ViewMatrix;
+
+		NearDistance = other.NearDistance;
+		FarDistance = other.FarDistance;
+
+		FOV = other.FOV;
+		MovementSpeed = other.MovementSpeed;
+		MovementYDamp = other.MovementYDamp;
+		MouseSensitivity = other.MouseSensitivity;
+		MouseToggledOff = other.MouseToggledOff;
+	}
+
 	void Camera::UpdateViewMatrix() {
 		m_ViewMatrix = glm::lookAt(m_CameraPos, m_CameraPos + m_CameraFront, m_CameraUp);
 	}

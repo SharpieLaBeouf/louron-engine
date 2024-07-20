@@ -40,8 +40,8 @@ public:
 		m_SceneCamera.MovementSpeed = 10.0f;
 		m_SceneCamera.MovementYDamp = 0.65f;
 
-		monkeyRenderer.LoadModelFromFile("assets/Models/Monkey/Monkey.fbx", monkeyFilter);
-		backPackRenderer.LoadModelFromFile("assets/Models/BackPack/BackPack.fbx", backPackFilter);
+		monkeyRenderer.LoadModelFromFile("Sandbox Project/Assets/Models/Monkey/Monkey.fbx", monkeyFilter);
+		backPackRenderer.LoadModelFromFile("Sandbox Project/Assets/Models/BackPack/BackPack.fbx", backPackFilter);
 	}
 
 	~Scene7() override

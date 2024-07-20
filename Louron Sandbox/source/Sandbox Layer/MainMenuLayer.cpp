@@ -22,6 +22,7 @@ void MainMenuLayer::OnAttach() {
 	m_Scenes.push_back(std::make_unique<Scene14>());
 	m_Scenes.push_back(std::make_unique<Scene15>());
 	m_Scenes.push_back(std::make_unique<Scene16>());
+	m_Scenes.push_back(std::make_unique<Scene17>());
 
 	Louron::Engine::Get().GetWindow().SetVSync(false);
 }
@@ -78,11 +79,15 @@ void MainMenuLayer::OnGuiRender() {
 		ImGui::SetNextWindowBgAlpha(1.0f);
 		if (ImGui::Begin("Main Menu", (bool*)0, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove))
 		{
-			glm::vec2 menuSize = { 600.0f, 400.0f };
+			glm::vec2 menuSize = { 600.0f, 600.0f };
 			ImGui::SetWindowSize(ImVec2(menuSize.x, menuSize.y), ImGuiCond_Always);
 			ImGui::SetWindowPos(ImVec2(io.DisplaySize.x / 2 - menuSize.x / 2, io.DisplaySize.y / 2 - menuSize.y / 2), ImGuiCond_Always);
 			ImGui::Text("Main Menu");
+
 			ImGui::Separator();
+			ImGui::Text("Basic OpenGL");
+			ImGui::Separator();
+
 			if (ImGui::Button(" 1. Basic Triangles        ")) {
 				L_APP_INFO("Menu Item 1 Pressed");
 				m_SceneSelector = 1;
@@ -118,6 +123,11 @@ void MainMenuLayer::OnGuiRender() {
 				m_SceneSelector = 7;
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
 			}
+
+			ImGui::Separator();
+			ImGui::Text("Game Engine - Core Feature Implementations");
+			ImGui::Separator();
+
 			if (ImGui::Button(" 8. Entity System          ")) {
 				L_APP_INFO("Menu Item 8 Pressed");
 				m_SceneSelector = 8;
@@ -129,7 +139,7 @@ void MainMenuLayer::OnGuiRender() {
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
 			}
 
-			if (ImGui::Button(" 10. Pong Clone            ")) {
+			if (ImGui::Button(" 10. Pong Game Clone       ")) {
 				L_APP_INFO("Menu Item 10 Pressed");
 				m_SceneSelector = 10;
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
@@ -153,7 +163,7 @@ void MainMenuLayer::OnGuiRender() {
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
 			}
 
-			if (ImGui::Button(" 14. Knerpix Remake        ")) {
+			if (ImGui::Button(" 14. Knerpix Game Remake   ")) {
 				L_APP_INFO("Menu Item 14 Pressed");
 				m_SceneSelector = 14;
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
@@ -168,6 +178,12 @@ void MainMenuLayer::OnGuiRender() {
 			if (ImGui::Button(" 16. PBR Implementation    ")) {
 				L_APP_INFO("Menu Item 16 Pressed");
 				m_SceneSelector = 16;
+				m_Scenes[m_SceneSelector - 1]->OnAttach();
+			}
+
+			if (ImGui::Button(" 17. Asset Manager & Prefabs")) {
+				L_APP_INFO("Menu Item 17 Pressed");
+				m_SceneSelector = 17;
 				m_Scenes[m_SceneSelector - 1]->OnAttach();
 			}
 		}

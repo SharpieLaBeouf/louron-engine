@@ -37,6 +37,7 @@ namespace Louron {
                     out << YAML::BeginMap;
                     out << YAML::Key << "StartScene" << YAML::Value << config.StartScene.string();
                     out << YAML::Key << "AssetDirectory" << YAML::Value << config.AssetDirectory.string();
+                    out << YAML::Key << "AssetRegistry" << YAML::Value << config.AssetRegistry.string(); // Relative to AssetDirecotry
                     out << YAML::EndMap;
                 }
                 out << YAML::EndMap;
@@ -80,10 +81,18 @@ namespace Louron {
             config.Name = data["Project Name"].as<std::string>();
 
             auto projectConfig = data["Project Config"];
-            config.StartScene = projectConfig["StartScene"].as<std::string>();
-            config.AssetDirectory = projectConfig["AssetDirectory"].as<std::string>();
+            
+            if(projectConfig["StartScene"])
+                config.StartScene = projectConfig["StartScene"].as<std::string>();
+            
+            if(projectConfig["AssetDirectory"])
+                config.AssetDirectory = projectConfig["AssetDirectory"].as<std::string>();
+
+            if (projectConfig["AssetRegistry"])
+                config.AssetRegistry = projectConfig["AssetRegistry"].as<std::string>();
 
             m_Project->SetConfig(config);
+
             return true;
         }
         return false;

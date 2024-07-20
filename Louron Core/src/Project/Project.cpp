@@ -27,34 +27,41 @@ namespace Louron {
 
 		std::filesystem::path outFilePath = projectFilePath;
 
-		// Check if Project File Path is Empty.
-		if (outFilePath.empty())
-			outFilePath = "Untitled Project/Untitled Project.lproj";
+		// 1. Validate ProjectFilePath
+		{
+			// Check if Project File Path is Empty.
+			if (outFilePath.empty())
+				outFilePath = "Untitled Project/Untitled Project.lproj";
 
-		// Check if Project File Extension is Incompatible.
-		if (outFilePath.extension() != ".lproj") {
-			
-			L_CORE_WARN("Incompatible Project File Extension");
-			L_CORE_WARN("Extension Used: {0}", projectFilePath.extension().string());
-			L_CORE_WARN("Extension Expected: .lproj");
-			
-			outFilePath.replace_extension(".lproj");
-		}
+			// Check if Project File Extension is Incompatible.
+			if (outFilePath.extension() != ".lproj") {
 
-		// Check if Project Has a Dedicated Parent Project Directory.
-		if (!outFilePath.has_parent_path() || std::filesystem::absolute(outFilePath).parent_path() == std::filesystem::current_path()) {
-			L_CORE_INFO("Created New Project Folder");
-			outFilePath = outFilePath.filename().replace_extension() / outFilePath;
-		}
+				L_CORE_WARN("Incompatible Project File Extension");
+				L_CORE_WARN("Extension Used: {0}", projectFilePath.extension().string());
+				L_CORE_WARN("Extension Expected: .lproj");
 
-		// Checks if Project Already Exists and Returns Deserialized Project Instance.
-		if (std::filesystem::exists(outFilePath)) {
-			L_CORE_INFO("Project Already Exists");
-			return Project::LoadProject(outFilePath);
+				return nullptr;
+			}
+
+			// Check if Project Has a Dedicated Parent Project Directory.
+			// If not we will create a directory in the name of the ProjectFilePath parsed to this function.
+			if (!outFilePath.has_parent_path() || std::filesystem::absolute(outFilePath).parent_path() == std::filesystem::current_path()) {
+				L_CORE_INFO("Created New Project Folder");
+				outFilePath = outFilePath.filename().replace_extension() / outFilePath;
+			}
+
+			// Checks if Project Already Exists and Returns Deserialized Project Instance.
+			if (std::filesystem::exists(outFilePath)) {
+				L_CORE_INFO("Project Already Exists");
+				return Project::LoadProject(outFilePath);
+			}
 		}
 		
-		// Initialise Project and Scene Instances.
+		// 2. Initialise Project and Scene Instances.
 		std::shared_ptr<Project> project = std::make_shared<Project>();
+
+		if (!s_ActiveProject)
+			s_ActiveProject = project;
 
 		// Define Project and Scene Config.
 		std::filesystem::path projectDirectory = outFilePath.parent_path();
@@ -62,9 +69,16 @@ namespace Louron {
 		project->m_Config.Name = outFilePath.filename().replace_extension().string();
 		project->m_Config.StartScene = projectDirectory / "Scenes/Untitled Scene.lscene";
 		project->m_Config.AssetDirectory = projectDirectory / "Assets/";
+		project->m_Config.AssetRegistry = project->m_Config.AssetDirectory / "AssetRegistry.lassetreg";
 
+		// This is a new project. New projects can only be created in the editor environment.
+		// Additionally, as this is a new project, we will serialise the empty AssetManager to
+		// ensure the file is created in the AssetDirectory.
+		project->m_AssetManager = std::make_shared<EditorAssetManager>();
+		project->GetEditorAssetManager()->SerializeAssetRegistry();
+
+		// We now want to create a new empty scene that is attached to this Project automatically.
 		project->m_ActiveScene = std::make_shared<Scene>();
-		project->m_ActiveScene->LoadSceneFile(project->m_Config.StartScene);
 		{
 			SceneConfig config = project->m_ActiveScene->GetConfig();
 			config.AssetDirectory = project->m_Config.AssetDirectory;
@@ -74,17 +88,18 @@ namespace Louron {
 		project->m_ProjectFilePath = outFilePath;
 		project->m_ProjectDirectory = projectDirectory;
 
-		// Second Save Project Data
+		// 3. Serialise Project Data
 		ProjectSerializer serializer(project);
 		if (!serializer.Serialize(outFilePath)) {
 			L_CORE_ERROR("Project Could Not Be Saved");
 			return nullptr;
 		}
 
-		L_CORE_INFO("Project Created: {0}", project->m_Config.Name);
+		// 4. Serialise Empty Scene Data
+		project->m_ActiveScene->m_SceneFilePath = project->m_Config.StartScene;
+		project->SaveScene(project->m_Config.StartScene);
 
-		if (!s_ActiveProject)
-			s_ActiveProject = project;
+		L_CORE_INFO("Project Created: {0}", project->m_Config.Name);
 
 		return project;
 	}
@@ -235,7 +250,7 @@ namespace Louron {
 	}
 
 	/// <summary>
-	/// Saves a Scene File.
+	/// Saves a Scene File relative to the Project Directory.
 	/// </summary>
 	bool Project::SaveScene(const std::filesystem::path& sceneFilePath) {
 
@@ -249,7 +264,7 @@ namespace Louron {
 			}
 
 			sceneSerializer.Serialize();
-			L_CORE_INFO("Scene ({0}) Saved At: {1}", s_ActiveProject->m_Config.Name, path.string());
+			L_CORE_INFO("Scene ({0}) Saved At: {1}", m_Config.Name, path.string());
 			return true;
 		}
 
@@ -270,5 +285,25 @@ namespace Louron {
 	void Project::SetScene(std::shared_ptr<Scene> scene) {
 		m_ActiveScene.reset();
 		m_ActiveScene = scene;
+	}
+
+	/// <summary>
+	/// Static function to get retrieve the Static Pointer Cast of AssetManagerBase -> EditorAssetManager.
+	/// 
+	/// THIS IS TO BE CALLED ONLY IN EDITOR ENVIRONMENTS.
+	/// </summary>
+	std::shared_ptr<EditorAssetManager> Project::GetStaticEditorAssetManager() {
+		if (auto project_ref = Project::GetActiveProject(); project_ref)
+			return project_ref->GetEditorAssetManager();
+		return nullptr;
+	}
+
+	/// <summary>
+	/// Static Pointer Cast of AssetManagerBase -> EditorAssetManager.
+	/// 
+	/// THIS IS TO BE CALLED ONLY IN EDITOR ENVIRONMENTS.
+	/// </summary>
+	std::shared_ptr<EditorAssetManager> Project::GetEditorAssetManager() const {
+		return std::static_pointer_cast<EditorAssetManager>(m_AssetManager);
 	}
 }

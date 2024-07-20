@@ -11,7 +11,7 @@ Entities:
       Scale: [1, 1, 1]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Blue_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Blue_Cube.fbx
     RigidbodyComponent:
       Mass: 10
       Drag: 0
@@ -35,7 +35,7 @@ Entities:
       Scale: [1.74626827, 1.31626976, 0.847137809]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -59,7 +59,7 @@ Entities:
       Scale: [1.89108706, 0.593902051, 1.71588898]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -83,7 +83,7 @@ Entities:
       Scale: [1.89185977, 0.715365887, 1.74380803]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -107,7 +107,7 @@ Entities:
       Scale: [0.904404402, 0.729728281, 1.04533768]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -131,7 +131,7 @@ Entities:
       Scale: [1.48530388, 1.37511063, 1.48077059]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -155,7 +155,7 @@ Entities:
       Scale: [1.43763757, 1.34266281, 1.52513194]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -179,7 +179,7 @@ Entities:
       Scale: [0.659435749, 1.14820433, 1.59917116]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -203,7 +203,7 @@ Entities:
       Scale: [1.95691073, 0.998382807, 1.92372179]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -227,7 +227,7 @@ Entities:
       Scale: [1.43722236, 1.61578369, 1.08012748]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -251,7 +251,7 @@ Entities:
       Scale: [1.3038671, 1.32283878, 1.39679456]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -275,7 +275,7 @@ Entities:
       Scale: [1.74351645, 0.66368556, 1.53602016]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -299,7 +299,7 @@ Entities:
       Scale: [1.7394073, 1.69121218, 1.0281415]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -323,7 +323,7 @@ Entities:
       Scale: [1.41962457, 1.41505349, 1.21060681]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -347,7 +347,7 @@ Entities:
       Scale: [0.661737204, 1.52139139, 1.51234269]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -371,7 +371,7 @@ Entities:
       Scale: [1.42060649, 1.8092891, 1.78743446]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -395,7 +395,7 @@ Entities:
       Scale: [1.85913801, 0.983413577, 0.957629323]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -419,7 +419,7 @@ Entities:
       Scale: [1.63251042, 1.28492212, 0.811044574]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -443,7 +443,7 @@ Entities:
       Scale: [1.2921927, 1.0371846, 0.876943588]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -467,7 +467,7 @@ Entities:
       Scale: [0.831676364, 1.54405272, 0.745156765]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -491,7 +491,7 @@ Entities:
       Scale: [1.29695678, 1.15041316, 0.923280358]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -515,7 +515,7 @@ Entities:
       Scale: [1.16687298, 1.34050512, 0.685051203]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -539,7 +539,7 @@ Entities:
       Scale: [0.881775379, 1.58373141, 1.89856768]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -563,7 +563,7 @@ Entities:
       Scale: [0.723910391, 1.68004715, 1.64228964]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -587,7 +587,7 @@ Entities:
       Scale: [0.918862164, 1.85563207, 1.26541853]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -611,7 +611,7 @@ Entities:
       Scale: [1.70508802, 1.35259295, 0.512810528]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -635,7 +635,7 @@ Entities:
       Scale: [1.21433687, 1.5245558, 1.36467743]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -659,7 +659,7 @@ Entities:
       Scale: [1.49410427, 1.41463697, 1.35009062]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -683,7 +683,7 @@ Entities:
       Scale: [1.93817544, 0.897934198, 1.20089507]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -707,7 +707,7 @@ Entities:
       Scale: [0.841135442, 0.700949192, 1.11545455]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -731,7 +731,7 @@ Entities:
       Scale: [0.708943248, 1.07030928, 0.927384377]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -755,7 +755,7 @@ Entities:
       Scale: [0.907020688, 1.06575251, 0.886784315]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -779,7 +779,7 @@ Entities:
       Scale: [0.738473654, 0.920312643, 1.82009125]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -803,7 +803,7 @@ Entities:
       Scale: [1.00443876, 1.38290453, 1.41433227]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -827,7 +827,7 @@ Entities:
       Scale: [1.16691041, 0.828587651, 1.09773779]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -851,7 +851,7 @@ Entities:
       Scale: [0.850768864, 1.31905079, 0.861886501]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -875,7 +875,7 @@ Entities:
       Scale: [0.780159652, 1.95983255, 1.59570622]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -899,7 +899,7 @@ Entities:
       Scale: [1.28604782, 1.28403592, 1.48650336]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -923,7 +923,7 @@ Entities:
       Scale: [0.998549461, 1.01883197, 0.554182112]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -947,7 +947,7 @@ Entities:
       Scale: [0.58414948, 1.73948681, 1.51144087]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -971,7 +971,7 @@ Entities:
       Scale: [1.41457224, 1.4476074, 0.868097961]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -995,7 +995,7 @@ Entities:
       Scale: [1.13293004, 1.65474117, 1.01497853]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1019,7 +1019,7 @@ Entities:
       Scale: [1.25809455, 1.49574232, 1.31662452]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1043,7 +1043,7 @@ Entities:
       Scale: [1.24823558, 1.53326011, 1.22136497]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1067,7 +1067,7 @@ Entities:
       Scale: [0.895991206, 0.908937633, 1.83656287]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1091,7 +1091,7 @@ Entities:
       Scale: [1.86565077, 1.88343513, 0.78880018]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1115,7 +1115,7 @@ Entities:
       Scale: [1.10882092, 0.978748441, 1.2812711]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1139,7 +1139,7 @@ Entities:
       Scale: [1.36059403, 1.01529086, 0.995166242]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1163,7 +1163,7 @@ Entities:
       Scale: [1.56415093, 1.50153399, 1.87073302]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1187,7 +1187,7 @@ Entities:
       Scale: [0.701718926, 1.72044718, 1.26437068]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1211,7 +1211,7 @@ Entities:
       Scale: [0.84912616, 1.56371617, 0.988502741]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1235,7 +1235,7 @@ Entities:
       Scale: [0.550602138, 0.865457475, 1.44248629]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1259,7 +1259,7 @@ Entities:
       Scale: [0.914485097, 1.76535642, 0.916986346]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1283,7 +1283,7 @@ Entities:
       Scale: [1.94414473, 1.30136573, 0.995323837]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1307,7 +1307,7 @@ Entities:
       Scale: [1.1363461, 1.97892082, 1.33459401]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1331,7 +1331,7 @@ Entities:
       Scale: [1.08579254, 1.41333973, 1.31390297]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1355,7 +1355,7 @@ Entities:
       Scale: [0.542575896, 1.36397457, 1.56858778]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1379,7 +1379,7 @@ Entities:
       Scale: [1.3045094, 1.11773038, 1.16472745]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1403,7 +1403,7 @@ Entities:
       Scale: [0.789466023, 1.32901692, 0.603997827]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1427,7 +1427,7 @@ Entities:
       Scale: [1.10146999, 1.85337305, 1.23070836]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1451,7 +1451,7 @@ Entities:
       Scale: [1.6792084, 1.82559633, 1.55410731]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1475,7 +1475,7 @@ Entities:
       Scale: [0.859249055, 0.566848636, 1.82619214]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1499,7 +1499,7 @@ Entities:
       Scale: [1.94816375, 0.583457112, 1.19589567]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1523,7 +1523,7 @@ Entities:
       Scale: [0.621004105, 1.74470973, 1.44650114]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1547,7 +1547,7 @@ Entities:
       Scale: [0.69930768, 1.32846224, 1.94346428]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1571,7 +1571,7 @@ Entities:
       Scale: [0.81122458, 1.63727355, 1.93030679]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1595,7 +1595,7 @@ Entities:
       Scale: [1.93148184, 1.83521163, 1.38607728]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1619,7 +1619,7 @@ Entities:
       Scale: [0.770853639, 1.78472602, 1.08253884]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1643,7 +1643,7 @@ Entities:
       Scale: [1.81016397, 1.39203644, 1.22101915]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1667,7 +1667,7 @@ Entities:
       Scale: [1.72214341, 1.47630072, 1.53659868]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1691,7 +1691,7 @@ Entities:
       Scale: [0.646710038, 0.824217558, 1.33536267]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1715,7 +1715,7 @@ Entities:
       Scale: [0.815609813, 0.794235826, 1.13062179]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1739,7 +1739,7 @@ Entities:
       Scale: [1.3896209, 1.69151592, 1.97418904]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1763,7 +1763,7 @@ Entities:
       Scale: [0.818383873, 0.584305167, 1.06638277]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1787,7 +1787,7 @@ Entities:
       Scale: [0.648140192, 1.12878537, 0.819461405]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1811,7 +1811,7 @@ Entities:
       Scale: [1.1552496, 0.964756131, 0.717958212]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1835,7 +1835,7 @@ Entities:
       Scale: [1.40974247, 1.51111603, 1.17280126]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1859,7 +1859,7 @@ Entities:
       Scale: [0.902864754, 1.33508766, 0.590813518]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1883,7 +1883,7 @@ Entities:
       Scale: [1.08724821, 1.48887503, 1.48471701]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1907,7 +1907,7 @@ Entities:
       Scale: [1.7809037, 1.11127591, 1.59220791]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1931,7 +1931,7 @@ Entities:
       Scale: [1.22187948, 1.25257325, 0.645517349]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1955,7 +1955,7 @@ Entities:
       Scale: [0.678446651, 1.23774362, 0.531263053]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -1979,7 +1979,7 @@ Entities:
       Scale: [1.52420783, 0.997457027, 1.62719786]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2003,7 +2003,7 @@ Entities:
       Scale: [1.60417581, 1.17826414, 1.36881459]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2027,7 +2027,7 @@ Entities:
       Scale: [1.3215338, 1.70299876, 1.11502552]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2051,7 +2051,7 @@ Entities:
       Scale: [0.730343342, 1.91617692, 1.70887423]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2075,7 +2075,7 @@ Entities:
       Scale: [1.11929584, 1.37687874, 0.643316031]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2099,7 +2099,7 @@ Entities:
       Scale: [1.37507796, 1.47482789, 1.06010914]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2123,7 +2123,7 @@ Entities:
       Scale: [1.80427635, 1.03465962, 0.67169559]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2147,7 +2147,7 @@ Entities:
       Scale: [1.25258088, 0.891178608, 0.821352363]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2171,7 +2171,7 @@ Entities:
       Scale: [1.67678094, 0.981863797, 0.555714071]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2195,7 +2195,7 @@ Entities:
       Scale: [0.734694481, 1.96002781, 0.534465134]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2219,7 +2219,7 @@ Entities:
       Scale: [1.65677452, 0.781748176, 1.5411334]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2243,7 +2243,7 @@ Entities:
       Scale: [1.33036149, 0.533677578, 1.64603198]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2267,7 +2267,7 @@ Entities:
       Scale: [1.60405564, 1.53179574, 0.772476971]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2291,7 +2291,7 @@ Entities:
       Scale: [1.19176877, 0.704712152, 0.774928093]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2315,7 +2315,7 @@ Entities:
       Scale: [1.74215436, 1.35477889, 1.79616487]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2339,7 +2339,7 @@ Entities:
       Scale: [1.89902496, 1.34108424, 1.64803648]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2363,7 +2363,7 @@ Entities:
       Scale: [1.95827293, 0.631374896, 1.81923437]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2387,7 +2387,7 @@ Entities:
       Scale: [1.64327908, 0.627028644, 0.911590278]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2411,7 +2411,7 @@ Entities:
       Scale: [1.77661002, 1.28502584, 1.42413771]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2435,7 +2435,7 @@ Entities:
       Scale: [5, 5, 5]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Green_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Green_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2459,7 +2459,7 @@ Entities:
       Scale: [5, 5, 5]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2483,7 +2483,7 @@ Entities:
       Scale: [3, 1, 3]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Red_Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Red_Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0
@@ -2518,7 +2518,7 @@ Entities:
       Scale: [200, 1, 200]
     MeshRendererComponent:
       MeshActive: true
-      MeshFilePath: assets/Models/Cube/Cube.fbx
+      MeshFilePath: Sandbox Project/Assets/Models/Cube/Cube.fbx
     RigidbodyComponent:
       Mass: 1
       Drag: 0

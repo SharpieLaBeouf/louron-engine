@@ -2,6 +2,7 @@
 
 // Louron Core Headers
 #include "Entity.h"
+#include "Prefab.h"
 #include "Scene Serializer.h"
 #include "Resource Manager.h"
 
@@ -10,6 +11,7 @@
 #include "Components/Light.h"
 #include "Components/Mesh.h"
 #include "Components/UUID.h"
+#include "Components/Skybox.h"
 
 #include "Components/Physics/Collider.h"
 #include "Components/Physics/Rigidbody.h"
@@ -141,7 +143,7 @@ namespace Louron {
 		// Load Existing Scene File or Create New Scene.
 		if (std::filesystem::exists(outFilePath)) {
 
-			SceneSerializer serializer(shared_from_this());
+			SceneSerializer serializer(std::static_pointer_cast<Scene>(shared_from_this()));
 			if (serializer.Deserialize(outFilePath)) {
 				m_SceneFilePath = outFilePath;
 				return true;
@@ -157,6 +159,39 @@ namespace Louron {
 	/// </summary>
 	Entity Scene::CreateEntity(const std::string& name) {
 		return CreateEntity(UUID(), name);
+	}
+
+	/// <summary>
+	/// Create Entity in Scene with UUID
+	/// </summary>
+	Entity Scene::CreateEntity(UUID uuid, const std::string& name) {
+
+		while (true) {
+
+			if (m_EntityMap->find(uuid) == m_EntityMap->end())
+				break;
+
+			uuid = UUID();
+		}
+
+		Entity entity = { m_Registry.create(), this };
+
+		// 1. Add UUID Component
+		entity.AddComponent<IDComponent>(uuid);
+
+		// 2. Add Transform Component
+		entity.AddComponent<Transform>();
+
+		// 3. Add Tag Component
+		auto& tag = entity.AddComponent<TagComponent>();
+		tag.Tag = name.empty() ? "Untitled Entity" : name;
+
+		// 4. Add Hierarchy Component
+		entity.AddComponent<HierarchyComponent>();
+
+		m_EntityMap->emplace(uuid, entity);
+
+		return entity;
 	}
 
 	#pragma region Component Copying
@@ -244,30 +279,6 @@ namespace Louron {
 		m_PhysxScene = nullptr;
 	}
 
-	/// <summary>
-	/// Create Entity in Scene with UUID
-	/// </summary>
-	Entity Scene::CreateEntity(UUID uuid, const std::string& name)
-	{
-		Entity entity = { m_Registry.create(), this };
-		
-		// 1. Add UUID Component
-		entity.AddComponent<IDComponent>(uuid);
-
-		// 2. Add Transform Component
-		entity.AddComponent<Transform>();
-
-		// 3. Add Tag Component
-		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Untitled Entity" : name;
-
-		// 4. Add Hierarchy Component
-		entity.AddComponent<HierarchyComponent>();
-
-		m_EntityMap->emplace(uuid, entity);
-
-		return entity;
-	}
 
 	// TODO: Duplicates Entity in Scene
 	Entity Scene::DuplicateEntity(Entity entity) {
@@ -326,13 +337,12 @@ namespace Louron {
 
 	Entity Scene::FindEntityByUUID(UUID uuid)
 	{
-		if (m_EntityMap->find(uuid) == m_EntityMap->end()) {
-			L_CORE_ERROR("Entity UUID not found in scene");
-			return {};
+		if (m_EntityMap->find(uuid) != m_EntityMap->end()) {
+			return Entity{ m_EntityMap->at(uuid), this };
 		}
-		else {
-			return { m_EntityMap->at(uuid), this };
-		}
+
+		L_CORE_ERROR("Entity UUID not found in scene");
+		return Entity{};
 	}
 
 	// Returns Primary Camera Entity
@@ -357,6 +367,145 @@ namespace Louron {
 		return (FindEntityByUUID(uuid)) ? true : false;
 	}
 
+	Entity Scene::InstantiatePrefab(std::shared_ptr<Prefab> prefab, std::optional<Transform> transform, const UUID& parent_uuid)
+	{
+		entt::registry* prefab_registry = &prefab->m_PrefabRegistry;
+		entt::entity prefab_root_entity = prefab->m_RootEntity;
+		std::string prefab_name = prefab->m_PrefabName;
+
+		std::function<Entity(entt::entity, const UUID&)> copy_prefab_entity = [&](entt::entity start_prefab_entity, const UUID& parent_uuid) -> Entity {
+
+			Entity instantiated_entity = this->CreateEntity("");
+
+			// 1. Copy Data in All Components
+			{
+				// 1.a. Tag Component
+				if (prefab_registry->has<TagComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<TagComponent>(start_prefab_entity);
+					instantiated_entity.GetComponent<TagComponent>().Tag = component.Tag;
+				}
+
+				// 1.b. Hierarchy Component
+				if (prefab_registry->has<HierarchyComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<HierarchyComponent>(start_prefab_entity);
+					instantiated_entity.GetComponent<HierarchyComponent>().AttachParent(parent_uuid);
+				}
+
+				// 1.c. Camera Component
+				if (prefab_registry->has<CameraComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<CameraComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<CameraComponent>(component);
+				}
+
+				// 1.d. Audio Listener
+				if (prefab_registry->has<AudioListener>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<AudioListener>(start_prefab_entity);
+					instantiated_entity.AddComponent<AudioListener>(component);
+				}
+
+				// 1.e. Audio Emitter
+				if (prefab_registry->has<AudioEmitter>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<AudioEmitter>(start_prefab_entity);
+					instantiated_entity.AddComponent<AudioEmitter>(component);
+				}
+
+				// 1.f. Transform Component
+				if (prefab_registry->has<Transform>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<Transform>(start_prefab_entity);
+					instantiated_entity.RemoveComponent<Transform>(); // Remove so we can use copy constructor for transform
+					
+					if (parent_uuid == NULL_UUID) { 
+						// If we are the root entity, we check if the transform 
+						// passed has a value, if not, standard copy from prefab
+						if (transform.has_value())
+							instantiated_entity.AddComponent<Transform>(transform.value());
+						else
+							instantiated_entity.AddComponent<Transform>(component);
+					}
+					else {
+						instantiated_entity.AddComponent<Transform>(component);
+					}
+				}
+
+				// 1.g. MeshFilter
+				if (prefab_registry->has<MeshFilter>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<MeshFilter>(start_prefab_entity);
+					instantiated_entity.AddComponent<MeshFilter>(component);
+				}
+
+				// 1.h. MeshRenderer
+				if (prefab_registry->has<MeshRenderer>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<MeshRenderer>(start_prefab_entity);
+					instantiated_entity.AddComponent<MeshRenderer>(component);
+				}
+
+				// 1.i. PointLight Component
+				if (prefab_registry->has<PointLightComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<PointLightComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<PointLightComponent>(component);
+				}
+
+				// 1.j. SpotLight Component
+				if (prefab_registry->has<SpotLightComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<SpotLightComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<SpotLightComponent>(component);
+				}
+
+				// 1.k. DirectionalLight Component
+				if (prefab_registry->has<DirectionalLightComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<DirectionalLightComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<DirectionalLightComponent>(component);
+				}
+
+				// 1.l. Skybox Component
+				if (prefab_registry->has<SkyboxComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<SkyboxComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<SkyboxComponent>(component);
+				}
+
+				// 1.m. Rigidbody Component
+				if (prefab_registry->has<Rigidbody>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<Rigidbody>(start_prefab_entity);
+					instantiated_entity.AddComponent<Rigidbody>() = component;
+				}
+
+				// 1.n. Sphere Collider
+				if (prefab_registry->has<SphereCollider>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<SphereCollider>(start_prefab_entity);
+					instantiated_entity.AddComponent<SphereCollider>() = component;
+				}
+
+				// 1.o. Box Collider
+				if (prefab_registry->has<BoxCollider>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<BoxCollider>(start_prefab_entity);
+					instantiated_entity.AddComponent<BoxCollider>() = component;
+				}
+			}
+
+			// 2. Recurse Children
+			if (prefab_registry->has<HierarchyComponent>(start_prefab_entity)) {
+
+				for (const auto& child_uuid : prefab_registry->get<HierarchyComponent>(start_prefab_entity).GetChildren())
+				{
+					Entity child_entity = copy_prefab_entity(prefab->FindEntityByUUID(child_uuid), instantiated_entity.GetUUID());
+
+				}
+
+			}
+
+			return instantiated_entity;
+
+		};
+
+		Entity instantiated_entity = copy_prefab_entity(prefab_root_entity, parent_uuid);
+
+		prefab->m_InstantiationCount++;
+
+		instantiated_entity.GetComponent<TagComponent>().Tag = instantiated_entity.GetComponent<TagComponent>().Tag + "_" + std::to_string(prefab->m_InstantiationCount);
+
+		return instantiated_entity;
+	}
+
 #pragma endregion
 
 #pragma region Scene Logic
@@ -366,19 +515,19 @@ namespace Louron {
 		m_IsRunning = true;
 
 		if (!m_CollisionCallback) {
-			m_CollisionCallback = std::make_unique<CollisionCallback>(shared_from_this());
+			m_CollisionCallback = std::make_unique<CollisionCallback>(std::static_pointer_cast<Scene>(shared_from_this()));
 
 			m_PhysxScene->setSimulationEventCallback(m_CollisionCallback.get());
 		}
 
-		m_SceneConfig.ScenePipeline->OnStartPipeline(shared_from_this());
+		m_SceneConfig.ScenePipeline->OnStartPipeline(std::static_pointer_cast<Scene>(shared_from_this()));
 	}
 
 	void Scene::OnUpdate() {
 
 		if (!m_IsPaused && m_IsRunning) {
 
-			PhysicsSystem::UpdatePhysicsObjects(shared_from_this());
+			PhysicsSystem::UpdatePhysicsObjects(std::static_pointer_cast<Scene>(shared_from_this()));
 
 			m_SceneConfig.ScenePipeline->OnUpdate();
 
@@ -394,7 +543,7 @@ namespace Louron {
 	void Scene::OnFixedUpdate() {
 		m_IsSimulatingPhysics = true;
 
-		PhysicsSystem::Update(shared_from_this());
+		PhysicsSystem::Update(std::static_pointer_cast<Scene>(shared_from_this()));
 
 		m_IsSimulatingPhysics = false;
 	}

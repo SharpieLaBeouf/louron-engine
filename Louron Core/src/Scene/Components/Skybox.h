@@ -39,6 +39,12 @@ namespace Louron {
 
 		void UpdateUniforms(const Camera& camera);
 
+		virtual AssetType GetType() const override { return AssetType::Material_Skybox; }
+
+		void Serialize(const std::filesystem::path& path);
+		bool Deserialize(const std::filesystem::path& path);
+
+
 	public:
 
 		// Bind and Unbinding
@@ -54,11 +60,11 @@ namespace Louron {
 		void SetName(const std::string& name) { m_MaterialName = name; }
 		const std::string& GetName() const { return m_MaterialName; }
 
+		GLuint m_SkyboxID = -1;
 	private:
 
 		std::string m_MaterialName = "New Skybox Material";
 
-		GLuint m_SkyboxID = -1;
 		std::shared_ptr<Shader> m_MaterialShader = Engine::Get().GetShaderLibrary().GetShader("Skybox");
 
 		std::filesystem::path m_MaterialFilePath;

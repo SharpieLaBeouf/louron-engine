@@ -19,10 +19,6 @@ private:
 
 	glm::vec3 m_LightPosition = glm::vec3(0.0);
 
-	float currentTime = 0;
-	float deltaTime = 0;
-	float lastTime = 0;
-
 public:
 	Scene12() :
 		m_Window(Louron::Engine::Get().GetWindow()),
@@ -39,15 +35,16 @@ public:
 	}
 
 	void OnAttach() override {
-		lastTime = (float)glfwGetTime();
-		// Load Project and Get Active Scene Handle
-		if (!m_Project || !m_Scene) {
+
+		if (m_Project)
+			Louron::Project::SetActiveProject(m_Project);
+		else
 			m_Project = Louron::Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
+
+		if (!m_Scene)
 			m_Scene = Louron::Project::GetActiveScene();
-			m_LightPosition = m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().GetLocalPosition();
-		}
 
-
+		m_LightPosition = m_Scene->FindEntityByName("Light Source 0").GetComponent<Louron::Transform>().GetLocalPosition();
 	
 		m_Scene->OnStart();
 	}
@@ -59,15 +56,11 @@ public:
 
 	void Update() override {
 
-		currentTime = (float)glfwGetTime();
-		deltaTime = currentTime - lastTime;
-		lastTime = currentTime;
-
 		// Update Camera Component
 
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetGlobalPosition());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->Update(Louron::Time::GetDeltaTime());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->GetGlobalPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->GetCameraDirection(), 1.0f);
 
 		if (m_Input.GetKeyDown(GLFW_KEY_F)) {
 			Louron::SpotLightComponent& spotLight = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>();

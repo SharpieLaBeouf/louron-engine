@@ -167,10 +167,10 @@ namespace Louron {
 			update_child_collider_flags(entity);
 		}
 
-		Rigidbody& component = scene->m_Registry.emplace<Rigidbody>(entity, entity.GetComponent<Transform>(), scene->GetPhysScene());
+		Transform& entity_transform = entity.GetComponent<Transform>();
+		PxScene* physics_scene = scene->GetPhysScene();
 
-		component.GetActor()->AddFlag(RigidbodyFlag_ShapesUpdated);
-		component.GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
+		Rigidbody& component = scene->m_Registry.emplace<Rigidbody>(entity, &entity_transform, physics_scene);
 
 		return component;
 	}
@@ -184,49 +184,53 @@ namespace Louron {
 			return;
 		}
 
-		// 1. Remove Shapes from Actor
-		std::map<std::weak_ptr<PhysicsShape>, UUID, std::owner_less<>> shape_ref_vector = component.GetActor()->m_ShapesRef;
-		for (auto& shape_weak_ref : shape_ref_vector) {
+		if (component.GetActor()) {
 
-			if (auto shape_ref = shape_weak_ref.first.lock(); shape_ref) {
+			// 1. Remove Shapes from Actor
+			std::map<std::weak_ptr<PhysicsShape>, UUID, std::owner_less<>> shape_ref_vector = component.GetActor()->m_ShapesRef;
+			for (auto& shape_weak_ref : shape_ref_vector) {
 
-				Entity shape_entity = scene->FindEntityByUUID(shape_weak_ref.second);
+				if (auto shape_ref = shape_weak_ref.first.lock(); shape_ref) {
 
-				if (!shape_entity)
-					continue;
+					Entity shape_entity = scene->FindEntityByUUID(shape_weak_ref.second);
 
-				if (shape_entity.HasComponent<SphereCollider>()) {
+					if (!shape_entity)
+						continue;
 
-					shape_entity.GetComponent<SphereCollider>().ResetRigidbody();
-					shape_entity.GetComponent<SphereCollider>().GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-				}
-				if (shape_entity.HasComponent<BoxCollider>()) {
+					if (shape_entity.HasComponent<SphereCollider>()) {
 
-					shape_entity.GetComponent<BoxCollider>().ResetRigidbody();
-					shape_entity.GetComponent<BoxCollider>().GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+						shape_entity.GetComponent<SphereCollider>().ResetRigidbody();
+						shape_entity.GetComponent<SphereCollider>().GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+					}
+					if (shape_entity.HasComponent<BoxCollider>()) {
+
+						shape_entity.GetComponent<BoxCollider>().ResetRigidbody();
+						shape_entity.GetComponent<BoxCollider>().GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+					}
 				}
 			}
-		}
 
-		// 2. We also want to check if there are any other shapes that may be connected to this rigidbody to be removed
-		if (PxU32 num_shapes = component.GetActor()->GetActor()->getNbShapes(); num_shapes > 0) {
+			// 2. We also want to check if there are any other shapes that may be connected to this rigidbody to be removed
+			if (PxU32 num_shapes = component.GetActor()->GetActor()->getNbShapes(); num_shapes > 0) {
 
-			L_CORE_WARN("Shapes Still Attached to Rigibody Not Stored in Map.");
-			for (PxU32 j = 0; j < num_shapes; j++) {
-				PxShape* temp_shape = nullptr;
-				component.GetActor()->GetActor()->getShapes(&temp_shape, 1, j);
-				component.GetActor()->GetActor()->detachShape(*temp_shape);
+				L_CORE_WARN("Shapes Still Attached to Rigibody Not Stored in Map.");
+				for (PxU32 j = 0; j < num_shapes; j++) {
+					PxShape* temp_shape = nullptr;
+					component.GetActor()->GetActor()->getShapes(&temp_shape, 1, j);
+					component.GetActor()->GetActor()->detachShape(*temp_shape);
+				}
+
 			}
 
+			// 3. Remove Current Rigidbody Actor from Scene
+			PxScene* physScene = scene->GetPhysScene();
+			physScene->removeActor(*component.GetActor()->GetActor());
+
+			// 4. Delete Actor
+			entity.GetComponent<Rigidbody>().GetActor()->Release();
+			entity.GetComponent<Rigidbody>().m_RigidDynamic = nullptr;
+
 		}
-
-		// 3. Remove Current Rigidbody Actor from Scene
-		PxScene* physScene = scene->GetPhysScene();
-		physScene->removeActor(*component.GetActor()->GetActor());
-
-		// 4. Delete Actor
-		entity.GetComponent<Rigidbody>().GetActor()->Release();
-		entity.GetComponent<Rigidbody>().m_RigidDynamic = nullptr;
 
 		// 5. Remove Rigidbody Component from Entity
 		scene->m_Registry.remove_if_exists<Rigidbody>(entity);
@@ -339,19 +343,21 @@ namespace Louron {
 			auto view = scene->GetAllEntitiesWith<Rigidbody>();
 			for (auto& entity_handle : view) {
 				auto& rb_ref = view.get<Rigidbody>(entity_handle);
-				if (!rb_ref.m_DeferredForce.empty()) {
-					for (const auto& action : rb_ref.m_DeferredForce) {
-						PxVec3 force = { action.force.x, action.force.y, action.force.z };
-						rb_ref.GetActor()->AddForce(force, action.forceMode);
+				if(rb_ref.GetActor()) {
+					if (!rb_ref.m_DeferredForce.empty()) {
+						for (const auto& action : rb_ref.m_DeferredForce) {
+							PxVec3 force = { action.force.x, action.force.y, action.force.z };
+							rb_ref.GetActor()->AddForce(force, action.forceMode);
+						}
+						rb_ref.m_DeferredForce.clear();
 					}
-					rb_ref.m_DeferredForce.clear();
-				}
-				if (!rb_ref.m_DeferredTorque.empty()) {
-					for (const auto& action : rb_ref.m_DeferredTorque) {
-						PxVec3 torque = { action.torque.x, action.torque.y, action.torque.z };
-						rb_ref.GetActor()->AddTorque(torque);
+					if (!rb_ref.m_DeferredTorque.empty()) {
+						for (const auto& action : rb_ref.m_DeferredTorque) {
+							PxVec3 torque = { action.torque.x, action.torque.y, action.torque.z };
+							rb_ref.GetActor()->AddTorque(torque);
+						}
+						rb_ref.m_DeferredTorque.clear();
 					}
-					rb_ref.m_DeferredTorque.clear();
 				}
 			}
 									
@@ -406,15 +412,18 @@ namespace Louron {
 				auto& rigidbody = rb_view.get<Rigidbody>(entity_handle);
 
 				// 1. Current Entity Has Rigidbody and Shape Does Not Already Refer to Rigidbody
-				if (rigidbody.GetActor()->CheckFlag(RigidbodyFlag_ShapesUpdated)) {
-					PxRigidBodyExt::setMassAndUpdateInertia(*rigidbody.GetActor()->GetActor(), 1.0f);
-				}
+				if(rigidbody.GetActor())
+				{
+					if (rigidbody.GetActor()->CheckFlag(RigidbodyFlag_ShapesUpdated)) {
+						PxRigidBodyExt::setMassAndUpdateInertia(*rigidbody.GetActor()->GetActor(), rigidbody.GetMass());
+					}
 
-				if (rigidbody.GetActor()->CheckFlag(RigidbodyFlag_TransformUpdated)) {
-					rigidbody.GetActor()->SetGlobalPose(rigidbody.entity->GetComponent<Transform>());
-				}
+					if (rigidbody.GetActor()->CheckFlag(RigidbodyFlag_TransformUpdated)) {
+						rigidbody.GetActor()->SetGlobalPose(rigidbody.entity->GetComponent<Transform>());
+					}
 
-				rigidbody.GetActor()->ClearFlags();
+					rigidbody.GetActor()->ClearFlags();
+				}
 			}
 		}
 	}
@@ -456,12 +465,14 @@ namespace Louron {
 				auto& transform = start_entity.GetComponent<Transform>();
 				auto& rigidbody = start_entity.GetComponent<Rigidbody>();
 
-				PxTransform physics_transform = rigidbody.GetActor()->GetGlobalPose();
-				glm::quat quaternion(physics_transform.q.w, physics_transform.q.x, physics_transform.q.y, physics_transform.q.z);
-				glm::vec3 rotation = glm::degrees(glm::eulerAngles(quaternion));
+				if(rigidbody.GetActor()) {
+					PxTransform physics_transform = rigidbody.GetActor()->GetGlobalPose();
+					glm::quat quaternion(physics_transform.q.w, physics_transform.q.x, physics_transform.q.y, physics_transform.q.z);
+					glm::vec3 rotation = glm::degrees(glm::eulerAngles(quaternion));
 
-				transform.SetGlobalPosition(glm::vec3(physics_transform.p.x, physics_transform.p.y, physics_transform.p.z));
-				transform.SetGlobalRotation(rotation);
+					transform.SetGlobalPosition(glm::vec3(physics_transform.p.x, physics_transform.p.y, physics_transform.p.z));
+					transform.SetGlobalRotation(rotation);
+				}
 
 			}
 			for (auto& child_uuid : start_entity.GetComponent<HierarchyComponent>().GetChildren()) {

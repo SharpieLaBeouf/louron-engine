@@ -125,11 +125,14 @@ namespace Louron {
 	/// </summary>
 	void MeshRenderer::ProcessNode(aiNode* node, const aiScene* scene, MeshFilter& meshFilter, const std::string& directory, std::shared_ptr<Shader> shader, const std::string& modelName)
 	{
-		// process all the node's meshes (if any)
-		for (unsigned int i = 0; i < node->mNumMeshes; i++)
+		if(node->mParent)
 		{
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			ProcessMesh(mesh, scene, meshFilter, directory, shader, modelName);
+			// process all the node's meshes (if any)
+			for (unsigned int i = 0; i < node->mNumMeshes; i++)
+			{
+				aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
+				ProcessMesh(mesh, scene, meshFilter, directory, shader, modelName);
+			}
 		}
 
 		// then do the same for each of its children
@@ -237,4 +240,22 @@ namespace Louron {
 		temp_mesh->MaterialIndex = mesh->mMaterialIndex;
 		meshFilter.Meshes->push_back(temp_mesh);
 	}	
+
+	SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
+	{
+
+		VAO = std::make_unique<VertexArray>();
+		VertexBuffer* vbo = new VertexBuffer(vertices, (GLuint)vertices.size());
+		BufferLayout layout = {
+			{ ShaderDataType::Float3, "aPos" },
+			{ ShaderDataType::Float3, "aNormal" },
+			{ ShaderDataType::Float2, "aTexCoord" }
+		};
+		vbo->SetLayout(layout);
+
+		IndexBuffer* ebo = new IndexBuffer(indices, (GLuint)indices.size());
+
+		VAO->AddVertexBuffer(vbo);
+		VAO->SetIndexBuffer(ebo);
+	}
 }

@@ -41,9 +41,12 @@ namespace Louron {
 	public:
 
 		Rigidbody() = default;
-		Rigidbody(Transform& transform, PxScene* scene);
-		Rigidbody(const Rigidbody&) = default;
+		Rigidbody(Transform* transform, PxScene* scene);
+		Rigidbody(const Rigidbody& other);
+		Rigidbody(Rigidbody&& other) = default;
 		~Rigidbody() = default;
+
+		Rigidbody& operator=(const Rigidbody& other);
 
 		/// <summary>
 		/// Only use this method for direct access to the actor instance.

@@ -8,6 +8,7 @@ class Scene11 : public TestScene {
 
 private:
 
+	std::shared_ptr<Louron::Project> m_Project;
 	std::shared_ptr<Louron::Scene> m_Scene;
 
 	Louron::Window& m_Window;
@@ -15,13 +16,8 @@ private:
 	Louron::ShaderLibrary& m_ShaderLib;
 	Louron::TextureLibrary& m_TextureLib;
 
-	float currentTime = 0;
-	float deltaTime = 0;
-	float lastTime = 0;
 	const int numLights = 25;
 	std::vector<float> lightBobOffset;
-
-	std::shared_ptr<Louron::ForwardPlusPipeline> m_Pipeline;
 
 	struct {
 
@@ -39,9 +35,7 @@ public:
 		m_Window(Louron::Engine::Get().GetWindow()),
 		m_Input(Louron::Engine::Get().GetInput()),
 		m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
-		m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
-		m_Pipeline(nullptr),
-		m_Scene(nullptr)
+		m_TextureLib(Louron::Engine::Get().GetTextureLibrary())
 	{
 		L_APP_INFO("Loading Scene 11");
 
@@ -52,22 +46,26 @@ public:
 	}
 
 	void OnAttach() override {
-		lastTime = (float)glfwGetTime(); 
 
-		if (!m_Scene || !m_Pipeline) {
+		if (m_Project)
+			Louron::Project::SetActiveProject(m_Project);
+		else
+			m_Project = Louron::Project::NewProject();
+
+		if (!m_Scene) {
 
 			// Scene Configuration Setup
-			m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
 			m_Scene = std::make_shared<Louron::Scene>(Louron::L_RENDER_PIPELINE::FORWARD_PLUS);
+			m_Project->SetActiveScene(m_Scene);
 
 			// Scene ResourcesSetup
 			const auto& resources = m_Scene->GetResources();
 			resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
-			resources->LoadMesh("assets/Models/Monkey/Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
-			resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
-			resources->LoadMesh("assets/Models/BackPack/BackPack.fbx", resources->Shaders["FP_Material_BP_Shader"]);
-			resources->LoadMesh("assets/Models/Sponza/sponza.obj", resources->Shaders["FP_Material_BP_Shader"]);
-			resources->LoadMesh("assets/Models/Torch/model/obj/Torch.obj", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("Sandbox Project/Assets/Models/Monkey/Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("Sandbox Project/Assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("Sandbox Project/Assets/Models/BackPack/BackPack.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("Sandbox Project/Assets/Models/Sponza/sponza.obj", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj", resources->Shaders["FP_Material_BP_Shader"]);
 
 			// Sponza
 			Louron::Entity entity = m_Scene->CreateEntity("Sponza");
@@ -116,8 +114,8 @@ public:
 
 			// Main Camera
 			auto& camera = m_Scene->CreateEntity("Main Camera").AddComponent<Louron::CameraComponent>();
-			camera.Camera = std::make_shared<Louron::Camera>(glm::vec3(-30.0f, 10.0f, -1.2f), glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, -20.0f);
-			camera.Camera->MouseToggledOff = false;
+			camera.CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(-30.0f, 10.0f, -1.2f), glm::vec3(0.0f, 1.0f, 0.0f), 0.0f, -20.0f);
+			camera.CameraInstance->MouseToggledOff = false;
 
 			camera.Primary = true;
 			camera.ClearFlags = Louron::CameraClearFlags::SKYBOX;
@@ -155,14 +153,10 @@ public:
 
 	void Update() override {
 
-		currentTime = (float)glfwGetTime();
-		deltaTime = currentTime - lastTime;
-		lastTime = currentTime;
-
 		// Update Camera Component
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetGlobalPosition());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->Update(Louron::Time::GetDeltaTime());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->GetGlobalPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->GetCameraDirection(), 1.0f);
 
 		if (m_Input.GetKeyDown(GLFW_KEY_F)) {
 			Louron::SpotLightComponent& spotLight = m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>();
@@ -189,7 +183,7 @@ public:
 		for (int i = 1; i < numLights; i++) {
 
 			// Each Light has their own bobbing height
-			float bobbingOffset = sin(currentTime + lightBobOffset[i]) * deltaTime;
+			float bobbingOffset = sin(static_cast<float>(Louron::Time::Get().GetCurrTime()) + lightBobOffset[i]) * Louron::Time::GetDeltaTime();
 			m_Scene->FindEntityByName("Light Source " + std::to_string(i)).GetComponent<Louron::Transform>().TranslateY(bobbingOffset);
 		}
 

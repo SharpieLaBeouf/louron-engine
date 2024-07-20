@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Asset/Asset.h"
+#include "Asset/Asset Importer.h"
+#include "Asset/Asset Manager.h"
+
 #include "Core/Audio.h"
 #include "Core/Engine.h"
 #include "Core/GuiLayer.h"
@@ -18,6 +22,7 @@
 
 #include "Scene/Entity.h"
 #include "Scene/Scene.h"
+#include "Scene/Prefab.h"
 #include "Scene/Scene Serializer.h"
 #include "Scene/Resource Manager.h"
 

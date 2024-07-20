@@ -14,13 +14,12 @@ class Scene8 : public TestScene {
 	//Private Setup Variables
 private:
 
+	std::shared_ptr<Louron::Project> m_Project;
 	std::shared_ptr<Louron::Scene> m_Scene;
 
 	Louron::InputManager& m_Input;
 	Louron::ShaderLibrary& m_ShaderLib;
 	Louron::TextureLibrary& m_TextureLib;
-
-	std::shared_ptr<Louron::ForwardPlusPipeline> m_Pipeline;
 
 public:
 
@@ -28,7 +27,6 @@ public:
 		 m_Input(Louron::Engine::Get().GetInput()),
 		 m_ShaderLib(Louron::Engine::Get().GetShaderLibrary()),
 		 m_TextureLib(Louron::Engine::Get().GetTextureLibrary()),
-		 m_Pipeline(nullptr),
 		 m_Scene(nullptr)
 	{
 		L_APP_INFO("Loading Scene 8");
@@ -45,15 +43,20 @@ public:
 
 		lastTime = (float)glfwGetTime();
 
-		if (!m_Scene || !m_Pipeline) {
+		if (m_Project)
+			Louron::Project::SetActiveProject(m_Project);
+		else
+			m_Project = Louron::Project::NewProject();
 
-			m_Pipeline = std::make_shared<Louron::ForwardPlusPipeline>();
+		if (!m_Scene) {
+
 			m_Scene = std::make_shared<Louron::Scene>(Louron::L_RENDER_PIPELINE::FORWARD_PLUS);
+			m_Project->SetActiveScene(m_Scene);
 
 			const auto& resources = m_Scene->GetResources();
 			resources->LinkShader(Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader"));
-			resources->LoadMesh("assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
-			resources->LoadMesh("assets/Models/Torch/model/obj/Torch.obj", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("Sandbox Project/Assets/Models/Monkey/Pink_Monkey.fbx", resources->Shaders["FP_Material_BP_Shader"]);
+			resources->LoadMesh("Sandbox Project/Assets/Models/Torch/model/obj/Torch.obj", resources->Shaders["FP_Material_BP_Shader"]);
 
 			// Create Entity for Monkey and Load Applicable Model
 			Louron::Entity entity = m_Scene->CreateEntity("Monkey");
@@ -63,7 +66,7 @@ public:
 
 			// Create Entity for Camera and Set to Primary Camera
 			entity = m_Scene->CreateEntity("Main Camera");
-			entity.AddComponent<Louron::CameraComponent>().Camera = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 0.0f, 10.0f));
+			entity.AddComponent<Louron::CameraComponent>().CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 0.0f, 10.0f));
 			entity.GetComponent<Louron::CameraComponent>().Primary = true;
 
 			entity = m_Scene->CreateEntity("Flash Light");
@@ -90,11 +93,11 @@ public:
 		lastTime = currentTime;
 
 		// Update Camera Component
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->Update(deltaTime);
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetGlobalPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->Update(deltaTime);
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->GetGlobalPosition());
 	
 		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::Transform>().GetLocalPosition());
-		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
+		m_Scene->FindEntityByName("Flash Light").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->GetCameraDirection(), 1.0f);
 		m_Scene->FindEntityByName("Point Light").GetComponent<Louron::Transform>().TranslateX(sin(currentTime) * deltaTime);
 
 		Draw();

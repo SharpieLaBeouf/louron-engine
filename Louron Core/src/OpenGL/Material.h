@@ -3,6 +3,7 @@
 // Louron Core Headers
 #include "Shader.h"
 #include "Texture.h"
+#include "../Asset/Asset.h"
 
 // C++ Standard Library Headers
 #include <string>
@@ -31,7 +32,7 @@ namespace Louron {
 
 	class Camera;
 
-	class Material {
+	class Material : public Asset {
 
 	public:
 
@@ -41,6 +42,8 @@ namespace Louron {
 		Material(std::shared_ptr<Texture> texture);
 		Material(std::shared_ptr<Shader> shader, std::shared_ptr<Texture> texture);
 		Material(std::shared_ptr<Shader> shader, std::unordered_map<GLint, std::shared_ptr<Texture>>& textures);
+
+		virtual AssetType GetType() const override { return AssetType::Material_Standard; }
 
 	public:
 
@@ -102,6 +105,8 @@ namespace Louron {
 		BPMaterial() = default;
 		~BPMaterial() = default;
 
+		virtual AssetType GetType() const override { return AssetType::Material_Standard; }
+
 	public:
 
 		// Getters and Setters
@@ -145,6 +150,8 @@ namespace Louron {
 	public:
 
 		PBRMaterial();
+
+		virtual AssetType GetType() const override { return AssetType::Material_Standard; }
 
 	private:
 

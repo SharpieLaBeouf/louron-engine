@@ -36,10 +36,14 @@ public:
 
 	void OnAttach() override {
 
-		if (!m_Project || !m_Scene) {
-
-			// Load Project and Get Active Scene Handle
+		// Load Project and Get Active Scene Handle
+		if (m_Project)
+			Louron::Project::SetActiveProject(m_Project);
+		else
 			m_Project = Project::LoadProject("Sandbox Project/Sandbox Project.lproj", "PBR Materials.lscene");
+
+		if (!m_Scene) {
+
 			m_Scene = Project::GetActiveScene();
 
 			m_Scene->FindEntityByName("PBR_Rusted_Iron").GetComponent<MeshRenderer>().Materials[0] = rusted_iron_material;
@@ -84,9 +88,9 @@ public:
 		}
 
 		// Update Camera Component
-		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->Update((float)Time::Get().GetDeltaTime());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().Camera->GetGlobalPosition());
-		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().Camera->GetCameraDirection(), 1.0f);
+		m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().CameraInstance->Update((float)Time::Get().GetDeltaTime());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Transform>().SetPosition(m_Scene->FindEntityByName("Main Camera").GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
+		m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::SpotLightComponent>().direction = glm::vec4(m_Scene->FindEntityByName("Main Camera").GetComponent<Louron::CameraComponent>().CameraInstance->GetCameraDirection(), 1.0f);
 
 		m_Scene->OnUpdate();
 
@@ -193,7 +197,7 @@ public:
 			ImGui::TreePop();
 		}
 
-		if (ImGui::Button("Toggle Camera Movement")) m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().Camera->ToggleMovement();
+		if (ImGui::Button("Toggle Camera Movement")) m_Scene->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->ToggleMovement();
 
 		if (ImGui::Button("Reset Scene")) {
 
