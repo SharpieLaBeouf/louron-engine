@@ -1,9 +1,0 @@
-Material Name: New Skybox Material
-Material Type: SkyboxMaterial
-TextureFilePaths:
-  Right: Kloppenheim Skybox\right.png
-  Left: Kloppenheim Skybox\left.png
-  Top: Kloppenheim Skybox\top.png
-  Bottom: Kloppenheim Skybox\bottom.png
-  Back: Kloppenheim Skybox\back.png
-  Front: Kloppenheim Skybox\front.png

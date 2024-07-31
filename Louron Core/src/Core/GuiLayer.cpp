@@ -21,13 +21,34 @@ namespace Louron {
 	GuiLayer::GuiLayer() : Layer("GuiLayer") { }
 
 	void GuiLayer::OnAttach() {
+
+		IMGUI_CHECKVERSION();
 		ImGui::CreateContext();
 		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
+
+		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+		ImGuiStyle& style = ImGui::GetStyle();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+		}
+
+		style.FrameRounding = 4.0f;
+		style.FrameBorderSize = 1.0f;
+
+		style.WindowMenuButtonPosition = ImGuiDir_Right;
+		style.ColorButtonPosition = ImGuiDir_Left;
 
 		SetDarkThemeColors();
 
@@ -66,38 +87,72 @@ namespace Louron {
 		// Rendering
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
 	}
 
 	void GuiLayer::SetDarkThemeColors() {
 		auto& colors = ImGui::GetStyle().Colors;
-		colors[ImGuiCol_WindowBg] = ImVec4{ 0.1f, 0.105f, 0.11f, 1.0f };
+
+		// Text
+		colors[ImGuiCol_Text]					= ImVec4{ 0.875f, 0.875f, 0.875f, 1.0f };
+		colors[ImGuiCol_TextSelectedBg]			= ImVec4{ 1.0f, 0.842f, 0.227f, 0.349f };
+
+		// Separator
+		colors[ImGuiCol_Separator]				= ImVec4{ 0.0f, 0.0f, 0.0f, 1.0f };
+
+		// Windows
+		colors[ImGuiCol_WindowBg]				= ImVec4{ 0.22f, 0.22f, 0.22f, 1.0f };
+		colors[ImGuiCol_DockingPreview]			= ImVec4{ 1.0f, 0.842f, 0.227f, 0.381f };
+
+		// Borders
+		colors[ImGuiCol_Border]					= ImVec4{ 0.12f, 0.12f, 0.12f, 1.0f};
+		colors[ImGuiCol_BorderShadow]			= ImVec4{ 0.221f, 0.221f, 0.221f, 1.0f};
 
 		// Headers
-		colors[ImGuiCol_Header] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-		colors[ImGuiCol_HeaderHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-		colors[ImGuiCol_HeaderActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+		colors[ImGuiCol_Header]					= ImVec4{ 1.0f, 0.842f, 0.227f, 0.416f };
+		colors[ImGuiCol_HeaderHovered]			= ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
+		colors[ImGuiCol_HeaderActive]			= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 
 		// Buttons
-		colors[ImGuiCol_Button] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-		colors[ImGuiCol_ButtonHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-		colors[ImGuiCol_ButtonActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+		colors[ImGuiCol_Button]					= ImVec4{ 0.165f, 0.165f, 0.165f, 1.0f };
+		colors[ImGuiCol_ButtonHovered]			= ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f };
+		colors[ImGuiCol_ButtonActive]			= ImVec4{ 0.588f, 0.588f, 0.588f, 1.0f };
+		colors[ImGuiCol_CheckMark]				= ImVec4{ 1.0f, 0.842f, 0.227f, 1.0f };
 
 		// Frame BG
-		colors[ImGuiCol_FrameBg] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
-		colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
-		colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+		colors[ImGuiCol_FrameBg]				= ImVec4{ 0.165f, 0.165f, 0.165f, 1.0f };
+		colors[ImGuiCol_FrameBgHovered]			= ImVec4{ 0.3f, 0.305f, 0.31f, 1.0f };
+		colors[ImGuiCol_FrameBgActive]			= ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
 
 		// Tabs
-		colors[ImGuiCol_Tab] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-		colors[ImGuiCol_TabHovered] = ImVec4{ 0.38f, 0.3805f, 0.381f, 1.0f };
-		colors[ImGuiCol_TabActive] = ImVec4{ 0.28f, 0.2805f, 0.281f, 1.0f };
-		colors[ImGuiCol_TabUnfocused] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-		colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.2f, 0.205f, 0.21f, 1.0f };
+		colors[ImGuiCol_Tab]					= ImVec4{ 0.141f, 0.141f, 0.141f, 1.0f };
+		colors[ImGuiCol_TabHovered]				= ImVec4{ 0.22f, 0.22f, 0.22f, 1.0f };
+
+		colors[ImGuiCol_TabSelected]			= ImVec4{ 0.22f, 0.22f, 0.22f, 1.0f };
+		colors[ImGuiCol_TabSelectedOverline]	= ImVec4{ 1.0f, 0.842f, 0.227f, 1.0f };
+
+		colors[ImGuiCol_TabDimmed]				= ImVec4{ 0.141f, 0.141f, 0.141f, 1.0f };
+		colors[ImGuiCol_TabDimmedSelected]		= ImVec4{ 0.22f, 0.22f, 0.22f, 1.0f };
+
+		// Resize
+		colors[ImGuiCol_ResizeGrip]				= ImVec4{ 1.0f, 0.842f, 0.227f, 0.50f };
+		colors[ImGuiCol_ResizeGripHovered]		= ImVec4{ 1.0f, 0.842f, 0.227f, 0.67f };
+		colors[ImGuiCol_ResizeGripActive]		= ImVec4{ 1.0f, 0.842f, 0.227f, 0.95f };
 
 		// Title
-		colors[ImGuiCol_TitleBg] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-		colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
-		colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.15f, 0.1505f, 0.151f, 1.0f };
+		colors[ImGuiCol_TitleBg]				= ImVec4{ 0.157f, 0.157f, 0.157f, 1.0f };
+		colors[ImGuiCol_TitleBgActive]			= colors[ImGuiCol_TitleBg];
+		colors[ImGuiCol_TitleBgCollapsed]		= colors[ImGuiCol_TitleBg];
+
+		// Drag and Drop
+		colors[ImGuiCol_DragDropTarget]			= ImVec4{ 1.0f, 0.842f, 0.227f, 0.416f };
 	}
 
 	uint32_t GuiLayer::GetActiveWidgetID() const

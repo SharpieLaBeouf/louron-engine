@@ -5,6 +5,7 @@
 
 #include "../Debug/Assert.h"
 
+#include "../Project/Project.h"
 #include "../Scene/Components/Camera.h"
 
 // C++ Standard Library Headers
@@ -154,11 +155,8 @@ namespace Louron {
 
 #pragma region PBR Materials
 
-
-	PBRMaterial::PBRMaterial() {
-		m_AlbedoTexture = Engine::Get().GetTextureLibrary().GetDefaultTexture();
-		m_MetallicTexture = Engine::Get().GetTextureLibrary().GetDefaultTexture();
-		m_NormalTexture = Engine::Get().GetTextureLibrary().GetDefaultNormalTexture();
+	PBRMaterial::PBRMaterial() : m_Shader(Engine::Get().GetShaderLibrary().GetShader("FP_Material_PBR_Shader"))
+	{
 	}
 
 	GLboolean PBRMaterial::Bind()  {
@@ -195,22 +193,22 @@ namespace Louron {
 			shader_ref->SetInt	("u_Material.metallicTexture",	1);
 			shader_ref->SetInt	("u_Material.normalTexture",	2);
 
-			if (auto texture_ref = m_AlbedoTexture.lock(); texture_ref && *texture_ref) {
+			if (auto texture_ref = (m_AlbedoTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : Project::GetStaticEditorAssetManager()->GetAsset<Texture>(m_AlbedoTexture); texture_ref && *texture_ref) {
 				glActiveTexture(GL_TEXTURE0);
 				texture_ref->Bind();
 			}
 
-			if (auto texture_ref = m_MetallicTexture.lock(); texture_ref && *texture_ref) {
+			if (auto texture_ref = (m_MetallicTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : Project::GetStaticEditorAssetManager()->GetAsset<Texture>(m_MetallicTexture); texture_ref && *texture_ref) {
 				glActiveTexture(GL_TEXTURE1);
 				texture_ref->Bind();
 			}
 
-			if (auto texture_ref = m_NormalTexture.lock(); texture_ref && *texture_ref) {
+			if (auto texture_ref = (m_NormalTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultNormalTexture() : Project::GetStaticEditorAssetManager()->GetAsset<Texture>(m_NormalTexture); texture_ref && *texture_ref) {
 				glActiveTexture(GL_TEXTURE2);
 				texture_ref->Bind();
 			}
 
-			if (&camera != nullptr) {
+			if (&camera) {
 				shader_ref->SetMat4("u_VertexIn.Proj", camera.GetProjMatrix());
 				shader_ref->SetMat4("u_VertexIn.View", camera.GetViewMatrix());
 				shader_ref->SetVec3("u_CameraPos", camera.GetGlobalPosition());
@@ -222,37 +220,15 @@ namespace Louron {
 
 	}
 
-	bool PBRMaterial::IsAlbedoTextureSet() const {
-		auto texture_ref = m_AlbedoTexture.lock();
-		return (texture_ref && *texture_ref && texture_ref != Engine::Get().GetTextureLibrary().GetDefaultTexture());
-	}
-
-	bool PBRMaterial::IsMetallicTextureSet() const {
-		auto texture_ref = m_MetallicTexture.lock();
-		return (texture_ref && *texture_ref && texture_ref != Engine::Get().GetTextureLibrary().GetDefaultTexture());
-	}
-
-	bool PBRMaterial::IsNormalTextureSet() const {
-		auto texture_ref = m_NormalTexture.lock();
-		return (texture_ref && *texture_ref && texture_ref != Engine::Get().GetTextureLibrary().GetDefaultNormalTexture());
-	}
+	bool PBRMaterial::IsAlbedoTextureSet() const { return m_AlbedoTexture != NULL_UUID; }
+	bool PBRMaterial::IsMetallicTextureSet() const { return m_MetallicTexture != NULL_UUID; }
+	bool PBRMaterial::IsNormalTextureSet() const { return m_NormalTexture != NULL_UUID; }
 
 	#pragma region Getters and Setters
 
-	void PBRMaterial::SetAlbedoTexture(std::shared_ptr<Texture> texture) {
-		if (texture && *texture)
-			m_AlbedoTexture = texture;
-	}
-
-	void PBRMaterial::SetMetallicTexture(std::shared_ptr<Texture> texture) {
-		if (texture && *texture)
-			m_MetallicTexture = texture;
-	}
-
-	void PBRMaterial::SetNormalTexture(std::shared_ptr<Texture> texture) {
-		if (texture && *texture)
-			m_NormalTexture = texture;
-	}
+	void PBRMaterial::SetAlbedoTexture(AssetHandle texture) { m_AlbedoTexture = texture; }
+	void PBRMaterial::SetMetallicTexture(AssetHandle texture) { m_MetallicTexture = texture; }
+	void PBRMaterial::SetNormalTexture(AssetHandle texture) { m_NormalTexture = texture; }
 
 	void PBRMaterial::SetRoughness(float roughness) { m_Roughness = roughness; }
 	void PBRMaterial::SetMetallic(float metallic) { m_MetallicScale = metallic; }
@@ -261,23 +237,11 @@ namespace Louron {
 	void PBRMaterial::SetName(const std::string& name) { m_MaterialName = name; }
 	void PBRMaterial::SetShader(std::shared_ptr<Shader> shader) { if (shader) m_Shader = shader; }
 
-	Texture* PBRMaterial::GetAlbedoTexture() const {
-		if (auto texture_ref = m_AlbedoTexture.lock(); texture_ref && *texture_ref)
-			return texture_ref.get();
-		return nullptr;
-	}
+	AssetHandle PBRMaterial::GetAlbedoTextureAssetHandle() const { return m_AlbedoTexture; }
 
-	Texture* PBRMaterial::GetMetallicTexture() const {
-		if (auto texture_ref = m_MetallicTexture.lock(); texture_ref && *texture_ref)
-			return texture_ref.get();
-		return nullptr;
-	}
+	AssetHandle PBRMaterial::GetMetallicTextureAssetHandle() const { return m_MetallicTexture; }
 
-	Texture* PBRMaterial::GetNormalTexture() const {
-		if (auto texture_ref = m_NormalTexture.lock(); texture_ref && *texture_ref)
-			return texture_ref.get();
-		return nullptr;
-	}
+	AssetHandle PBRMaterial::GetNormalTextureAssetHandle() const { return m_NormalTexture; }
 
 	float PBRMaterial::GetRoughness() const { return m_Roughness; }
 	float PBRMaterial::GetMetallic() const { return m_MetallicScale; }

@@ -17,6 +17,9 @@
 
 using namespace physx;
 
+class YAML::Emitter;
+class YAML::Node;
+
 namespace Louron {
 
 	struct Rigidbody : public Component {
@@ -81,6 +84,11 @@ namespace Louron {
 
 		void ApplyForce(const glm::vec3& force, PxForceMode::Enum forceMode = PxForceMode::eFORCE);
 		void ApplyTorque(const glm::vec3& torque);
+
+		void Serialize(YAML::Emitter& out);
+		bool Deserialize(const YAML::Node data);
+
+	private:
 
 		struct DeferredForce {
 			glm::vec3 force;

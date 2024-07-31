@@ -3,9 +3,7 @@
 struct PointLight {
     vec4 position;
 
-    vec4 ambient;
-    vec4 diffuse;
-    vec4 specular;
+    vec4 colour;
 
     float radius;
     float intensity;
@@ -15,24 +13,23 @@ struct PointLight {
 };
 
 struct SpotLight {
-	vec4 position;
-	vec4 direction;
 
-	vec4 ambient;
-	vec4 diffuse;
-	vec4 specular;
+    vec4 position;
+    vec4 direction;
+
+    vec4 colour;
     
-	float range;
-	float angle;
-	float intensity;
-	
+    float range;
+    float angle;
+    float intensity;
+    
     bool activeLight;
     bool lastLight;
    
-	// DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
-	float m_Padding1;
-	float m_Padding2;
-	float m_Padding3;
+    // DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
+    float m_Padding1;
+    float m_Padding2;
+    float m_Padding3;
 };
 
 struct VisibleIndex {
@@ -293,6 +290,8 @@ void main(){
 	}
 }
 
+const float PI = 3.14159;
+
 // This algorithm is not very efficient regarding false positives. This is due
 // to the tiled based rendering technique. Where I may implement clustered
 // based rendering technique, this will allow greater refinement for spotlight culling
@@ -303,27 +302,22 @@ void main(){
 // around cluster frustum. Cannot make sphere around frustum in tiled based rendering
 // as the sphere would be huge due to depth values for each tile, leading to even more
 // false positives.
-BoundingSphere GetConeBoundingSphere(SpotLight light){
+BoundingSphere GetConeBoundingSphere(SpotLight light) {
 	
-	float cosPenumbra = cos(radians(light.angle));
+	float angle = radians(light.angle * 0.5);
+	float cosPenumbra = cos(angle);
 
 	BoundingSphere sphere;
-	
-	// If the angle is less than or equal to 40.51 degrees, use a bounding 
-	// sphere that encompasses the entire cone of the spotlight.
-	if(cosPenumbra <= 0.707107) {
 
-		float coneSin = sqrt(1.0 - cosPenumbra * cosPenumbra);
-		sphere.centre = light.position + cosPenumbra * light.range * light.direction;
-		sphere.radius = coneSin * light.range;
+    if(angle > PI/4.0) {
+        sphere.centre = light.position + cosPenumbra * light.range * light.direction;
+		sphere.radius = sin(angle) * light.range;
+    }
+    else
+    {
+        sphere.centre = light.position + light.range / (2.0 * cosPenumbra) * light.direction;
+        sphere.radius = light.range / (2.0 * cosPenumbra);
+    }
 
-	} 
-	// If the angle is greater than 40.51 degrees, calculate the bounding sphere 
-	// based on the spotlight's range and angle.
-	else {
-		
-		sphere.radius = light.range / (2.0 * cosPenumbra);
-		sphere.centre = light.position + sphere.radius * light.direction;
-	}
 	return sphere;
 }

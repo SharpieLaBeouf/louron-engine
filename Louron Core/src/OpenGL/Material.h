@@ -162,9 +162,9 @@ namespace Louron {
 		float m_MetallicScale = 0.0f;
 		glm::vec4 m_AlbedoTint = glm::vec4(1.0f);
 
-		std::weak_ptr<Texture> m_AlbedoTexture;
-		std::weak_ptr<Texture> m_MetallicTexture;
-		std::weak_ptr<Texture> m_NormalTexture;
+		AssetHandle m_AlbedoTexture = NULL_UUID;
+		AssetHandle m_MetallicTexture = NULL_UUID;
+		AssetHandle m_NormalTexture = NULL_UUID;
 
 		std::weak_ptr<Shader> m_Shader;
 
@@ -181,9 +181,9 @@ namespace Louron {
 		bool IsMetallicTextureSet() const;
 		bool IsNormalTextureSet() const;
 
-		void SetAlbedoTexture(std::shared_ptr<Texture> texture);
-		void SetMetallicTexture(std::shared_ptr<Texture> texture);
-		void SetNormalTexture(std::shared_ptr<Texture> texture);
+		void SetAlbedoTexture(AssetHandle texture);
+		void SetMetallicTexture(AssetHandle texture);
+		void SetNormalTexture(AssetHandle texture);
 
 		void SetRoughness(float roughness);
 		void SetMetallic(float metallic);
@@ -192,9 +192,9 @@ namespace Louron {
 		void SetShader(std::shared_ptr<Shader> shader);
 		void SetName(const std::string& name);
 
-		Texture* GetAlbedoTexture() const;
-		Texture* GetMetallicTexture() const;
-		Texture* GetNormalTexture() const;
+		AssetHandle GetAlbedoTextureAssetHandle() const;
+		AssetHandle GetMetallicTextureAssetHandle() const;
+		AssetHandle GetNormalTextureAssetHandle() const;
 
 		float GetRoughness() const;
 		float GetMetallic() const;

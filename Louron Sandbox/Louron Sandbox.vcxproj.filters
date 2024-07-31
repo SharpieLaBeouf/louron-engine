@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Sandbox Application.cpp">
+    <ClCompile Include="Source\Louron Editor Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="source\Sandbox Layer\MainMenuLayer.cpp">
+    <ClCompile Include="source\Editor Layer\Louron Editor Layer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -55,7 +55,7 @@
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 9.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\Sandbox Layer\MainMenuLayer.h">
+    <ClInclude Include="source\Editor Layer\Louron Editor Layer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Sandbox Layer\Test Projects\Test Scene Base.h">

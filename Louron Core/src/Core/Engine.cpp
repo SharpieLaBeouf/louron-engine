@@ -8,6 +8,8 @@
 
 #include "../OpenGL/Vertex Array.h"
 
+#include "../Renderer/Renderer.h"
+
 // C++ Standard Library Headers
 #include <filesystem>
 
@@ -17,7 +19,7 @@ namespace Louron {
 
     Engine* Engine::s_Instance = nullptr;
 
-    Engine::Engine(const EngineSpecification& specification) : m_Specification(specification) {
+    Engine::Engine(const EngineConfig& specification) : m_Specification(specification) {
         s_Instance = this;
 
         L_CORE_INFO("Initialising Louron Engine");
@@ -38,6 +40,9 @@ namespace Louron {
 
         // Init Audio System
         Audio::Get();
+
+        // Renderer Init Debug VAOs
+        Renderer::Init();
 
         m_ShaderLibrary = std::make_unique<ShaderLibrary>();
 

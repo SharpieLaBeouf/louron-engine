@@ -70,6 +70,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>src</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -97,6 +99,8 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>src</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,6 +125,7 @@
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_glfw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="include\imgui\imgui_tables.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="libs\glad\glad.c" />
     <ClCompile Include="src\Asset\Asset Importer.cpp" />
@@ -129,14 +134,17 @@
     <ClCompile Include="src\Core\Audio.cpp" />
     <ClCompile Include="src\Core\Engine.cpp" />
     <ClCompile Include="src\Core\GuiLayer.cpp" />
+    <ClCompile Include="src\Core\ImGuiBuild.cpp" />
     <ClCompile Include="src\Core\Input.cpp" />
     <ClCompile Include="src\Core\LayerStack.cpp" />
     <ClCompile Include="src\Core\Logging.cpp" />
     <ClCompile Include="src\Core\Physics.cpp" />
     <ClCompile Include="src\Core\Window.cpp" />
+    <ClCompile Include="src\OpenGL\Framebuffer.cpp" />
     <ClCompile Include="src\Project\Project Serializer.cpp" />
     <ClCompile Include="src\Renderer\Renderer.cpp" />
     <ClCompile Include="src\Renderer\RendererPipeline.cpp" />
+    <ClCompile Include="src\Scene\Components\Light.cpp" />
     <ClCompile Include="src\Scene\Components\Physics\Collider.cpp" />
     <ClCompile Include="src\Scene\Components\Components.cpp" />
     <ClCompile Include="src\Scene\Components\Mesh.cpp" />
@@ -147,7 +155,6 @@
     <ClCompile Include="src\Scene\Entity.cpp" />
     <ClCompile Include="src\Project\Project.cpp" />
     <ClCompile Include="src\Scene\Prefab.cpp" />
-    <ClCompile Include="src\Scene\Resource Manager.cpp" />
     <ClCompile Include="src\Scene\Scene Serializer.cpp" />
     <ClCompile Include="src\Scene\Scene Systems\Physics System.cpp" />
     <ClCompile Include="src\Scene\Scene.cpp" />
@@ -538,11 +545,13 @@
     <ClInclude Include="include\imgui\imgui.h" />
     <ClInclude Include="include\imgui\imgui_impl_glfw.h" />
     <ClInclude Include="include\imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="include\imgui\imgui_impl_opengl3_loader.h" />
     <ClInclude Include="include\imgui\imgui_internal.h" />
     <ClInclude Include="include\imgui\imstb_rectpack.h" />
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
     <ClInclude Include="include\khr\khrplatform.h" />
+    <ClInclude Include="include\miniaudio\miniaudio.h" />
     <ClInclude Include="include\physx\characterkinematic\PxBoxController.h" />
     <ClInclude Include="include\physx\characterkinematic\PxCapsuleController.h" />
     <ClInclude Include="include\physx\characterkinematic\PxController.h" />
@@ -1012,6 +1021,7 @@
     <ClInclude Include="include\spdlog\tweakme.h" />
     <ClInclude Include="include\spdlog\version.h" />
     <ClInclude Include="include\stb_image\stb_image.h" />
+    <ClInclude Include="include\stb_image\stb_image_resize2.h" />
     <ClInclude Include="include\yaml-cpp\anchor.h" />
     <ClInclude Include="include\yaml-cpp\binary.h" />
     <ClInclude Include="include\yaml-cpp\contrib\anchordict.h" />
@@ -1055,6 +1065,7 @@
     <ClInclude Include="src\Core\Audio.h" />
     <ClInclude Include="src\Core\Engine.h" />
     <ClInclude Include="src\Core\EngineStart.h" />
+    <ClInclude Include="src\Core\File Utilities.h" />
     <ClInclude Include="src\Core\GuiLayer.h" />
     <ClInclude Include="src\Core\Layer.h" />
     <ClInclude Include="src\Core\LayerStack.h" />
@@ -1065,6 +1076,7 @@
     <ClInclude Include="src\Debug\Profiler.h" />
     <ClInclude Include="src\Louron.h" />
     <ClInclude Include="src\OpenGL\Buffer.h" />
+    <ClInclude Include="src\OpenGL\Framebuffer.h" />
     <ClInclude Include="src\Project\Project Serializer.h" />
     <ClInclude Include="src\Project\Project.h" />
     <ClInclude Include="src\Renderer\Renderer.h" />
@@ -1084,7 +1096,6 @@
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\OpenGL\Texture.h" />
     <ClInclude Include="src\Scene\Prefab.h" />
-    <ClInclude Include="src\Scene\Resource Manager.h" />
     <ClInclude Include="src\Scene\Scene Serializer.h" />
     <ClInclude Include="src\Scene\Scene Systems\Physics System.h" />
     <ClInclude Include="src\Scene\Scene.h" />
@@ -1251,11 +1262,6 @@
     <None Include="include\glm\gtx\wrap.inl" />
     <None Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CMakeDetermineCompilerABI_C.bin" />
     <None Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CMakeDetermineCompilerABI_CXX.bin" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="libs\assimp\assimp-vc143-mt.lib" />
-    <Library Include="libs\assimp\assimp-vc143-mtd.lib" />
-    <Library Include="libs\glfw\glfw3.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

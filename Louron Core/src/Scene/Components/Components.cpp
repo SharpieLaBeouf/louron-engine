@@ -14,10 +14,16 @@
 
 // External Vendor Library Headers
 #include <glm/glm.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
+
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
+#include <yaml-cpp/yaml.h>
 
 namespace Louron {
 
@@ -247,7 +253,8 @@ namespace Louron {
 
     void Transform::SetGlobalPosition(const glm::vec3& globalPosition) {
 
-        if (entity && *entity && entity->GetScene() && entity->GetComponent<HierarchyComponent>().HasParent()) {
+        Entity entity = GetEntity();
+        if (entity && entity.GetScene() && entity.GetComponent<HierarchyComponent>().HasParent()) {
 
             glm::mat4 parentGlobalMatrix = GetComponentInParent<Transform>()->GetGlobalTransform();
             glm::mat4 parentInverseMatrix = glm::inverse(parentGlobalMatrix);
@@ -261,7 +268,9 @@ namespace Louron {
 
     void Transform::SetGlobalRotation(const glm::vec3& globalRotation) {
 
-        if (entity && *entity && entity->GetScene() && entity->GetComponent<HierarchyComponent>().HasParent()) {
+        Entity entity = GetEntity();
+
+        if (entity && entity.GetScene() && entity.GetComponent<HierarchyComponent>().HasParent()) {
 
             glm::quat parentGlobalRotation = glm::quat(glm::radians(GetComponentInParent<Transform>()->GetGlobalRotation()));
             glm::quat parentInverseRotation = glm::inverse(parentGlobalRotation);
@@ -277,7 +286,9 @@ namespace Louron {
 
     void Transform::SetGlobalScale(const glm::vec3& globalScale) {
 
-        if (entity && *entity && entity->GetScene() && entity->GetComponent<HierarchyComponent>().HasParent()) {
+        Entity entity = GetEntity();
+
+        if (entity && entity.GetScene() && entity.GetComponent<HierarchyComponent>().HasParent()) {
 
             glm::vec3 parentGlobalScale = GetComponentInParent<Transform>()->GetGlobalScale();
             m_Scale = globalScale / parentGlobalScale;
@@ -294,10 +305,12 @@ namespace Louron {
 
         AddFlag(TransformFlag_GlobalTransformUpdated);
 
-        if (entity && *entity && entity->GetScene()) {
+        Entity entity = GetEntity();
 
-            for (const auto& child_uuid : entity->GetComponent<HierarchyComponent>().GetChildren()) {
-                Entity child_entity = entity->GetScene()->FindEntityByUUID(child_uuid);
+        if (entity && entity.GetScene()) {
+
+            for (const auto& child_uuid : entity.GetComponent<HierarchyComponent>().GetChildren()) {
+                Entity child_entity = entity.GetScene()->FindEntityByUUID(child_uuid);
 
                 child_entity.GetComponent<Transform>().OnTransformUpdated();
             }
@@ -306,6 +319,8 @@ namespace Louron {
     }
 
     void Transform::UpdateLocalTransformMatrix() {
+
+        Entity entity = GetEntity();
 
         // Check if any changes made to local transform, if YES WE UPDATE
         if (CheckFlag(TransformFlag_PropertiesUpdated)) {
@@ -317,13 +332,17 @@ namespace Louron {
 
             OnTransformUpdated();
 
-            if (entity && *entity && entity->GetScene() && entity->HasComponent<Rigidbody>() && entity->GetComponent<Rigidbody>().GetActor())
-                entity->GetComponent<Rigidbody>().GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
+
+            if (entity && entity.GetScene() && entity.HasComponent<Rigidbody>() && entity.GetComponent<Rigidbody>().GetActor())
+                entity.GetComponent<Rigidbody>().GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
 
             RemoveFlag(TransformFlag_PropertiesUpdated);
             RemoveFlag(TransformFlag_PropertiesUpdated);
             RemoveFlag(TransformFlag_PropertiesUpdated);
         }
+
+        if (entity.HasComponent<AssetMeshFilter>())
+            entity.GetComponent<AssetMeshFilter>().AABBNeedsUpdate = true;
     }
 
     glm::vec3 Transform::GetGlobalPosition() {
@@ -369,6 +388,32 @@ namespace Louron {
         return m_Scale;
     }
 
+    const glm::vec3 local_forward = glm::vec3{ 0.0f, 0.0f, -1.0f };
+
+    void Transform::SetForwardDirection(const glm::vec3& direction) {
+        glm::vec3 forward = glm::normalize(direction);
+        glm::vec3 eulerRotation = glm::degrees(glm::eulerAngles(glm::rotation(local_forward, forward)));
+        SetRotation(eulerRotation); // Set Local
+    }
+
+    glm::vec3 Transform::GetForwardDirection() {
+        glm::quat rotation = glm::quat(glm::radians(m_Rotation));
+        glm::vec3 forward = rotation * local_forward;
+        return glm::normalize(forward);
+    }
+
+    void Transform::SetGlobalForwardDirection(const glm::vec3& direction) {
+        glm::vec3 forward = glm::normalize(direction);
+        glm::vec3 eulerRotation = glm::degrees(glm::eulerAngles(glm::rotation(local_forward, forward)));
+        SetGlobalRotation(eulerRotation); // Set Global
+    }
+
+    glm::vec3 Transform::GetGlobalForwardDirection() {
+        glm::quat globalRotation = glm::quat(glm::radians(GetGlobalRotation()));
+        glm::vec3 globalForward = globalRotation * local_forward;
+        return glm::normalize(globalForward);
+    }
+
     const glm::mat4& Transform::GetGlobalTransform() { 
 
         if (CheckFlag(TransformFlag_GlobalTransformUpdated)) {
@@ -379,32 +424,34 @@ namespace Louron {
                 glm::length(m_GlobalTransform[2])
             ); // Can't call GetGlobalScale here as it would send it into a never ending recursion as GetGlobalScale will call GetGlobalTransform if the flag is not cleared
 
-            if (entity && *entity && entity->GetScene() && entity->GetComponent<HierarchyComponent>().HasParent())
-                m_GlobalTransform = entity->GetComponent<HierarchyComponent>().GetParentEntity().GetComponent<Transform>().GetGlobalTransform() * GetLocalTransform();
+            Entity entity = GetEntity();
+
+            if (entity && entity.GetScene() && entity.GetComponent<HierarchyComponent>().HasParent())
+                m_GlobalTransform = entity.GetComponent<HierarchyComponent>().GetParentEntity().GetComponent<Transform>().GetGlobalTransform() * GetLocalTransform();
             else
                 m_GlobalTransform = m_LocalTransform;
 
             RemoveFlag(TransformFlag_GlobalTransformUpdated);
 
-            if (entity && *entity) {
+            if (entity) {
 
-                if (entity && *entity && entity->HasComponent<SphereCollider>()) {
+                if (entity.HasComponent<SphereCollider>()) {
 
-                    if (entity->GetComponent<SphereCollider>().GetShape()->IsStatic())
-                        entity->GetComponent<SphereCollider>().GetShape()->AddFlag(ColliderFlag_TransformUpdated);
+                    if (entity.GetComponent<SphereCollider>().GetShape()->IsStatic())
+                        entity.GetComponent<SphereCollider>().GetShape()->AddFlag(ColliderFlag_TransformUpdated);
 
                     if (old_global_scale != GetGlobalScale())
-                        entity->GetComponent<SphereCollider>().GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated); // TODO: Fix this because it goes on the fritz when child is attached to parent, and the parent scale changes
+                        entity.GetComponent<SphereCollider>().GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated); // TODO: Fix this because it goes on the fritz when child is attached to parent, and the parent scale changes
 
                 }
                 
-                if (entity && *entity && entity->HasComponent<BoxCollider>()) {
+                if (entity.HasComponent<BoxCollider>()) {
 
-                    if(entity->GetComponent<BoxCollider>().GetShape()->IsStatic())
-                        entity->GetComponent<BoxCollider>().GetShape()->AddFlag(ColliderFlag_TransformUpdated);
+                    if(entity.GetComponent<BoxCollider>().GetShape()->IsStatic())
+                        entity.GetComponent<BoxCollider>().GetShape()->AddFlag(ColliderFlag_TransformUpdated);
 
                     if (old_global_scale != GetGlobalScale())
-                        entity->GetComponent<BoxCollider>().GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
+                        entity.GetComponent<BoxCollider>().GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
 
                 }
             }
@@ -427,13 +474,100 @@ namespace Louron {
 
     glm::mat4 Transform::operator*(const Transform& other) const { return m_LocalTransform * other.m_LocalTransform; }
 
+    void Transform::Serialize(YAML::Emitter& out) {
+
+        out << YAML::Key << "TransformComponent";
+        out << YAML::BeginMap;
+
+        out << YAML::Key << "Translation" << YAML::Value << YAML::Flow
+            << YAML::BeginSeq
+            << m_Position.x
+            << m_Position.y
+            << m_Position.z
+            << YAML::EndSeq;
+
+        out << YAML::Key << "Rotation" << YAML::Value << YAML::Flow
+            << YAML::BeginSeq
+            << m_Rotation.x
+            << m_Rotation.y
+            << m_Rotation.z
+            << YAML::EndSeq;
+
+        out << YAML::Key << "Scale" << YAML::Value << YAML::Flow
+            << YAML::BeginSeq
+            << m_Scale.x
+            << m_Scale.y
+            << m_Scale.z
+            << YAML::EndSeq;
+
+        out << YAML::EndMap;
+    }
+
+    bool Transform::Deserialize(const YAML::Node data)
+    {
+        AddFlag(TransformFlag_GlobalTransformUpdated);
+        AddFlag(TransformFlag_PropertiesUpdated);
+
+        YAML::Node component = data;
+
+        if (component["Translation"]) {
+            auto translationSeq = component["Translation"];
+            if (translationSeq.IsSequence() && translationSeq.size() == 3) {
+                m_Position.x = translationSeq[0].as<float>();
+                m_Position.y = translationSeq[1].as<float>();
+                m_Position.z = translationSeq[2].as<float>();
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+
+        if (component["Rotation"]) {
+            auto rotationSeq = component["Rotation"];
+            if (rotationSeq.IsSequence() && rotationSeq.size() == 3) {
+                m_Rotation.x = rotationSeq[0].as<float>();
+                m_Rotation.y = rotationSeq[1].as<float>();
+                m_Rotation.z = rotationSeq[2].as<float>();
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+
+        if (component["Scale"]) {
+            auto scaleSeq = component["Scale"];
+            if (scaleSeq.IsSequence() && scaleSeq.size() == 3) {
+                m_Scale.x = scaleSeq[0].as<float>();
+                m_Scale.y = scaleSeq[1].as<float>();
+                m_Scale.z = scaleSeq[2].as<float>();
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+
+        return true;
+    }
+
 #pragma endregion
 
 #pragma region ComponentBase
 
     template<typename T>
     T* Component::GetComponent() {
-        return &(entity->GetComponent<T>());
+        Entity entity = GetEntity();
+        if(entity)
+            return &(entity.GetComponent<T>());
+        return nullptr;
     }
     
     // Explicitly instantiate the template for specific types
@@ -445,8 +579,8 @@ namespace Louron {
     template AudioListener*                 Component::GetComponent<AudioListener>();
     template AudioEmitter*                  Component::GetComponent<AudioEmitter>();
     template Transform*                     Component::GetComponent<Transform>();
-    template MeshFilter*                    Component::GetComponent<MeshFilter>();
-    template MeshRenderer*                  Component::GetComponent<MeshRenderer>();
+    template AssetMeshFilter*               Component::GetComponent<AssetMeshFilter>();
+    template AssetMeshRenderer*             Component::GetComponent<AssetMeshRenderer>();
     template PointLightComponent*           Component::GetComponent<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponent<SpotLightComponent>();
     template DirectionalLightComponent*     Component::GetComponent<DirectionalLightComponent>();
@@ -458,10 +592,12 @@ namespace Louron {
     template<typename T>
     T* Component::GetComponentInParent() {
 
-        // Check if entity has parent
-        if (entity && entity->GetComponent<HierarchyComponent>().HasParent() && entity->GetComponent<HierarchyComponent>().GetParentEntity()) {
+        Entity entity = GetEntity();
 
-            Entity parentEntity = entity->GetScene()->FindEntityByUUID(entity->GetComponent<HierarchyComponent>().GetParentID());
+        // Check if entity has parent
+        if (entity && entity.GetComponent<HierarchyComponent>().HasParent() && entity.GetComponent<HierarchyComponent>().GetParentEntity()) {
+
+            Entity parentEntity = entity.GetScene()->FindEntityByUUID(entity.GetComponent<HierarchyComponent>().GetParentID());
 
             // Check if parent has entity
             if(parentEntity && parentEntity.HasComponent<T>())
@@ -485,8 +621,8 @@ namespace Louron {
     template AudioListener*                 Component::GetComponentInParent<AudioListener>();
     template AudioEmitter*                  Component::GetComponentInParent<AudioEmitter>();
     template Transform*                     Component::GetComponentInParent<Transform>();
-    template MeshFilter*                    Component::GetComponentInParent<MeshFilter>();
-    template MeshRenderer*                  Component::GetComponentInParent<MeshRenderer>();
+    template AssetMeshFilter*               Component::GetComponentInParent<AssetMeshFilter>();
+    template AssetMeshRenderer*             Component::GetComponentInParent<AssetMeshRenderer>();
     template PointLightComponent*           Component::GetComponentInParent<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponentInParent<SpotLightComponent>();
     template DirectionalLightComponent*     Component::GetComponentInParent<DirectionalLightComponent>();
@@ -497,10 +633,13 @@ namespace Louron {
 
     template<typename T>
     std::vector<T*> Component::GetComponentsInParent() {
-        // Check if entity has parent
-        if (entity && entity->GetComponent<HierarchyComponent>().HasParent() && entity->GetComponent<HierarchyComponent>().GetParentEntity()) {
 
-            Entity parentEntity = entity->GetScene()->FindEntityByUUID(entity->GetComponent<HierarchyComponent>().GetParentID());
+        Entity entity = GetEntity();
+
+        // Check if entity has parent
+        if (entity && entity.GetComponent<HierarchyComponent>().HasParent() && entity.GetComponent<HierarchyComponent>().GetParentEntity()) {
+
+            Entity parentEntity = entity.GetScene()->FindEntityByUUID(entity.GetComponent<HierarchyComponent>().GetParentID());
 
             std::vector<T*> component_vector;
 
@@ -534,8 +673,8 @@ namespace Louron {
     template std::vector<AudioListener*>                Component::GetComponentsInParent<AudioListener>();
     template std::vector<AudioEmitter*>                 Component::GetComponentsInParent<AudioEmitter>();
     template std::vector<Transform*>                    Component::GetComponentsInParent<Transform>();
-    template std::vector<MeshFilter*>                   Component::GetComponentsInParent<MeshFilter>();
-    template std::vector<MeshRenderer*>                 Component::GetComponentsInParent<MeshRenderer>();
+    template std::vector<AssetMeshFilter*>              Component::GetComponentsInParent<AssetMeshFilter>();
+    template std::vector<AssetMeshRenderer*>            Component::GetComponentsInParent<AssetMeshRenderer>();
     template std::vector<PointLightComponent*>          Component::GetComponentsInParent<PointLightComponent>();
     template std::vector<SpotLightComponent*>           Component::GetComponentsInParent<SpotLightComponent>();
     template std::vector<DirectionalLightComponent*>    Component::GetComponentsInParent<DirectionalLightComponent>();
@@ -547,15 +686,17 @@ namespace Louron {
     template<typename T>
     T* Component::GetComponentInChildren() {
 
-        // Check if entity has children
-        if (entity && !entity->GetComponent<HierarchyComponent>().GetChildren().empty()) {
+        Entity entity = GetEntity();
 
-            auto& children_vector = entity->GetComponent<HierarchyComponent>().GetChildren();
+        // Check if entity has children
+        if (entity && !entity.GetComponent<HierarchyComponent>().GetChildren().empty()) {
+
+            auto& children_vector = entity.GetComponent<HierarchyComponent>().GetChildren();
 
             // Does the current entity have any children with the component we are looking for?
             for (auto& child_uuid : children_vector) {
 
-                Entity child_entity = entity->GetScene()->FindEntityByUUID(child_uuid);
+                Entity child_entity = entity.GetScene()->FindEntityByUUID(child_uuid);
 
                 if (child_entity.HasComponent<T>())
                     return &(child_entity.GetComponent<T>());
@@ -564,7 +705,7 @@ namespace Louron {
             // If not, let's start to recursively check the children of the children
             for (auto& child_uuid : children_vector) {
 
-                Entity child_entity = entity->GetScene()->FindEntityByUUID(child_uuid);
+                Entity child_entity = entity.GetScene()->FindEntityByUUID(child_uuid);
                 T* component_found = child_entity.GetComponent<Transform>().GetComponentInChildren<T>();
 
                 if (component_found)
@@ -586,8 +727,8 @@ namespace Louron {
     template AudioListener*                 Component::GetComponentInChildren<AudioListener>();
     template AudioEmitter*                  Component::GetComponentInChildren<AudioEmitter>();
     template Transform*                     Component::GetComponentInChildren<Transform>();
-    template MeshFilter*                    Component::GetComponentInChildren<MeshFilter>();
-    template MeshRenderer*                  Component::GetComponentInChildren<MeshRenderer>();
+    template AssetMeshFilter*               Component::GetComponentInChildren<AssetMeshFilter>();
+    template AssetMeshRenderer*             Component::GetComponentInChildren<AssetMeshRenderer>();
     template PointLightComponent*           Component::GetComponentInChildren<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponentInChildren<SpotLightComponent>();
     template DirectionalLightComponent*     Component::GetComponentInChildren<DirectionalLightComponent>();
@@ -601,12 +742,14 @@ namespace Louron {
     {
         std::vector<T*> components;
 
-        if (entity && entity->HasComponent<HierarchyComponent>()) {
-            auto& children_vector = entity->GetComponent<HierarchyComponent>().GetChildren();
+        Entity entity = GetEntity();
+
+        if (entity && entity.HasComponent<HierarchyComponent>()) {
+            auto& children_vector = entity.GetComponent<HierarchyComponent>().GetChildren();
 
             // Check all direct children first
             for (auto& child_uuid : children_vector) {
-                Entity child_entity = entity->GetScene()->FindEntityByUUID(child_uuid);
+                Entity child_entity = entity.GetScene()->FindEntityByUUID(child_uuid);
 
                 if (child_entity.HasComponent<T>()) {
                     components.push_back(&(child_entity.GetComponent<T>()));
@@ -631,8 +774,8 @@ namespace Louron {
     template std::vector<AudioListener*>                Component::GetComponentsInChildren<AudioListener>();
     template std::vector<AudioEmitter*>                 Component::GetComponentsInChildren<AudioEmitter>();
     template std::vector<Transform*>                    Component::GetComponentsInChildren<Transform>();
-    template std::vector<MeshFilter*>                   Component::GetComponentsInChildren<MeshFilter>();
-    template std::vector<MeshRenderer*>                 Component::GetComponentsInChildren<MeshRenderer>();
+    template std::vector<AssetMeshFilter*>              Component::GetComponentsInChildren<AssetMeshFilter>();
+    template std::vector<AssetMeshRenderer*>            Component::GetComponentsInChildren<AssetMeshRenderer>();
     template std::vector<PointLightComponent*>          Component::GetComponentsInChildren<PointLightComponent>();
     template std::vector<SpotLightComponent*>           Component::GetComponentsInChildren<SpotLightComponent>();
     template std::vector<DirectionalLightComponent*>    Component::GetComponentsInChildren<DirectionalLightComponent>();
@@ -678,7 +821,9 @@ namespace Louron {
             return;
         }
 
-        if (!entity || !*entity || !entity->GetScene()) {
+        Entity entity = GetEntity();
+
+        if (!entity || !entity.GetScene()) {
             L_CORE_ERROR("Cannot Attach Parent - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
@@ -696,15 +841,15 @@ namespace Louron {
         if (m_Parent != NULL_UUID) 
             DetachParent();
 
-        Entity new_parent_entity = entity->GetScene()->FindEntityByUUID(newParentID);
+        Entity new_parent_entity = entity.GetScene()->FindEntityByUUID(newParentID);
         if (!new_parent_entity) {
-            L_CORE_ERROR("Cannot Attach Parent - Parent Entity Is Invalid! Entity({0}) will be at the root of the scene now.", entity->GetName());
+            L_CORE_ERROR("Cannot Attach Parent - Parent Entity Is Invalid! Entity({0}) will be at the root of the scene now.", entity.GetName());
             return;
         }
 
         // 2. Convert Current Global Transform to Local Transform relative to newParent
         // Get references to the relevant components
-        auto& entity_transform = entity->GetComponent<Transform>();
+        auto& entity_transform = entity.GetComponent<Transform>();
         auto& parent_transform = new_parent_entity.GetComponent<Transform>();
 
         // Calculate the local transform relative to the new parent
@@ -719,12 +864,12 @@ namespace Louron {
         entity_transform.m_LocalTransform = localTransform;
         entity_transform.m_GlobalTransform = new_parent_entity.GetComponent<Transform>().GetGlobalTransform() * localTransform;
 
-        if (!entity->HasComponent<Rigidbody>()) {
+        if (!entity.HasComponent<Rigidbody>()) {
 
             // 1. I need to recursively check my children to see if there are
             // any children entities that HAVE a SphereCollider or BoxCollider, and 
             // DO NOT HAVE a Rigidbody.
-            std::vector<Entity> child_colliders = GetChildCollidersWithoutRigidbody(*entity);
+            std::vector<Entity> child_colliders = GetChildCollidersWithoutRigidbody(entity);
 
             // 2. Flag all children with Collider Components without Rigidbodies to update
             //    rigidbody reference in the physics system
@@ -744,18 +889,20 @@ namespace Louron {
 
         // Finalise relationship 8==D~({})
         m_Parent = newParentID;
-        new_parent_entity.GetComponent<HierarchyComponent>().m_Children.push_back(entity->GetUUID());
+        new_parent_entity.GetComponent<HierarchyComponent>().m_Children.push_back(entity.GetUUID());
     }
 
     void HierarchyComponent::DetachParent() {
 
-        if (!entity || !*entity || !entity->GetScene()) {
+        Entity entity = GetEntity();
+
+        if (!entity || !entity.GetScene()) {
             L_CORE_ERROR("Cannot Detach Parent - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
-        
+
         // 1. Calculate the child's global transform
-        auto& entityTransform = entity->GetComponent<Transform>();
+        auto& entityTransform = entity.GetComponent<Transform>();
         glm::mat4 globalTransform = entityTransform.GetGlobalTransform();
 
         // 2. Update the child's local transform to match the global transform
@@ -769,12 +916,12 @@ namespace Louron {
         entityTransform.m_LocalTransform = globalTransform;
         entityTransform.m_GlobalTransform = globalTransform;
 
-        if (!entity->HasComponent<Rigidbody>()) {
+        if (!entity.HasComponent<Rigidbody>()) {
 
             // 1. I need to recursively check my children to see if there are
             // any children entities that HAVE a SphereCollider or BoxCollider, and 
             // DO NOT HAVE a Rigidbody.
-            std::vector<Entity> child_colliders = GetChildCollidersWithoutRigidbody(*entity);
+            std::vector<Entity> child_colliders = GetChildCollidersWithoutRigidbody(entity);
 
             // 2. Flag all children with Collider Components without Rigidbodies to update
             //    rigidbody reference in the physics system
@@ -794,13 +941,13 @@ namespace Louron {
         }
 
         if (m_Parent != NULL_UUID) {
-            Entity parentEntity = entity->GetScene()->FindEntityByUUID(m_Parent);
+            Entity parentEntity = entity.GetScene()->FindEntityByUUID(m_Parent);
             if (parentEntity) {
                 auto& parentChildren = parentEntity.GetComponent<HierarchyComponent>().m_Children;
 
                 // Erase-remove idiom to remove the child from the parent's children list
                 parentChildren.erase(
-                    std::remove(parentChildren.begin(), parentChildren.end(), entity->GetUUID()),
+                    std::remove(parentChildren.begin(), parentChildren.end(), entity.GetUUID()),
                     parentChildren.end()
                 );
             }
@@ -812,28 +959,32 @@ namespace Louron {
 
     void HierarchyComponent::DetachChildren() {
 
-        if (!entity || !*entity || !entity->GetScene()) {
+        Entity entity = GetEntity();
+
+        if (!entity || !entity.GetScene()) {
             L_CORE_ERROR("Cannot Rehome Children - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
 
         for (const auto& child : m_Children) {
-            entity->GetScene()->FindEntityByUUID(child).GetComponent<HierarchyComponent>().DetachParent();
+            entity.GetScene()->FindEntityByUUID(child).GetComponent<HierarchyComponent>().DetachParent();
         }
 
-        L_CORE_INFO("Detached {0} Children From Entity({1}).", m_Children.size(), entity->GetName());
+        L_CORE_INFO("Detached {0} Children From Entity({1}).", m_Children.size(), entity.GetName());
 
         m_Children.clear();
     }
 
     void HierarchyComponent::RehomeChildren(const UUID& newParentID) {
 
-        if (!entity || !*entity || !entity->GetScene()) {
+        Entity entity = GetEntity();
+
+        if (!entity || !entity.GetScene()) {
             L_CORE_ERROR("Cannot Rehome Children - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
 
-        Entity new_parent = entity->GetScene()->FindEntityByUUID(newParentID);
+        Entity new_parent = entity.GetScene()->FindEntityByUUID(newParentID);
         if (!new_parent) {
             L_CORE_ERROR("Cannot Rehome Children - Parent Entity Is Invalid.");
             return;
@@ -841,11 +992,11 @@ namespace Louron {
 
         for (const auto& child : m_Children) {
 
-            entity->GetScene()->FindEntityByUUID(child).GetComponent<HierarchyComponent>().AttachParent(newParentID);
+            entity.GetScene()->FindEntityByUUID(child).GetComponent<HierarchyComponent>().AttachParent(newParentID);
 
         }
         
-        L_CORE_INFO("Rehomed {0} Children From Entity({1}) to Entity({2}).", m_Children.size(), entity->GetName(), new_parent.GetName());
+        L_CORE_INFO("Rehomed {0} Children From Entity({1}) to Entity({2}).", m_Children.size(), entity.GetName(), new_parent.GetName());
 
         m_Children.clear();
 
@@ -853,50 +1004,49 @@ namespace Louron {
 
     Entity HierarchyComponent::FindChild(const UUID& childUUID) const {
 
-        if (!entity || !*entity || !entity->GetScene()) {
-            L_CORE_ERROR("Cannot Find Child - Current Entity Is Invalid and Cannot Access Scene!");
-            return Entity(entt::null, nullptr);
+        if (!scene) {
+            L_CORE_ASSERT(scene, "Cannot Find Child - Current Entity Has Invalid Scene Reference!");
+            return {};
         }
 
-        if (entity->GetScene()->HasEntity(childUUID)) {
-            return entity->GetScene()->FindEntityByUUID(childUUID);
+        if (scene->HasEntity(childUUID)) {
+            return scene->FindEntityByUUID(childUUID);
         }
 
-        return Entity(entt::null, nullptr);
+        return {};
     }
 
     Entity HierarchyComponent::FindChild(const std::string& childName) const {
 
-        if (!entity || !*entity || !entity->GetScene()) {
-            L_CORE_ERROR("Cannot Find Child - Current Entity Is Invalid and Cannot Access Scene!");
-            return Entity(entt::null, nullptr);
+        if (!scene) {
+            L_CORE_ASSERT(scene, "Cannot Find Child - Current Entity Has Invalid Scene Reference!");
+            return {};
         }
 
-        if (entity && entity->GetScene() && entity->GetScene()->HasEntity(childName)) {
-            return entity->GetScene()->FindEntityByName(childName);
+        if (scene->HasEntity(childName)) {
+            return scene->FindEntityByName(childName);
         }
 
-        return Entity(entt::null, nullptr);
+        return {};
     }
 
     const std::vector<UUID>& HierarchyComponent::GetChildren() const {
         return m_Children;
     }
 
-    Entity HierarchyComponent::GetParentEntity() const
-    {
-
-        if (!entity || !*entity || !entity->GetScene()) {
-            L_CORE_ERROR("Cannot Get Parent Entity - Current Entity Is Invalid and Cannot Access Scene!");
-            return Entity(entt::null, nullptr);
-        }
+    Entity HierarchyComponent::GetParentEntity() const {
 
         if (!HasParent()) {
-            L_CORE_WARN("Attempted to Get Parent When There Is No Parent - Returning Null Entity.");
-            return Entity(entt::null, nullptr);
+            L_CORE_WARN("Cannot Get Parent Entity - No Parent Attached.");
+            return {};
         }
 
-        return entity->GetScene()->FindEntityByUUID(m_Parent);
+        if (!scene) {
+            L_CORE_ASSERT(scene, "Cannot Get Parent Entity - Current Entity Has Invalid Scene Reference!");
+            return {};
+        }
+
+        return scene->FindEntityByUUID(m_Parent);
     }
 
     const UUID& HierarchyComponent::GetParentID() const {
@@ -907,6 +1057,252 @@ namespace Louron {
         return m_Parent != NULL_UUID;
     }
 
+    void HierarchyComponent::Serialize(YAML::Emitter& out) {
+
+        out << YAML::Key << "HierarchyComponent";
+        out << YAML::BeginMap;
+
+        out << YAML::Key << "Parent" << YAML::Value << m_Parent;
+
+        {
+            out << YAML::Key << "Children" << YAML::Value;
+            out << YAML::BeginSeq;
+                
+            for (const auto& child : m_Children) {
+                out << child;
+            }
+
+            out << YAML::EndSeq;;
+        }
+
+        out << YAML::EndMap;
+    }
+
+    bool HierarchyComponent::Deserialize(const YAML::Node data) {
+
+        YAML::Node component = data;
+
+        // Deserialize the Parent value
+        if (component["Parent"]) {
+            m_Parent = component["Parent"].as<uint32_t>();  
+        }
+
+        // Deserialize the Children sequence
+        if (component["Children"]) {
+
+            if (component["Children"].IsSequence()) {
+                
+                m_Children.clear();
+                for (size_t i = 0; i < component["Children"].size(); ++i) {
+                    m_Children.push_back(component["Children"][i].as<uint32_t>());
+                }
+
+            }
+
+        }
+        return true;
+    }
+
 #pragma endregion
 
+    void TagComponent::Serialize(YAML::Emitter& out) {
+
+        out << YAML::Key << "TagComponent";
+        out << YAML::BeginMap;
+
+        out << YAML::Key << "Tag" << YAML::Value << Tag;
+
+        out << YAML::EndMap;
+    }
+
+    bool TagComponent::Deserialize(const YAML::Node data)
+    {
+        if (data["Tag"])
+            Tag = data["Tag"].as<std::string>();
+
+        return true;
+    }
+
+    void CameraComponent::Serialize(YAML::Emitter& out)
+    {
+
+        if (CameraInstance) {
+            out << YAML::Key << "CameraComponent";
+            out << YAML::BeginMap;
+            {
+
+                out << YAML::Key << "Camera" << YAML::Value;
+                out << YAML::BeginMap;
+                {
+
+                    out << YAML::Key << "FOV" << YAML::Value << CameraInstance->FOV;
+                    out << YAML::Key << "MovementToggle" << YAML::Value << CameraInstance->m_Movement;
+                    out << YAML::Key << "MovementSpeed" << YAML::Value << CameraInstance->MovementSpeed;
+                    out << YAML::Key << "MovementYDamp" << YAML::Value << CameraInstance->MovementYDamp;
+                    out << YAML::Key << "MouseSensitivity" << YAML::Value << CameraInstance->MouseSensitivity;
+                    out << YAML::Key << "MouseToggledOff" << YAML::Value << CameraInstance->MouseToggledOff;
+
+                    glm::vec3 v = CameraInstance->GetGlobalPosition();
+                    out << YAML::Key << "Position" << YAML::Value << YAML::Flow
+                        << YAML::BeginSeq
+                        << v.x
+                        << v.y
+                        << v.z
+                        << YAML::EndSeq;
+
+                    out << YAML::Key << "Yaw" << YAML::Value << CameraInstance->GetYaw();
+                    out << YAML::Key << "Pitch" << YAML::Value << CameraInstance->GetPitch();
+                }
+                out << YAML::EndMap;
+            }
+
+            out << YAML::Key << "Primary" << YAML::Value << Primary;
+
+            const char* clear_string = (ClearFlags == CameraClearFlags::SKYBOX) ? "Skybox" : "Colour";
+            out << YAML::Key << "ClearFlag" << YAML::Value << clear_string;
+
+            out << YAML::EndMap;
+        }
+
+    }
+
+    bool CameraComponent::Deserialize(const YAML::Node data) {
+        
+        YAML::Node component = data;
+
+        if (component["Camera"]) {
+            YAML::Node cameraNode = component["Camera"];
+
+            if (cameraNode["FOV"]) {
+                float temp = cameraNode["FOV"].as<float>();
+                CameraInstance->FOV = cameraNode["FOV"].as<float>();
+            }
+            else {
+                return false;
+            }
+
+            if (cameraNode["MovementToggle"]) {
+                CameraInstance->m_Movement = cameraNode["MovementToggle"].as<bool>();
+            }
+            else {
+                return false;
+            }
+
+            if (cameraNode["MovementSpeed"]) {
+                CameraInstance->MovementSpeed = cameraNode["MovementSpeed"].as<float>();
+            }
+            else {
+                return false;
+            }
+
+            if (cameraNode["MovementYDamp"]) {
+                CameraInstance->MovementYDamp = cameraNode["MovementYDamp"].as<float>();
+            }
+            else {
+                return false;
+            }
+
+            if (cameraNode["MouseSensitivity"]) {
+                CameraInstance->MouseSensitivity = cameraNode["MouseSensitivity"].as<float>();
+            }
+            else {
+                return false;
+            }
+
+            if (cameraNode["MouseToggledOff"]) {
+                CameraInstance->MouseToggledOff = cameraNode["MouseToggledOff"].as<bool>();
+            }
+            else {
+                return false;
+            }
+
+            if (cameraNode["Position"]) {
+                auto positionSeq = cameraNode["Position"];
+                if (positionSeq.IsSequence() && positionSeq.size() == 3) {
+                    glm::vec3 position{};
+                    position.x = positionSeq[0].as<float>();
+                    position.y = positionSeq[1].as<float>();
+                    position.z = positionSeq[2].as<float>();
+                    CameraInstance->SetPosition(position);
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                return false;
+            }
+
+            if (cameraNode["Yaw"]) {
+                CameraInstance->SetYaw(cameraNode["Yaw"].as<float>());
+            }
+            else {
+                return false;
+            }
+
+            if (cameraNode["Pitch"]) {
+                CameraInstance->SetPitch(cameraNode["Pitch"].as<float>());
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+
+        if (component["Primary"]) {
+            Primary = component["Primary"].as<bool>();
+        }
+        else {
+            return false;
+        }
+
+        if (component["ClearFlag"]) {
+            std::string clearFlagStr = component["ClearFlag"].as<std::string>();
+            if (clearFlagStr == "Skybox") {
+                ClearFlags = CameraClearFlags::SKYBOX;
+            }
+            else if (clearFlagStr == "Colour") {
+                ClearFlags = CameraClearFlags::COLOUR_ONLY;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            return false;
+        }
+
+        return true;
+    }
+
+    void IDComponent::Serialize(YAML::Emitter& out) {
+
+        out << YAML::Key << "Entity" << YAML::Value << ID;
+    }
+
+    bool IDComponent::Deserialize(const YAML::Node data) {
+
+        if (data)
+            ID = data.as<uint32_t>();
+        else
+            return false;
+
+        return true;
+    }
+    Entity Component::GetEntity() const {
+
+        if (!scene) {
+            L_CORE_ASSERT(scene, "Cannot Get Entity - Current Entity Has Invalid Scene Reference!");
+            return {};
+        }
+        
+        if (!scene->HasEntity(entity_uuid)) {
+            L_CORE_ASSERT(scene, "Cannot Get Entity - Current Entity Is Invalid!");
+            return {};
+        }
+
+        return scene->FindEntityByUUID(entity_uuid);
+    }
 }

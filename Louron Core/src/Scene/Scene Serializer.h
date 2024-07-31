@@ -31,8 +31,6 @@ namespace Louron {
 	private:
 		std::weak_ptr<Scene> m_Scene;
 
-		std::shared_ptr<SkyboxMaterial> DeserializeSkyboxMaterial(const std::filesystem::path& filePath);
-
 		void SerializeEntity(YAML::Emitter& out, Entity entity);
 	};
 

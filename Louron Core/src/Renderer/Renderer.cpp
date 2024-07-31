@@ -1,6 +1,58 @@
 #include "Renderer.h"
 
+#include "../OpenGL/Buffer.h"
+#include "../OpenGL/Vertex Array.h"
+
 namespace Louron {
+
+	static std::unique_ptr<VertexArray> s_DebugCubeVAO;
+	static std::unique_ptr<VertexArray> s_DebugSphereVAO; // TODO: Implement this
+
+	RenderPassStats Renderer::s_RenderStats = {};
+
+	static GLuint debug_VAO = -1;
+
+	void Renderer::Init() {
+
+		if (!s_DebugCubeVAO) {
+
+			// Define the vertices of the cube
+			GLfloat cubeVertices[] = {
+				// Vertices of a unit cube
+				-0.5f, -0.5f, -0.5f,
+				 0.5f, -0.5f, -0.5f,
+				 0.5f,  0.5f, -0.5f,
+				-0.5f,  0.5f, -0.5f,
+				-0.5f, -0.5f,  0.5f,
+				 0.5f, -0.5f,  0.5f,
+				 0.5f,  0.5f,  0.5f,
+				-0.5f,  0.5f,  0.5f
+			};
+
+			// Define the indices for the edges of the cube
+			GLuint cubeIndices[] = {
+				0, 1, 1, 2, 2, 3, 3, 0, // Bottom face
+				4, 5, 5, 6, 6, 7, 7, 4, // Top face
+				0, 4, 1, 5, 2, 6, 3, 7  // Side edges
+			};
+
+			s_DebugCubeVAO = std::make_unique<VertexArray>();
+			s_DebugCubeVAO->Bind();
+
+			VertexBuffer* vbo = new VertexBuffer(cubeVertices, sizeof(cubeVertices));
+			BufferLayout layout = {
+				{ ShaderDataType::Float3, "aPos" }
+			};
+			vbo->SetLayout(layout);
+
+			IndexBuffer* ebo = new IndexBuffer(cubeIndices, sizeof(cubeIndices) / sizeof(GLuint));
+
+			s_DebugCubeVAO->AddVertexBuffer(vbo);
+			s_DebugCubeVAO->SetIndexBuffer(ebo);
+
+			s_DebugCubeVAO->UnBind();
+		}
+	}
 
 	void Renderer::ClearColour(const glm::vec4 colour) {
 		glClearColor(colour.r, colour.g, colour.b, colour.a);
@@ -10,31 +62,55 @@ namespace Louron {
 		glClear(mask);
 	}
 
-	void Renderer::DrawMesh(std::shared_ptr<Mesh> Mesh) {
-		Mesh->VAO->Bind();
-   		glDrawElements(GL_TRIANGLES, Mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+	void Renderer::DrawSubMesh(std::shared_ptr<SubMesh> sub_mesh) {
+		sub_mesh->VAO->Bind();
+		glDrawElements(GL_TRIANGLES, sub_mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+
+		s_RenderStats.DrawCalls++;
+
+		s_RenderStats.SubMeshes_Rendered++;
+
+		s_RenderStats.Primitives_TriangleCount += sub_mesh->VAO->GetIndexBuffer()->GetCount() / 3;
+		s_RenderStats.Primitives_VerticeCount += sub_mesh->VAO->GetIndexBuffer()->GetCount();
+	}
+
+	void Renderer::DrawDebugCube() {
+
+		s_DebugCubeVAO->Bind();
+		glDrawElements(GL_LINES, s_DebugCubeVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+
+		s_RenderStats.DrawCalls++;
+
+		s_RenderStats.SubMeshes_Rendered++;
+
+		s_RenderStats.Primitives_LineCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() / 2;
+		s_RenderStats.Primitives_VerticeCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount();
+		
 	}
 
 	void Renderer::DrawSkybox(SkyboxComponent& skybox) {
+
 		skybox.Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
-	}
 
+		s_RenderStats.DrawCalls++;
+
+		s_RenderStats.Skybox_Rendered++;
+
+		s_RenderStats.Primitives_TriangleCount += 36 / 3;
+		s_RenderStats.Primitives_VerticeCount += 36;
+
+	}
 
 	static GLuint s_MeshInstanceBuffers = -1;
 
-	void Renderer::DrawInstancedMesh(std::shared_ptr<Mesh> mesh, std::vector<Transform> transforms) {
+	void Renderer::DrawInstancedSubMesh(std::shared_ptr<SubMesh> mesh, std::vector<glm::mat4> transforms) {
 		
-		std::vector<glm::mat4> transformMatrices;
-		for (int i = 0; i < transforms.size(); i++) {
-			transformMatrices.push_back(transforms[i]);
-		}
-
 		if (s_MeshInstanceBuffers == -1) {
 			
 			glGenBuffers(1, &s_MeshInstanceBuffers);
 			glBindBuffer(GL_ARRAY_BUFFER, s_MeshInstanceBuffers);
-			glBufferData(GL_ARRAY_BUFFER, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0], GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), &transforms[0], GL_DYNAMIC_DRAW);
 		}
 		else {
 
@@ -43,13 +119,13 @@ namespace Louron {
 			GLint bufferSize = 0;
 			glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
 
-			if (bufferSize < transformMatrices.size() * sizeof(glm::mat4)) {
+			if (bufferSize < transforms.size() * sizeof(glm::mat4)) {
 				// Reallocate buffer with the new size
-				glBufferData(GL_ARRAY_BUFFER, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0], GL_DYNAMIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), &transforms[0], GL_DYNAMIC_DRAW);
 			}
 			else {
 				// Update existing buffer with new data
-				glBufferSubData(GL_ARRAY_BUFFER, 0, transformMatrices.size() * sizeof(glm::mat4), &transformMatrices[0]);
+				glBufferSubData(GL_ARRAY_BUFFER, 0, transforms.size() * sizeof(glm::mat4), &transforms[0]);
 			}
 		}
 
@@ -96,6 +172,13 @@ namespace Louron {
 		glVertexAttribDivisor(8, 0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		s_RenderStats.DrawCalls++;
+
+		s_RenderStats.SubMeshes_Instanced += static_cast<GLuint>(transforms.size());
+
+		s_RenderStats.Primitives_TriangleCount += mesh->VAO->GetIndexBuffer()->GetCount() / 3 * static_cast<GLuint>(transforms.size());
+		s_RenderStats.Primitives_VerticeCount += mesh->VAO->GetIndexBuffer()->GetCount() * static_cast<GLuint>(transforms.size());
 	}
 	void Renderer::CleanupRenderData() {
 
@@ -104,4 +187,7 @@ namespace Louron {
 			s_MeshInstanceBuffers = -1;
 		}
 	}
+
+	void Renderer::ClearRenderStats() { s_RenderStats = {}; }
+	const RenderPassStats& Renderer::GetFrameRenderStats() { return s_RenderStats; }
 }

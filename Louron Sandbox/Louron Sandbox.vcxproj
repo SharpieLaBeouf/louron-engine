@@ -67,6 +67,7 @@
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -90,6 +91,7 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <DisableSpecificWarnings>
       </DisableSpecificWarnings>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>NotSet</SubSystem>
@@ -103,8 +105,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Source\Sandbox Application.cpp" />
-    <ClCompile Include="source\Sandbox Layer\MainMenuLayer.cpp" />
+    <ClCompile Include="Source\Louron Editor Application.cpp" />
+    <ClCompile Include="source\Editor Layer\Louron Editor Layer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Louron Core\Louron Core.vcxproj">
@@ -120,7 +122,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\Sandbox Layer\MainMenuLayer.h" />
+    <ClInclude Include="source\Editor Layer\Louron Editor Layer.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 1.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 10.h" />
     <ClInclude Include="source\Sandbox Layer\Test Projects\Scene 11.h" />

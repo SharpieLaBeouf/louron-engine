@@ -30,6 +30,8 @@ namespace Louron {
 		virtual void OnStartPipeline(std::shared_ptr<Louron::Scene> scene);
 		virtual void OnStopPipeline();
 
+		virtual void OnViewportResize();
+
 		virtual void UpdateActiveScene(std::shared_ptr<Louron::Scene> scene);
 
 	private:
@@ -38,7 +40,6 @@ namespace Louron {
 
 	protected:
 
-		glm::uvec2 m_FrameSize{ 0, 0 };
 		std::shared_ptr<Louron::Scene> m_Scene;
 	};
 
@@ -52,23 +53,14 @@ namespace Louron {
 		void OnStartPipeline(std::shared_ptr<Louron::Scene> scene) override;
 		void OnStopPipeline() override;
 
-		GLuint GetRenderFBO() const;
-		GLuint GetRenderColourTexture() const;
-		GLuint GetRenderEntityIDTexture() const;
-		GLuint GetRenderDepthTexture() const;
-
-		// This is used to let the pipeline know if it should
-		// render the screen quad with the colour attachment
-		// of the scene_fbo, or not 
-		void SetRenderScreenQuad(bool shouldRenderScreenQuad);
-
-		UUID PickRenderEntityID(glm::ivec2 screenPos);
+		void OnViewportResize() override;
 
 	private:
 
 		void UpdateComputeData();
 
 		void UpdateSSBOData();
+		void ConductRenderableCull(Camera* camera, std::vector<Entity>* renderables);
 		void ConductDepthPass(Camera* camera);
 		void ConductLightCull(Camera* camera);
 		void ConductRenderPass(Camera* camera);
@@ -86,17 +78,12 @@ namespace Louron {
 
 			GLuint DL_Buffer = -1;
 
-			GLuint Scene_FBO = -1;
-			GLuint Scene_Colour_Texture = -1;
-			GLuint Scene_EntityID_Texture = -1;
-			GLuint Scene_Depth_Texture = -1;
-
-			GLuint Entity_Texture_Clear = NULL_UUID;
 			std::unique_ptr<VertexArray> Screen_Quad_VAO;
-			bool Render_Screen_Quad = true;
 
 			GLuint workGroupsX = -1;
 			GLuint workGroupsY = -1;
+
+			std::vector<Entity> RenderableEntities;
 
 		} FP_Data;
 

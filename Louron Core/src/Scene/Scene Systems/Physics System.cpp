@@ -68,7 +68,7 @@ namespace Louron {
 				if (auto old_rb_ref = collider.GetShape()->GetRigidbody(); old_rb_ref && *old_rb_ref)
 					old_rb_ref->DetachShape(collider.GetShape());
 
-				collider.UpdateRigidbody(rb_ref->entity->GetUUID());
+				collider.UpdateRigidbody(rb_ref->GetEntity().GetUUID());
 
 				// Attach the Collider to the New Rigidbody
 				if (auto new_rb_ref = collider.GetShape()->GetRigidbody(); new_rb_ref && *new_rb_ref)
@@ -379,7 +379,7 @@ namespace Louron {
 				auto& collider = sc_view.get<SphereCollider>(entity_handle);
 
 				if (!collider.GetShape()->NoFlagsSet()) {
-					Entity entity = { entity_handle, scene.get() };
+					Entity entity = { entity_handle, scene.get()};
 
 					ProcessColliderChanges<SphereCollider>(entity);
 				}
@@ -396,7 +396,7 @@ namespace Louron {
 				auto& collider = bc_view.get<BoxCollider>(entity_handle);
 
 				if (!collider.GetShape()->NoFlagsSet()) {
-					Entity entity = { entity_handle, scene.get() };
+					Entity entity = { entity_handle, scene.get()};
 
 					ProcessColliderChanges<BoxCollider>(entity);
 				}
@@ -419,7 +419,7 @@ namespace Louron {
 					}
 
 					if (rigidbody.GetActor()->CheckFlag(RigidbodyFlag_TransformUpdated)) {
-						rigidbody.GetActor()->SetGlobalPose(rigidbody.entity->GetComponent<Transform>());
+						rigidbody.GetActor()->SetGlobalPose(rigidbody.GetEntity().GetComponent<Transform>());
 					}
 
 					rigidbody.GetActor()->ClearFlags();
@@ -453,7 +453,7 @@ namespace Louron {
 
 			for (auto& entity_handle : root_view) {
 				if (!root_view.get<HierarchyComponent>(entity_handle).HasParent()) {
-					root_entities.push_back(*root_view.get<HierarchyComponent>(entity_handle).entity);
+					root_entities.push_back(root_view.get<HierarchyComponent>(entity_handle).GetEntity());
 				}
 			}
 		}

@@ -43,7 +43,9 @@ namespace Louron {
 					return GetComponent<Rigidbody>();
 				
 				Rigidbody& component = PhysicsSystem::AddRigidBody(*this, m_Scene);
-				component.entity = std::make_shared<Entity>(*this);
+
+				component.scene = m_Scene;
+				component.entity_uuid = m_Scene->m_Registry.get<IDComponent>(m_EntityHandle).ID;
 
 				return component;
 			}
@@ -58,7 +60,9 @@ namespace Louron {
 					return GetComponent<SphereCollider>();
 
 				SphereCollider& component = PhysicsSystem::AddSphereCollider(*this, m_Scene);
-				component.entity = std::make_shared<Entity>(*this);
+
+				component.scene = m_Scene;
+				component.entity_uuid = m_Scene->m_Registry.get<IDComponent>(m_EntityHandle).ID;
 
 				return component;
 			}
@@ -73,7 +77,9 @@ namespace Louron {
 					return GetComponent<BoxCollider>();
 
 				BoxCollider& component = PhysicsSystem::AddBoxCollider({ m_EntityHandle, m_Scene }, m_Scene);
-				component.entity = std::make_shared<Entity>(*this);
+
+				component.scene = m_Scene;
+				component.entity_uuid = m_Scene->m_Registry.get<IDComponent>(m_EntityHandle).ID;
 
 				return component;
 			}
@@ -86,7 +92,9 @@ namespace Louron {
 			}
 
 			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
-			component.entity = std::make_shared<Entity>(*this);
+
+			component.scene = m_Scene;
+			component.entity_uuid = m_Scene->m_Registry.get<IDComponent>(m_EntityHandle).ID;
 
 			return component;
 		}
@@ -146,13 +154,13 @@ namespace Louron {
 			}
 			if constexpr (std::is_same_v<T, BoxCollider>) {
 				if (HasComponent<BoxCollider>())
-					PhysicsSystem::RemoveCollider({ m_EntityHandle, m_Scene }, m_Scene, PxGeometryType::eBOX);
+					PhysicsSystem::RemoveCollider({ m_EntityHandle, m_Scene}, m_Scene, PxGeometryType::eBOX);
 			}
 
 			m_Scene->m_Registry.remove_if_exists<T>(m_EntityHandle);
 		}
 
-		operator bool() const { return m_Scene ? m_Scene->GetRegistry()->valid(m_EntityHandle) : m_EntityHandle != entt::null; }
+		operator bool() const { return GetScene() ? GetScene()->GetRegistry()->valid(m_EntityHandle) : m_EntityHandle != entt::null; }
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 

@@ -15,6 +15,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 
+namespace YAML {
+
+    class Emitter;
+    class Node;
+}
+
 namespace Louron {
 
     class Scene;
@@ -36,7 +42,10 @@ namespace Louron {
 
         virtual ~Component() = default;
 
-        std::shared_ptr<Entity> entity;
+        UUID entity_uuid = NULL_UUID;
+        Scene* scene = nullptr;
+
+        Entity GetEntity() const;
 
         template<typename T>
         T* GetComponent();
@@ -61,6 +70,9 @@ namespace Louron {
         IDComponent() = default;
         IDComponent(UUID uuid) : ID(uuid) { }
         IDComponent(const IDComponent&) = default;
+
+        void Serialize(YAML::Emitter& out);
+        bool Deserialize(const YAML::Node data);
     };
 
 	struct TagComponent : public Component {
@@ -70,6 +82,9 @@ namespace Louron {
 		TagComponent() = default;
 		TagComponent(const TagComponent&) = default;
 		TagComponent(const std::string& name) : Tag(name) { }
+
+        void Serialize(YAML::Emitter& out);
+        bool Deserialize(const YAML::Node data);
 	};
 
     struct HierarchyComponent : public Component {
@@ -93,17 +108,21 @@ namespace Louron {
         const UUID& GetParentID() const;
         bool HasParent() const;
 
+        void Serialize(YAML::Emitter& out);
+        bool Deserialize(const YAML::Node data);
+
     private:
 
         UUID m_Parent = NULL_UUID;
         std::vector<UUID> m_Children;
 
         friend class Prefab;
+        friend class ModelImporter;
 
     };
 
 
-    enum CameraClearFlags {
+    enum class CameraClearFlags : uint8_t {
         COLOUR_ONLY = 0,
         SKYBOX = 1
     };
@@ -111,8 +130,11 @@ namespace Louron {
 	struct CameraComponent : public Component {
 
 		std::shared_ptr<Camera> CameraInstance = nullptr;
-		bool Primary = true;
+		
+        bool Primary = true;
+
         CameraClearFlags ClearFlags = CameraClearFlags::COLOUR_ONLY;
+        glm::vec4 ClearColour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 		CameraComponent() = default;
         CameraComponent(const CameraComponent& other) {
@@ -123,6 +145,9 @@ namespace Louron {
             this->CameraInstance = std::make_shared<Camera>(*other.CameraInstance);
 
         }
+
+        void Serialize(YAML::Emitter& out);
+        bool Deserialize(const YAML::Node data);
 
 	};
 
@@ -202,6 +227,12 @@ namespace Louron {
         glm::vec3 GetGlobalRotation();
         glm::vec3 GetGlobalScale();
 
+        void SetForwardDirection(const glm::vec3& direction); // Set Local Direction
+        glm::vec3 GetForwardDirection(); // Get Local Direction
+
+        void SetGlobalForwardDirection(const glm::vec3& direction);
+        glm::vec3 GetGlobalForwardDirection();
+
         const glm::vec3& GetLocalPosition() const;
         const glm::vec3& GetLocalRotation() const;
         const glm::vec3& GetLocalScale() const;
@@ -213,6 +244,9 @@ namespace Louron {
 
         operator const glm::mat4()&;
         glm::mat4 operator*(const Transform& other) const;
+
+        void Serialize(YAML::Emitter& out);
+        bool Deserialize(const YAML::Node data);
 
     private:
 
@@ -228,8 +262,8 @@ namespace Louron {
     template<typename... Component>
     struct ComponentGroup { };
 
-    struct MeshFilter;
-    struct MeshRenderer;
+    struct AssetMeshFilter;
+    struct AssetMeshRenderer;
 
     struct PointLightComponent;
     struct SpotLightComponent;
@@ -247,21 +281,20 @@ namespace Louron {
         IDComponent,
         TagComponent,
         HierarchyComponent,
+        Transform,
 
         CameraComponent,
 
         AudioListener,
         AudioEmitter,
 
-        Transform, 
+        AssetMeshFilter,
+        AssetMeshRenderer,
 
-        MeshFilter, 
-        MeshRenderer,
-
+        SkyboxComponent,
         PointLightComponent, 
         SpotLightComponent, 
         DirectionalLightComponent, 
-        SkyboxComponent, 
 
         Rigidbody,
         SphereCollider,

@@ -61,15 +61,9 @@ namespace Louron {
 	}
 	
 	void Camera::UpdateProjMatrix() { m_ProjMatrix = glm::perspective(glm::radians(FOV), (float)m_Window.GetWidth() / (float)m_Window.GetHeight(), NearDistance, FarDistance); }
+	void Camera::UpdateProjMatrix(const glm::ivec2& new_size) { m_ProjMatrix = glm::perspective(glm::radians(FOV), (float)new_size.x / (float)new_size.y, NearDistance, FarDistance); }
 
 	void Camera::Update(float deltaTime) {
-		if (m_Input.GetKeyUp(GLFW_KEY_LEFT_ALT)) {
-			this->MouseToggledOff = !this->MouseToggledOff;
-			if (this->MouseToggledOff)
-				glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			else if (!this->MouseToggledOff)
-				glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		}
 
 		if (m_Movement)
 		{
@@ -132,6 +126,17 @@ namespace Louron {
 			if (m_Pitch < -89.0f)
 				m_Pitch = -89.0f;
 		}
+
+		UpdateCameraVectors();
+	}
+
+	void Camera::LookAtGlobalPosition(const glm::vec3& global_position, float distance_from_position) {
+		glm::vec3 direction = glm::normalize(global_position - m_CameraPos);
+		m_Pitch = glm::degrees(glm::asin(direction.y));
+		m_Yaw = glm::degrees(glm::atan(direction.z, direction.x));
+
+		// Position the camera 10 units away from the target position
+		m_CameraPos = global_position - direction * distance_from_position;
 
 		UpdateCameraVectors();
 	}

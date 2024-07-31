@@ -1,5 +1,5 @@
 Project Name: Sandbox Project
 Project Config:
-  StartScene: Sandbox Project/Scenes/Sandbox Project Scene.lscene
+  StartScene: Sandbox Project/Scenes/Sponza Scene.lscene
   AssetDirectory: Sandbox Project/Assets/
   AssetRegistry: AssetRegistry.lassetreg

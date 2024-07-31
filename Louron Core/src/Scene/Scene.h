@@ -29,9 +29,9 @@ namespace Louron {
 	class Entity;
 	class Prefab;
 	class RenderPipeline;
+	class FrameBuffer;
+	struct FrameBufferConfig;
 	class UUID;
-
-	struct ResourceManager;
 
 	enum L_RENDER_PIPELINE;
 
@@ -39,9 +39,9 @@ namespace Louron {
 
 		std::string Name = "Untitled Scene";
 		std::filesystem::path AssetDirectory;
+		std::filesystem::path SceneFilePath;
 
 		std::shared_ptr<RenderPipeline> ScenePipeline;
-		std::shared_ptr<ResourceManager> SceneResourceManager;
 
 		L_RENDER_PIPELINE ScenePipelineType;
 	};
@@ -72,6 +72,8 @@ namespace Louron {
 		bool HasEntity(const std::string& name);
 		bool HasEntity(const UUID& uuid);
 
+	public:
+
 		bool IsRunning() const { return m_IsRunning; }
 		bool IsPaused() const { return m_IsPaused; }
 		bool IsPhysicsSimulating() const { return m_IsSimulatingPhysics; }
@@ -83,7 +85,10 @@ namespace Louron {
 		void OnUpdateGUI();
 
 		void OnFixedUpdate();
-		void OnFixedUpdateGUI();
+
+		void OnViewportResize(const glm::ivec2& new_size);
+
+	public:
 
 		template<typename... Components>
 		auto GetAllEntitiesWith() {	return m_Registry.view<Components...>(); }
@@ -92,8 +97,7 @@ namespace Louron {
 
 		void SetConfig(const SceneConfig& config) { m_SceneConfig = config; }
 		const SceneConfig& GetConfig() const { return m_SceneConfig; }
-		std::shared_ptr<ResourceManager> GetResources() const { return m_SceneConfig.SceneResourceManager; }
-
+		
 		entt::registry* GetRegistry() { return &m_Registry; }
 		bool CopyRegistry(std::shared_ptr<Scene> otherScene);
 
@@ -102,21 +106,27 @@ namespace Louron {
 
 		virtual AssetType GetType() const override { return AssetType::Scene; }
 
-	protected:
+		void CreateSceneFrameBuffer(const FrameBufferConfig& framebuffer_config);
+		void SetSceneFrameBuffer(std::shared_ptr<FrameBuffer> framebuffer);
+		std::shared_ptr<FrameBuffer> GetSceneFrameBuffer() const;
 
-		entt::registry m_Registry;
-		std::shared_ptr<std::unordered_map<UUID, entt::entity>> m_EntityMap = std::make_shared<std::unordered_map<UUID, entt::entity>>();
+		void SetSceneFilePath(const std::filesystem::path& path) { m_SceneConfig.SceneFilePath = path; }
+		const std::filesystem::path& GetSceneFilePath() const { return m_SceneConfig.SceneFilePath; }
 
 	private:
 
+		entt::registry m_Registry;
+		std::shared_ptr<std::map<UUID, entt::entity>> m_EntityMap = std::make_shared<std::map<UUID, entt::entity>>();
+
 		PxScene* m_PhysxScene = nullptr;
-		std::unique_ptr<CollisionCallback> m_CollisionCallback;
+		std::unique_ptr<CollisionCallback> m_CollisionCallback = nullptr;
+
+		std::shared_ptr<FrameBuffer> m_SceneFrameBuffer = nullptr;
 
 		bool m_IsRunning = false;
 		bool m_IsPaused = false;
 		bool m_IsSimulatingPhysics = false;
 
-		std::filesystem::path m_SceneFilePath;
 		SceneConfig m_SceneConfig;
 
 		friend class Entity;

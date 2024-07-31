@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <unordered_map>
+#include <filesystem>
 
 // External Vendor Library Headers
 #include <glad/glad.h>
@@ -24,6 +25,9 @@ namespace Louron {
 
 		GLuint m_Program = -1;
 		std::string m_Name;
+
+		bool m_IsComputeShader = false;
+		std::filesystem::path m_ShaderFilePath;
 
 	public:
 
@@ -54,7 +58,11 @@ namespace Louron {
 
 	private:
 
-		void checkCompileErrors(unsigned int shader, std::string type);
+		bool checkCompileErrors(unsigned int shader, std::string type);
+
+		void LoadShader();
+
+		friend class ShaderLibrary;
 	};
 
 	class ShaderLibrary {
@@ -64,6 +72,8 @@ namespace Louron {
 		void UnBindAllShaders();
 
 		ShaderLibrary();
+
+		void ReloadAllShaders();
 
 		std::shared_ptr<Shader>& GetShader(const std::string& shaderName);
 		std::shared_ptr<Shader>& LoadShader(const std::string& shaderFile, bool isComputeShader = false);

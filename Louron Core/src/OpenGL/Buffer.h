@@ -17,14 +17,12 @@
 namespace Louron {
 
 	struct Vertex {
-		glm::vec3 position;
-		glm::vec3 normal;
-		glm::vec2 texCoords;
+		glm::vec3 position{};
+		glm::vec3 normal{};
+		glm::vec2 texCoords{};
 
-		// TODO: implement tangent and bitangent functionality
-
-		//glm::vec3 tangent;
-		//glm::vec3 bitangent;
+		glm::vec3 tangent{};
+		glm::vec3 bitangent{};
 	};
 
 	enum class ShaderDataType { None = 0, Float, Float2, Float3, Float4, Mat3, Mat4, Int, Int2, Int3, Int4, Bool };

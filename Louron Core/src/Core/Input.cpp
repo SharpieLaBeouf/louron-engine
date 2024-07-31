@@ -1,5 +1,7 @@
 #include "Input.h"
 
+#include "imgui/imgui_impl_glfw.cpp"
+
 namespace Louron {
 
 	double InputManager::m_MouseX;
@@ -21,12 +23,16 @@ namespace Louron {
 			InputManager::mButtons[button][0] = false;
 			InputManager::mButtons[button][1] = true;
 		}
+
+        ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 	}
 
 	void cursorCallback(GLFWwindow* window, double xpos, double ypos)
 	{
 		InputManager::m_MouseX = xpos;
 		InputManager::m_MouseY = ypos;
+
+        ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 	}
 
 	void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -43,11 +49,7 @@ namespace Louron {
 			InputManager::mKeys[key][1] = true;
 		}
 
-		ImGuiIO& io = ImGui::GetIO();
-		if (action == GLFW_PRESS)
-			io.KeysDown[key] = true;
-		if (action == GLFW_RELEASE)
-			io.KeysDown[key] = false;
+        ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 	}
 
 	int InputManager::Init(GLFWwindow* window)

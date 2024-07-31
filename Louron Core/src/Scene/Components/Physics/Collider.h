@@ -13,6 +13,12 @@
 
 using namespace physx;
 
+namespace YAML {
+
+    class Emitter;
+    class Node;
+}
+
 namespace Louron {
 
     struct Rigidbody;
@@ -70,7 +76,7 @@ namespace Louron {
         void UpdateTransform(Transform& collider_transform, Transform& rigidbody_transform);
 
         // GETTERS
-        const bool& GetIsTrigger() const;
+        const bool& IsTrigger() const;
         std::shared_ptr<PhysicsMaterial> GetMaterial() const;
 
         const glm::vec3& GetCentre() const;
@@ -85,6 +91,8 @@ namespace Louron {
         void SetCentre(const glm::vec3& centre);
         void SetRadius(float radius);
 
+        void Serialize(YAML::Emitter& out);
+        bool Deserialize(const YAML::Node data);
 
     private:
 
@@ -149,7 +157,7 @@ namespace Louron {
         void UpdateTransform(Transform& collider_transform, Transform& rigidbody_transform);
 
         // GETTERS
-        const bool& GetIsTrigger() const;
+        const bool& IsTrigger() const;
         std::shared_ptr<PhysicsMaterial> GetMaterial() const;
 
         const glm::vec3& GetCentre() const;
@@ -163,6 +171,9 @@ namespace Louron {
 
         void SetCentre(const glm::vec3& centre);
         void SetSize(const glm::vec3& boxExtents);
+
+        void Serialize(YAML::Emitter& out);
+        bool Deserialize(const YAML::Node data);
 
     private:
 

@@ -3,7 +3,6 @@
 // Louron Core Headers
 #include "Scene.h"
 #include "Entity.h"
-#include "Resource Manager.h"
 
 #include "Components/Components.h"
 #include "Components/Light.h"
@@ -136,377 +135,61 @@ namespace Louron {
 	void SceneSerializer::SerializeEntity(YAML::Emitter& out, Entity entity) {
 
 		out << YAML::BeginMap;
-		out << YAML::Key << "Entity" << YAML::Value << entity.GetUUID();
+
+		if (entity.HasComponent<IDComponent>()) {
+			entity.GetComponent<IDComponent>().Serialize(out);
+		}
 
 		if (entity.HasComponent<TagComponent>()) {
+			entity.GetComponent<TagComponent>().Serialize(out);
+		}
 
-			out << YAML::Key << "TagComponent";
-			out << YAML::BeginMap;
-
-			const std::string& tag = entity.GetComponent<TagComponent>().Tag;
-			out << YAML::Key << "Tag" << YAML::Value << tag;
-
-			out << YAML::EndMap;
+		if (entity.HasComponent<HierarchyComponent>()) {
+			entity.GetComponent<HierarchyComponent>().Serialize(out);
 		}
 
 		if (entity.HasComponent<Transform>()) {
-
-			out << YAML::Key << "TransformComponent";
-			out << YAML::BeginMap;
-
-			Transform& transform = entity.GetComponent<Transform>();
-			
-			glm::vec3 v = transform.GetLocalPosition();
-			out << YAML::Key << "Translation" << YAML::Value << YAML::Flow 
-				<< YAML::BeginSeq 
-					<< v.x 
-					<< v.y 
-					<< v.z 
-				<< YAML::EndSeq;
-			
-			v = transform.GetLocalRotation();
-			out << YAML::Key << "Rotation" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< YAML::EndSeq;
-			
-			v = transform.GetLocalScale();
-			out << YAML::Key << "Scale" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< YAML::EndSeq;
-
-			out << YAML::EndMap;
+			entity.GetComponent<Transform>().Serialize(out);
 		}
 
 		if (entity.HasComponent<CameraComponent>()) {
-
-			out << YAML::Key << "CameraComponent";
-			out << YAML::BeginMap;
-
-			CameraComponent& cameraComponent = entity.GetComponent<CameraComponent>();
-			{
-				std::shared_ptr<Camera> camera = cameraComponent.CameraInstance;
-
-				out << YAML::Key << "Camera" << YAML::Value;
-				out << YAML::BeginMap;
-
-				{
-					out << YAML::Key << "FOV" << YAML::Value << camera->FOV;
-					out << YAML::Key << "MovementToggle" << YAML::Value << camera->m_Movement;
-					out << YAML::Key << "MovementSpeed" << YAML::Value << camera->MovementSpeed;
-					out << YAML::Key << "MovementYDamp" << YAML::Value << camera->MovementYDamp;
-					out << YAML::Key << "MouseSensitivity" << YAML::Value << camera->MouseSensitivity;
-					out << YAML::Key << "MouseToggledOff" << YAML::Value << camera->MouseToggledOff;
-					
-					glm::vec3 v = camera->GetGlobalPosition();
-					out << YAML::Key << "Position" << YAML::Value << YAML::Flow
-						<< YAML::BeginSeq
-						<< v.x
-						<< v.y
-						<< v.z
-						<< YAML::EndSeq;
-
-					out << YAML::Key << "Yaw" << YAML::Value << camera->GetYaw();
-					out << YAML::Key << "Pitch" << YAML::Value << camera->GetPitch();
-				}
-
-				out << YAML::EndMap;
-			}
-
-			out << YAML::Key << "Primary" << YAML::Value << cameraComponent.Primary;
-			out << YAML::Key << "ClearFlag" << YAML::Value << (int)cameraComponent.ClearFlags;
-
-			out << YAML::EndMap;
+			entity.GetComponent<CameraComponent>().Serialize(out);
 		}
 
-		if (entity.HasComponent<MeshRenderer>()) {
+		if (entity.HasComponent<AssetMeshFilter>()) {
+			entity.GetComponent<AssetMeshFilter>().Serialize(out);
+		}
 
-			out << YAML::Key << "MeshRendererComponent";
-			out << YAML::BeginMap;
-
-			const MeshRenderer& meshRenderer = entity.GetComponent<MeshRenderer>();
-			out << YAML::Key << "MeshActive" << YAML::Value << meshRenderer.active;
-			out << YAML::Key << "MeshFilePath" << YAML::Value << meshRenderer.GetPath();
-
-			out << YAML::EndMap;
+		if (entity.HasComponent<AssetMeshRenderer>()) {
+			entity.GetComponent<AssetMeshRenderer>().Serialize(out);
 		}
 
 		if (entity.HasComponent<SkyboxComponent>()) {
-
-			const SkyboxComponent& skyboxComponent = entity.GetComponent<SkyboxComponent>();
-			if (!skyboxComponent.Material->GetMaterialFilePath().empty()) {
-
-				out << YAML::Key << "SkyboxComponent";
-				out << YAML::BeginMap;
-
-				out << YAML::Key << "MaterialFilePath" << YAML::Value << 
-					skyboxComponent.Material->GetMaterialFilePath().string().substr(
-						skyboxComponent.Material->GetMaterialFilePath().string().find(
-							m_Scene.lock()->GetConfig().AssetDirectory.string()) + m_Scene.lock()->GetConfig().AssetDirectory.string().length()
-					);
-
-				{
-					skyboxComponent.Material->Serialize(skyboxComponent.Material->GetMaterialFilePath());
-					L_CORE_INFO("Skybox Material ({0}) Saved At: {1}", skyboxComponent.Material->GetMaterialFilePath().filename().replace_extension().string(), skyboxComponent.Material->GetMaterialFilePath().string());
-				}
-
-				out << YAML::EndMap;
-			}
-			else
-				L_CORE_ERROR("Could Not Save SkyBox Information - No SkyBoxMaterial FilePath Specified!");
+			entity.GetComponent<SkyboxComponent>().Serialize(out);
 		}
 
 		if (entity.HasComponent<PointLightComponent>()) {
-
-			out << YAML::Key << "PointLightComponent";
-			out << YAML::BeginMap;
-
-			const PointLightComponent& light = entity.GetComponent<PointLightComponent>();
-
-			glm::vec4 v = light.position;
-			out << YAML::Key << "Position" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-
-			v = light.ambient;
-			out << YAML::Key << "Ambient" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-
-			
-			v = light.diffuse;
-			out << YAML::Key << "Diffuse" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-			
-			v = light.specular;
-			out << YAML::Key << "Specular" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-
-			out << YAML::Key << "Radius" << YAML::Value << light.lightProperties.radius;
-			out << YAML::Key << "Intensity" << YAML::Value << light.lightProperties.intensity;
-			out << YAML::Key << "Active" << YAML::Value << light.lightProperties.active;
-
-			out << YAML::EndMap;
+			entity.GetComponent<PointLightComponent>().Serialize(out);
 		}
 		
 		if (entity.HasComponent<SpotLightComponent>()) {
-
-			out << YAML::Key << "SpotLightComponent";
-			out << YAML::BeginMap;
-
-			const SpotLightComponent& light = entity.GetComponent<SpotLightComponent>();
-
-			glm::vec4 v = light.position;
-			out << YAML::Key << "Position" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-			
-			v = light.direction;
-			out << YAML::Key << "Direction" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-
-			v = light.ambient;
-			out << YAML::Key << "Ambient" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-
-			v = light.diffuse;
-			out << YAML::Key << "Diffuse" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-
-			v = light.specular;
-			out << YAML::Key << "Specular" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-
-			out << YAML::Key << "Range" << YAML::Value << light.lightProperties.range;
-			out << YAML::Key << "Angle" << YAML::Value << light.lightProperties.angle;
-			out << YAML::Key << "Intensity" << YAML::Value << light.lightProperties.intensity;
-			out << YAML::Key << "Active" << YAML::Value << light.lightProperties.active;
-
-			out << YAML::EndMap;
+			entity.GetComponent<SpotLightComponent>().Serialize(out);
 		}
 		
 		if (entity.HasComponent<DirectionalLightComponent>()) {
-
-			out << YAML::Key << "DirectionalLightComponent";
-			out << YAML::BeginMap;
-
-			const DirectionalLightComponent& light = entity.GetComponent<DirectionalLightComponent>();
-
-			glm::vec4 v = light.ambient;
-			out << YAML::Key << "Ambient" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-			
-			v = light.diffuse;
-			out << YAML::Key << "Diffuse" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-
-			v = light.specular;
-			out << YAML::Key << "Specular" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< v.w
-				<< YAML::EndSeq;
-			
-			out << YAML::EndMap;
+			entity.GetComponent<DirectionalLightComponent>().Serialize(out);
 		}
 
 		if (entity.HasComponent<Rigidbody>()) {
-
-			out << YAML::Key << "RigidbodyComponent";
-			out << YAML::BeginMap;
-
-			const Rigidbody& rigidBody = entity.GetComponent<Rigidbody>();
-
-			out << YAML::Key << "Mass" << YAML::Value << rigidBody.GetMass();
-			out << YAML::Key << "Drag" << YAML::Value << rigidBody.GetDrag();
-			out << YAML::Key << "AngularDrag" << YAML::Value << rigidBody.GetAngularDrag();
-
-			out << YAML::Key << "AutomaticCentreOfMass" << YAML::Value << rigidBody.IsAutomaticCentreOfMassEnabled();
-			out << YAML::Key << "UseGravity" << YAML::Value << rigidBody.IsGravityEnabled();
-			out << YAML::Key << "IsKinematic" << YAML::Value << rigidBody.IsKinematicEnabled();
-
-			glm::vec3 v = rigidBody.GetPositionConstraint();
-			out << YAML::Key << "PositionConstraint" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< YAML::EndSeq;
-
-			v = rigidBody.GetRotationConstraint();
-			out << YAML::Key << "RotationConstraint" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< YAML::EndSeq;
-
-			out << YAML::EndMap;
+			entity.GetComponent<Rigidbody>().Serialize(out);
 		}
 
 		if (entity.HasComponent<SphereCollider>()) {
-
-			out << YAML::Key << "SphereColliderComponent";
-			out << YAML::BeginMap;
-
-			const SphereCollider& sphereCollider = entity.GetComponent<SphereCollider>();
-
-			out << YAML::Key << "IsTrigger" << YAML::Value << sphereCollider.GetIsTrigger();
-
-			out << YAML::Key << "Radius" << YAML::Value << sphereCollider.GetRadius();
-
-			glm::vec3 v = sphereCollider.GetCentre();
-			out << YAML::Key << "Centre" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< YAML::EndSeq;
-
-			std::shared_ptr<PhysicsMaterial> tempMaterial = sphereCollider.GetMaterial();
-			out << YAML::Key << "MaterialProperties" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< tempMaterial->GetStaticFriction()
-				<< tempMaterial->GetDynamicFriction()
-				<< tempMaterial->GetBounciness()
-				<< YAML::EndSeq;
-
-			out << YAML::EndMap;
+			entity.GetComponent<SphereCollider>().Serialize(out);
 		}
 
 		if (entity.HasComponent<BoxCollider>()) {
-
-			out << YAML::Key << "BoxColliderComponent";
-			out << YAML::BeginMap;
-
-			const BoxCollider& boxCollider = entity.GetComponent<BoxCollider>();
-
-			out << YAML::Key << "IsTrigger" << YAML::Value << boxCollider.GetIsTrigger();
-
-			glm::vec3 v = boxCollider.GetCentre();
-			out << YAML::Key << "Centre" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< YAML::EndSeq;
-
-			v = boxCollider.GetSize();
-			out << YAML::Key << "Size" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< v.x
-				<< v.y
-				<< v.z
-				<< YAML::EndSeq;
-
-			std::shared_ptr<PhysicsMaterial> tempMaterial = boxCollider.GetMaterial();
-			out << YAML::Key << "MaterialProperties" << YAML::Value << YAML::Flow
-				<< YAML::BeginSeq
-				<< tempMaterial->GetStaticFriction()
-				<< tempMaterial->GetDynamicFriction()
-				<< tempMaterial->GetBounciness()
-				<< YAML::EndSeq;
-
-			out << YAML::EndMap;
+			entity.GetComponent<SphereCollider>().Serialize(out);
 		}
 
 		out << YAML::EndMap;
@@ -520,7 +203,7 @@ namespace Louron {
 			return false;
 		}
 
-		std::filesystem::path outFilePath = (sceneFilePath.empty()) ? scene_ref->m_SceneFilePath : sceneFilePath;
+		std::filesystem::path outFilePath = (sceneFilePath.empty()) ? scene_ref->m_SceneConfig.SceneFilePath : sceneFilePath;
 
 		if (outFilePath.extension() != ".lscene") {
 
@@ -628,23 +311,25 @@ namespace Louron {
 				for (auto entity : entities) {
 					
 					// UUID
-					UUID uuid = entity["Entity"].as<UUID>();
+					UUID uuid = entity["Entity"].as<uint32_t>();
+					std::string tag = entity["TagComponent"]["Tag"].as<std::string>();
 
-					// Tag
-					std::string name;
-					auto tag = entity["TagComponent"];
-					if (tag) name = tag["Tag"].as<std::string>();
+					Entity deserializedEntity = scene_ref->CreateEntity(uuid, tag);
 
-					Entity deserializedEntity = scene_ref->CreateEntity(uuid, name);
+					L_CORE_INFO("Deserialising Entity: {0}", deserializedEntity.GetName());
+
+					// Hierarchy
+					auto hierarchy = entity["HierarchyComponent"];
+					if (hierarchy) {
+						auto& entityHierarchy = deserializedEntity.GetComponent<HierarchyComponent>();
+						entityHierarchy.Deserialize(hierarchy);
+					}
 
 					// Transform
 					auto transform = entity["TransformComponent"];
 					if (transform) {
 						auto& entityTransform = deserializedEntity.GetComponent<Transform>();
-
-						entityTransform.SetPosition(transform["Translation"].as<glm::vec3>());
-						entityTransform.SetRotation(transform["Rotation"].as<glm::vec3>());
-						entityTransform.SetScale(transform["Scale"].as<glm::vec3>());
+						entityTransform.Deserialize(transform);
 					}
 
 					// Camera
@@ -652,112 +337,80 @@ namespace Louron {
 					if (camera) {
 
 						auto& entityCamera = deserializedEntity.AddComponent<CameraComponent>();
+						entityCamera.CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f));
 						
-						entityCamera.CameraInstance = std::make_shared<Louron::Camera>(camera["Camera"]["Position"].as<glm::vec3>());
-						entityCamera.CameraInstance->FOV = camera["Camera"]["FOV"].as<float>();
-						entityCamera.CameraInstance->m_Movement = camera["Camera"]["MovementToggle"].as<bool>();
-						entityCamera.CameraInstance->MovementSpeed = camera["Camera"]["MovementSpeed"].as<float>();
-						entityCamera.CameraInstance->MovementYDamp = camera["Camera"]["MovementYDamp"].as<float>();
-						entityCamera.CameraInstance->MouseSensitivity = camera["Camera"]["MouseSensitivity"].as<float>();
-						entityCamera.CameraInstance->MouseToggledOff = camera["Camera"]["MouseToggledOff"].as<bool>();
-
-						entityCamera.CameraInstance->SetYaw(camera["Camera"]["Yaw"].as<float>());
-						entityCamera.CameraInstance->SetPitch(camera["Camera"]["Pitch"].as<float>());
-
-						entityCamera.Primary = camera["Primary"].as<bool>();
-						entityCamera.ClearFlags = (CameraClearFlags)camera["ClearFlag"].as<int>();
-
+						if (!entityCamera.Deserialize(camera))
+							L_CORE_WARN("Deserialisation of Camera Component Not Complete.");
 					}
 
-					// Mesh Renderer and Mesh Filter
+					// Mesh Filter
+					auto meshFilter = entity["MeshFilterComponent"];
+					if (meshFilter) {
+
+						auto& entityMeshFilter = deserializedEntity.AddComponent<AssetMeshFilter>();
+
+						if (!entityMeshFilter.Deserialize(meshFilter))
+							L_CORE_WARN("Deserialisation of Mesh Filter Not Complete.");
+					}
+
+					// Mesh Renderer
 					auto meshRenderer = entity["MeshRendererComponent"];
 					if (meshRenderer) {
 
-						if (scene_ref->m_SceneConfig.SceneResourceManager->LoadMesh(meshRenderer["MeshFilePath"].as<std::string>().c_str(), Louron::Engine::Get().GetShaderLibrary().GetShader("FP_Material_BP_Shader")) == GL_TRUE) {
+						auto& entityMeshRenderer = deserializedEntity.AddComponent<AssetMeshRenderer>();
 
-							deserializedEntity.AddComponent<MeshFilter>().LinkMeshFilter(scene_ref->m_SceneConfig.SceneResourceManager->GetMeshFilter(meshRenderer["MeshFilePath"].as<std::string>()));
-							auto& entityMeshRenderer = deserializedEntity.AddComponent<MeshRenderer>();
-							entityMeshRenderer.LinkMeshRenderer(scene_ref->m_SceneConfig.SceneResourceManager->GetMeshRenderer(meshRenderer["MeshFilePath"].as<std::string>()));
-							entityMeshRenderer.active = meshRenderer["MeshActive"].as<bool>();
-						}
-						else {
-							L_CORE_ERROR("Scene Could Not Load Mesh: {0}", meshRenderer["MeshFilePath"].as<std::string>().c_str());
-						}
-
+						if (!entityMeshRenderer.Deserialize(meshRenderer))
+							L_CORE_WARN("Deserialisation of Mesh Renderer Not Complete.");
 					}
 
 					// Skybox Component and Skybox Material
 					auto skybox = entity["SkyboxComponent"];
 					if (skybox) {
 
-						SkyboxComponent& skyboxComponent = deserializedEntity.AddComponent<SkyboxComponent>();
-						if (!skyboxComponent.Material->Deserialize(scene_ref->m_SceneConfig.AssetDirectory / skybox["MaterialFilePath"].as<std::string>()))
-						{
-							L_CORE_ERROR("Could Not Deserialize Skybox Material File: {0}", skybox["MaterialFilePath"].as<std::string>());
-							deserializedEntity.RemoveComponent<SkyboxComponent>();
-						}
+						auto& skyboxComponent = deserializedEntity.AddComponent<SkyboxComponent>();
+
+						if (!skyboxComponent.Deserialize(skybox))
+							L_CORE_WARN("Deserialisation of Sky Box Not Complete.");
 					}
 
 					// Point Light
-
 					auto pointLight = entity["PointLightComponent"];
 					if (pointLight) {
 
 						auto& entityPointLight = deserializedEntity.AddComponent<PointLightComponent>();
-						entityPointLight.position = pointLight["Position"].as<glm::vec4>();
-						entityPointLight.ambient = pointLight["Ambient"].as<glm::vec4>();
-						entityPointLight.diffuse = pointLight["Diffuse"].as<glm::vec4>();
-						entityPointLight.specular = pointLight["Specular"].as<glm::vec4>();
 
-						entityPointLight.lightProperties.radius = pointLight["Radius"].as<GLfloat>();
-						entityPointLight.lightProperties.intensity = pointLight["Intensity"].as<GLfloat>();
-						entityPointLight.lightProperties.active = pointLight["Active"].as<GLint>();
+						if (!entityPointLight.Deserialize(pointLight))
+							L_CORE_WARN("Deserialisation of Point Light Not Complete.");
 					}
 
 					// Spot Light
-
 					auto spotLight = entity["SpotLightComponent"];
 					if (spotLight) {
 
 						auto& entitySpotLight = deserializedEntity.AddComponent<SpotLightComponent>();
-						entitySpotLight.position = spotLight["Position"].as<glm::vec4>();
-						entitySpotLight.direction = spotLight["Direction"].as<glm::vec4>();
-						entitySpotLight.ambient = spotLight["Ambient"].as<glm::vec4>();
-						entitySpotLight.diffuse = spotLight["Diffuse"].as<glm::vec4>();
-						entitySpotLight.specular = spotLight["Specular"].as<glm::vec4>();
 
-						entitySpotLight.lightProperties.range = spotLight["Range"].as<GLfloat>();
-						entitySpotLight.lightProperties.angle = spotLight["Angle"].as<GLfloat>();
-						entitySpotLight.lightProperties.intensity = spotLight["Intensity"].as<GLfloat>();
-						entitySpotLight.lightProperties.active = spotLight["Active"].as<GLint>();
+						if (!entitySpotLight.Deserialize(spotLight))
+							L_CORE_WARN("Deserialisation of Spot Light Not Complete.");
 					}
 
 					// Directional Light
-
 					auto directionalLight = entity["DirectionalLightComponent"];
 					if (directionalLight) {
 
 						auto& entityDirectionalLight = deserializedEntity.AddComponent<DirectionalLightComponent>();
-						entityDirectionalLight.ambient = directionalLight["Ambient"].as<glm::vec4>();
-						entityDirectionalLight.diffuse = directionalLight["Diffuse"].as<glm::vec4>();
-						entityDirectionalLight.specular = directionalLight["Specular"].as<glm::vec4>();
+
+						if (!entityDirectionalLight.Deserialize(directionalLight))
+							L_CORE_WARN("Deserialisation of Directional Light Not Complete.");
 					}
 
+					// Rigidbody
 					auto rigidBody = entity["RigidbodyComponent"];
 					if (rigidBody) {
 
 						auto& entityRigidBody = deserializedEntity.AddComponent<Rigidbody>();
 
-						entityRigidBody.SetMass(rigidBody["Mass"].as<float>());
-						entityRigidBody.SetDrag(rigidBody["Drag"].as<float>());
-						entityRigidBody.SetAngularDrag(rigidBody["AngularDrag"].as<float>());
-
-						entityRigidBody.SetAutomaticCentreOfMass(rigidBody["AutomaticCentreOfMass"].as<bool>());
-						entityRigidBody.SetGravity(rigidBody["UseGravity"].as<bool>());
-						entityRigidBody.SetKinematic(rigidBody["IsKinematic"].as<bool>());
-
-						entityRigidBody.SetPositionConstraint(rigidBody["PositionConstraint"].as<glm::vec3>());
-						entityRigidBody.SetRotationConstraint(rigidBody["RotationConstraint"].as<glm::vec3>());
+						if (!entityRigidBody.Deserialize(rigidBody))
+							L_CORE_WARN("Deserialisation of Rigidbody Not Complete.");
 
 						if(entityRigidBody.GetActor()) {
 							entityRigidBody.GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
@@ -765,40 +418,28 @@ namespace Louron {
 						}
 					}
 
+					// Sphere Collider
 					auto sphereCollider = entity["SphereColliderComponent"];
 					if (sphereCollider) {
 
 						auto& entitySphereCollider = deserializedEntity.AddComponent<SphereCollider>();
-						entitySphereCollider.SetIsTrigger(sphereCollider["IsTrigger"].as<bool>());
 
-						entitySphereCollider.SetRadius(sphereCollider["Radius"].as<float>());
-
-						entitySphereCollider.SetCentre(sphereCollider["Centre"].as<glm::vec3>());
-
-						glm::vec3 materialProps = sphereCollider["MaterialProperties"].as<glm::vec3>();
-						entitySphereCollider.GetMaterial()->SetStaticFriction(materialProps.x);
-						entitySphereCollider.GetMaterial()->SetDynamicFriction(materialProps.y);
-						entitySphereCollider.GetMaterial()->SetBounciness(materialProps.z);
+						if (!entitySphereCollider.Deserialize(sphereCollider))
+							L_CORE_WARN("Deserialisation of Sphere Collider Not Complete.");
 
 						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
 						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
 						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
 					}
 
+					// Box Collider
 					auto boxCollider = entity["BoxColliderComponent"];
 					if (boxCollider) {
 
 						auto& entityBoxCollider = deserializedEntity.AddComponent<BoxCollider>();
-						entityBoxCollider.SetIsTrigger(boxCollider["IsTrigger"].as<bool>());
 
-						entityBoxCollider.SetSize(boxCollider["Size"].as<glm::vec3>());
-
-						entityBoxCollider.SetCentre(boxCollider["Centre"].as<glm::vec3>());
-
-						glm::vec3 materialProps = boxCollider["MaterialProperties"].as<glm::vec3>();
-						entityBoxCollider.GetMaterial()->SetStaticFriction(materialProps.x);
-						entityBoxCollider.GetMaterial()->SetDynamicFriction(materialProps.y);
-						entityBoxCollider.GetMaterial()->SetBounciness(materialProps.z);
+						if (!entityBoxCollider.Deserialize(boxCollider))
+							L_CORE_WARN("Deserialisation of Box Collider Not Complete.");
 
 						entityBoxCollider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
 						entityBoxCollider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
@@ -807,76 +448,30 @@ namespace Louron {
 				}
 			}
 			PhysicsSystem::Update(scene_ref);
+
+			auto transform_update = scene_ref->GetAllEntitiesWith<Transform>();
+			for (const auto& entity_handle : transform_update) {
+				transform_update.get<Transform>(entity_handle).SetPosition(transform_update.get<Transform>(entity_handle).GetLocalPosition());
+			}
+
+			// Update Camera Component
+			Entity camera_entity = scene_ref->GetPrimaryCameraEntity();
+
+			if (camera_entity) {
+				camera_entity.GetComponent<CameraComponent>().CameraInstance->Update(Time::Get().GetDeltaTime());
+				camera_entity.GetComponent<Transform>().SetPosition(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
+				camera_entity.GetComponent<Transform>().SetGlobalForwardDirection(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetCameraDirection());
+			}
+			else {
+				auto camera = scene_ref->CreateEntity("Main Camera");
+				camera.AddComponent<CameraComponent>();
+			}
+			
 			return true;
 		}
 		return false;
 	}
 
-	std::shared_ptr<SkyboxMaterial> SceneSerializer::DeserializeSkyboxMaterial(const std::filesystem::path& filePath) {
-		
-		if (filePath.extension() != ".lmaterial") {
-
-			L_CORE_WARN("Incompatible Material File Extension");
-			L_CORE_WARN("Extension Used: {0}", filePath.extension().string());
-			L_CORE_WARN("Extension Expected: .lmaterial");
-		}
-		else
-		{
-			YAML::Node data;
-
-			try {
-				data = YAML::LoadFile(filePath.string());
-			}
-			catch (YAML::ParserException e) {
-				L_CORE_ERROR("YAML-CPP Failed to Load Scene File: '{0}', {1}", filePath.string(), e.what());
-				return nullptr;
-			}
-
-			if (!data["Material Type"] || data["Material Type"].as<std::string>() != "SkyboxMaterial") {
-				L_CORE_ERROR("Material Type Node is Not Skybox Material: '{0}'", filePath.string());
-				return nullptr;
-			}
-
-			if (!data["Material Name"]) {
-				L_CORE_ERROR("Material Name Node Not Correctly Declared in File: '{0}'", filePath.string());
-				return nullptr;
-			}
-
-			if (!data["TextureFilePaths"]) {
-				L_CORE_ERROR("TextureFilePaths Node Not Correctly Declared in File: '{0}'", filePath.string());
-				return nullptr;
-			}
-			else {
-
-				std::shared_ptr<SkyboxMaterial> material = std::make_shared<SkyboxMaterial>();
-				std::array<std::filesystem::path, 6> textureFilePathArray;
-
-				std::unordered_map<int, std::string> indexKeyMap{
-				
-					{ 0, "Right"},
-					{ 1, "Left"},
-					{ 2, "Top"},
-					{ 3, "Bottom"},
-					{ 4, "Back"},
-					{ 5, "Front"},
-				
-				};
-
-				auto texturesData = data["TextureFilePaths"];
-				if (texturesData)
-					for (auto& pair : indexKeyMap) 
-						if(texturesData[pair.second])
-							textureFilePathArray[pair.first] = m_Scene.lock()->m_SceneConfig.AssetDirectory / texturesData[pair.second].as<std::string>();
-				
-				material->LoadSkybox(textureFilePathArray);
-				material->SetName(data["Material Name"].as<std::string>());
-				material->SetMaterialFilePath(filePath);
-
-				return material;
-			}
-		}
-		return nullptr;
-	}
 }
 
 #pragma warning( pop )

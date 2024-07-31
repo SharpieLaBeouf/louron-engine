@@ -15,6 +15,11 @@
 
 // External Vendor Library Headers
 
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
+#include <yaml-cpp/yaml.h>
+
 namespace Louron {
 
 #pragma region SphereCollider
@@ -36,8 +41,10 @@ namespace Louron {
         m_IsTrigger = other.m_IsTrigger;
         m_Centre = other.m_Centre;
 
-        if (entity && *entity)
-            m_EntityUUID = entity->GetUUID();
+        Entity entity = GetEntity();
+
+        if (entity)
+            m_EntityUUID = entity.GetUUID();
         else
             m_EntityUUID = NULL_UUID;
 
@@ -61,8 +68,10 @@ namespace Louron {
         m_IsTrigger = other.m_IsTrigger;
         m_Centre = other.m_Centre;
 
-        if (entity && *entity)
-            m_EntityUUID = entity->GetUUID();
+        Entity entity = GetEntity();
+
+        if (entity)
+            m_EntityUUID = entity.GetUUID();
         else
             m_EntityUUID = NULL_UUID;
 
@@ -105,15 +114,16 @@ namespace Louron {
 
     void SphereCollider::CreateStaticRigidbody() {
 
-        if (!entity || !*entity || !entity->GetScene()) {
+        Entity entity = GetEntity();
+        if (!entity || !entity.GetScene()) {
             L_CORE_ERROR("Cannot Create Static Rigidbody - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
 
         ResetRigidbody();
 
-        const glm::vec3& position = entity->GetComponent<Transform>().GetGlobalPosition();
-        const glm::quat& quaternion = glm::quat(glm::radians(entity->GetComponent<Transform>().GetGlobalRotation()));
+        const glm::vec3& position = entity.GetComponent<Transform>().GetGlobalPosition();
+        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetComponent<Transform>().GetGlobalRotation()));
         
         m_Shape->m_StaticBody = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
 
@@ -122,13 +132,13 @@ namespace Louron {
         m_Shape->m_StaticBody->SetKinematic(true);
 
         PxRigidBodyExt::updateMassAndInertia(*m_Shape->m_StaticBody->GetActor(), 1.0f);
-        entity->GetScene()->GetPhysScene()->addActor(*m_Shape->m_StaticBody->GetActor());
+        entity.GetScene()->GetPhysScene()->addActor(*m_Shape->m_StaticBody->GetActor());
 
         m_Shape->AddFlag(ColliderFlag_TransformUpdated);
         m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
 
         m_Shape->m_RigidbodyRef = m_Shape->m_StaticBody;
-        m_RigidbodyUUID = entity->GetUUID();
+        m_RigidbodyUUID = entity.GetUUID();
 
     }
 
@@ -137,26 +147,27 @@ namespace Louron {
     /// </summary>
     void SphereCollider::UpdateRigidbody(const UUID& rigidbodyEntityUUID) {
 
-        if (!entity || !*entity || !entity->GetScene()) {
+        Entity entity = GetEntity();
+        if (!entity || !entity.GetScene()) {
             L_CORE_ERROR("Cannot Update Rigidbody - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
 
-        if (!entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID)) {
+        if (!entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID)) {
             
             L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Is Invalid and Cannot Access Scene!");
             CreateStaticRigidbody();
             return;
         }
         
-        if (!entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<Rigidbody>()) {
+        if (!entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<Rigidbody>()) {
             
             L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Does Not Have Rigidbody Component!");
             CreateStaticRigidbody();
             return;
         }
 
-        if (auto rb_ref = entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<Rigidbody>().GetActor();  rb_ref && *rb_ref) {
+        if (auto rb_ref = entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<Rigidbody>().GetActor();  rb_ref && *rb_ref) {
 
             ResetRigidbody();
 
@@ -194,11 +205,13 @@ namespace Louron {
         }
 
         m_Shape->SetLocalPose({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f });
-        SetRadius(glm::compMax(entity->GetComponent<Transform>().GetGlobalScale()) / 2.0f);
+
+        Entity entity = GetEntity();
+        SetRadius(glm::compMax(entity.GetComponent<Transform>().GetGlobalScale()) / 2.0f);
     }
 
     // GETTERS
-    const bool& SphereCollider::GetIsTrigger() const { return m_IsTrigger; }
+    const bool& SphereCollider::IsTrigger() const { return m_IsTrigger; }
     std::shared_ptr<PhysicsMaterial> SphereCollider::GetMaterial() const { return m_Material; }
 
     const glm::vec3& SphereCollider::GetCentre() const { return m_Centre; }
@@ -237,6 +250,74 @@ namespace Louron {
         m_Radius = radius;
 
         m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+    }
+
+    void SphereCollider::Serialize(YAML::Emitter& out)
+    {
+        out << YAML::Key << "SphereColliderComponent";
+        out << YAML::BeginMap;
+
+
+        out << YAML::Key << "IsTrigger" << YAML::Value << m_IsTrigger;
+
+        out << YAML::Key << "Radius" << YAML::Value << m_Radius;
+
+        out << YAML::Key << "Centre" << YAML::Value << YAML::Flow
+            << YAML::BeginSeq
+            << m_Centre.x
+            << m_Centre.y
+            << m_Centre.z
+            << YAML::EndSeq;
+
+        out << YAML::Key << "MaterialProperties" << YAML::Value << YAML::Flow
+            << YAML::BeginSeq
+            << m_Material->GetStaticFriction()
+            << m_Material->GetDynamicFriction()
+            << m_Material->GetBounciness()
+            << YAML::EndSeq;
+
+        out << YAML::EndMap;
+    }
+
+    bool SphereCollider::Deserialize(const YAML::Node data)
+    {
+        // Deserialize the IsTrigger value
+        if (data["IsTrigger"]) {
+            SetIsTrigger(data["IsTrigger"].as<bool>());
+        }
+
+        // Deserialize the Radius value
+        if (data["Radius"]) {
+            SetRadius(data["Radius"].as<float>());
+        }
+
+        // Deserialize the Centre sequence
+        if (data["Centre"] && data["Centre"].IsSequence()) {
+            const YAML::Node& centreNode = data["Centre"];
+
+            glm::vec3 temp{};
+            temp.x = centreNode[0].as<float>();
+            temp.y = centreNode[1].as<float>();
+            temp.z = centreNode[2].as<float>();
+
+            SetCentre(temp);
+        }
+
+        // Deserialize the MaterialProperties sequence
+        if (data["MaterialProperties"] && data["MaterialProperties"].IsSequence()) {
+            const YAML::Node& materialNode = data["MaterialProperties"];
+
+            float staticFriction = materialNode[0].as<float>();
+            float dynamicFriction = materialNode[1].as<float>();
+            float bounciness = materialNode[2].as<float>();
+
+            // Assuming you have a method to set material properties
+            m_Material->SetStaticFriction(staticFriction);
+            m_Material->SetDynamicFriction(dynamicFriction);
+            m_Material->SetBounciness(bounciness);
+        }
+
+        return true;
     }
 
 
@@ -309,8 +390,9 @@ namespace Louron {
         m_IsTrigger = other.m_IsTrigger;
         m_Centre = other.m_Centre;
 
-        if (entity && *entity)
-            m_EntityUUID = entity->GetUUID();
+        Entity entity = GetEntity();
+        if (entity)
+            m_EntityUUID = entity.GetUUID();
         else
             m_EntityUUID = NULL_UUID;
 
@@ -330,8 +412,9 @@ namespace Louron {
         m_IsTrigger = other.m_IsTrigger;
         m_Centre = other.m_Centre;
 
-        if (entity && *entity)
-            m_EntityUUID = entity->GetUUID();
+        Entity entity = GetEntity();
+        if (entity)
+            m_EntityUUID = entity.GetUUID();
         else
             m_EntityUUID = NULL_UUID;
 
@@ -370,15 +453,16 @@ namespace Louron {
 
     void BoxCollider::CreateStaticRigidbody() {
 
-        if (!entity || !*entity || !entity->GetScene()) {
+        Entity entity = GetEntity();
+        if (!entity || !entity.GetScene()) {
             L_CORE_ERROR("Cannot Create Static Rigidbody - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
 
         this->ResetRigidbody();
 
-        const glm::vec3& position = entity->GetComponent<Transform>().GetGlobalPosition();
-        const glm::quat& quaternion = glm::quat(glm::radians(entity->GetComponent<Transform>().GetGlobalRotation()));
+        const glm::vec3& position = entity.GetComponent<Transform>().GetGlobalPosition();
+        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetComponent<Transform>().GetGlobalRotation()));
 
         m_Shape->m_StaticBody = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
 
@@ -387,13 +471,13 @@ namespace Louron {
         m_Shape->m_StaticBody->SetKinematic(true);
 
         PxRigidBodyExt::updateMassAndInertia(*m_Shape->m_StaticBody->GetActor(), 1.0f);
-        entity->GetScene()->GetPhysScene()->addActor(*m_Shape->m_StaticBody->GetActor());
+        entity.GetScene()->GetPhysScene()->addActor(*m_Shape->m_StaticBody->GetActor());
 
         m_Shape->AddFlag(ColliderFlag_TransformUpdated);
         m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
 
         m_Shape->m_RigidbodyRef = m_Shape->m_StaticBody;
-        m_RigidbodyUUID = entity->GetUUID();
+        m_RigidbodyUUID = entity.GetUUID();
 
     }
 
@@ -402,26 +486,27 @@ namespace Louron {
     /// </summary>
     void BoxCollider::UpdateRigidbody(const UUID& rigidbodyEntityUUID) {
 
-        if (!entity || !*entity || !entity->GetScene()) {
+        Entity entity = GetEntity();
+        if (!entity || !entity.GetScene()) {
             L_CORE_ERROR("Cannot Update Rigidbody - Current Entity Is Invalid and Cannot Access Scene!");
             return;
         }
 
-        if (!entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID)) {
+        if (!entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID)) {
 
             L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Is Invalid and Cannot Access Scene!");
             CreateStaticRigidbody();
             return;
         }
 
-        if (!entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<Rigidbody>()) {
+        if (!entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<Rigidbody>()) {
 
             L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Does Not Have Rigidbody Component!");
             CreateStaticRigidbody();
             return;
         }
 
-        if (auto rb_ref = entity->GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<Rigidbody>().GetActor();  rb_ref && *rb_ref) {
+        if (auto rb_ref = entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<Rigidbody>().GetActor();  rb_ref && *rb_ref) {
 
             ResetRigidbody();
 
@@ -460,7 +545,7 @@ namespace Louron {
     }
 
     // GETTERS
-    const bool& BoxCollider::GetIsTrigger() const { return m_IsTrigger; }
+    const bool& BoxCollider::IsTrigger() const { return m_IsTrigger; }
     std::shared_ptr<PhysicsMaterial> BoxCollider::GetMaterial() const { return m_Material; }
 
     const glm::vec3& BoxCollider::GetCentre() const { return m_Centre; }
@@ -499,6 +584,86 @@ namespace Louron {
         m_BoxExtents = glm::abs(boxExtents);
 
         m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+    }
+
+    void BoxCollider::Serialize(YAML::Emitter& out)
+    {
+        out << YAML::Key << "BoxColliderComponent";
+        out << YAML::BeginMap;
+
+        out << YAML::Key << "IsTrigger" << YAML::Value << m_IsTrigger;
+
+        out << YAML::Key << "Centre" << YAML::Value << YAML::Flow
+            << YAML::BeginSeq
+            << m_Centre.x
+            << m_Centre.y
+            << m_Centre.z
+            << YAML::EndSeq;
+
+        out << YAML::Key << "Size" << YAML::Value << YAML::Flow
+            << YAML::BeginSeq
+            << m_BoxExtents.x
+            << m_BoxExtents.y
+            << m_BoxExtents.z
+            << YAML::EndSeq;
+
+        out << YAML::Key << "MaterialProperties" << YAML::Value << YAML::Flow
+            << YAML::BeginSeq
+            << m_Material->GetStaticFriction()
+            << m_Material->GetDynamicFriction()
+            << m_Material->GetBounciness()
+            << YAML::EndSeq;
+
+        out << YAML::EndMap;
+    }
+
+    bool BoxCollider::Deserialize(const YAML::Node data)
+    {
+        // Deserialize the IsTrigger value
+        if (data["IsTrigger"]) {
+            SetIsTrigger(data["IsTrigger"].as<bool>());
+        }
+
+        // Deserialize the Size sequence
+        if (data["Size"]) {
+            const YAML::Node& sizeNode = data["Size"];
+
+            glm::vec3 temp{};
+
+            temp.x = sizeNode[0].as<float>();
+            temp.y = sizeNode[1].as<float>();
+            temp.z = sizeNode[2].as<float>();
+
+            SetSize(temp);
+        }
+
+        // Deserialize the Centre sequence
+        if (data["Centre"] && data["Centre"].IsSequence()) {
+            const YAML::Node& centreNode = data["Centre"];
+
+            glm::vec3 temp{};
+            temp.x = centreNode[0].as<float>();
+            temp.y = centreNode[1].as<float>();
+            temp.z = centreNode[2].as<float>();
+
+            SetCentre(temp);
+        }
+
+        // Deserialize the MaterialProperties sequence
+        if (data["MaterialProperties"] && data["MaterialProperties"].IsSequence()) {
+            const YAML::Node& materialNode = data["MaterialProperties"];
+
+            float staticFriction = materialNode[0].as<float>();
+            float dynamicFriction = materialNode[1].as<float>();
+            float bounciness = materialNode[2].as<float>();
+
+            // Assuming you have a method to set material properties
+            m_Material->SetStaticFriction(staticFriction);
+            m_Material->SetDynamicFriction(dynamicFriction);
+            m_Material->SetBounciness(bounciness);
+        }
+
+        return true;
     }
 
 

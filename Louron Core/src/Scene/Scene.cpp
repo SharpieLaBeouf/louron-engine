@@ -4,7 +4,6 @@
 #include "Entity.h"
 #include "Prefab.h"
 #include "Scene Serializer.h"
-#include "Resource Manager.h"
 
 #include "Components/Camera.h"
 #include "Components/Components.h"
@@ -26,6 +25,8 @@
 
 #include "../Core/Time.h"
 #include "../Core/Input.h"
+
+#include "../OpenGL/Framebuffer.h"
 
 // C++ Standard Library Headers
 #include <iomanip>
@@ -64,12 +65,11 @@ namespace Louron {
 		}
 #endif
 
-		m_SceneFilePath = "Scenes/Untitled Scene.lscene";
+		m_SceneConfig.SceneFilePath = "Scenes/Untitled Scene.lscene";
 
-		m_SceneConfig.Name = m_SceneFilePath.filename().replace_extension().string();
+		m_SceneConfig.Name = m_SceneConfig.SceneFilePath.filename().replace_extension().string();
 		m_SceneConfig.AssetDirectory = "Assets/";
 		m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
-		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
 		
 		m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
 	}
@@ -92,13 +92,12 @@ namespace Louron {
 		}
 #endif
 
-		m_SceneFilePath = "Scenes/Untitled Scene.lscene";
+		m_SceneConfig.SceneFilePath = "Scenes/Untitled Scene.lscene";
 
-		m_SceneConfig.Name = m_SceneFilePath.filename().replace_extension().string();
+		m_SceneConfig.Name = m_SceneConfig.SceneFilePath.filename().replace_extension().string();
 		m_SceneConfig.AssetDirectory = "Assets/";
 		m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
-		m_SceneConfig.SceneResourceManager = std::make_shared<ResourceManager>();
-
+		
 		switch (pipeline) {
 		case L_RENDER_PIPELINE::FORWARD:
 			m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
@@ -145,7 +144,7 @@ namespace Louron {
 
 			SceneSerializer serializer(std::static_pointer_cast<Scene>(shared_from_this()));
 			if (serializer.Deserialize(outFilePath)) {
-				m_SceneFilePath = outFilePath;
+				m_SceneConfig.SceneFilePath = outFilePath;
 				return true;
 			}
 
@@ -177,14 +176,22 @@ namespace Louron {
 		Entity entity = { m_Registry.create(), this };
 
 		// 1. Add UUID Component
-		entity.AddComponent<IDComponent>(uuid);
+		auto& temp = entity.AddComponent<IDComponent>(uuid);
 
 		// 2. Add Transform Component
 		entity.AddComponent<Transform>();
 
 		// 3. Add Tag Component
+		std::string uniqueName = name.empty() ? "Untitled Entity" : name;
+		int suffix = 1;
+		std::string baseName = uniqueName;
+
+		// Ensure the name is unique by appending a numeric suffix
+		while (FindEntityByName(uniqueName)) {
+			uniqueName = baseName + " (" + std::to_string(suffix++) + ")";
+		}
 		auto& tag = entity.AddComponent<TagComponent>();
-		tag.Tag = name.empty() ? "Untitled Entity" : name;
+		tag.Tag = uniqueName;
 
 		// 4. Add Hierarchy Component
 		entity.AddComponent<HierarchyComponent>();
@@ -279,6 +286,11 @@ namespace Louron {
 		m_PhysxScene = nullptr;
 	}
 
+	// FBO Stuff
+	void Scene::CreateSceneFrameBuffer(const FrameBufferConfig& framebuffer_config) { m_SceneFrameBuffer = std::make_shared<FrameBuffer>(framebuffer_config); }
+	void Scene::SetSceneFrameBuffer(std::shared_ptr<FrameBuffer> framebuffer) { m_SceneFrameBuffer = framebuffer; }
+	std::shared_ptr<FrameBuffer> Scene::GetSceneFrameBuffer() const { return m_SceneFrameBuffer; }
+
 
 	// TODO: Duplicates Entity in Scene
 	Entity Scene::DuplicateEntity(Entity entity) {
@@ -288,22 +300,23 @@ namespace Louron {
 	// Destroys Entity in Scene
 	void Scene::DestroyEntity(Entity entity) {
 
-		// 1. Check for children and Destroy them too
+		// 1. Check if entity is valid
 		if (!entity) {
 			L_CORE_WARN("Attempted to Destroy Null Entity.");
 			return;
 		}
 
-		// Check If Entity is Part of the Scene
+		// 2. Check If Entity is Part of the Scene
 		if (!HasEntity(entity.GetUUID())) {
 			L_CORE_WARN("Attempted to Destroy an Entity Not In The Scene.");
 			return;
 		}
 
-		// Call Physics System Remove Methods
-		PhysicsSystem::RemoveRigidBody(entity, this);
-
-		if (entity.HasAnyComponent<SphereCollider, BoxCollider>()) {
+		// 3. Call Physics System Remove Methods
+		if (entity.HasAnyComponent<Rigidbody, SphereCollider, BoxCollider>()) {
+			
+			if (entity.HasComponent<Rigidbody>())
+				PhysicsSystem::RemoveRigidBody(entity, this);
 
 			if (entity.HasComponent<SphereCollider>())
 				PhysicsSystem::RemoveCollider(entity, this, PxGeometryType::eSPHERE);
@@ -312,12 +325,20 @@ namespace Louron {
 				PhysicsSystem::RemoveCollider(entity, this, PxGeometryType::eBOX);
 		}
 
-		// 2. Remove Entity from Scene
+		// 4. Remove From Parent and Destroy All Children
+		if (entity.HasComponent<HierarchyComponent>()) {
 
-		// Remove the Entity from the Scene Entity Map
+			// Make a copy of the child list so we don't invalidate 
+			// the iterator whilst destroying children
+			std::vector<UUID> children_vec = entity.GetComponent<HierarchyComponent>().GetChildren();
+			for (const auto& children_uuid : children_vec) 
+				DestroyEntity(FindEntityByUUID(children_uuid));
+		}
+
+		// 5. Remove the Entity from the Scene Entity Map
 		m_EntityMap->erase(entity.GetUUID());
 
-		// Destroy the Entity and Components from the ENTT Registry
+		// 6. Destroy the Entity and Components from the ENTT Registry
 		m_Registry.destroy(entity);
 	}
 
@@ -331,8 +352,8 @@ namespace Louron {
 				return Entity{ entity, this };
 		}
 
-		L_CORE_ERROR("Scene Does Not Have an Entity Named: {0}", name);
-		return {};
+		L_CORE_WARN("Scene Does Not Have an Entity Named: {0}", name);
+		return Entity{ entt::null, nullptr };
 	}
 
 	Entity Scene::FindEntityByUUID(UUID uuid)
@@ -341,8 +362,8 @@ namespace Louron {
 			return Entity{ m_EntityMap->at(uuid), this };
 		}
 
-		L_CORE_ERROR("Entity UUID not found in scene");
-		return Entity{};
+		L_CORE_WARN("Entity UUID not found in scene: {0}", std::to_string(uuid));
+		return Entity{ entt::null, nullptr };
 	}
 
 	// Returns Primary Camera Entity
@@ -355,7 +376,8 @@ namespace Louron {
 				return Entity{ entity, this };
 		}
 
-		return {};
+		L_CORE_WARN("Scene Does Not Have an Entity with a Camera Component.");
+		return Entity{ entt::null, nullptr };
 	}
 
 	bool Scene::HasEntity(const std::string& name)
@@ -369,6 +391,9 @@ namespace Louron {
 
 	Entity Scene::InstantiatePrefab(std::shared_ptr<Prefab> prefab, std::optional<Transform> transform, const UUID& parent_uuid)
 	{
+		if (!prefab)
+			return {};
+
 		entt::registry* prefab_registry = &prefab->m_PrefabRegistry;
 		entt::entity prefab_root_entity = prefab->m_RootEntity;
 		std::string prefab_name = prefab->m_PrefabName;
@@ -428,15 +453,15 @@ namespace Louron {
 				}
 
 				// 1.g. MeshFilter
-				if (prefab_registry->has<MeshFilter>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<MeshFilter>(start_prefab_entity);
-					instantiated_entity.AddComponent<MeshFilter>(component);
+				if (prefab_registry->has<AssetMeshFilter>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<AssetMeshFilter>(start_prefab_entity);
+					instantiated_entity.AddComponent<AssetMeshFilter>(component);
 				}
 
 				// 1.h. MeshRenderer
-				if (prefab_registry->has<MeshRenderer>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<MeshRenderer>(start_prefab_entity);
-					instantiated_entity.AddComponent<MeshRenderer>(component);
+				if (prefab_registry->has<AssetMeshRenderer>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<AssetMeshRenderer>(start_prefab_entity);
+					instantiated_entity.AddComponent<AssetMeshRenderer>(component);
 				}
 
 				// 1.i. PointLight Component
@@ -530,7 +555,6 @@ namespace Louron {
 			PhysicsSystem::UpdatePhysicsObjects(std::static_pointer_cast<Scene>(shared_from_this()));
 
 			m_SceneConfig.ScenePipeline->OnUpdate();
-
 		}
 	}
 
@@ -548,7 +572,26 @@ namespace Louron {
 		m_IsSimulatingPhysics = false;
 	}
 
-	void Scene::OnFixedUpdateGUI() {
+	void Scene::OnViewportResize(const glm::ivec2& new_size) {
+
+		glm::ivec2 final_size = new_size;
+
+		if (final_size.x <= 0 || final_size.y <= 0) {
+			L_CORE_ERROR("Attempted to Resize FrameBuffer to Invalid Size: X({0}), Y({1}).", new_size.x, new_size.y);
+			L_CORE_ERROR("Setting New Viewport Size to: X(1), Y(1).");
+			final_size = { 1,1 };
+		}
+
+		if (m_SceneFrameBuffer) {
+
+			if (m_SceneFrameBuffer->GetConfig().Width == final_size.x && m_SceneFrameBuffer->GetConfig().Height == final_size.y)
+				return;
+
+			// Update Render Pipeline Data
+			m_SceneFrameBuffer->Resize(final_size);
+			m_SceneConfig.ScenePipeline->OnViewportResize();
+
+		}
 
 	}
 

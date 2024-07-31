@@ -13,6 +13,10 @@
 
 // External Vendor Library Headers
 
+
+class YAML::Emitter;
+class YAML::Node;
+
 namespace Louron {
 
 	enum L_SKYBOX_BINDING {
@@ -31,44 +35,31 @@ namespace Louron {
 		// Constructors and Logic
 
 		SkyboxMaterial();
-		~SkyboxMaterial() = default;
+		~SkyboxMaterial();
 
-		GLboolean LoadSkybox(const std::array<std::filesystem::path, 6>& textures);
-		GLboolean LoadMaterial(const std::array<std::filesystem::path, 6>& materialFilePath) { return false; } // TODO: IMPLEMENT
-		GLboolean LoadSkyboxTexture(const L_SKYBOX_BINDING& binding, const std::filesystem::path& filePath);
+		void SetSkyboxFaceTexture(const L_SKYBOX_BINDING& binding, const AssetHandle& texture_asset_handle);
 
-		void UpdateUniforms(const Camera& camera);
+		void UpdateUniforms(Camera* camera);
 
 		virtual AssetType GetType() const override { return AssetType::Material_Skybox; }
 
-		void Serialize(const std::filesystem::path& path);
-		bool Deserialize(const std::filesystem::path& path);
-
-
-	public:
+		void Serialize(const std::filesystem::path& path = "");
+		bool Deserialize(const std::filesystem::path& path = "");
 
 		// Bind and Unbinding
 		GLboolean Bind();
 		void UnBind();
 
+		void ConstructSkyboxCubeMap();
 
-		void SetMaterialFilePath(const std::filesystem::path& filePath) { m_MaterialFilePath = filePath; }
-		const std::filesystem::path& GetMaterialFilePath() const { return m_MaterialFilePath; }
-
-		const std::array<std::filesystem::path, 6>& GetTextureFilePaths() const { return m_TextureFilePaths; }
-
-		void SetName(const std::string& name) { m_MaterialName = name; }
-		const std::string& GetName() const { return m_MaterialName; }
-
-		GLuint m_SkyboxID = -1;
 	private:
 
-		std::string m_MaterialName = "New Skybox Material";
+		GLuint m_SkyboxID;
+
+		std::array<AssetHandle, 6> m_TextureAssetHandles{ NULL_UUID };
 
 		std::shared_ptr<Shader> m_MaterialShader = Engine::Get().GetShaderLibrary().GetShader("Skybox");
 
-		std::filesystem::path m_MaterialFilePath;
-		std::array<std::filesystem::path, 6> m_TextureFilePaths;
 	};
 
 
@@ -76,7 +67,7 @@ namespace Louron {
 
 	public:
 
-		std::shared_ptr<SkyboxMaterial> Material = std::make_shared<SkyboxMaterial>();
+		AssetHandle SkyboxMaterialAssetHandle = NULL_UUID;
 
 	public:
 
@@ -84,10 +75,10 @@ namespace Louron {
 		SkyboxComponent(const SkyboxComponent&) = default;
 
 		void Bind() { m_VAO->Bind(); }
-		void UnBind() { 
-			Material->UnBind();
-			glBindVertexArray(0); 
-		}
+		void UnBind() { glBindVertexArray(0); }
+
+		void Serialize(YAML::Emitter& out);
+		bool Deserialize(const YAML::Node data);
 
 	private:
 

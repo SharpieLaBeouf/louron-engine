@@ -48,6 +48,68 @@ namespace Louron {
 		/// <param name="entity"></param>
 		void DestroyEntity(entt::entity entity);
 
+		template<typename T, typename... Args>
+		T& AddComponent(entt::entity entity_handle, Args&&... args) {
+
+			if (HasComponent<T>(entity_handle)) {
+				L_CORE_WARN("Entity Already Has: {0}", typeid(T).name());
+				return GetComponent<T>(entity_handle);
+			}
+
+			T& component = m_PrefabRegistry.emplace<T>(entity_handle, std::forward<Args>(args)...);
+
+			return component;
+
+		}
+
+		template<typename T>
+		T& GetComponent(entt::entity entity_handle) {
+
+			static std::unordered_map<std::type_index, std::shared_ptr<T>> blankComponents;
+			if (entity_handle == entt::null) {
+				L_CORE_ERROR("Entity Cannot GetComponent as Entity Handle is Null");
+
+				if (blankComponents.find(typeid(T)) == blankComponents.end())
+					blankComponents[typeid(T)] = std::make_shared<T>();
+
+				return *blankComponents[typeid(T)];
+			}
+
+			if (!HasComponent<T>(entity_handle)) {
+				L_CORE_ERROR("Entity Does Not Have Component");
+
+				if (blankComponents.find(typeid(T)) == blankComponents.end())
+					blankComponents[typeid(T)] = std::make_shared<T>();
+
+				return *blankComponents[typeid(T)];
+			}
+
+			return m_PrefabRegistry.get<T>(entity_handle);
+
+		}
+
+		template <typename T>
+		void RemoveComponent(entt::entity entity_handle) {
+
+			m_PrefabRegistry.remove_if_exists<T>(entity_handle);
+		}
+
+		// This returns if the Entity has an applicable Component
+		template <typename T>
+		bool HasComponent(entt::entity entity) {
+			return m_PrefabRegistry.has<T>(entity);
+		}
+
+		const std::string& GetPrefabName() const { return m_PrefabName; }
+		void SetPrefabName(const std::string& name) { 
+			m_PrefabName = name;
+			if (m_RootEntity != entt::null) {
+				GetComponent<TagComponent>(m_RootEntity).Tag = name;
+			}
+		}
+
+		const entt::entity& GetRootEntity() const { return m_RootEntity; }
+
 		entt::entity FindEntityByName(const std::string& name);
 		entt::entity FindEntityByUUID(const UUID& uuid);
 

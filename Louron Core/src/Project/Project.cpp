@@ -96,7 +96,7 @@ namespace Louron {
 		}
 
 		// 4. Serialise Empty Scene Data
-		project->m_ActiveScene->m_SceneFilePath = project->m_Config.StartScene;
+		project->m_ActiveScene->m_SceneConfig.SceneFilePath = project->m_Config.StartScene;
 		project->SaveScene(project->m_Config.StartScene);
 
 		L_CORE_INFO("Project Created: {0}", project->m_Config.Name);
@@ -131,6 +131,11 @@ namespace Louron {
 		ProjectSerializer serializer(s_ActiveProject);
 		if (serializer.Deserialize(projectFilePath))
 		{
+			if(!s_ActiveProject->m_AssetManager) {
+				s_ActiveProject->m_AssetManager = std::make_shared<EditorAssetManager>();
+			}
+
+			std::static_pointer_cast<EditorAssetManager>(s_ActiveProject->m_AssetManager)->DeserializeAssetRegistry();
 
 			std::shared_ptr<Scene> scene = std::make_shared<Scene>(L_RENDER_PIPELINE::FORWARD_PLUS);
 
@@ -256,7 +261,7 @@ namespace Louron {
 
 		if (m_ActiveScene) {
 			SceneSerializer sceneSerializer(m_ActiveScene);
-			const std::filesystem::path& path = (sceneFilePath.empty()) ? m_ActiveScene->m_SceneFilePath : sceneFilePath;
+			const std::filesystem::path& path = (sceneFilePath.empty()) ? m_ActiveScene->m_SceneConfig.SceneFilePath : sceneFilePath;
 
 			if (path.empty()) {
 				L_CORE_ERROR("Cannot Save Scene, File Path Invalid : \'{0}\'", path.string());

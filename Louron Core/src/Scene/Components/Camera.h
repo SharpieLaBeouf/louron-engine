@@ -16,7 +16,7 @@ namespace Louron {
 
 	class Camera {
 
-		friend class SceneSerializer;
+		friend struct CameraComponent;
 
 	public:
 
@@ -40,6 +40,7 @@ namespace Louron {
 		glm::mat4 GetViewMatrix() const { return m_ViewMatrix; }
 
 		void UpdateProjMatrix(); 
+		void UpdateProjMatrix(const glm::ivec2& new_size);
 		glm::mat4 GetProjMatrix() const { return m_ProjMatrix; }
 
 		glm::vec3 GetCameraDirection() const { return m_CameraFront; }
@@ -60,6 +61,8 @@ namespace Louron {
 
 		void ProcessKeyboard(float deltaTime);
 		void ProcessMouse(bool constrainPitch = true);
+
+		void LookAtGlobalPosition(const glm::vec3& global_position, float distance_from_position = 10.0f);
 
 	private:
 

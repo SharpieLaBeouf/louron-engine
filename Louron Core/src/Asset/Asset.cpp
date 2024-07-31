@@ -2,32 +2,32 @@
 
 namespace Louron {
 
-	std::string_view Louron::AssetTypeToString(AssetType type)
+	std::string Louron::AssetTypeToString(AssetType type)
 	{
 		std::string type_string = "AssetType::<Invalid>";
 		switch (type) {
 
-			case AssetType::None:					return "AssetType::None";	
+			case AssetType::None:					type_string = "AssetType::None";				 break;
 
-			case AssetType::Scene:					return "AssetType::Scene";	
-			case AssetType::Prefab:					return "AssetType::Prefab";	
+			case AssetType::Scene:					type_string = "AssetType::Scene";				 break;
+			case AssetType::Prefab:					type_string = "AssetType::Prefab";				 break;
 
-			case AssetType::Texture2D:				return "AssetType::Texture2D";
-			case AssetType::TextureCubeMap:			return "AssetType::TextureCubeMap";
+			case AssetType::Texture2D:				type_string = "AssetType::Texture2D";			 break;
+			case AssetType::TextureCubeMap:			type_string = "AssetType::TextureCubeMap";		 break;
 
-			case AssetType::Mesh:					return "AssetType::Mesh";
-			case AssetType::ModelImport:			return "AssetType::ModelImport";
+			case AssetType::Mesh:					type_string = "AssetType::Mesh";				 break;
+			case AssetType::ModelImport:			type_string = "AssetType::ModelImport";			 break;
 
-			case AssetType::Audio:					return "AssetType::Audio";	
+			case AssetType::Audio:					type_string = "AssetType::Audio";				 break;
 
-			case AssetType::Material_Standard:		return "AssetType::Material_Standard";
-			case AssetType::Material_Skybox:		return "AssetType::Material_Skybox";
+			case AssetType::Material_Standard:		type_string = "AssetType::Material_Standard";	 break;
+			case AssetType::Material_Skybox:		type_string = "AssetType::Material_Skybox";		 break;
 
 		}
-		return "AssetType::<Invalid>";
+		return type_string;
 	}
 
-	AssetType AssetTypeFromString(std::string_view assetType)
+	AssetType AssetTypeFromString(const std::string& assetType)
 	{
 		if (assetType == "AssetType::None")					return AssetType::None;
 

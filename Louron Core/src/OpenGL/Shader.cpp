@@ -15,12 +15,68 @@ namespace Louron {
 	void Shader::Bind() { glUseProgram(m_Program); }
 	void Shader::UnBind() { glUseProgram(0); }
 
-	Shader::Shader(const GLchar* shaderFile, bool isComputeShader = false)
-	{
+	Shader::Shader(const GLchar* shaderFile, bool isComputeShader = false) {
+		
+		m_Name = m_ShaderFilePath.filename().replace_extension().string();
+		m_ShaderFilePath = shaderFile;
+		m_IsComputeShader = isComputeShader;
 
-		std::ifstream file(shaderFile);
+		LoadShader();
+	}
 
-		if (!isComputeShader) {
+	Shader::~Shader() { glDeleteProgram(m_Program); }
+
+	GLuint Shader::GetProgram() { return m_Program; }
+
+	const std::string& Shader::GetName() { return m_Name; }
+
+	void Shader::SetName(const std::string& name) { m_Name = name; }
+
+	void Shader::SetBool(const GLchar* name, bool value) const { glUniform1i(glGetUniformLocation(m_Program, name), (int)value); }
+	void Shader::SetInt(const GLchar* name, int value) const { glUniform1i(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetUInt(const GLchar* name, GLuint value) const { glUniform1ui(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetFloat(const GLchar* name, float value) const { glUniform1f(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetiVec2(const GLchar* name, const glm::ivec2& value) const { glUniform2iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetiVec3(const GLchar* name, const glm::ivec3& value) const { glUniform3iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetiVec4(const GLchar* name, const glm::ivec4& value) const { glUniform4iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetVec2(const GLchar* name, const glm::vec2& value) const { glUniform2fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetVec3(const GLchar* name, const glm::vec3& value) const { glUniform3fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetVec4(const GLchar* name, const glm::vec4& value) const { glUniform4fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetMat2(const GLchar* name, const glm::mat2& mat) const { glUniformMatrix2fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
+	void Shader::SetMat3(const GLchar* name, const glm::mat3& mat) const { glUniformMatrix3fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
+	void Shader::SetMat4(const GLchar* name, const glm::mat4& mat) const { glUniformMatrix4fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
+
+	bool Shader::checkCompileErrors(unsigned int shader, std::string type) {
+		int success;
+		char infoLog[1024];
+		if (type != "PROGRAM")
+		{
+			glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+			if (!success)
+			{
+				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+				L_CORE_ERROR("Shader Compilation Error: {0}\n{1}", type, infoLog);
+				return false;
+			}
+		}
+		else
+		{
+			glGetProgramiv(shader, GL_LINK_STATUS, &success);
+			if (!success)
+			{
+				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
+				L_CORE_ERROR("Shader Linking Error: {0}\n{1}", type, infoLog);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	void Shader::LoadShader() {
+
+		std::ifstream file(m_ShaderFilePath);
+
+		if (!m_IsComputeShader) {
 
 			enum class ShaderType {
 				NONE = -1, VERTEX = 0, FRAGMENT = 1
@@ -52,18 +108,33 @@ namespace Louron {
 			vertex = glCreateShader(GL_VERTEX_SHADER);
 			glShaderSource(vertex, 1, &vShaderCode, NULL);
 			glCompileShader(vertex);
-			checkCompileErrors(vertex, "VERTEX");
+			if (!checkCompileErrors(vertex, "VERTEX")) {
+				glDeleteShader(vertex);
+				return;
+			}
 
 			fragment = glCreateShader(GL_FRAGMENT_SHADER);
 			glShaderSource(fragment, 1, &fShaderCode, NULL);
 			glCompileShader(fragment);
-			checkCompileErrors(fragment, "FRAGMENT");
+			if (!checkCompileErrors(fragment, "FRAGMENT")) {
+				glDeleteShader(vertex);
+				glDeleteShader(fragment);
+				return;
+			}
 
-			m_Program = glCreateProgram();
-			glAttachShader(m_Program, vertex);
-			glAttachShader(m_Program, fragment);
-			glLinkProgram(m_Program);
-			checkCompileErrors(m_Program, "PROGRAM");
+			unsigned int program = glCreateProgram();
+			glAttachShader(program, vertex);
+			glAttachShader(program, fragment);
+			glLinkProgram(program);
+			
+			if (!checkCompileErrors(program, "PROGRAM")) {
+				glDeleteShader(vertex);
+				glDeleteShader(fragment);
+				glDeleteProgram(program);
+				return;
+			}
+
+			m_Program = program;
 
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
@@ -85,59 +156,17 @@ namespace Louron {
 			glCompileShader(compute);
 			checkCompileErrors(compute, "COMPUTE");
 
-			m_Program = glCreateProgram();
-			glAttachShader(m_Program, compute);
+			GLuint program = glCreateProgram();
+			glAttachShader(program, compute);
+			glLinkProgram(program);
+			checkCompileErrors(program, "PROGRAM");
 
-			glLinkProgram(m_Program);
-			checkCompileErrors(m_Program, "PROGRAM");
+			m_Program = program;
 
 			glDeleteShader(compute);
 		}
-	}
 
-	Shader::~Shader() { glDeleteProgram(m_Program); }
 
-	GLuint Shader::GetProgram() { return m_Program; }
-
-	const std::string& Shader::GetName() { return m_Name; }
-
-	void Shader::SetName(const std::string& name) { m_Name = name; }
-
-	void Shader::SetBool(const GLchar* name, bool value) const { glUniform1i(glGetUniformLocation(m_Program, name), (int)value); }
-	void Shader::SetInt(const GLchar* name, int value) const { glUniform1i(glGetUniformLocation(m_Program, name), value); }
-	void Shader::SetUInt(const GLchar* name, GLuint value) const { glUniform1ui(glGetUniformLocation(m_Program, name), value); }
-	void Shader::SetFloat(const GLchar* name, float value) const { glUniform1f(glGetUniformLocation(m_Program, name), value); }
-	void Shader::SetiVec2(const GLchar* name, const glm::ivec2& value) const { glUniform2iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetiVec3(const GLchar* name, const glm::ivec3& value) const { glUniform3iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetiVec4(const GLchar* name, const glm::ivec4& value) const { glUniform4iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetVec2(const GLchar* name, const glm::vec2& value) const { glUniform2fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetVec3(const GLchar* name, const glm::vec3& value) const { glUniform3fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetVec4(const GLchar* name, const glm::vec4& value) const { glUniform4fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetMat2(const GLchar* name, const glm::mat2& mat) const { glUniformMatrix2fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
-	void Shader::SetMat3(const GLchar* name, const glm::mat3& mat) const { glUniformMatrix3fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
-	void Shader::SetMat4(const GLchar* name, const glm::mat4& mat) const { glUniformMatrix4fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
-
-	void Shader::checkCompileErrors(unsigned int shader, std::string type) {
-		int success;
-		char infoLog[1024];
-		if (type != "PROGRAM")
-		{
-			glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-			if (!success)
-			{
-				glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-				L_CORE_ERROR("Shader Compilation Error: {0}\n{1}", type, infoLog);
-			}
-		}
-		else
-		{
-			glGetProgramiv(shader, GL_LINK_STATUS, &success);
-			if (!success)
-			{
-				glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-				L_CORE_ERROR("Shader Linking Error: {0}\n{1}", type, infoLog);
-			}
-		}
 	}
 
 // -- Shader Library --
@@ -168,6 +197,14 @@ namespace Louron {
 		}
 	}
 
+	void ShaderLibrary::ReloadAllShaders() {
+
+		for (const auto& [name, shader] : m_Shaders) {
+			shader->LoadShader();
+		}
+
+	}
+
 	/// <summary>
 	/// This loads a shader based on the name of the shader file path.
 	/// </summary>
@@ -184,8 +221,7 @@ namespace Louron {
 			return m_Shaders[shaderName];
 		}
 
-		std::shared_ptr<Shader> shader = std::make_unique<Shader>(shaderFile.c_str(), isComputeShader);
-		shader->SetName(shaderName);
+		std::shared_ptr<Shader> shader = std::make_shared<Shader>(shaderFile.c_str(), isComputeShader);
 
 		// Check if Shader Linked Successfully
 		GLint success;

@@ -33,7 +33,7 @@ namespace Louron {
 		}
 	};
 
-	struct EngineSpecification
+	struct EngineConfig
 	{
 		std::string Name = "Louron Engine";
 		std::string WorkingDirectory;
@@ -43,7 +43,7 @@ namespace Louron {
 
 	class Engine {
 	public:
-		Engine(const EngineSpecification& specification);
+		Engine(const EngineConfig& specification);
 		virtual ~Engine() = default;
 
 		void PushLayer(Layer* layer);
@@ -59,7 +59,7 @@ namespace Louron {
 		static Engine& Get() { return *s_Instance; }
 		void Close();
 
-		const EngineSpecification& GetSpecification() const { return m_Specification; }
+		const EngineConfig& GetSpecification() const { return m_Specification; }
 
 	private:
 
@@ -79,7 +79,7 @@ namespace Louron {
 		std::unique_ptr <Window> m_Window;
 		GuiLayer* m_GuiLayer;
 		LayerStack m_LayerStack;
-		EngineSpecification m_Specification;
+		EngineConfig m_Specification;
 
 		// Resource Management Systems
 		std::unique_ptr<InputManager> m_Input;

@@ -34,8 +34,8 @@ namespace Louron {
 
 	public: // Project Functions
 
-		static std::shared_ptr<Project> GetActiveProject() { return s_ActiveProject; }
-		static std::shared_ptr<Scene> GetActiveScene() { return s_ActiveProject->m_ActiveScene; }
+		static std::shared_ptr<Project> GetActiveProject() { return (s_ActiveProject) ? s_ActiveProject : nullptr; }
+		static std::shared_ptr<Scene> GetActiveScene() { return (s_ActiveProject) ? (s_ActiveProject->m_ActiveScene) ? s_ActiveProject->m_ActiveScene : nullptr : nullptr; }
 
 		static void SetActiveProject(std::shared_ptr<Project> project);
 		static void SetActiveScene(std::shared_ptr<Scene> scene);

@@ -55,7 +55,7 @@ namespace Louron {
 		// 4. Add Hierarchy Component
 		auto& hierarchy = m_PrefabRegistry.emplace_or_replace<HierarchyComponent>(entity);
 		if(m_PrefabRegistry.valid(m_RootEntity) && m_PrefabRegistry.has<IDComponent>(m_RootEntity)) {
-			hierarchy.AttachParent(m_PrefabRegistry.get<IDComponent>(m_RootEntity).ID);
+			hierarchy.m_Parent = m_PrefabRegistry.get<IDComponent>(m_RootEntity).ID;
 		}
 
 		m_EntityMap.emplace((uint32_t)entity, entity);
@@ -171,15 +171,15 @@ namespace Louron {
 			}
 
 			// 1.g. MeshFilter
-			if (start_entity.HasComponent<MeshFilter>()) {
-				auto& component = start_entity.GetComponent<MeshFilter>();
-				m_PrefabRegistry.emplace_or_replace<MeshFilter>(prefab_entity_handle, component);
+			if (start_entity.HasComponent<AssetMeshFilter>()) {
+				auto& component = start_entity.GetComponent<AssetMeshFilter>();
+				m_PrefabRegistry.emplace_or_replace<AssetMeshFilter>(prefab_entity_handle, component);
 			}
 
 			// 1.h. MeshRenderer
-			if (start_entity.HasComponent<MeshRenderer>()) {
-				auto& component = start_entity.GetComponent<MeshRenderer>();
-				m_PrefabRegistry.emplace_or_replace<MeshRenderer>(prefab_entity_handle, component);
+			if (start_entity.HasComponent<AssetMeshRenderer>()) {
+				auto& component = start_entity.GetComponent<AssetMeshRenderer>();
+				m_PrefabRegistry.emplace_or_replace<AssetMeshRenderer>(prefab_entity_handle, component);
 			}
 
 			// 1.i. PointLight Component
