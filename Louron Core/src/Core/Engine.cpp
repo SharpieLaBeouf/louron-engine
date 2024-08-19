@@ -99,10 +99,13 @@ namespace Louron {
 
         while (m_Running) {
             L_PROFILE_SCOPE("Engine: Overall Loop");
+
+            Profiler::Get().NewFrame();
+
             Time::Get().UpdateTime();
 
             {
-                L_PROFILE_SCOPE("Engine: Standard Update Loop");
+                L_PROFILE_SCOPE("Engine: 1. Standard Update Loop");
 
                 for (Layer* layer : m_LayerStack) {
                     layer->OnUpdate();
@@ -110,7 +113,7 @@ namespace Louron {
             }
 
             {
-                L_PROFILE_SCOPE("Engine: Fixed Update Loop");
+                L_PROFILE_SCOPE("Engine: 2. Fixed Update Loop");
 
                 m_FixedUpdateTimer += Time::GetDeltaTime();
                           
@@ -126,7 +129,7 @@ namespace Louron {
 
             m_GuiLayer->Begin();
             {
-                L_PROFILE_SCOPE("Engine: GUI Update Loop");
+                L_PROFILE_SCOPE("Engine: 3. GUI Update Loop");
 
                 for (Layer* layer : m_LayerStack) {
                     layer->OnGuiRender();
@@ -134,7 +137,10 @@ namespace Louron {
             }
             m_GuiLayer->End();
 
-            m_Window->OnUpdate();
+            {
+                L_PROFILE_SCOPE("Engine: 4. Update Window (Finish GL Commands)");
+                m_Window->OnUpdate();
+            }
         }
 
     }

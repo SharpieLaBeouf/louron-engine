@@ -4,6 +4,7 @@
 #include "Entity.h"
 #include "Prefab.h"
 #include "Scene Serializer.h"
+#include "OctreeBounds.h"
 
 #include "Components/Camera.h"
 #include "Components/Components.h"
@@ -380,6 +381,10 @@ namespace Louron {
 		return Entity{ entt::null, nullptr };
 	}
 
+	bool Scene::HasEntity(const Entity& entity)
+	{
+		return m_Registry.has(entity);
+	}
 	bool Scene::HasEntity(const std::string& name)
 	{
 		return (FindEntityByName(name)) ? true : false;

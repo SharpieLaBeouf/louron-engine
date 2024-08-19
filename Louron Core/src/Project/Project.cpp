@@ -4,6 +4,8 @@
 #include "Project Serializer.h"
 #include "../Core/Logging.h"
 #include "../Renderer/RendererPipeline.h"
+#include "../Scene/OctreeBounds.h"
+#include "../Scene/Entity.h"
 
 // C++ Standard Library Headers
 
@@ -216,7 +218,8 @@ namespace Louron {
 			outFilePath = sceneFilePath;
 
 		m_ActiveScene = std::make_shared<Scene>();
-		m_ActiveScene->LoadSceneFile(outFilePath);
+		if(!m_ActiveScene->LoadSceneFile(outFilePath))
+			m_ActiveScene->m_Octree = std::make_shared<OctreeBounds<Entity>>();
 		
 		SceneConfig scnConfig = m_ActiveScene->GetConfig();
 		scnConfig.AssetDirectory = m_ProjectDirectory.string() + "/Assets/";

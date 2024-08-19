@@ -307,6 +307,13 @@ namespace Louron {
 
         Entity entity = GetEntity();
 
+        if (entity.HasComponent<AssetMeshFilter>()) {
+
+            auto& component = entity.GetComponent<AssetMeshFilter>();
+            component.AABBNeedsUpdate = true;
+            component.OctreeNeedsUpdate = true;
+        }
+
         if (entity && entity.GetScene()) {
 
             for (const auto& child_uuid : entity.GetComponent<HierarchyComponent>().GetChildren()) {
@@ -332,7 +339,6 @@ namespace Louron {
 
             OnTransformUpdated();
 
-
             if (entity && entity.GetScene() && entity.HasComponent<Rigidbody>() && entity.GetComponent<Rigidbody>().GetActor())
                 entity.GetComponent<Rigidbody>().GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
 
@@ -341,8 +347,6 @@ namespace Louron {
             RemoveFlag(TransformFlag_PropertiesUpdated);
         }
 
-        if (entity.HasComponent<AssetMeshFilter>())
-            entity.GetComponent<AssetMeshFilter>().AABBNeedsUpdate = true;
     }
 
     glm::vec3 Transform::GetGlobalPosition() {
@@ -1161,6 +1165,15 @@ namespace Louron {
             const char* clear_string = (ClearFlags == CameraClearFlags::SKYBOX) ? "Skybox" : "Colour";
             out << YAML::Key << "ClearFlag" << YAML::Value << clear_string;
 
+            glm::vec4 v  = ClearColour;
+            out << YAML::Key << "ClearColour" << YAML::Value << YAML::Flow
+                << YAML::BeginSeq
+                << v.r
+                << v.g
+                << v.b
+                << v.a
+                << YAML::EndSeq;
+
             out << YAML::EndMap;
         }
 
@@ -1272,6 +1285,16 @@ namespace Louron {
         }
         else {
             return false;
+        }
+
+        if (component["ClearColour"]) {
+            auto clearColourSeq = component["ClearColour"];
+            if (clearColourSeq.IsSequence() && clearColourSeq.size() == 4) {
+                ClearColour.r = clearColourSeq[0].as<float>();
+                ClearColour.g = clearColourSeq[1].as<float>();
+                ClearColour.b = clearColourSeq[2].as<float>();
+                ClearColour.a = clearColourSeq[3].as<float>();
+            }
         }
 
         return true;

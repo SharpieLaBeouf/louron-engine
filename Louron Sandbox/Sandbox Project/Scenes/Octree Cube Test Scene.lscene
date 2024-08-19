@@ -1,0 +1,3054 @@
+Scene Name: Untitled Scene
+Scene Asset Directory: Sandbox Project/Assets/
+Scene Pipeline Type: -842150451
+Entities:
+  - Entity: 2767613601
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-50, 30, 45]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Intensity: 1
+  - Entity: 3278036697
+    TagComponent:
+      Tag: Cube
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 861085572
+        - 3901366234
+        - 2569542270
+        - 2760542634
+        - 439173563
+        - 821918396
+        - 2105548539
+        - 1986435791
+        - 4082374304
+        - 4050406746
+        - 1614071252
+        - 2306040736
+        - 4186749139
+        - 75558511
+        - 488762941
+        - 3456892000
+        - 2481592342
+        - 1204451680
+        - 509315359
+        - 2505447349
+        - 2818203881
+        - 1293284145
+        - 3979325537
+        - 3911523477
+        - 18818515
+        - 612713754
+        - 285649103
+        - 629795056
+        - 1923740510
+        - 3623935657
+        - 2732024523
+        - 1142918692
+        - 2961125387
+        - 864731276
+        - 29812004
+        - 3328253171
+        - 3731488251
+        - 1946727932
+        - 1000458730
+        - 2963772631
+        - 1496811112
+        - 327974552
+        - 440704908
+        - 3403760609
+        - 673483501
+        - 1220193000
+        - 410176743
+        - 1884681364
+        - 1273985451
+        - 49465153
+        - 3873740291
+        - 1115653865
+        - 3860228988
+        - 856606133
+        - 3998699091
+        - 2413045939
+        - 4071681077
+        - 2555228126
+        - 1548927930
+        - 1990079237
+        - 3159331292
+        - 2582092806
+        - 3781138855
+        - 511090500
+        - 4198460938
+        - 718415314
+        - 1911950924
+        - 4090452086
+        - 3612738432
+        - 748197433
+        - 2386586304
+        - 1274200188
+        - 227710533
+        - 4137091781
+        - 3248691845
+        - 1127078825
+        - 3309570734
+        - 3422614814
+        - 2682667793
+        - 1592159714
+        - 1334567221
+        - 889357519
+        - 214414676
+        - 1102293148
+        - 2955394518
+        - 1109645965
+        - 2976541424
+        - 2152349053
+        - 313889701
+        - 3023100824
+        - 2375434854
+        - 996731234
+        - 2526539647
+        - 668702757
+        - 36517092
+        - 522509536
+        - 1918419388
+        - 419138068
+        - 1008229954
+        - 4288632973
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 861085572
+    TagComponent:
+      Tag: Red_Cube_1
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1718540682
+    TransformComponent:
+      Translation: [20.3588943, -8.18250942, 21.8680172]
+      Rotation: [171.534698, 20.7015038, 25.8690853]
+      Scale: [0.516620576, 0.360498309, 0.26977849]
+  - Entity: 1718540682
+    TagComponent:
+      Tag: Cube (99)
+    HierarchyComponent:
+      Parent: 861085572
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2271751902
+  - Entity: 3901366234
+    TagComponent:
+      Tag: Red_Cube_2
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1864594380
+    TransformComponent:
+      Translation: [3.55071259, -23.3426037, -20.0540161]
+      Rotation: [-32.1415062, 18.0414238, -174.787079]
+      Scale: [0.378197104, 0.254529595, 0.483225256]
+  - Entity: 1864594380
+    TagComponent:
+      Tag: Cube (98)
+    HierarchyComponent:
+      Parent: 3901366234
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2569542270
+    TagComponent:
+      Tag: Red_Cube_3
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2002288459
+    TransformComponent:
+      Translation: [1.70426881, 15.6895695, 26.6567326]
+      Rotation: [-176.184341, 34.3714371, 8.89484501]
+      Scale: [0.89348346, 0.444348335, 0.236913294]
+  - Entity: 2002288459
+    TagComponent:
+      Tag: Cube (97)
+    HierarchyComponent:
+      Parent: 2569542270
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2760542634
+    TagComponent:
+      Tag: Red_Cube_4
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 508654565
+    TransformComponent:
+      Translation: [-0.200687289, 30.8985348, -2.21104717]
+      Rotation: [-141.162018, 40.4710236, 7.80723858]
+      Scale: [0.561769962, 0.567546308, 0.774477422]
+  - Entity: 508654565
+    TagComponent:
+      Tag: Cube (96)
+    HierarchyComponent:
+      Parent: 2760542634
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 439173563
+    TagComponent:
+      Tag: Red_Cube_5
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3680497305
+    TransformComponent:
+      Translation: [-9.26339722, -6.35382509, -28.8698254]
+      Rotation: [30.9568176, -24.2802811, 89.5228729]
+      Scale: [0.938616991, 0.359450996, 0.212914705]
+  - Entity: 3680497305
+    TagComponent:
+      Tag: Cube (95)
+    HierarchyComponent:
+      Parent: 439173563
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 821918396
+    TagComponent:
+      Tag: Red_Cube_6
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2038773435
+    TransformComponent:
+      Translation: [22.5124454, -6.31034374, -20.3228397]
+      Rotation: [-165.27626, 36.2251549, -177.45723]
+      Scale: [0.799311519, 0.335654706, 0.396189958]
+  - Entity: 2038773435
+    TagComponent:
+      Tag: Cube (94)
+    HierarchyComponent:
+      Parent: 821918396
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2105548539
+    TagComponent:
+      Tag: Red_Cube_7
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1334068337
+    TransformComponent:
+      Translation: [13.2842102, 20.7961445, 18.7269459]
+      Rotation: [160.589294, 18.9584751, -61.1419945]
+      Scale: [0.441672593, 0.805325866, 0.464174092]
+  - Entity: 1334068337
+    TagComponent:
+      Tag: Cube (93)
+    HierarchyComponent:
+      Parent: 2105548539
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1986435791
+    TagComponent:
+      Tag: Red_Cube_8
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 4054899628
+    TransformComponent:
+      Translation: [-12.9957323, 21.2078266, -18.4658432]
+      Rotation: [38.6368599, -28.5214577, 17.0332565]
+      Scale: [0.494895548, 0.511103511, 0.608171642]
+  - Entity: 4054899628
+    TagComponent:
+      Tag: Cube (92)
+    HierarchyComponent:
+      Parent: 1986435791
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 4082374304
+    TagComponent:
+      Tag: Red_Cube_9
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3537710866
+    TransformComponent:
+      Translation: [-23.8195286, -7.37911701, 18.3800774]
+      Rotation: [64.2445145, -41.9670296, 69.219986]
+      Scale: [0.772787154, 0.30762884, 0.824699759]
+  - Entity: 3537710866
+    TagComponent:
+      Tag: Cube (91)
+    HierarchyComponent:
+      Parent: 4082374304
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 4050406746
+    TagComponent:
+      Tag: Red_Cube_10
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 4193940039
+    TransformComponent:
+      Translation: [-18.5122948, 16.3455696, 18.7020264]
+      Rotation: [65.949501, -31.0763664, -9.97588634]
+      Scale: [0.75645566, 0.402767777, 0.581107259]
+  - Entity: 4193940039
+    TagComponent:
+      Tag: Cube (90)
+    HierarchyComponent:
+      Parent: 4050406746
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1614071252
+    TagComponent:
+      Tag: Red_Cube_11
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 392326999
+    TransformComponent:
+      Translation: [19.8828888, -19.5575066, 13.4841795]
+      Rotation: [-151.403824, -6.42720652, -2.42840958]
+      Scale: [0.449465513, 0.571988225, 0.263758004]
+  - Entity: 392326999
+    TagComponent:
+      Tag: Cube (89)
+    HierarchyComponent:
+      Parent: 1614071252
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2306040736
+    TagComponent:
+      Tag: Red_Cube_12
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3831514566
+    TransformComponent:
+      Translation: [-0.998095512, 13.7183714, 27.7571354]
+      Rotation: [-121.506241, -20.2255688, 24.2431087]
+      Scale: [0.367646217, 0.64469111, 0.981978536]
+  - Entity: 3831514566
+    TagComponent:
+      Tag: Cube (88)
+    HierarchyComponent:
+      Parent: 2306040736
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 4186749139
+    TagComponent:
+      Tag: Red_Cube_13
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2235988227
+    TransformComponent:
+      Translation: [-2.71487379, -29.7488003, 8.20284557]
+      Rotation: [58.5424728, 53.4299469, -146.480072]
+      Scale: [0.679200351, 0.699974597, 0.943686306]
+  - Entity: 2235988227
+    TagComponent:
+      Tag: Cube (87)
+    HierarchyComponent:
+      Parent: 4186749139
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 75558511
+    TagComponent:
+      Tag: Red_Cube_14
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 576215084
+    TransformComponent:
+      Translation: [-17.0039024, -21.6121902, -14.2628555]
+      Rotation: [89.5406494, 14.9431839, 118.845184]
+      Scale: [0.564009726, 0.640551865, 0.86038065]
+  - Entity: 576215084
+    TagComponent:
+      Tag: Cube (86)
+    HierarchyComponent:
+      Parent: 75558511
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 488762941
+    TagComponent:
+      Tag: Red_Cube_15
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 951241801
+    TransformComponent:
+      Translation: [13.3381348, 21.4586658, -17.9239559]
+      Rotation: [135.138962, -25.3739796, -160.83194]
+      Scale: [0.23135078, 0.22624661, 0.686406255]
+  - Entity: 951241801
+    TagComponent:
+      Tag: Cube (85)
+    HierarchyComponent:
+      Parent: 488762941
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3456892000
+    TagComponent:
+      Tag: Red_Cube_16
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1220882697
+    TransformComponent:
+      Translation: [-19.0656548, -12.8332119, 20.7715645]
+      Rotation: [-126.115509, 50.9376335, -92.2692719]
+      Scale: [0.722327352, 0.423221678, 0.918806374]
+  - Entity: 1220882697
+    TagComponent:
+      Tag: Cube (84)
+    HierarchyComponent:
+      Parent: 3456892000
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2481592342
+    TagComponent:
+      Tag: Red_Cube_17
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3045247548
+    TransformComponent:
+      Translation: [-18.9988117, 21.0600681, -12.4566107]
+      Rotation: [48.9295616, -28.1645851, 157.767624]
+      Scale: [0.294317991, 0.264476269, 0.71133095]
+  - Entity: 3045247548
+    TagComponent:
+      Tag: Cube (83)
+    HierarchyComponent:
+      Parent: 2481592342
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1204451680
+    TagComponent:
+      Tag: Red_Cube_18
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 4090246643
+    TransformComponent:
+      Translation: [19.8765469, 23.6914082, -1.81346858]
+      Rotation: [-113.194862, 9.2681036, -156.793137]
+      Scale: [0.462086707, 0.616793156, 0.513338685]
+  - Entity: 4090246643
+    TagComponent:
+      Tag: Cube (82)
+    HierarchyComponent:
+      Parent: 1204451680
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 509315359
+    TagComponent:
+      Tag: Red_Cube_19
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3377826241
+    TransformComponent:
+      Translation: [-19.8334866, -22.1011524, 8.82157898]
+      Rotation: [-4.84290075, 11.6753712, 43.0917854]
+      Scale: [0.214926288, 0.615219772, 0.222630635]
+  - Entity: 3377826241
+    TagComponent:
+      Tag: Cube (81)
+    HierarchyComponent:
+      Parent: 509315359
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2505447349
+    TagComponent:
+      Tag: Red_Cube_20
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2555833685
+    TransformComponent:
+      Translation: [-23.7769756, -16.5470047, 10.9772673]
+      Rotation: [-47.3474007, 13.1318626, -43.1538162]
+      Scale: [0.97767967, 0.41368252, 0.624376714]
+  - Entity: 2555833685
+    TagComponent:
+      Tag: Cube (80)
+    HierarchyComponent:
+      Parent: 2505447349
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2818203881
+    TagComponent:
+      Tag: Red_Cube_21
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1262865185
+    TransformComponent:
+      Translation: [-17.6024113, 24.0882664, 8.34020233]
+      Rotation: [29.7221527, 18.6052742, -133.734344]
+      Scale: [0.881045759, 0.621677935, 0.225496873]
+  - Entity: 1262865185
+    TagComponent:
+      Tag: Cube (79)
+    HierarchyComponent:
+      Parent: 2818203881
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1293284145
+    TagComponent:
+      Tag: Red_Cube_22
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 844672837
+    TransformComponent:
+      Translation: [-22.406559, -19.7306976, 8.26402473]
+      Rotation: [42.7905922, 40.1068764, 11.9334574]
+      Scale: [0.48687464, 0.779327095, 0.929588437]
+  - Entity: 844672837
+    TagComponent:
+      Tag: Cube (78)
+    HierarchyComponent:
+      Parent: 1293284145
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3979325537
+    TagComponent:
+      Tag: Red_Cube_23
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2173147512
+    TransformComponent:
+      Translation: [22.6680279, -7.23978424, -19.8341675]
+      Rotation: [-54.3579636, 31.7928371, -11.2084999]
+      Scale: [0.561405361, 0.391962558, 0.629520357]
+  - Entity: 2173147512
+    TagComponent:
+      Tag: Cube (77)
+    HierarchyComponent:
+      Parent: 3979325537
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3911523477
+    TagComponent:
+      Tag: Red_Cube_24
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1032960274
+    TransformComponent:
+      Translation: [-12.6452208, -27.5513706, 6.37721252]
+      Rotation: [-2.39361382, 29.4641495, 33.1703644]
+      Scale: [0.451012284, 0.970281124, 0.534336865]
+  - Entity: 1032960274
+    TagComponent:
+      Tag: Cube (76)
+    HierarchyComponent:
+      Parent: 3911523477
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 18818515
+    TagComponent:
+      Tag: Red_Cube_25
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3338966319
+    TransformComponent:
+      Translation: [-23.5510654, 5.35547876, -19.3988323]
+      Rotation: [144.203278, -47.8399239, 61.4209824]
+      Scale: [0.779102981, 0.533372343, 0.970123708]
+  - Entity: 3338966319
+    TagComponent:
+      Tag: Cube (75)
+    HierarchyComponent:
+      Parent: 18818515
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 612713754
+    TagComponent:
+      Tag: Red_Cube_26
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2119905212
+    TransformComponent:
+      Translation: [-28.7037449, -9.69846725, 6.45624685]
+      Rotation: [23.648119, -14.0676336, 168.786545]
+      Scale: [0.311416984, 0.250164062, 0.277935326]
+  - Entity: 2119905212
+    TagComponent:
+      Tag: Cube (74)
+    HierarchyComponent:
+      Parent: 612713754
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 285649103
+    TagComponent:
+      Tag: Red_Cube_27
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3496955260
+    TransformComponent:
+      Translation: [19.8266659, 17.5895138, -16.0362282]
+      Rotation: [173.839966, 31.4371548, 178.562576]
+      Scale: [0.647187352, 0.284461558, 0.398138463]
+  - Entity: 3496955260
+    TagComponent:
+      Tag: Cube (73)
+    HierarchyComponent:
+      Parent: 285649103
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 629795056
+    TagComponent:
+      Tag: Red_Cube_28
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 4243067680
+    TransformComponent:
+      Translation: [25.9474831, 16.4054489, 4.15184164]
+      Rotation: [-135.96965, 27.5884495, -56.84972]
+      Scale: [0.230224088, 0.870703042, 0.783166051]
+  - Entity: 4243067680
+    TagComponent:
+      Tag: Cube (72)
+    HierarchyComponent:
+      Parent: 629795056
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1923740510
+    TagComponent:
+      Tag: Red_Cube_29
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1774647699
+    TransformComponent:
+      Translation: [1.05216098, 19.3127422, 24.1983337]
+      Rotation: [156.99469, -24.9071541, -31.7291698]
+      Scale: [0.456652403, 0.546520531, 0.500050426]
+  - Entity: 1774647699
+    TagComponent:
+      Tag: Cube (71)
+    HierarchyComponent:
+      Parent: 1923740510
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3623935657
+    TagComponent:
+      Tag: Red_Cube_30
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1810930754
+    TransformComponent:
+      Translation: [-8.90014553, -23.0217209, 18.7199421]
+      Rotation: [-33.9151001, 20.6838417, 4.67544031]
+      Scale: [0.299089849, 0.317742199, 0.512892127]
+  - Entity: 1810930754
+    TagComponent:
+      Tag: Cube (70)
+    HierarchyComponent:
+      Parent: 3623935657
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2732024523
+    TagComponent:
+      Tag: Red_Cube_31
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2368750057
+    TransformComponent:
+      Translation: [23.2970352, 15.4047613, -13.4011126]
+      Rotation: [-173.801559, 32.6338501, -47.4187088]
+      Scale: [0.498266906, 0.919249415, 0.592729568]
+  - Entity: 2368750057
+    TagComponent:
+      Tag: Cube (69)
+    HierarchyComponent:
+      Parent: 2732024523
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1142918692
+    TagComponent:
+      Tag: Red_Cube_32
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 289902677
+    TransformComponent:
+      Translation: [6.58650827, 22.6373386, -20.0952072]
+      Rotation: [176.283325, 22.5251503, 31.126255]
+      Scale: [0.603792727, 0.366176546, 0.251254648]
+  - Entity: 289902677
+    TagComponent:
+      Tag: Cube (68)
+    HierarchyComponent:
+      Parent: 1142918692
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2961125387
+    TagComponent:
+      Tag: Red_Cube_33
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1855080142
+    TransformComponent:
+      Translation: [-26.7628613, 1.36494374, 15.5413837]
+      Rotation: [177.577118, -42.1000252, -65.9534912]
+      Scale: [0.75424099, 0.838774323, 0.651915014]
+  - Entity: 1855080142
+    TagComponent:
+      Tag: Cube (67)
+    HierarchyComponent:
+      Parent: 2961125387
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 864731276
+    TagComponent:
+      Tag: Red_Cube_34
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1485686540
+    TransformComponent:
+      Translation: [-22.3545361, -10.1241226, -18.9056931]
+      Rotation: [14.7872944, 12.5549755, -109.597343]
+      Scale: [0.542759717, 0.657499611, 0.479462981]
+  - Entity: 1485686540
+    TagComponent:
+      Tag: Cube (66)
+    HierarchyComponent:
+      Parent: 864731276
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 29812004
+    TagComponent:
+      Tag: Red_Cube_35
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3466210856
+    TransformComponent:
+      Translation: [-4.80076885, -17.4023571, 25.1745701]
+      Rotation: [-169.340332, -26.4378643, -58.7907639]
+      Scale: [0.632755399, 0.704402745, 0.297860831]
+  - Entity: 3466210856
+    TagComponent:
+      Tag: Cube (65)
+    HierarchyComponent:
+      Parent: 29812004
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3328253171
+    TagComponent:
+      Tag: Red_Cube_36
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1429102169
+    TransformComponent:
+      Translation: [19.4713802, -9.07509136, -22.319416]
+      Rotation: [175.24324, -24.2929955, -58.7050133]
+      Scale: [0.549853504, 0.636433303, 0.393235892]
+  - Entity: 1429102169
+    TagComponent:
+      Tag: Cube (64)
+    HierarchyComponent:
+      Parent: 3328253171
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3731488251
+    TagComponent:
+      Tag: Red_Cube_37
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 86728988
+    TransformComponent:
+      Translation: [20.7124233, 11.4520559, 19.9873562]
+      Rotation: [174.330795, -42.2993889, -16.6391163]
+      Scale: [0.735103905, 0.69519639, 0.622642696]
+  - Entity: 86728988
+    TagComponent:
+      Tag: Cube (63)
+    HierarchyComponent:
+      Parent: 3731488251
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1946727932
+    TagComponent:
+      Tag: Red_Cube_38
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3843818917
+    TransformComponent:
+      Translation: [7.14432526, 14.8141956, 26.2516022]
+      Rotation: [33.0632782, 55.1419716, -177.096466]
+      Scale: [0.732151449, 0.811724424, 0.922790051]
+  - Entity: 3843818917
+    TagComponent:
+      Tag: Cube (62)
+    HierarchyComponent:
+      Parent: 1946727932
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1000458730
+    TagComponent:
+      Tag: Red_Cube_39
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1463181707
+    TransformComponent:
+      Translation: [18.367836, 15.5663786, -19.4925289]
+      Rotation: [52.4093895, -47.0734253, 37.178833]
+      Scale: [0.721913517, 0.842291296, 0.879437208]
+  - Entity: 1463181707
+    TagComponent:
+      Tag: Cube (61)
+    HierarchyComponent:
+      Parent: 1000458730
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2963772631
+    TagComponent:
+      Tag: Red_Cube_40
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2950521875
+    TransformComponent:
+      Translation: [21.5755959, 16.5518093, -14.8384523]
+      Rotation: [-94.6626129, 43.5669136, 57.9355698]
+      Scale: [0.73193711, 0.43365708, 0.699091136]
+  - Entity: 2950521875
+    TagComponent:
+      Tag: Cube (60)
+    HierarchyComponent:
+      Parent: 2963772631
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1496811112
+    TagComponent:
+      Tag: Red_Cube_41
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1492855232
+    TransformComponent:
+      Translation: [-9.15468693, 21.3814373, -20.4615288]
+      Rotation: [80.1396179, -21.7191658, 124.357323]
+      Scale: [0.350895822, 0.71943742, 0.807029068]
+  - Entity: 1492855232
+    TagComponent:
+      Tag: Cube (59)
+    HierarchyComponent:
+      Parent: 1496811112
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 327974552
+    TagComponent:
+      Tag: Red_Cube_42
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 48069787
+    TransformComponent:
+      Translation: [-24.8014297, -10.0246964, 15.6218739]
+      Rotation: [147.021347, -33.0197601, 98.5982285]
+      Scale: [0.799403846, 0.813204467, 0.35550347]
+  - Entity: 48069787
+    TagComponent:
+      Tag: Cube (58)
+    HierarchyComponent:
+      Parent: 327974552
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 440704908
+    TagComponent:
+      Tag: Red_Cube_43
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3463383950
+    TransformComponent:
+      Translation: [17.9814587, -11.2393684, -22.5830059]
+      Rotation: [-179.049515, -13.6139965, 39.4062653]
+      Scale: [0.246643022, 0.814071238, 0.231920823]
+  - Entity: 3463383950
+    TagComponent:
+      Tag: Cube (57)
+    HierarchyComponent:
+      Parent: 440704908
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3403760609
+    TagComponent:
+      Tag: Red_Cube_44
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3385234828
+    TransformComponent:
+      Translation: [5.8468523, -25.385664, -16.7639694]
+      Rotation: [-126.548561, 30.704546, 14.9411077]
+      Scale: [0.592656076, 0.334183782, 0.563141406]
+  - Entity: 3385234828
+    TagComponent:
+      Tag: Cube (56)
+    HierarchyComponent:
+      Parent: 3403760609
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 673483501
+    TagComponent:
+      Tag: Red_Cube_45
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3531909447
+    TransformComponent:
+      Translation: [-5.52965498, 25.9333954, 16.0165672]
+      Rotation: [-95.4605865, -37.1586151, -50.7900314]
+      Scale: [0.662216425, 0.318276227, 0.660488069]
+  - Entity: 3531909447
+    TagComponent:
+      Tag: Cube (55)
+    HierarchyComponent:
+      Parent: 673483501
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1220193000
+    TagComponent:
+      Tag: Red_Cube_46
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 808899389
+    TransformComponent:
+      Translation: [-1.30975318, -28.0286541, -13.1273546]
+      Rotation: [-44.5461349, 38.5898361, -43.8482971]
+      Scale: [0.752109766, 0.252576232, 0.495433271]
+  - Entity: 808899389
+    TagComponent:
+      Tag: Cube (54)
+    HierarchyComponent:
+      Parent: 1220193000
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 410176743
+    TagComponent:
+      Tag: Red_Cube_47
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 250926930
+    TransformComponent:
+      Translation: [-15.1066046, 23.3920574, -13.5738897]
+      Rotation: [168.945007, 3.31186175, 134.549301]
+      Scale: [0.327398181, 0.600254893, 0.217453718]
+  - Entity: 250926930
+    TagComponent:
+      Tag: Cube (53)
+    HierarchyComponent:
+      Parent: 410176743
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1884681364
+    TagComponent:
+      Tag: Red_Cube_48
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 137531418
+    TransformComponent:
+      Translation: [-17.9130325, -14.6274481, 20.6109047]
+      Rotation: [-5.85496283, 40.3020744, 43.4771156]
+      Scale: [0.582241654, 0.993431628, 0.712298751]
+  - Entity: 137531418
+    TagComponent:
+      Tag: Cube (52)
+    HierarchyComponent:
+      Parent: 1884681364
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1273985451
+    TagComponent:
+      Tag: Red_Cube_49
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1703007076
+    TransformComponent:
+      Translation: [28.312439, -1.67203701, 12.4602757]
+      Rotation: [152.483566, -41.6775131, 86.7555695]
+      Scale: [0.912264526, 0.719053984, 0.522713661]
+  - Entity: 1703007076
+    TagComponent:
+      Tag: Cube (51)
+    HierarchyComponent:
+      Parent: 1273985451
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 49465153
+    TagComponent:
+      Tag: Red_Cube_50
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 71656626
+    TransformComponent:
+      Translation: [-10.2459707, -24.2952709, -16.2606316]
+      Rotation: [43.4711914, -14.1968307, 117.638428]
+      Scale: [0.545246065, 0.903609335, 0.532953084]
+  - Entity: 71656626
+    TagComponent:
+      Tag: Cube (50)
+    HierarchyComponent:
+      Parent: 49465153
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3873740291
+    TagComponent:
+      Tag: Red_Cube_51
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3455543292
+    TransformComponent:
+      Translation: [23.978466, 12.5025892, -15.1118116]
+      Rotation: [-100.18438, 21.3378963, 74.447319]
+      Scale: [0.388361335, 0.56053704, 0.922415614]
+  - Entity: 3455543292
+    TagComponent:
+      Tag: Cube (49)
+    HierarchyComponent:
+      Parent: 3873740291
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1115653865
+    TagComponent:
+      Tag: Red_Cube_52
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 378872863
+    TransformComponent:
+      Translation: [-22.0733223, 21.5593758, -2.7586472]
+      Rotation: [-17.7515583, -31.4347534, 48.2308502]
+      Scale: [0.818010509, 0.600745201, 0.250126094]
+  - Entity: 378872863
+    TagComponent:
+      Tag: Cube (48)
+    HierarchyComponent:
+      Parent: 1115653865
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3860228988
+    TagComponent:
+      Tag: Red_Cube_53
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1288003144
+    TransformComponent:
+      Translation: [-22.1457348, -0.468331814, 21.6563015]
+      Rotation: [45.9598999, -2.83899856, -51.2042351]
+      Scale: [0.375438184, 0.460376531, 0.692792952]
+  - Entity: 1288003144
+    TagComponent:
+      Tag: Cube (47)
+    HierarchyComponent:
+      Parent: 3860228988
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 856606133
+    TagComponent:
+      Tag: Red_Cube_54
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1432225610
+    TransformComponent:
+      Translation: [-20.8105049, 21.4771938, -8.08093548]
+      Rotation: [96.0781174, -46.8096313, -25.9468803]
+      Scale: [0.717472911, 0.61856091, 0.965657115]
+  - Entity: 1432225610
+    TagComponent:
+      Tag: Cube (46)
+    HierarchyComponent:
+      Parent: 856606133
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3998699091
+    TagComponent:
+      Tag: Red_Cube_55
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2099119734
+    TransformComponent:
+      Translation: [-11.0939379, -20.1941338, -20.7067585]
+      Rotation: [179.895279, -60.1999207, 0.00961115398]
+      Scale: [0.807697475, 0.855941474, 0.927832067]
+  - Entity: 2099119734
+    TagComponent:
+      Tag: Cube (45)
+    HierarchyComponent:
+      Parent: 3998699091
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2413045939
+    TagComponent:
+      Tag: Red_Cube_56
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 572490210
+    TransformComponent:
+      Translation: [3.91321731, 8.22086334, -29.6100044]
+      Rotation: [-173.434219, -22.4396286, 127.29715]
+      Scale: [0.529885888, 0.304648519, 0.531857193]
+  - Entity: 572490210
+    TagComponent:
+      Tag: Cube (44)
+    HierarchyComponent:
+      Parent: 2413045939
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 4071681077
+    TagComponent:
+      Tag: Red_Cube_57
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1560621953
+    TransformComponent:
+      Translation: [20.9529819, 1.14507341, 22.7883701]
+      Rotation: [179.960342, 31.4808922, 44.4928551]
+      Scale: [0.59502095, 0.794046104, 0.473234445]
+  - Entity: 1560621953
+    TagComponent:
+      Tag: Cube (43)
+    HierarchyComponent:
+      Parent: 4071681077
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2555228126
+    TagComponent:
+      Tag: Red_Cube_58
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2914437864
+    TransformComponent:
+      Translation: [29.5945225, 6.93227863, -5.97964764]
+      Rotation: [-176.393524, 14.3177586, 137.092651]
+      Scale: [0.247474313, 0.728574276, 0.267115444]
+  - Entity: 2914437864
+    TagComponent:
+      Tag: Cube (42)
+    HierarchyComponent:
+      Parent: 2555228126
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1548927930
+    TagComponent:
+      Tag: Red_Cube_59
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3178666676
+    TransformComponent:
+      Translation: [12.2923918, -13.7376652, 24.8962231]
+      Rotation: [174.084229, 19.2193184, 24.3025379]
+      Scale: [0.367753118, 0.511425912, 0.317490458]
+  - Entity: 3178666676
+    TagComponent:
+      Tag: Cube (41)
+    HierarchyComponent:
+      Parent: 1548927930
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1990079237
+    TagComponent:
+      Tag: Red_Cube_60
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3895058419
+    TransformComponent:
+      Translation: [29.500946, 7.55648947, -5.67820358]
+      Rotation: [41.3762779, 37.1459084, 0.710063219]
+      Scale: [0.705916405, 0.487989843, 0.597587109]
+  - Entity: 3895058419
+    TagComponent:
+      Tag: Cube (40)
+    HierarchyComponent:
+      Parent: 1990079237
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3159331292
+    TagComponent:
+      Tag: Red_Cube_61
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2818357741
+    TransformComponent:
+      Translation: [3.73803639, 27.9100895, 12.9113312]
+      Rotation: [6.5926013, -23.3136482, -145.514587]
+      Scale: [0.447548568, 0.788209677, 0.810713351]
+  - Entity: 2818357741
+    TagComponent:
+      Tag: Cube (39)
+    HierarchyComponent:
+      Parent: 3159331292
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2582092806
+    TagComponent:
+      Tag: Red_Cube_62
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1072676990
+    TransformComponent:
+      Translation: [-2.2043798, 22.3284588, 21.3595181]
+      Rotation: [178.985779, -19.0129547, -62.9157333]
+      Scale: [0.404187679, 0.723359644, 0.306041718]
+  - Entity: 1072676990
+    TagComponent:
+      Tag: Cube (38)
+    HierarchyComponent:
+      Parent: 2582092806
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3781138855
+    TagComponent:
+      Tag: Red_Cube_63
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2270520278
+    TransformComponent:
+      Translation: [20.6509132, 10.2972794, 20.6677094]
+      Rotation: [-9.3723135, -30.526186, -59.973568]
+      Scale: [0.491168559, 0.867729306, 0.563935459]
+  - Entity: 2270520278
+    TagComponent:
+      Tag: Cube (37)
+    HierarchyComponent:
+      Parent: 3781138855
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 511090500
+    TagComponent:
+      Tag: Red_Cube_64
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2199728947
+    TransformComponent:
+      Translation: [1.03852165, -23.6099377, -20.0285015]
+      Rotation: [154.667679, -27.0273037, -24.0769272]
+      Scale: [0.353413552, 0.613453567, 0.622373521]
+  - Entity: 2199728947
+    TagComponent:
+      Tag: Cube (36)
+    HierarchyComponent:
+      Parent: 511090500
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 4198460938
+    TagComponent:
+      Tag: Red_Cube_65
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3744587645
+    TransformComponent:
+      Translation: [29.6227264, -7.3200531, -5.34408951]
+      Rotation: [-92.0387268, 56.6905441, -44.5749016]
+      Scale: [0.77254796, 0.722979844, 0.960412145]
+  - Entity: 3744587645
+    TagComponent:
+      Tag: Cube (35)
+    HierarchyComponent:
+      Parent: 4198460938
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 718415314
+    TagComponent:
+      Tag: Red_Cube_66
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3075940221
+    TransformComponent:
+      Translation: [-21.7732353, 0.965920568, 22.0145817]
+      Rotation: [-62.0411415, -13.4777622, 146.420334]
+      Scale: [0.59077096, 0.895264387, 0.221297711]
+  - Entity: 3075940221
+    TagComponent:
+      Tag: Cube (34)
+    HierarchyComponent:
+      Parent: 718415314
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1911950924
+    TagComponent:
+      Tag: Red_Cube_67
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 4152364417
+    TransformComponent:
+      Translation: [-20.025938, -15.6298895, 17.7289829]
+      Rotation: [-8.40086174, -18.5188007, -37.1366653]
+      Scale: [0.312945813, 0.631498098, 0.361603111]
+  - Entity: 4152364417
+    TagComponent:
+      Tag: Cube (33)
+    HierarchyComponent:
+      Parent: 1911950924
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 4090452086
+    TagComponent:
+      Tag: Red_Cube_68
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 178856625
+    TransformComponent:
+      Translation: [-16.1639366, -9.40259838, 24.697504]
+      Rotation: [-76.3268356, -39.5125999, 94.336441]
+      Scale: [0.738169014, 0.26444459, 0.574216306]
+  - Entity: 178856625
+    TagComponent:
+      Tag: Cube (32)
+    HierarchyComponent:
+      Parent: 4090452086
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3612738432
+    TagComponent:
+      Tag: Red_Cube_69
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3439584849
+    TransformComponent:
+      Translation: [0.0508082509, -25.4056416, -17.7256622]
+      Rotation: [7.08878708, 27.4330921, -20.5255928]
+      Scale: [0.650904477, 0.384316593, 0.322053909]
+  - Entity: 3439584849
+    TagComponent:
+      Tag: Cube (31)
+    HierarchyComponent:
+      Parent: 3612738432
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 748197433
+    TagComponent:
+      Tag: Red_Cube_70
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2996730185
+    TransformComponent:
+      Translation: [8.51263046, 24.1339054, -17.4567471]
+      Rotation: [-24.6541061, -25.5806236, -63.4657021]
+      Scale: [0.207209855, 0.983191431, 0.662869513]
+  - Entity: 2996730185
+    TagComponent:
+      Tag: Cube (30)
+    HierarchyComponent:
+      Parent: 748197433
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2386586304
+    TagComponent:
+      Tag: Red_Cube_71
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 941648775
+    TransformComponent:
+      Translation: [-10.95261, 1.61532271, 28.9323254]
+      Rotation: [113.004807, 48.7486153, 76.322731]
+      Scale: [0.905629814, 0.522372663, 0.678521395]
+  - Entity: 941648775
+    TagComponent:
+      Tag: Cube (29)
+    HierarchyComponent:
+      Parent: 2386586304
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1274200188
+    TagComponent:
+      Tag: Red_Cube_72
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2891655949
+    TransformComponent:
+      Translation: [-15.5961733, -26.7645359, -0.259378523]
+      Rotation: [-178.191422, -26.6250229, 5.23087025]
+      Scale: [0.444102615, 0.596728683, 0.45341897]
+  - Entity: 2891655949
+    TagComponent:
+      Tag: Cube (28)
+    HierarchyComponent:
+      Parent: 1274200188
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 227710533
+    TagComponent:
+      Tag: Red_Cube_73
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 674894968
+    TransformComponent:
+      Translation: [18.4639874, 15.5816059, 19.3892498]
+      Rotation: [-171.468063, 18.0162716, -42.1459236]
+      Scale: [0.430122912, 0.484649152, 0.294886172]
+  - Entity: 674894968
+    TagComponent:
+      Tag: Cube (27)
+    HierarchyComponent:
+      Parent: 227710533
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 4137091781
+    TagComponent:
+      Tag: Red_Cube_74
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2076061807
+    TransformComponent:
+      Translation: [-0.649723649, 28.4325504, -12.2807283]
+      Rotation: [-78.6166153, 33.1430626, 162.014603]
+      Scale: [0.477196455, 0.432168126, 0.859089434]
+  - Entity: 2076061807
+    TagComponent:
+      Tag: Cube (26)
+    HierarchyComponent:
+      Parent: 4137091781
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3248691845
+    TagComponent:
+      Tag: Red_Cube_75
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3980679612
+    TransformComponent:
+      Translation: [-6.8577919, -26.2307262, -14.9855947]
+      Rotation: [175.230865, -25.5220051, -143.464325]
+      Scale: [0.756130874, 0.320085645, 0.218991265]
+  - Entity: 3980679612
+    TagComponent:
+      Tag: Cube (25)
+    HierarchyComponent:
+      Parent: 3248691845
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1127078825
+    TagComponent:
+      Tag: Red_Cube_76
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3793468858
+    TransformComponent:
+      Translation: [22.8517189, 16.9714603, 12.2236204]
+      Rotation: [-63.4941826, -38.7581825, -90.1325226]
+      Scale: [0.817090511, 0.202828228, 0.555170417]
+  - Entity: 3793468858
+    TagComponent:
+      Tag: Cube (24)
+    HierarchyComponent:
+      Parent: 1127078825
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3309570734
+    TagComponent:
+      Tag: Red_Cube_77
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3858744513
+    TransformComponent:
+      Translation: [28.7085247, 9.89498425, -6.12848949]
+      Rotation: [168.845398, -26.7004814, -65.5672607]
+      Scale: [0.380671173, 0.928468347, 0.540312827]
+  - Entity: 3858744513
+    TagComponent:
+      Tag: Cube (23)
+    HierarchyComponent:
+      Parent: 3309570734
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3422614814
+    TagComponent:
+      Tag: Red_Cube_78
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3051938082
+    TransformComponent:
+      Translation: [18.3942699, -23.4994297, -8.31119442]
+      Rotation: [11.3569927, -21.099268, -148.266693]
+      Scale: [0.323254317, 0.627859414, 0.435750514]
+  - Entity: 3051938082
+    TagComponent:
+      Tag: Cube (22)
+    HierarchyComponent:
+      Parent: 3422614814
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2682667793
+    TagComponent:
+      Tag: Red_Cube_79
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 660008439
+    TransformComponent:
+      Translation: [24.6606808, -16.1978664, -9.4407835]
+      Rotation: [-17.1101513, 30.6137009, -1.24752045]
+      Scale: [0.787761211, 0.316210955, 0.847277462]
+  - Entity: 660008439
+    TagComponent:
+      Tag: Cube (21)
+    HierarchyComponent:
+      Parent: 2682667793
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1592159714
+    TagComponent:
+      Tag: Red_Cube_80
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1389136061
+    TransformComponent:
+      Translation: [-13.3279791, 23.6981297, 14.8462744]
+      Rotation: [-4.92069435, -21.2317677, -5.53163433]
+      Scale: [0.215327308, 0.533924758, 0.511992693]
+  - Entity: 1389136061
+    TagComponent:
+      Tag: Cube (20)
+    HierarchyComponent:
+      Parent: 1592159714
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1334567221
+    TagComponent:
+      Tag: Red_Cube_81
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1810684061
+    TransformComponent:
+      Translation: [-4.62430239, -23.7417984, -19.3543606]
+      Rotation: [129.503433, 45.1370697, 83.1868744]
+      Scale: [0.952516019, 0.275275588, 0.800874472]
+  - Entity: 1810684061
+    TagComponent:
+      Tag: Cube (19)
+    HierarchyComponent:
+      Parent: 1334567221
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 889357519
+    TagComponent:
+      Tag: Red_Cube_82
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2542904964
+    TransformComponent:
+      Translation: [-29.5703526, 7.05019093, -5.9613204]
+      Rotation: [4.31224489, -20.1045227, -178.186096]
+      Scale: [0.207532048, 0.367212594, 0.481807917]
+  - Entity: 2542904964
+    TagComponent:
+      Tag: Cube (18)
+    HierarchyComponent:
+      Parent: 889357519
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 214414676
+    TagComponent:
+      Tag: Red_Cube_83
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 713719144
+    TransformComponent:
+      Translation: [12.607461, -23.1628284, 16.2537308]
+      Rotation: [57.9566002, 17.2903557, -12.6213522]
+      Scale: [0.246270046, 0.370583266, 0.667410374]
+  - Entity: 713719144
+    TagComponent:
+      Tag: Cube (17)
+    HierarchyComponent:
+      Parent: 214414676
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1102293148
+    TagComponent:
+      Tag: Red_Cube_84
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2564906549
+    TransformComponent:
+      Translation: [-0.471365929, -4.33734655, -30.6694241]
+      Rotation: [6.89244413, 16.5707626, -26.5125637]
+      Scale: [0.25779289, 0.58777231, 0.334596246]
+  - Entity: 2564906549
+    TagComponent:
+      Tag: Cube (16)
+    HierarchyComponent:
+      Parent: 1102293148
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2955394518
+    TagComponent:
+      Tag: Red_Cube_85
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 517309987
+    TransformComponent:
+      Translation: [-20.089838, 10.0776215, 21.3187313]
+      Rotation: [164.172195, 30.2493782, 12.3497763]
+      Scale: [0.228404328, 0.73960489, 0.791017294]
+  - Entity: 517309987
+    TagComponent:
+      Tag: Cube (15)
+    HierarchyComponent:
+      Parent: 2955394518
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1109645965
+    TagComponent:
+      Tag: Red_Cube_86
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 249166655
+    TransformComponent:
+      Translation: [5.13901281, -29.7015476, -7.14541578]
+      Rotation: [41.4150352, 23.7358551, -20.5701561]
+      Scale: [0.374281853, 0.494442284, 0.60895288]
+  - Entity: 249166655
+    TagComponent:
+      Tag: Cube (14)
+    HierarchyComponent:
+      Parent: 1109645965
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2976541424
+    TagComponent:
+      Tag: Red_Cube_87
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 195349506
+    TransformComponent:
+      Translation: [-7.78621769, -19.2278156, 23.006834]
+      Rotation: [175.82547, 35.1292191, -9.76135921]
+      Scale: [0.897110939, 0.550571501, 0.254727125]
+  - Entity: 195349506
+    TagComponent:
+      Tag: Cube (13)
+    HierarchyComponent:
+      Parent: 2976541424
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2152349053
+    TagComponent:
+      Tag: Red_Cube_88
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2799069939
+    TransformComponent:
+      Translation: [2.73950076, 21.1866226, 22.4336967]
+      Rotation: [-44.5692406, -34.8296204, 27.5146542]
+      Scale: [0.476087004, 0.322715044, 0.690062881]
+  - Entity: 2799069939
+    TagComponent:
+      Tag: Cube (12)
+    HierarchyComponent:
+      Parent: 2152349053
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 313889701
+    TagComponent:
+      Tag: Red_Cube_89
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 190936497
+    TransformComponent:
+      Translation: [0.521461606, 12.4047174, -28.3813229]
+      Rotation: [-69.3522263, -15.132515, -39.8056679]
+      Scale: [0.558363736, 0.902263403, 0.414514929]
+  - Entity: 190936497
+    TagComponent:
+      Tag: Cube (11)
+    HierarchyComponent:
+      Parent: 313889701
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 3023100824
+    TagComponent:
+      Tag: Red_Cube_90
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 10101148
+    TransformComponent:
+      Translation: [-12.6412458, 23.2638054, -16.0823727]
+      Rotation: [-179.443649, -32.2560349, -23.8692474]
+      Scale: [0.704684973, 0.555965364, 0.381610423]
+  - Entity: 10101148
+    TagComponent:
+      Tag: Cube (10)
+    HierarchyComponent:
+      Parent: 3023100824
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2375434854
+    TagComponent:
+      Tag: Red_Cube_91
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2276614830
+    TransformComponent:
+      Translation: [-13.0890732, 13.1353531, -24.8150558]
+      Rotation: [21.1373978, 26.1654148, -42.7451019]
+      Scale: [0.537958324, 0.59064573, 0.49817729]
+  - Entity: 2276614830
+    TagComponent:
+      Tag: Cube (9)
+    HierarchyComponent:
+      Parent: 2375434854
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 996731234
+    TagComponent:
+      Tag: Red_Cube_92
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3407504178
+    TransformComponent:
+      Translation: [-22.8322983, -10.1317768, 18.321619]
+      Rotation: [-29.1796951, -39.8050575, 67.023613]
+      Scale: [0.972471654, 0.925263107, 0.313130021]
+  - Entity: 3407504178
+    TagComponent:
+      Tag: Cube (8)
+    HierarchyComponent:
+      Parent: 996731234
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 2526539647
+    TagComponent:
+      Tag: Red_Cube_93
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 1944330440
+    TransformComponent:
+      Translation: [-10.5798759, 28.9249001, 3.32637382]
+      Rotation: [152.331772, -53.1594543, -133.680786]
+      Scale: [0.814748228, 0.31982699, 0.824069321]
+  - Entity: 1944330440
+    TagComponent:
+      Tag: Cube (7)
+    HierarchyComponent:
+      Parent: 2526539647
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 668702757
+    TagComponent:
+      Tag: Red_Cube_94
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 4035275620
+    TransformComponent:
+      Translation: [22.1408615, 4.55699968, 21.1816998]
+      Rotation: [6.15677643, 61.9854698, -167.759506]
+      Scale: [0.981028378, 0.242837399, 0.790415764]
+  - Entity: 4035275620
+    TagComponent:
+      Tag: Cube (6)
+    HierarchyComponent:
+      Parent: 668702757
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 36517092
+    TagComponent:
+      Tag: Red_Cube_95
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2240115577
+    TransformComponent:
+      Translation: [-24.0753422, -18.1878757, -7.01623535]
+      Rotation: [35.9542542, 38.9880486, 133.103821]
+      Scale: [0.400525242, 0.945691586, 0.883317769]
+  - Entity: 2240115577
+    TagComponent:
+      Tag: Cube (5)
+    HierarchyComponent:
+      Parent: 36517092
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 522509536
+    TagComponent:
+      Tag: Red_Cube_96
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 4261619455
+    TransformComponent:
+      Translation: [23.6447639, 5.44264174, -19.2600918]
+      Rotation: [92.1028748, 30.5153561, -36.3776093]
+      Scale: [0.663709819, 0.267981142, 0.698502839]
+  - Entity: 4261619455
+    TagComponent:
+      Tag: Cube (4)
+    HierarchyComponent:
+      Parent: 522509536
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1918419388
+    TagComponent:
+      Tag: Red_Cube_97
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 3746552210
+    TransformComponent:
+      Translation: [2.91165352, -11.7072401, -28.5326328]
+      Rotation: [-164.710724, -17.5855331, -52.9310951]
+      Scale: [0.657915294, 0.592043996, 0.279236317]
+  - Entity: 3746552210
+    TagComponent:
+      Tag: Cube (3)
+    HierarchyComponent:
+      Parent: 1918419388
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 419138068
+    TagComponent:
+      Tag: Red_Cube_98
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 599688727
+    TransformComponent:
+      Translation: [-0.855739534, 24.1472912, -19.3861942]
+      Rotation: [95.55439, 36.6474304, -154.17926]
+      Scale: [0.708935916, 0.453395158, 0.874398887]
+  - Entity: 599688727
+    TagComponent:
+      Tag: Cube (2)
+    HierarchyComponent:
+      Parent: 419138068
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1008229954
+    TagComponent:
+      Tag: Red_Cube_99
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 4257574108
+    TransformComponent:
+      Translation: [2.76558018, 21.3548698, 22.2703705]
+      Rotation: [-124.758568, 43.7803307, -92.4667053]
+      Scale: [0.618033826, 0.216292366, 0.906708419]
+  - Entity: 4257574108
+    TagComponent:
+      Tag: Cube (1)
+    HierarchyComponent:
+      Parent: 1008229954
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 4288632973
+    TagComponent:
+      Tag: Red_Cube_100
+    HierarchyComponent:
+      Parent: 3278036697
+      Children:
+        - 2343086283
+    TransformComponent:
+      Translation: [-15.299551, -5.05700111, 26.457489]
+      Rotation: [-13.382865, 16.688385, 16.0871544]
+      Scale: [0.317312449, 0.33168596, 0.308872283]
+  - Entity: 2343086283
+    TagComponent:
+      Tag: Cube (0)
+    HierarchyComponent:
+      Parent: 4288632973
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 630971567
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 466633711
+  - Entity: 1214553779
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [14.0838642, 10.8627834, 44.9770355]
+      Rotation: [-14.8121023, 14.3815746, -1.87909365]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        FOV: 90
+        MovementToggle: true
+        MovementSpeed: 10
+        MovementYDamp: 0.649999976
+        MouseSensitivity: 0.100000001
+        MouseToggledOff: false
+        Position: [14.0838642, 10.8627834, 44.9770355]
+        Yaw: -104.854393
+        Pitch: -14.3378258
+      Primary: true
+      ClearFlag: Colour
+      ClearColour: [0.316634446, 0.296760857, 0.465686262, 1]

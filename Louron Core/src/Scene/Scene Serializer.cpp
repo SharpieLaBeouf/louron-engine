@@ -3,6 +3,7 @@
 // Louron Core Headers
 #include "Scene.h"
 #include "Entity.h"
+#include "OctreeBounds.h"
 
 #include "Components/Components.h"
 #include "Components/Light.h"
@@ -466,6 +467,29 @@ namespace Louron {
 				auto camera = scene_ref->CreateEntity("Main Camera");
 				camera.AddComponent<CameraComponent>();
 			}
+
+			// Calculate Overall Scene Octree
+			OctreeBoundsConfig octree_config{};
+
+			std::vector<OctreeBounds<Entity>::OctreeData> data_sources;
+
+			auto bounds_view_mesh = scene_ref->GetAllEntitiesWith<AssetMeshFilter, AssetMeshRenderer>();
+			for (const auto& entity_handle : bounds_view_mesh) {
+				auto& mesh_filter = bounds_view_mesh.get<AssetMeshFilter>(entity_handle);
+
+				// Ensure the AABB is up to date
+				mesh_filter.UpdateTransformedAABB();
+
+				const auto& aabb = mesh_filter.TransformedAABB;
+
+				data_sources.push_back(std::make_shared<OctreeDataSource<Entity>>(mesh_filter.GetEntity(), aabb));
+			}
+
+			octree_config.Looseness = 1.25f;
+			octree_config.PreferredDataSourceLimit = 8;
+
+			// Create the octree and insert data sources
+			scene_ref->m_Octree = std::make_shared<OctreeBounds<Entity>>(octree_config, data_sources);
 			
 			return true;
 		}

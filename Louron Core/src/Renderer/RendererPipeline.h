@@ -3,6 +3,8 @@
 // Louron Core Headers
 #include "../Scene/Components/Components.h"
 #include "../OpenGL/Vertex Array.h"
+#include "../Scene/Frustum.h"
+#include "../Scene/OctreeBounds.h"
 
 // C++ Standard Library Headers
 #include <memory>
@@ -19,6 +21,9 @@ namespace Louron {
 	};
 
 	class Scene;
+	class Entity;
+	struct Bounds_AABB;
+	struct Bounds_Sphere;
 
 	class RenderPipeline {
 
@@ -60,32 +65,50 @@ namespace Louron {
 		void UpdateComputeData();
 
 		void UpdateSSBOData();
-		void ConductRenderableCull(Camera* camera, std::vector<Entity>* renderables);
+		void ConductLightFrustumCull();
+		void ConductRenderableFrustumCull();
 		void ConductDepthPass(Camera* camera);
-		void ConductLightCull(Camera* camera);
+		void ConductTiledBasedLightCull(Camera* camera);
 		void ConductRenderPass(Camera* camera);
 
 		void RenderFBOQuad();
+
+		bool IsSphereInsideFrustum(const Bounds_Sphere& bounds, const Frustum& frustum);
 
 	private:
 
 		struct ForwardPlusData {
 
-			GLuint PL_Buffer = -1;
-			GLuint PL_Indices_Buffer = -1;
-			GLuint SL_Buffer = -1;
-			GLuint SL_Indices_Buffer = -1;
-
 			GLuint DL_Buffer = -1;
 
+			GLuint PL_Buffer = -1;	// Buffer that holds all lights in the scene
+			GLuint PL_Indices_Buffer = -1;	// Buffer that holds light indices for each tile
+
+			GLuint SL_Buffer = -1;
+			GLuint SL_Indices_Buffer = -1;	// Buffer that holds light indices for each tile
+			
 			std::unique_ptr<VertexArray> Screen_Quad_VAO;
 
 			GLuint workGroupsX = -1;
 			GLuint workGroupsY = -1;
 
 			std::vector<Entity> RenderableEntities;
+			std::vector<Entity> PLEntities;
+			std::vector<Entity> SLEntities;
+
+			Frustum Camera_Frustum{};
+
+			bool ShowLightComplexity = false;
+			bool ShowWireframe = false;
+
+			std::thread OctreeUpdateThread;
+			std::vector<std::shared_ptr<OctreeDataSource<Entity>>> OctreeEntitiesInCamera;
 
 		} FP_Data;
+
+	public:
+
+		ForwardPlusData& GetFPData() { return FP_Data; }
 
 	};
 

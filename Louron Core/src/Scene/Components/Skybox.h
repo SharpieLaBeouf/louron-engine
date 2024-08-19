@@ -54,7 +54,7 @@ namespace Louron {
 
 	private:
 
-		GLuint m_SkyboxID;
+		GLuint m_SkyboxID = -1;
 
 		std::array<AssetHandle, 6> m_TextureAssetHandles{ NULL_UUID };
 

@@ -35,9 +35,13 @@ namespace Louron {
 	public:
 
 		VertexArray();
-		VertexArray(const VertexArray&) = default;
-		VertexArray(VertexArray&&) = default;
 		~VertexArray();
+
+		VertexArray(const VertexArray&) = default;
+		VertexArray& operator=(const VertexArray& other) = default;
+
+		VertexArray(VertexArray&&) = default;
+		VertexArray& operator=(VertexArray&& other) = default;
 
 		void Bind() const;
 		void UnBind() const;

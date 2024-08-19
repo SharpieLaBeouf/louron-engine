@@ -102,6 +102,13 @@ struct PointLight {
 
     bool activeLight;
     bool lastLight;
+
+	uint shadowCastingType;
+    
+    // DO NOT USE - this is for SSBO alignment purposes ONLY (12 BYTES)
+	float m_Padding1;
+	float m_Padding2;
+	float m_Padding3;
 };
 
 struct SpotLight {
@@ -117,15 +124,17 @@ struct SpotLight {
     
     bool activeLight;
     bool lastLight;
-   
+    
+	uint shadowCastingType;
+	
     // DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
-    float m_Padding1;
-    float m_Padding2;
-    float m_Padding3;
+	float m_Padding1;
+	float m_Padding2;
+   
 };
 
 struct VisibleIndex {
-    int index;
+    uint index;
 };
 
 // Point Lights SSBO
@@ -171,6 +180,7 @@ uniform PBRMaterial u_Material;
 uniform int u_TilesX;
 uniform ivec2 u_ScreenSize;
 uniform sampler2D u_Depth;
+uniform bool u_ShowLightComplexity;
 
 // Forward Plus Local Variables
 uint index;
@@ -300,8 +310,11 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo
     uint index = tileID.y * u_TilesX + tileID.x;
     uint offset = index * MAX_POINT_LIGHTS;
 
+    int lightCount = 0;
+
     for (int i = 0;  i < MAX_POINT_LIGHTS && PL_IndiciesBuffer_Data.data[offset + i].index != -1; i++) {
         uint lightIndex = PL_IndiciesBuffer_Data.data[offset + i].index;
+        lightCount++;
 
         if (!PL_Buffer_Data.data[lightIndex].activeLight)
             continue;
@@ -337,6 +350,13 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo
             
             point_result += (kD * albedo / PI + specular) * radiance * NdotL * attenuation;
         }
+    }
+    
+    // If heatmap is enabled, blend the original result with the heatmap color based on light count
+    if (u_ShowLightComplexity && lightCount > 0) {
+        float heatmapValue = float(lightCount) / 10.0;
+        vec3 heatmapColor = vec3(heatmapValue, 0.0, 1.0 - heatmapValue);
+        point_result = mix(point_result, heatmapColor, 0.5); // Adjust blend factor as needed
     }
 
     return point_result;

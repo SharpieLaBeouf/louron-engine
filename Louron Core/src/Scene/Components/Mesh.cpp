@@ -17,8 +17,7 @@
 
 namespace Louron {
 
-	SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
-	{
+	SubMesh::SubMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices) {
 
 		VAO = std::make_unique<VertexArray>();
 		VertexBuffer* vbo = new VertexBuffer(vertices, (GLuint)vertices.size());
@@ -132,7 +131,7 @@ namespace Louron {
 		}
 	}
 
-	void AssetMeshFilter::Serialize(YAML::Emitter& out) {
+	void AssetMeshFilter::Serialize(YAML::Emitter& out) const {
 
 		out << YAML::Key << "MeshFilterComponent";
 		out << YAML::BeginMap;

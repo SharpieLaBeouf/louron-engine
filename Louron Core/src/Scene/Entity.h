@@ -164,6 +164,12 @@ namespace Louron {
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 
+		bool operator==(const Entity& other) {
+			if (m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene)
+				return true;
+			return false;
+		}
+
 		// This returns the UUID reference to the Component
 		UUID GetUUID() { return GetComponent<IDComponent>().ID; }
 		// This returns the tag reference to the Component

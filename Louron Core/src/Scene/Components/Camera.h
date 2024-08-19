@@ -64,6 +64,8 @@ namespace Louron {
 
 		void LookAtGlobalPosition(const glm::vec3& global_position, float distance_from_position = 10.0f);
 
+		void ResetMousePosToCurrentPos();
+
 	private:
 
 		Window& m_Window;

@@ -3,7 +3,7 @@
 // Louron Core Headers
 
 // C++ Standard Library Headers
-#include <unordered_map>
+#include <map>
 #include <memory>
 #include <chrono>
 
@@ -13,7 +13,8 @@ namespace Louron {
 
 	struct ProfileResult {
 		const char* Name;
-		float Time;
+		float Time = 0.0f;
+		bool Accumulative = false;
 	};
 
 	class Profiler {
@@ -26,8 +27,25 @@ namespace Louron {
 			return s_Instance;
 		}
 
-		std::unordered_map<const char*, ProfileResult>& GetResults() { return m_Results; }
+		std::map<const char*, ProfileResult>& GetResults() { return m_Results; }
 		void AddResult(const ProfileResult& result) { m_Results[result.Name] = result; }
+		void AddAccumResult(const ProfileResult& result) { 
+			if(m_Results.count(result.Name) == 0)
+				m_Results[result.Name] = result;
+			else
+				m_Results[result.Name].Time += result.Time; 
+		}
+
+		void NewFrame() {
+			for (auto it = m_Results.begin(); it != m_Results.end(); ) {
+				if (it->second.Accumulative) {
+					it = m_Results.erase(it); // erase returns the iterator to the next element
+				}
+				else {
+					++it; // move to the next element
+				}
+			}
+		}
 
 		// Delete copy assignment and move assignment constructors
 		Profiler(const Profiler&) = delete;
@@ -41,13 +59,13 @@ namespace Louron {
 
 		Profiler() { }
 
-		std::unordered_map<const char*, ProfileResult> m_Results;
+		std::map<const char*, ProfileResult> m_Results;
 	};
 
 	class ProfileTimer {
 	public:
 
-		ProfileTimer(const char* name) : m_Name(name), m_Stopped(false) {
+		ProfileTimer(const char* name, bool accumulative = false) : m_Name(name), m_Stopped(false), m_Accumulative(accumulative) {
 			m_TimerStart = std::chrono::high_resolution_clock::now();
 		}
 		~ProfileTimer() {
@@ -65,7 +83,10 @@ namespace Louron {
 			m_Stopped = true;
 
 			float elapsedTime = (timerEnd - timerStart) * 0.001f;
-			Profiler::Get().AddResult({ m_Name, elapsedTime });
+			if(!m_Accumulative)
+				Profiler::Get().AddResult({ m_Name, elapsedTime });
+			else
+				Profiler::Get().AddAccumResult({ m_Name, elapsedTime, true });
 		}
 
 	private:
@@ -73,6 +94,7 @@ namespace Louron {
 		const char* m_Name;
 		std::chrono::time_point<std::chrono::steady_clock> m_TimerStart;
 		bool m_Stopped;
+		bool m_Accumulative;
 	};
 
 }
@@ -97,4 +119,5 @@ namespace Louron {
 #endif
 
 #define L_PROFILE_SCOPE(name) ::Louron::ProfileTimer time##__LINE__(name)
+#define L_PROFILE_SCOPE_ACCUMULATIVE(name) ::Louron::ProfileTimer time##__LINE__(name, true)
 #define L_PROFILE_FUNCTION() L_PROFILE_SCOPE(L_CURRENT_FUNCTION)

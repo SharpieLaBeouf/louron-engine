@@ -11,6 +11,8 @@
 
 #include "Components.h"
 
+#include "../Bounds.h"
+
 // C++ Standard Library Headers
 #include <string>
 #include <vector>
@@ -26,66 +28,8 @@ namespace YAML {
 	class Emitter;
 	class Node;
 }
+
 namespace Louron {
-
-#pragma region Bound Structures
-
-	struct Bounds_Sphere {
-
-		glm::vec3 BoundsCentre = glm::vec3(0.0f);
-		float BoundsRadius = 0.0f;
-
-		Bounds_Sphere() = default;
-		Bounds_Sphere(const glm::vec3& centre, const float& radius) : BoundsCentre(centre), BoundsRadius(radius) {}
-		Bounds_Sphere(const Bounds_Sphere&) = default;
-		Bounds_Sphere(Bounds_Sphere&&) = default;
-		~Bounds_Sphere() = default;
-	};
-
-	struct Bounds_AABB {
-		glm::vec3 BoundsMin = glm::vec3(-1.0f);
-		glm::vec3 BoundsMax = glm::vec3(1.0f);
-
-		Bounds_AABB() = default;
-		Bounds_AABB(const glm::vec3& min, const glm::vec3& max) : BoundsMin(min), BoundsMax(max) {}
-		Bounds_AABB(const Bounds_AABB&) = default;
-		Bounds_AABB(Bounds_AABB&&) noexcept = default; // Explicitly declare move constructor
-		Bounds_AABB& operator=(const Bounds_AABB&) = default;
-		Bounds_AABB& operator=(Bounds_AABB&&) noexcept = default; // Explicitly declare move assignment operator
-		~Bounds_AABB() = default;
-
-		/// <summary>
-		/// Calculate the Centre of the AABB
-		/// </summary>
-		/// <returns></returns>
-		glm::vec3 Center() const {
-			return (BoundsMin + BoundsMax) * 0.5f;
-		}
-			
-		/// <summary>
-		/// Calculate the Size of the AABB
-		/// </summary>
-		glm::vec3 Size() const {
-			return BoundsMax - BoundsMin;
-		}
-
-		/// <summary>
-		/// Get the transformation matrix for this AABB
-		/// </summary>
-		glm::mat4 GetGlobalTransform() const {
-			glm::vec3 center = Center();
-			glm::vec3 size = Size();
-
-			// Create the transformation matrix
-			glm::mat4 transform = glm::mat4(1.0f);
-			transform = glm::translate(transform, center);
-			transform = glm::scale(transform, size);
-
-			return transform;
-		}
-	};
-
-#pragma endregion
 
 #pragma region Mesh Data Structs
 
@@ -94,9 +38,13 @@ namespace Louron {
 		std::unique_ptr<VertexArray> VAO = nullptr;
 
 		SubMesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
-		SubMesh(const SubMesh&) = default;
-		SubMesh(SubMesh&&) = default;
 		~SubMesh() = default;
+
+		SubMesh(const SubMesh&) = default;
+		SubMesh& operator=(const SubMesh& other) = default;
+
+		SubMesh(SubMesh&&) = default;
+		SubMesh& operator=(SubMesh&& other) = default;
 
 	};
 
@@ -123,15 +71,16 @@ namespace Louron {
 
 		AssetHandle MeshFilterAssetHandle = NULL_UUID;
 
-		Bounds_AABB TransformedAABB;
+		Bounds_AABB TransformedAABB{};
 		bool AABBNeedsUpdate = true;
+		bool OctreeNeedsUpdate = true;
 
 		void UpdateTransformedAABB();
 
 		AssetMeshFilter() = default;
 		~AssetMeshFilter() = default;
 
-		void Serialize(YAML::Emitter& out);
+		void Serialize(YAML::Emitter& out) const;
 		bool Deserialize(const YAML::Node data);
 
 		void SetShouldDisplayDebugLines(const bool& shouldDisplay) { m_DisplayDebugAABB = shouldDisplay; }

@@ -49,6 +49,7 @@ namespace Louron {
 		static void ClearBuffer(GLbitfield mask);
 
 		static void DrawDebugCube();
+		static void DrawInstancedDebugCube(std::vector<glm::mat4> transforms);
 
 		static void DrawSubMesh(std::shared_ptr<SubMesh> sub_mesh);
 		static void DrawSkybox(SkyboxComponent& skybox);

@@ -11,10 +11,13 @@ LouronEditorLayer::LouronEditorLayer() {
 }
 
 void LouronEditorLayer::OnAttach() {
+
 	Engine::Get().GetWindow().SetVSync(false);
 	
 	Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
+	
 	auto scene = Project::GetActiveScene();
+	scene->SetDisplayOctree(true);
 
 	FrameBufferConfig fbo_config;
 	fbo_config.Width = m_ViewportWindowSize.x;
@@ -51,7 +54,6 @@ void LouronEditorLayer::OnDetach() {
 }
 
 void LouronEditorLayer::OnUpdate() {
-
 
 	if (auto scene_ref = Project::GetActiveScene(); scene_ref) {
 
@@ -334,6 +336,7 @@ void LouronEditorLayer::DisplayViewportWindow() {
 		if (m_SceneWindowFocused != ImGui::IsWindowFocused()) {
 			m_SceneWindowFocused = ImGui::IsWindowFocused();
 			scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->MouseToggledOff = m_SceneWindowFocused;
+			scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->ResetMousePosToCurrentPos();
 		}
 
 		// ----- Draw Simple FPS Counter -----
@@ -731,19 +734,19 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 		ImGui::Text("X");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local PositionX", &value.x, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local PositionX", &value.x, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		ImGui::SameLine();
 		ImGui::Text("Y");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local PositionY", &value.y, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local PositionY", &value.y, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		ImGui::SameLine();
 		ImGui::Text("Z");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local PositionZ", &value.z, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local PositionZ", &value.z, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		if (updated) entity_transform.SetPosition(value);
 
@@ -757,19 +760,19 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 		ImGui::Text("X");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local RotationX", &value.x, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local RotationX", &value.x, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		ImGui::SameLine();
 		ImGui::Text("Y");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local RotationY", &value.y, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local RotationY", &value.y, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		ImGui::SameLine();
 		ImGui::Text("Z");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local RotationZ", &value.z, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local RotationZ", &value.z, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		if (updated) entity_transform.SetRotation(value);
 
@@ -783,19 +786,19 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 		ImGui::Text("X");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local ScaleX", &value.x, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local ScaleX", &value.x, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		ImGui::SameLine();
 		ImGui::Text("Y");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local ScaleY", &value.y, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local ScaleY", &value.y, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		ImGui::SameLine();
 		ImGui::Text("Z");
 		ImGui::SameLine();
 		ImGui::SetNextItemWidth(columnWidth / 3); // Set width to one-third of column width
-		if (ImGui::DragFloat("##Local ScaleZ", &value.z, 0.0f, 0, 0, "%.2f")) updated = true;
+		if (ImGui::DragFloat("##Local ScaleZ", &value.z, 0.1f, 0, 0, "%.2f")) updated = true;
 
 		if (updated) entity_transform.SetScale(value);
 
@@ -1045,6 +1048,24 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 			ImGui::PopStyleVar();
 			ImGui::PopStyleColor();
 
+			// Drag target
+			if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_HANDLE")) {
+					AssetHandle dropped_asset_handle = *(const AssetHandle*)payload->Data;
+
+					if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Mesh) {
+						component.MeshFilterAssetHandle = dropped_asset_handle;
+						component.AABBNeedsUpdate = true;
+						component.OctreeNeedsUpdate = true;
+						Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(component.MeshFilterAssetHandle); // Force load the Asset on the main thread/GL context
+					}
+					else {
+						L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+
 			ImGui::SameLine();
 			if (ImGui::Button("...")) {
 				L_APP_INFO("Lets Implement Opening an Asset Directory Window - FOR MESHES!");
@@ -1098,7 +1119,7 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 				int i = 0;
 				ImGui::Columns(2, "mesh_renderer_material_columns", false);
 				ImGui::SetColumnWidth(-1, first_coloumn_width);
-				for (const auto& asset_handle : component.MeshRendererMaterialHandles) {
+				for (auto& asset_handle : component.MeshRendererMaterialHandles) {
 
 					std::string material_name;
 					ImVec4 text_colour = ImGui::GetStyleColorVec4(ImGuiCol_Text);
@@ -1130,7 +1151,7 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 						float availableWidth = ImGui::GetContentRegionAvail().x - buttonWidth - ImGui::GetStyle().ItemSpacing.x;
 						ImGui::PushItemWidth(availableWidth);
 
-						ImGui::InputText("##MeshFilterName", asset_name_buf, sizeof(asset_name_buf), ImGuiInputTextFlags_ReadOnly);
+						ImGui::InputText("##MaterialName", asset_name_buf, sizeof(asset_name_buf), ImGuiInputTextFlags_ReadOnly);
 
 						ImGui::PopItemWidth();
 					}
@@ -1139,6 +1160,21 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 
 					ImGui::PopStyleVar();
 					ImGui::PopStyleColor();
+
+					// Drag target
+					if (ImGui::BeginDragDropTarget()) {
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_HANDLE")) {
+							AssetHandle dropped_asset_handle = *(const AssetHandle*)payload->Data;
+
+							if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Material_Standard) {
+								asset_handle = dropped_asset_handle;
+							}
+							else {
+								L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+							}
+						}
+						ImGui::EndDragDropTarget();
+					}
 
 					ImGui::SameLine();
 					if (ImGui::Button("...")) {
@@ -1470,6 +1506,31 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 			ImGui::ColorEdit4("##PointLightColour", glm::value_ptr(component.Colour));
 			ImGui::NextColumn();
 
+			static std::array<const char*, 3> shadow_types = { "No Shadows", "Hard Shadows", "Soft Shadows"};
+			uint8_t item_current = static_cast<uint8_t>(component.ShadowFlag);
+			ImGui::Text("Shadow Type");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1.0f);
+			if (ImGui::BeginCombo("##PointShadowType", shadow_types[item_current])) {
+
+				for (int n = 0; n < shadow_types.size(); n++)
+				{
+					const bool is_selected = (item_current == n);
+					if (ImGui::Selectable(shadow_types[n], is_selected))
+					{
+						item_current = n;
+						component.ShadowFlag = static_cast<ShadowTypeFlag>(item_current);
+					}
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndCombo();
+			}
+			ImGui::NextColumn();
+
 			ImGui::Columns(1);
 
 			ImGui::TreePop();
@@ -1525,6 +1586,31 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 			ImGui::ColorEdit4("##SpotLightColour", glm::value_ptr(component.Colour));
 			ImGui::NextColumn();
 
+			static std::array<const char*, 3> shadow_types = { "No Shadows", "Hard Shadows", "Soft Shadows" };
+			uint8_t item_current = static_cast<uint8_t>(component.ShadowFlag);
+			ImGui::Text("Shadow Type");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1.0f);
+			if (ImGui::BeginCombo("##SpotShadowType", shadow_types[item_current])) {
+
+				for (int n = 0; n < shadow_types.size(); n++)
+				{
+					const bool is_selected = (item_current == n);
+					if (ImGui::Selectable(shadow_types[n], is_selected))
+					{
+						item_current = n;
+						component.ShadowFlag = static_cast<ShadowTypeFlag>(item_current);
+					}
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndCombo();
+			}
+			ImGui::NextColumn();
+
 			ImGui::Columns(1);
 
 			ImGui::TreePop();
@@ -1568,6 +1654,31 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 			ImGui::ColorEdit4("##DirectionalLightColour", glm::value_ptr(component.Colour));
 			ImGui::NextColumn();
 
+			static std::array<const char*, 3> shadow_types = { "No Shadows", "Hard Shadows", "Soft Shadows" };
+			uint8_t item_current = static_cast<uint8_t>(component.ShadowFlag);
+			ImGui::Text("Shadow Type");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1.0f);
+			if (ImGui::BeginCombo("##DirectionalShadowType", shadow_types[item_current])) {
+
+				for (int n = 0; n < shadow_types.size(); n++)
+				{
+					const bool is_selected = (item_current == n);
+					if (ImGui::Selectable(shadow_types[n], is_selected))
+					{
+						item_current = n;
+						component.ShadowFlag = static_cast<ShadowTypeFlag>(item_current);
+					}
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndCombo();
+			}
+			ImGui::NextColumn();
+
 			ImGui::Columns(1);
 
 			ImGui::TreePop();
@@ -1596,8 +1707,9 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 			if (!asset_material)
 				continue;
 
+			// TODO: implement serialisation for custom materials, probably need content browser first though lol
 			// Toggle the != to == if you want to edit materials from an imported asset that are not saved to their own file
-			bool immutable_material = metadata_material.FilePath.extension() == ".lmaterial";
+			bool immutable_material = metadata_material.FilePath.extension() != ".lmaterial";
 
 			if (ImGui::TreeNode(std::string("Material: " + metadata_material.AssetName).c_str())) {
 
@@ -1611,6 +1723,21 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 
 				// Texture and text alignment
 				ImGui::ImageButton("##Albedo Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
+
+				// Drag target
+				if (ImGui::BeginDragDropTarget()) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_HANDLE")) {
+						AssetHandle dropped_asset_handle = *(const AssetHandle*)payload->Data;
+
+						if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
+							asset_material->SetAlbedoTexture(dropped_asset_handle);
+						}
+						else {
+							L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
 
 				ImGui::SameLine();
 
@@ -1637,6 +1764,22 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 				texture_id = asset_material->GetMetallicTextureAssetHandle() != NULL_UUID ? Project::GetStaticEditorAssetManager()->GetAsset<Texture>(asset_material->GetMetallicTextureAssetHandle())->GetID() : 0;
 
 				ImGui::ImageButton("##Metallic Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
+
+				// Drag target
+				if (ImGui::BeginDragDropTarget()) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_HANDLE")) {
+						AssetHandle dropped_asset_handle = *(const AssetHandle*)payload->Data;
+
+						if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
+							asset_material->SetMetallicTexture(dropped_asset_handle);
+						}
+						else {
+							L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
+
 				ImGui::SameLine();
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (32.0f / 2.0f - ImGui::CalcTextSize("Metallic Texture").y / 2.0f));
 				ImGui::Text("Metallic Texture");
@@ -1658,6 +1801,22 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 				texture_id = asset_material->GetNormalTextureAssetHandle() != NULL_UUID ? Project::GetStaticEditorAssetManager()->GetAsset<Texture>(asset_material->GetNormalTextureAssetHandle())->GetID() : 0;
 
 				ImGui::ImageButton("##Normal Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
+
+				// Drag target
+				if (ImGui::BeginDragDropTarget()) {
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_HANDLE")) {
+						AssetHandle dropped_asset_handle = *(const AssetHandle*)payload->Data;
+
+						if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
+							asset_material->SetNormalTexture(dropped_asset_handle);
+						}
+						else {
+							L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+						}
+					}
+					ImGui::EndDragDropTarget();
+				}
+
 				ImGui::SameLine();
 				ImGui::SetCursorPosY(ImGui::GetCursorPosY() + (32.0f / 2.0f - ImGui::CalcTextSize("Normal Texture").y / 2.0f));
 				ImGui::Text("Normal Texture");
@@ -1674,7 +1833,6 @@ void LouronEditorLayer::DisplayPropertiesWindow() {
 	}
 
 	ImGui::EndChild();
-
 
 	ImGui::End();
 	
@@ -1695,26 +1853,102 @@ void LouronEditorLayer::DisplayRenderStatsWindow() {
 		return;
 	}
 
-	if (ImGui::Begin("Render Stats", &m_ActiveGUIWindows["Render Stats"], 0)) {
+	if (ImGui::Begin("Render", &m_ActiveGUIWindows["Render Stats"], 0)) {
 
 		auto& stats = Renderer::GetFrameRenderStats();
+		auto& FP_Data = std::static_pointer_cast<ForwardPlusPipeline>(Project::GetActiveScene()->GetConfig().ScenePipeline)->GetFPData();
 
-		ImGui::SeparatorText("Low Level API Calls");
-		ImGui::Text("Draw Calls: %i", stats.DrawCalls);
+		if (ImGui::TreeNodeEx("Rendering Options", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-		ImGui::SeparatorText("Primitives");
-		ImGui::Text("Total Vertice Count: %i", stats.Primitives_VerticeCount);
-		ImGui::Text("Triangle Count: %i", stats.Primitives_TriangleCount);
-		ImGui::Text("Line Count: %i", stats.Primitives_LineCount);
+			ImGui::Checkbox("View Light Complexity", &FP_Data.ShowLightComplexity);
+			ImGui::Checkbox("View Wireframe", &FP_Data.ShowWireframe);
 
-		ImGui::SeparatorText("Sub Meshes");
-		ImGui::Text("Sub Meshes Renderered: %i", stats.SubMeshes_Rendered);
-		ImGui::Text("Sub Meshes Instanced: %i", stats.SubMeshes_Instanced);
-		ImGui::Text("Skyboxes Renderered: %i", stats.Skybox_Rendered);
+			ImGui::TreePop();
+		}
 
-		ImGui::SeparatorText("Frustum Culling");
-		ImGui::Text("Entities Rendered: %i", stats.Entities_Rendered);
-		ImGui::Text("Entities Culled: %i", stats.Entities_Culled);
+		if (ImGui::TreeNodeEx("Rendering Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+			ImGui::SeparatorText("Low Level API Calls");
+			ImGui::Text("Draw Calls: %i", stats.DrawCalls);
+
+			ImGui::SeparatorText("Primitives");
+			ImGui::Text("Total Vertice Count: %i", stats.Primitives_VerticeCount);
+			ImGui::Text("Triangle Count: %i", stats.Primitives_TriangleCount);
+			ImGui::Text("Line Count: %i", stats.Primitives_LineCount);
+
+			ImGui::SeparatorText("Sub Meshes");
+			ImGui::Text("Sub Meshes Renderered: %i", stats.SubMeshes_Rendered);
+			ImGui::Text("Sub Meshes Instanced: %i", stats.SubMeshes_Instanced);
+			ImGui::Text("Skyboxes Renderered: %i", stats.Skybox_Rendered);
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNodeEx("Culling Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
+
+			ImGui::Text("Entities Rendered: %i", stats.Entities_Rendered);
+			ImGui::Text("Entities Culled: %i", stats.Entities_Culled);
+
+			ImGui::Text("Visible Point Lights: %i", (int)FP_Data.PLEntities.size());
+			ImGui::Text("Visible Spot Lights: %i", (int)FP_Data.SLEntities.size());
+
+			if (ImGui::TreeNodeEx("Octree Info", ImGuiTreeNodeFlags_DefaultOpen)) {
+				bool octree_display_toggle = Project::GetActiveScene()->GetDisplayOctree();
+				if (ImGui::Checkbox("View Octree", &octree_display_toggle))
+					Project::GetActiveScene()->SetDisplayOctree(octree_display_toggle);
+
+				ImGui::Text("Octree Data Sources: %i", (int)Project::GetActiveScene()->GetOctree().lock()->GetAllOctreeDataSources().size());
+
+				static OctreeBoundsConfig config = Project::GetActiveScene()->GetOctree().lock()->GetConfig();
+
+				ImGui::DragFloat("Looseness", &config.Looseness, 0.001f, 1.0f, 2.0f);
+				ImGui::DragInt("PreferredDataSourceLimit", &config.PreferredDataSourceLimit, 0.25f, 1);
+
+				if (ImGui::Button("Rebuild Octree")) {
+					L_PROFILE_SCOPE("Rebuild Octree");
+					auto oct_ref = Project::GetActiveScene()->GetOctree().lock();
+					oct_ref->SetConfig(config);
+					oct_ref->RebuildOctree();
+
+				}
+
+				// Length of interval in seconds we gather new results
+				static float timer_max = 0.5f;
+				ImGui::SliderFloat("Octree Stat Timer", &timer_max, 0.1f, 1.0f);
+
+				static float timer = timer_max;
+
+				static float octreeTime = 0.0f;
+
+				static const int data_size = 100;
+				static float data[data_size] = { 0.0f };
+				static int data_index = 0;
+
+				if (timer > 0.0f) {
+					timer -= Time::GetDeltaTime();
+				}
+				else {
+					timer = timer_max;
+
+					auto& results = Profiler::Get().GetResults();
+					octreeTime = results["Forward Plus - Frustum Culling Octree Query"].Time;
+
+					// Store the current octree time in the buffer
+					data[data_index] = octreeTime * 1000.0f; // Convert to microseconds for easier reading
+					data_index = (data_index + 1) % data_size; // Wrap around the buffer index
+				}
+
+				ImGui::Text("Octree Query Time: % .2fus", octreeTime * 1000.0f);
+
+				// Plot the historical octree times
+				ImVec2 plot_size = ImVec2(0, 80);
+				ImGui::PlotLines("##Octree Query Time (us)", data, data_size, data_index, nullptr, 0.0f, 100.0f, plot_size); // Adjust the y-range as needed
+
+				ImGui::TreePop();
+			}
+
+			ImGui::TreePop();
+		}
 	}
 	ImGui::End();
 }
@@ -1728,7 +1962,22 @@ void LouronEditorLayer::DisplayProfilerWindow() {
 
 	if (ImGui::Begin("Profiler", &m_ActiveGUIWindows["Profiler"], 0)) {
 
-		for (auto& result : Profiler::Get().GetResults()) {
+		static float timer = 1.0f;
+		static bool IsResultsPerFrame = true;
+		static std::map<const char*, ProfileResult> results;
+
+		ImGui::Checkbox("Toggle Results Per Frame/Per Second", &IsResultsPerFrame);
+
+		if (timer > 0.0f && !IsResultsPerFrame)
+			timer -= Time::GetDeltaTime();
+		
+		
+		if (timer <= 0.0f || IsResultsPerFrame) {
+			timer = 1.0f;
+			results = Profiler::Get().GetResults();
+		}
+
+		for (auto& result : results) {
 
 			char label[128];
 			strcpy_s(label, result.second.Name);

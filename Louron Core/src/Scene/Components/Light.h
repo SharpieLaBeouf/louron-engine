@@ -26,6 +26,14 @@ namespace YAML {
 
 namespace Louron {
 
+	enum class ShadowTypeFlag {
+
+		NoShadows	= 0,
+		HardShadows = 1,
+		SoftShadows = 2,
+
+	};
+
 	struct PointLightComponent : public Component {
 
 		bool Active = true;
@@ -34,6 +42,8 @@ namespace Louron {
 
 		float Radius = 10.0f;
 		float Intensity = 1.0f;
+
+		ShadowTypeFlag ShadowFlag = ShadowTypeFlag::NoShadows;
 
 		PointLightComponent() = default;
 		PointLightComponent(const PointLightComponent&) = default;
@@ -52,6 +62,8 @@ namespace Louron {
 		float Angle = 45.0f; // Full Angle of SpotLight Cone
 		float Intensity = 1.0f;
 
+		ShadowTypeFlag ShadowFlag = ShadowTypeFlag::NoShadows;
+
 		SpotLightComponent() = default;
 		SpotLightComponent(const SpotLightComponent&) = default;
 
@@ -67,6 +79,8 @@ namespace Louron {
 
 		float Intensity = 1.0f;
 
+		ShadowTypeFlag ShadowFlag = ShadowTypeFlag::NoShadows;
+
 		DirectionalLightComponent() = default;
 		DirectionalLightComponent(const DirectionalLightComponent&) = default;
 
@@ -75,6 +89,13 @@ namespace Louron {
 	};
 
 	struct VisibleLightIndex {
-		GLint index;
+		uint32_t index;
+
+		VisibleLightIndex() = default;
+		VisibleLightIndex(const VisibleLightIndex& other) = default;
+		VisibleLightIndex(VisibleLightIndex&& other) = default;
+
+		VisibleLightIndex& operator=(const VisibleLightIndex& other) = default;
+		VisibleLightIndex& operator=(VisibleLightIndex&& other) = default;
 	};
 }

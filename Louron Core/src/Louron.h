@@ -25,6 +25,9 @@
 #include "Scene/Entity.h"
 #include "Scene/Scene.h"
 #include "Scene/Prefab.h"
+#include "Scene/Bounds.h"
+#include "Scene/Frustum.h"
+#include "Scene/OctreeBounds.h"
 #include "Scene/Scene Serializer.h"
 
 #include "Scene/Components/Camera.h"

@@ -10,6 +10,13 @@ struct PointLight {
 
     bool activeLight;
     bool lastLight;
+
+	uint shadowCastingType;
+    
+    // DO NOT USE - this is for SSBO alignment purposes ONLY (12 BYTES)
+	float m_Padding1;
+	float m_Padding2;
+	float m_Padding3;
 };
 
 struct SpotLight {
@@ -25,15 +32,17 @@ struct SpotLight {
     
     bool activeLight;
     bool lastLight;
-   
+    
+	uint shadowCastingType;
+	
     // DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
-    float m_Padding1;
-    float m_Padding2;
-    float m_Padding3;
+	float m_Padding1;
+	float m_Padding2;
+   
 };
 
 struct VisibleIndex {
-    int index;
+    uint index;
 };
 
 struct BoundingSphere {
@@ -42,7 +51,7 @@ struct BoundingSphere {
 };
 
 // Point Lights SSBO
-layout(std430, binding = 0) readonly buffer PL_Buffer {
+layout(std430, binding = 0) buffer PL_Buffer {
     PointLight data[];
 } PL_Buffer_Data;
 
@@ -51,7 +60,7 @@ layout(std430, binding = 1) writeonly buffer PL_IndiciesBuffer {
 } PL_IndiciesBuffer_Data;
 
 // Spot Lights SSBO
-layout(std430, binding = 2) readonly buffer SL_Buffer {
+layout(std430, binding = 2) buffer SL_Buffer {
     SpotLight data[];
 } SL_Buffer_Data;
 
@@ -103,7 +112,6 @@ void main(){
 		PL_VisibleLightCount = 0;
 		SL_VisibleLightCount = 0;
 		viewProjection = u_Proj * u_View;
-		
 	}
 
 	barrier();
@@ -208,9 +216,9 @@ void main(){
 			distance = dot(position, frustumPlanes[j]) + radius;
 
 			// If one of the tests fails, then there is no intersection
-			if (distance <= 0.0) {
+			if (distance <= 0.0)
 				break;
-			}
+			
 		}
 
 		// If greater than zero, then it is a visible light
@@ -219,7 +227,6 @@ void main(){
 			// Add index to the shared array of visible indices
 			uint offset = atomicAdd(PL_VisibleLightCount, 1);
 			PL_VisibleLightIndices[offset] = int(lightIndex);
-
 		}
 	}
 	
@@ -231,9 +238,9 @@ void main(){
 		
 		// Get the lightIndex to test for this thread / pass. If the index is >= light count, then this thread can stop testing lights
 		uint lightIndex = i * threadCount + gl_LocalInvocationIndex;
-		if (lightIndex >= SL_LightCount) {
+		if (lightIndex >= SL_LightCount)
 			break;
-		}
+		
 		
 		if(!SL_Buffer_Data.data[lightIndex].activeLight)
 			continue;
@@ -264,23 +271,26 @@ void main(){
 	barrier();
 
 	// Step 4. One thread per workgroup should fill the global light buffer
-	if (gl_LocalInvocationIndex == 0) {
+	uint offset = index * MAX_LIGHTS; // Determine position in global buffer
+
+    for (uint i = gl_LocalInvocationIndex; i < PL_VisibleLightCount; i += TILE_SIZE * TILE_SIZE) {
+        PL_IndiciesBuffer_Data.data[offset + i].index = PL_VisibleLightIndices[i];
+    }
+
+    for (uint i = gl_LocalInvocationIndex; i < SL_VisibleLightCount; i += TILE_SIZE * TILE_SIZE) {
+        SL_IndiciesBuffer_Data.data[offset + i].index = SL_VisibleLightIndices[i];
+    }
 	
+	barrier();
+
+	// Step 5. One thread per workgroup should index the last light if there is not MAX lights
+	if (gl_LocalInvocationIndex == 0) {
+		
 		uint offset = index * MAX_LIGHTS; // Determine position in global buffer
 	
-		// Fill Indicies buffer for each workgroup for all point lights that have been detected
-		for (uint i = 0; i < PL_VisibleLightCount; i++) {
-			PL_IndiciesBuffer_Data.data[offset + i].index = PL_VisibleLightIndices[i];
-		}
-		
 		// If array is not full, then mark last index in buffer as -1
 		if (PL_VisibleLightCount != MAX_LIGHTS) {
 			PL_IndiciesBuffer_Data.data[offset + PL_VisibleLightCount].index = -1;
-		}
-		
-		// Fill Indicies buffer for each workgroup for all spotlights that have been detected
-		for (uint i = 0; i < SL_VisibleLightCount; i++) {
-			SL_IndiciesBuffer_Data.data[offset + i].index = SL_VisibleLightIndices[i];
 		}
 		
 		// If array is not full, then mark last index in buffer as -1
@@ -288,6 +298,7 @@ void main(){
 			SL_IndiciesBuffer_Data.data[offset + SL_VisibleLightCount].index = -1;
 		}
 	}
+
 }
 
 const float PI = 3.14159;

@@ -88,6 +88,85 @@ namespace Louron {
 		
 	}
 
+	static GLuint s_DebugCubeInstanceBuffers = -1;
+
+	void Renderer::DrawInstancedDebugCube(std::vector<glm::mat4> transforms) {
+
+		if (transforms.empty())
+			return;
+
+		if (s_DebugCubeInstanceBuffers == -1) {
+
+			glGenBuffers(1, &s_DebugCubeInstanceBuffers);
+			glBindBuffer(GL_ARRAY_BUFFER, s_DebugCubeInstanceBuffers);
+			glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), transforms.data(), GL_DYNAMIC_DRAW);
+		}
+		else {
+
+			glBindBuffer(GL_ARRAY_BUFFER, s_DebugCubeInstanceBuffers);
+
+			GLint bufferSize = 0;
+			glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &bufferSize);
+
+			if (bufferSize < transforms.size() * sizeof(glm::mat4)) {
+				// Reallocate buffer with the new size
+				glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), &transforms[0], GL_DYNAMIC_DRAW);
+			}
+			else {
+				// Update existing buffer with new data
+				glBufferSubData(GL_ARRAY_BUFFER, 0, transforms.size() * sizeof(glm::mat4), &transforms[0]);
+			}
+		}
+
+		// Additional validation
+		if (glIsBuffer(s_DebugCubeInstanceBuffers) == GL_FALSE) {
+			L_CORE_ERROR("Buffer is not valid after binding or updating data.");
+			return;
+		}
+
+		s_DebugCubeVAO->Bind();
+
+		// Set vertex attributes
+		std::size_t vec4Size = sizeof(glm::vec4);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)0);
+
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(1 * vec4Size));
+
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(2 * vec4Size));
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, GLsizei(4 * vec4Size), (void*)(3 * vec4Size));
+
+		glVertexAttribDivisor(1, 1);
+		glVertexAttribDivisor(2, 1);
+		glVertexAttribDivisor(3, 1);
+		glVertexAttribDivisor(4, 1);
+
+		// DRAW CALL
+		glDrawElementsInstanced(GL_LINES, s_DebugCubeVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, static_cast<GLuint>(transforms.size()));
+
+		// Reset state after drawing
+		glDisableVertexAttribArray(1);
+		glDisableVertexAttribArray(2);
+		glDisableVertexAttribArray(3);
+		glDisableVertexAttribArray(4);
+
+		// Optionally reset divisor values if needed
+		glVertexAttribDivisor(1, 0);
+		glVertexAttribDivisor(2, 0);
+		glVertexAttribDivisor(3, 0);
+		glVertexAttribDivisor(4, 0);
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+		s_RenderStats.DrawCalls++;
+		s_RenderStats.Primitives_LineCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() / 2 * static_cast<GLuint>(transforms.size());
+		s_RenderStats.Primitives_VerticeCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() * static_cast<GLuint>(transforms.size());
+	}
+
 	void Renderer::DrawSkybox(SkyboxComponent& skybox) {
 
 		skybox.Bind();
@@ -105,12 +184,15 @@ namespace Louron {
 	static GLuint s_MeshInstanceBuffers = -1;
 
 	void Renderer::DrawInstancedSubMesh(std::shared_ptr<SubMesh> mesh, std::vector<glm::mat4> transforms) {
-		
+
+		if (transforms.empty())
+			return;
+
 		if (s_MeshInstanceBuffers == -1) {
 			
 			glGenBuffers(1, &s_MeshInstanceBuffers);
 			glBindBuffer(GL_ARRAY_BUFFER, s_MeshInstanceBuffers);
-			glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), &transforms[0], GL_DYNAMIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), transforms.data(), GL_DYNAMIC_DRAW);
 		}
 		else {
 
@@ -157,7 +239,7 @@ namespace Louron {
 		glVertexAttribDivisor(8, 1);
 
 		// DRAW CALL
-		glDrawElementsInstanced(GL_TRIANGLES, mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, (GLsizei)transforms.size());
+		glDrawElementsInstanced(GL_TRIANGLES, mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, static_cast<GLuint>(transforms.size()));
 
 		// Reset state after drawing
 		glDisableVertexAttribArray(5);

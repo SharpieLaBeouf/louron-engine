@@ -5,6 +5,7 @@
 #include "../Asset/Asset.h"
 #include "Components/Physics/CollisionCallback.h"
 #include "Components/Components.h"
+#include "OctreeBounds.h"
 
 // C++ Standard Library Headers
 #include <vector>
@@ -17,9 +18,9 @@
 #include <entt/entt.hpp>
 #include <physx/PxPhysicsAPI.h>
 
-#define MAX_DIRECTIONAL_LIGHTS 10
-#define MAX_POINT_LIGHTS 1024
-#define MAX_SPOT_LIGHTS 1024
+constexpr int MAX_DIRECTIONAL_LIGHTS = 10;
+constexpr int MAX_POINT_LIGHTS = 1024;
+constexpr int MAX_SPOT_LIGHTS = 1024;
 
 using namespace physx;
 
@@ -69,6 +70,7 @@ namespace Louron {
 		Entity FindEntityByName(std::string_view name);
 		Entity FindEntityByUUID(UUID uuid);
 
+		bool HasEntity(const Entity& entity);
 		bool HasEntity(const std::string& name);
 		bool HasEntity(const UUID& uuid);
 
@@ -113,6 +115,11 @@ namespace Louron {
 		void SetSceneFilePath(const std::filesystem::path& path) { m_SceneConfig.SceneFilePath = path; }
 		const std::filesystem::path& GetSceneFilePath() const { return m_SceneConfig.SceneFilePath; }
 
+		void SetDisplayOctree(bool display) { m_DisplayOctree = display; }
+		const bool& GetDisplayOctree() const { return m_DisplayOctree; }
+
+		std::weak_ptr<OctreeBounds<Entity>> GetOctree() const { return m_Octree; }
+
 	private:
 
 		entt::registry m_Registry;
@@ -128,6 +135,9 @@ namespace Louron {
 		bool m_IsSimulatingPhysics = false;
 
 		SceneConfig m_SceneConfig;
+
+		std::shared_ptr<OctreeBounds<Entity>> m_Octree = nullptr;
+		bool m_DisplayOctree = false;
 
 		friend class Entity;
 		friend class Project;

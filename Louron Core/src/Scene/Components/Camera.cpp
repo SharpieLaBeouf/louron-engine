@@ -141,6 +141,14 @@ namespace Louron {
 		UpdateCameraVectors();
 	}
 
+	void Camera::ResetMousePosToCurrentPos()
+	{
+		float xpos = m_Input.GetMouseX(), ypos = m_Input.GetMouseY();
+
+		m_LastMouseX = xpos;
+		m_LastMouseY = ypos;
+	}
+
 	void Camera::UpdateCameraVectors()
 	{
 		glm::vec3 front = glm::vec3();
