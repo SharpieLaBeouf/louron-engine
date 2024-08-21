@@ -6,16 +6,11 @@
 
 #include <memory>
 #include <vector>
-#include <string>
-
-#include <iostream>
 
 #include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/component_wise.hpp>
 
 #include "../Core/Logging.h"
-#include "../Debug/Profiler.h"
 #include "../Debug/Assert.h"
 
 #include "Bounds.h"
@@ -40,7 +35,7 @@ namespace Louron {
 		/// splits into child nodes and attempts to reinsert these Data Sources 
 		/// into its child nodes.
 		/// 
-		/// If we reach the maximum depth, or the minimum node size, we cannot 
+		/// If we reach the the minimum node size, we cannot 
 		/// split any further, which is why this is a preferred limit for 
 		/// Data Sources per node.
 		/// </summary>
@@ -1020,8 +1015,8 @@ namespace Louron {
 			size_t position = std::distance(m_DataSources.begin(), it);
 			
 			if (!m_RootNode->Remove(position)) {
-				m_RootNode->Remove(position);
 				L_CORE_ERROR("Data Not Actually Contained Within Octree.");
+				return false;
 			}
 
 			m_RootNode->RevalidateNodes(0);
@@ -1037,14 +1032,12 @@ namespace Louron {
 		/// </summary>
 		bool Update(const DataType& data, const Bounds_AABB& bounds) {
 
-			if (m_RootNode) {
+			if (!m_RootNode)
+				return false;
 
-				Remove(data);
+			Remove(data);
 				
-				return Insert(data, bounds);
-			}
-
-			return false;
+			return Insert(data, bounds);
 		}
 
 		/// <summary>
@@ -1059,22 +1052,20 @@ namespace Louron {
 		/// <param name="frustum">Bounds AABB Range to Query</param>
 		const std::vector<OctreeData>& Query(const Bounds_AABB& bounds) const {
 
-			static std::vector<OctreeData> s_AABB_query_data_vector{};
-
-			if (s_AABB_query_data_vector.capacity() == 0 || s_AABB_query_data_vector.capacity() < m_DataSources.size()) {
-				s_AABB_query_data_vector.reserve(m_DataSources.empty() ? 1024 : m_DataSources.size());
+			if (m_QueryReturnVectors[0].capacity() == 0 || m_QueryReturnVectors[0].capacity() < m_DataSources.size()) {
+				m_QueryReturnVectors[0].reserve(m_DataSources.empty() ? 1024 : m_DataSources.size());
 			}
 
-			s_AABB_query_data_vector.clear();
+			m_QueryReturnVectors[0].clear();
 
 			if (m_DataSources.empty())
-				return s_AABB_query_data_vector;
+				return m_QueryReturnVectors[0];
 
 			if (m_RootNode) {
 				bool should_delete = false;
-				m_RootNode->Query(bounds, s_AABB_query_data_vector, should_delete);
+				m_RootNode->Query(bounds, m_QueryReturnVectors[0], should_delete);
 			}
-			return s_AABB_query_data_vector;
+			return m_QueryReturnVectors[0];
 		}
 
 		/// <summary>
@@ -1089,22 +1080,20 @@ namespace Louron {
 		/// <param name="frustum">Bounds Sphere Range to Query</param>
 		const std::vector<OctreeData>& Query(const Bounds_Sphere& bounds) const {
 
-			static std::vector<OctreeData> s_SPHERE_query_data_vector{};
-
-			if (s_SPHERE_query_data_vector.capacity() == 0 || s_SPHERE_query_data_vector.capacity() < m_DataSources.size()) {
-				s_SPHERE_query_data_vector.reserve(m_DataSources.empty() ? 1024 : m_DataSources.size());
+			if (m_QueryReturnVectors[1].capacity() == 0 || m_QueryReturnVectors[1].capacity() < m_DataSources.size()) {
+				m_QueryReturnVectors[1].reserve(m_DataSources.empty() ? 1024 : m_DataSources.size());
 			}
 
-			s_SPHERE_query_data_vector.clear();
+			m_QueryReturnVectors[1].clear();
 
 			if (m_DataSources.empty())
-				return s_SPHERE_query_data_vector;
+				return m_QueryReturnVectors[1];
 
 			if (m_RootNode) {
 				bool should_delete = false;
-				m_RootNode->Query(bounds, s_SPHERE_query_data_vector, should_delete);
+				m_RootNode->Query(bounds, m_QueryReturnVectors[1], should_delete);
 			}
-			return s_SPHERE_query_data_vector;
+			return m_QueryReturnVectors[1];
 		}
 
 		/// <summary>
@@ -1119,22 +1108,20 @@ namespace Louron {
 		/// <param name="frustum">Camera Frustum to Query</param>
 		const std::vector<OctreeData>& Query(const Frustum& frustum) {
 
-			static std::vector<OctreeData> s_FRUSTUM_query_data_vector{};
-
-			if (s_FRUSTUM_query_data_vector.capacity() == 0 || s_FRUSTUM_query_data_vector.capacity() < m_DataSources.size()) {
-				s_FRUSTUM_query_data_vector.reserve(m_DataSources.empty() ? 1024 : m_DataSources.size());
+			if (m_QueryReturnVectors[2].capacity() == 0 || m_QueryReturnVectors[2].capacity() < m_DataSources.size()) {
+				m_QueryReturnVectors[2].reserve(m_DataSources.empty() ? 1024 : m_DataSources.size());
 			}
 
-			s_FRUSTUM_query_data_vector.clear();
+			m_QueryReturnVectors[2].clear();
 
 			if (m_DataSources.empty())
-				return s_FRUSTUM_query_data_vector;
+				return m_QueryReturnVectors[2];
 
 			if (m_RootNode) {
 				bool should_delete = false;
-				m_RootNode->Query(frustum, s_FRUSTUM_query_data_vector, should_delete);
+				m_RootNode->Query(frustum, m_QueryReturnVectors[2], should_delete);
 			}
-			return s_FRUSTUM_query_data_vector;
+			return m_QueryReturnVectors[2];
 		}
 
 		/// <summary>
@@ -1241,9 +1228,9 @@ namespace Louron {
 
 				m_RootNode.reset();
 				m_RootNode = nullptr;
-
-				m_DataSources.clear();
 			}
+
+			m_DataSources.clear();
 
 			// 2. Calculate Initial Bounds of New Octree
 			if (!data_sources.empty()) {
@@ -1399,6 +1386,8 @@ namespace Louron {
 		OctreeNode m_RootNode;
 
 		std::vector<OctreeData> m_DataSources{};
+
+		std::array<std::vector<OctreeData>, 3> m_QueryReturnVectors{};
 
 		std::mutex m_OctreeMutex{};
 
