@@ -16,6 +16,8 @@ namespace Louron {
 
 	public:
 
+		static void Init();
+		static void Shutdown();
 		static Audio& Get();
 
 		void PlayAudioFile(const std::string& audioFile);
@@ -23,7 +25,6 @@ namespace Louron {
 	private:
 
 		Audio();
-
 		~Audio();
 
 		// Delete copy assignment and move assignment constructors
@@ -34,7 +35,7 @@ namespace Louron {
 		Audio& operator=(const Audio&) = delete;
 		Audio& operator=(Audio&&) = delete;
 
-		ma_engine* m_SoundEngine;
+		ma_engine* m_SoundEngine = nullptr;
 
 	};
 }

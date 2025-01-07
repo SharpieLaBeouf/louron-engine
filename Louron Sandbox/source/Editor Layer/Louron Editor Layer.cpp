@@ -1907,8 +1907,7 @@ void LouronEditorLayer::DisplayRenderStatsWindow() {
 				if (ImGui::Button("Rebuild Octree")) {
 					L_PROFILE_SCOPE("Rebuild Octree");
 					auto oct_ref = Project::GetActiveScene()->GetOctree().lock();
-					oct_ref->SetConfig(config);
-					oct_ref->RebuildOctree();
+					oct_ref->RebuildOctree(config);
 
 				}
 

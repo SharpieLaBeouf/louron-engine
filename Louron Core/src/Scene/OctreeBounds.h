@@ -1133,6 +1133,16 @@ namespace Louron {
 		}
 
 		/// <summary>
+		/// This will rebuild the octree with all its current data sources, 
+		/// but with a new configuration for the Octree.
+		/// </summary>
+		void RebuildOctree(const OctreeBoundsConfig& new_config) {
+			std::unique_lock lock(m_OctreeMutex);
+			m_Config = new_config;
+			BuildOctree();
+		}
+
+		/// <summary>
 		/// This will return the data sources contained ONLY in the root node.
 		/// </summary>
 		/// <returns></returns>

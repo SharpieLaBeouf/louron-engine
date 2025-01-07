@@ -7,8 +7,11 @@
 #include <mutex>
 
 #include "Logging.h"
+#include "../Debug/Assert.h"
 
 namespace Louron {
+
+	static Audio* s_Instance = nullptr;
 
 	Audio::Audio() {
 
@@ -23,13 +26,21 @@ namespace Louron {
 		m_SoundEngine = engine;
 	}
 
-	Audio& Audio::Get() {
-		static std::once_flag onceFlag;
-		static Audio* s_Instance = nullptr;
+	void Audio::Init() {
 
-		std::call_once(onceFlag, []() {
-			s_Instance = new Audio();
-			});
+		L_CORE_ASSERT(!s_Instance, "Audio Already Initialised!");
+
+		s_Instance = new Audio();
+	}
+
+	void Audio::Shutdown() {
+		delete s_Instance;
+		s_Instance = nullptr;
+	}
+
+	Audio& Audio::Get() {
+		
+		L_CORE_ASSERT(s_Instance, "Audio Not Initialised!");
 
 		return *s_Instance;
 	}

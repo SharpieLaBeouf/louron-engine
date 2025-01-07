@@ -39,7 +39,7 @@ namespace Louron {
         Physics::Init();
 
         // Init Audio System
-        Audio::Get();
+        Audio::Init();
 
         // Renderer Init Debug VAOs
         Renderer::Init();
@@ -60,21 +60,6 @@ namespace Louron {
         }
 
         m_TextureLibrary = std::make_unique<TextureLibrary>();
-
-        // Load All Textures
-        {
-            for (const auto& path : FindFilePaths(".png")) {
-                m_TextureLibrary->LoadTexture(path);
-            }
-
-            for (const auto& path : FindFilePaths(".jpg")) {
-                m_TextureLibrary->LoadTexture(path);
-            }
-
-            for (const auto& path : FindFilePaths(".psd")) {
-                m_TextureLibrary->LoadTexture(path);
-            }
-        }
 
         // Init Input Manager
         m_Input = std::make_unique<InputManager>();
@@ -143,6 +128,8 @@ namespace Louron {
             }
         }
 
+        Audio::Shutdown();
+        Time::Shutdown();
     }
 
     bool Engine::OnWindowClose() {

@@ -1,6 +1,7 @@
 #pragma once
 
 // Louron Core Headers
+#include "Logging.h"
 
 // C++ Standard Library Headers
 #include <chrono>
@@ -13,59 +14,35 @@ namespace Louron {
 
 	public:
 
-		static void Init() {
-			Time::Get();
-		}
+		static void Init();
+		static void Shutdown();
 
-		static Time& Get() {
-			static Time s_Instance;
+		static Time& Get();
 
-			return s_Instance;
-		}
+		void UpdateTime();
 
-		void UpdateTime() {
-			m_CurrentTimeClock = std::chrono::high_resolution_clock::now();
+		static float GetUnscaledDeltaTime();
+		static float GetDeltaTime();
 
-			m_CurrentTime = std::chrono::duration_cast<std::chrono::duration<double>>(m_CurrentTimeClock.time_since_epoch()).count();
-			m_DeltaTime = std::chrono::duration_cast<std::chrono::duration<double>>(m_CurrentTimeClock - m_LastTimeClock).count();
+		static float GetUnscaledFixedDeltaTime();
+		static float GetFixedDeltaTime();
 
-			m_LastTimeClock = m_CurrentTimeClock;
+		static void SetFixedDeltaTime(const float& fixedDeltaTime);
 
-			m_FrameRateTimer -= (float)m_DeltaTime;
-			if (m_FrameRateTimer <= 0.0f) {
-				m_FrameRateEstimate = (int)(1.0f / (float)m_DeltaTime);
-				m_FrameRateTimer = 1.0f;
-			}
+		static int GetUnscaledFixedUpdatesHz();
+		static int GetFixedUpdatesHz();
 
-		}
-
-		static float GetUnscaledDeltaTime()			{ return (float)Time::Get().m_DeltaTime; }
-		static float GetDeltaTime()					{ return (float)Time::Get().m_DeltaTime * Time::Get().m_TimeScale; }
-
-		static float GetUnscaledFixedDeltaTime()	{ return Time::Get().m_FixedDeltaTime; }
-		static float GetFixedDeltaTime()			{ return Time::Get().m_FixedDeltaTime * Time::Get().m_TimeScale; }
-
-		static void SetFixedDeltaTime(const float& fixedDeltaTime) {
-			L_CORE_INFO("Fixed Update Frequency Interval Changed To: {0} seconds", fixedDeltaTime);
-			Time::Get().m_FixedDeltaTime = fixedDeltaTime;
-		}
-
-		static int GetUnscaledFixedUpdatesHz() { return (int)(1.0f / Time::Get().m_FixedDeltaTime); }
-		static int GetFixedUpdatesHz() { return (int)(1.0f / Time::Get().m_FixedDeltaTime * Time::Get().m_TimeScale); }
-
-		static float GetTimeScale() { return Time::Get().m_TimeScale; }
-		static void SetTimeScale(const float& timeScale) { Time::Get().m_TimeScale = timeScale; }
+		static float GetTimeScale();
+		static void SetTimeScale(const float& timeScale);
 		
 		/// <summary>Estimate of average framerate.</summary>
-		static int GetFrameRate() { return Time::Get().m_FrameRateEstimate; } // TODO: Average this from last two seconds of runtime for smoother and more accurate FPS
+		static int GetFrameRate();
 
-		double GetCurrTime() const { return m_CurrentTime; }
+		double GetCurrTime() const;
 
 	private:
 
-		Time() {
-			m_LastTimeClock = std::chrono::high_resolution_clock::now();
-		}
+		Time();
 
 		// Delete copy assignment and move assignment constructors
 		Time(const Time&) = delete;

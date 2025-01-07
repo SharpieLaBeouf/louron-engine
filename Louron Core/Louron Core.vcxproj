@@ -139,6 +139,7 @@
     <ClCompile Include="src\Core\LayerStack.cpp" />
     <ClCompile Include="src\Core\Logging.cpp" />
     <ClCompile Include="src\Core\Physics.cpp" />
+    <ClCompile Include="src\Core\Time.cpp" />
     <ClCompile Include="src\Core\Window.cpp" />
     <ClCompile Include="src\OpenGL\Framebuffer.cpp" />
     <ClCompile Include="src\Project\Project Serializer.cpp" />
