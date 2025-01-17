@@ -14,6 +14,7 @@
 #include "Core/Time.h"
 #include "Core/Window.h"
 #include "Core/File Utilities.h"
+#include "Core/Platform.h"
 
 #include "OpenGL/Buffer.h"
 #include "OpenGL/Material.h"
@@ -48,3 +49,6 @@
 
 #include "Debug/Assert.h"
 #include "Debug/Profiler.h"
+
+#include "Scripting/Script Connector.h"
+#include "Scripting/Script Manager.h"

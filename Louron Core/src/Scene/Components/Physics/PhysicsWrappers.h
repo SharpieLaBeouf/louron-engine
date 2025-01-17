@@ -17,7 +17,7 @@ namespace Louron {
 
 	class PhysicsShape;
 	class UUID;
-	struct Transform;
+	struct TransformComponent;
 
 	/// <summary>
 	/// Flags that are set to determine what state changes have occured
@@ -32,19 +32,6 @@ namespace Louron {
 
 	};
 	
-	/// <summary>
-	/// Flags that are set to determine what state changes have occured
-	/// each frame so the PhysicsSystem may process these changes.
-	/// </summary>
-	enum ColliderFlags : uint8_t {
-
-		ColliderFlag_None				= 0,
-
-		ColliderFlag_TransformUpdated	= 1U << 0,  // Only add this flag where there have been manual changes made to the transform of the shape.
-		ColliderFlag_RigidbodyUpdated	= 1U << 1,  // Add this flag when there have been changes to the rigidbody reference.
-		ColliderFlag_ShapePropsUpdated	= 1U << 2,	// Add this flag when the properties of the shape have been updated.
-	};
-
 	class RigidDynamic {
 
 		friend class PhysicsSystem;
@@ -58,10 +45,12 @@ namespace Louron {
 
 	public:
 
-		RigidDynamic() = delete;
-		RigidDynamic(const PxTransform& transform);
+		void Init(const PxTransform& transform);
+		void Shutdown();
+
+		RigidDynamic() = default;
 		RigidDynamic(RigidDynamic&& other) noexcept;
-		~RigidDynamic();
+		~RigidDynamic() = default;
 
 		RigidDynamic(const RigidDynamic&) = delete;
 		RigidDynamic& operator=(const RigidDynamic&) = delete;
@@ -95,7 +84,7 @@ namespace Louron {
 
 		// Setter methods
 		void SetGlobalPose(const PxTransform& pose);
-		void SetGlobalPose(Transform& transform);
+		void SetGlobalPose(TransformComponent& transform);
 		void SetGlobalPose(const glm::vec3& position, const glm::vec3& rotation);
 
 		void SetKinematic(bool isKinematicEnabled);
@@ -132,10 +121,13 @@ namespace Louron {
 
 	public:
 
-		PhysicsMaterial();
+		void Init();
+		void Shutdown();
+
+		PhysicsMaterial() = default;
 		PhysicsMaterial(float dynamicFriction, float staticFriction, float bounciness);
 		PhysicsMaterial(const PhysicsMaterial& other);
-		~PhysicsMaterial();
+		~PhysicsMaterial() = default;
 
 		PxMaterial* GetMaterial() const;
 
@@ -166,8 +158,6 @@ namespace Louron {
 		std::shared_ptr<RigidDynamic> m_StaticBody = nullptr; // This is only used when there are no other Rigidbodies to attach to.
 		std::weak_ptr<RigidDynamic> m_RigidbodyRef;
 
-		ColliderFlags m_StateFlags = ColliderFlag_None;
-
 	public:
 
 		PhysicsShape() = delete;
@@ -186,14 +176,6 @@ namespace Louron {
 		bool IsStatic() const;
 		std::shared_ptr<RigidDynamic> GetRigidbody();
 
-		// FLAGS
-		void AddFlag(ColliderFlags flag);
-		void ClearFlag(ColliderFlags flag);
-		bool CheckFlag(ColliderFlags flag) const;
-		bool NoFlagsSet() const;
-		void ClearFlags();
-		ColliderFlags GetFlags() const;
-
 		#pragma region Getters and Setters
 
 		// Getter methods
@@ -205,7 +187,7 @@ namespace Louron {
 		// Setter methods
 		void SetLocalPose(const PxTransform& pose);
 		void SetLocalPose(const glm::vec3& local_position, const glm::vec3& local_rotation);
-		void SetLocalPose(Transform& transform);
+		void SetLocalPose(TransformComponent& transform);
 		
 		void SetGeometry(const PxGeometry& geom);
 		
@@ -218,7 +200,8 @@ namespace Louron {
 
 	private:
 
-		friend struct SphereCollider;
-		friend struct BoxCollider;
+		friend struct SphereColliderComponent;
+		friend struct BoxColliderComponent;
 	};
+
 }

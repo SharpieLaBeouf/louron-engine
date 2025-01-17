@@ -17,21 +17,18 @@ namespace Louron {
 
     #pragma region Constructors and Class Setup
 
-    RigidDynamic::RigidDynamic(const PxTransform& transform) : 
-        m_Actor(PxGetPhysics().createRigidDynamic(transform))
-    {
-        if (!m_Actor)
-            L_CORE_ERROR("Failed to Create PxRigidDynamic.");
+    void RigidDynamic::Init(const PxTransform& transform) {
+        m_Actor = PxGetPhysics().createRigidDynamic(transform);
+    }
+
+    void RigidDynamic::Shutdown() {
+        Release();
     }
 
     RigidDynamic::RigidDynamic(RigidDynamic&& other) noexcept : 
         m_Actor(other.m_Actor)
     {
         other.m_Actor = nullptr;
-    }
-
-    RigidDynamic::~RigidDynamic() {
-        //Release();
     }
 
     RigidDynamic& RigidDynamic::operator=(RigidDynamic&& other) noexcept {
@@ -183,7 +180,7 @@ namespace Louron {
         }
     }
 
-    void RigidDynamic::SetGlobalPose(Transform& transform) {
+    void RigidDynamic::SetGlobalPose(TransformComponent& transform) {
         if (m_Actor) {
             glm::vec3 position = transform.GetGlobalPosition();
             glm::quat quaternion = glm::quat(glm::radians(transform.GetGlobalRotation()));
@@ -381,27 +378,27 @@ namespace Louron {
     
 #pragma region PhysicsMaterial
 
-    PhysicsMaterial::PhysicsMaterial() {
+    void PhysicsMaterial::Init() {
         m_Material = PxGetPhysics().createMaterial(m_StaticFriction, m_DynamicFriction, m_Bounciness);
+    }
+
+    void PhysicsMaterial::Shutdown()
+    {
+        if (m_Material) {
+            m_Material->release();
+            m_Material = nullptr;
+        }
     }
 
     PhysicsMaterial::PhysicsMaterial(float dynamicFriction, float staticFriction, float bounciness) :
         m_DynamicFriction(dynamicFriction),
         m_StaticFriction(staticFriction),
-        m_Bounciness(bounciness) {
-
-        m_Material = PxGetPhysics().createMaterial(m_StaticFriction, m_DynamicFriction, m_Bounciness);
-    }
+        m_Bounciness(bounciness) { }
 
     PhysicsMaterial::PhysicsMaterial(const PhysicsMaterial& other) {
-        m_Material = PxGetPhysics().createMaterial(other.m_StaticFriction, other.m_DynamicFriction, other.m_Bounciness);
-    }
-
-    PhysicsMaterial::~PhysicsMaterial() {
-        if (m_Material) {
-            m_Material->release();
-            m_Material = nullptr;
-        }
+        m_DynamicFriction = other.m_DynamicFriction;
+        m_StaticFriction = other.m_StaticFriction;
+        m_Bounciness = other.m_Bounciness;
     }
 
     PxMaterial* PhysicsMaterial::GetMaterial() const { return m_Material; }
@@ -437,9 +434,10 @@ namespace Louron {
     PhysicsShape::PhysicsShape(const PxGeometry& geometry, const PxMaterial& material, bool isExclusive, PxShapeFlags shapeFlags) :
         m_Shape(PxGetPhysics().createShape(geometry, material, isExclusive, shapeFlags))
     {
-        m_Shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
+        if(m_Shape) 
+            m_Shape->setFlag(PxShapeFlag::eSIMULATION_SHAPE, true);
+
         if (!m_Shape) {
-            L_CORE_ERROR("Failed to Create PxShape.");
             m_Shape = nullptr;
         }
     }
@@ -494,17 +492,6 @@ namespace Louron {
 
         return nullptr;
     }
-
-    #pragma endregion
-
-    #pragma region Flagging System
-
-    void PhysicsShape::AddFlag(ColliderFlags flag) { m_StateFlags = static_cast<ColliderFlags>(m_StateFlags | flag); }
-    void PhysicsShape::ClearFlag(ColliderFlags flag) { m_StateFlags = static_cast<ColliderFlags>(m_StateFlags & ~flag); }
-    bool PhysicsShape::CheckFlag(ColliderFlags flag) const { return (m_StateFlags & static_cast<ColliderFlags>(flag)) != ColliderFlag_None; }
-    bool PhysicsShape::NoFlagsSet() const { return m_StateFlags == ColliderFlag_None; }
-    void PhysicsShape::ClearFlags() { m_StateFlags = ColliderFlag_None; }
-    ColliderFlags PhysicsShape::GetFlags() const { return m_StateFlags; }
 
     #pragma endregion
 
@@ -589,7 +576,7 @@ namespace Louron {
         L_CORE_ERROR("Cannot Set Pose - Shape is Nullptr.");    
     }
 
-    void PhysicsShape::SetLocalPose(Transform& transform) {
+    void PhysicsShape::SetLocalPose(TransformComponent& transform) {
         if (m_Shape) {
 
             auto rb_ref = m_RigidbodyRef.lock();

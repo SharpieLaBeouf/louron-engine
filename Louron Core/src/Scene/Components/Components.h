@@ -64,6 +64,19 @@ namespace Louron {
 
     };
 
+    struct ScriptComponent : public Component {
+
+        // Name and Active State of Script
+        std::vector<std::pair<std::string, bool>> Scripts;
+
+        ScriptComponent() = default;
+        ScriptComponent(const ScriptComponent&) = default;
+        ScriptComponent(const std::vector<std::pair<std::string, bool>>& script_name) : Scripts(script_name) { }
+
+        void Serialize(YAML::Emitter& out) const;
+        bool Deserialize(const YAML::Node data, Entity entity);
+    };
+
     struct IDComponent : public Component {
         UUID ID;
 
@@ -116,6 +129,9 @@ namespace Louron {
         UUID m_Parent = NULL_UUID;
         std::vector<UUID> m_Children;
 
+        // This is for the editor hierarchy panel ordering
+        uint32_t m_HierarchyOrderIndex = -1;
+
         friend class Prefab;
         friend class ModelImporter;
 
@@ -141,6 +157,7 @@ namespace Louron {
 
             this->Primary = other.Primary;
             this->ClearFlags = other.ClearFlags;
+            this->ClearColour = other.ClearColour;
 
             this->CameraInstance = std::make_shared<Camera>(*other.CameraInstance);
 
@@ -161,7 +178,7 @@ namespace Louron {
 
     };
 
-	struct Transform : public Component {
+	struct TransformComponent : public Component {
 
 	private:
 		glm::vec3 m_Position = glm::vec3(0.0f);
@@ -178,9 +195,9 @@ namespace Louron {
 
     public:
 
-        Transform();
-        Transform(const Transform&) = default;
-        Transform(const glm::vec3& translation);
+        TransformComponent();
+        TransformComponent(const TransformComponent&) = default;
+        TransformComponent(const glm::vec3& translation);
 
         // FLAGS
         void AddFlag(TransformFlags flag);
@@ -227,11 +244,17 @@ namespace Louron {
         glm::vec3 GetGlobalRotation();
         glm::vec3 GetGlobalScale();
 
-        void SetForwardDirection(const glm::vec3& direction); // Set Local Direction
-        glm::vec3 GetForwardDirection(); // Get Local Direction
+        void SetLocalForwardDirection(const glm::vec3& direction); // Set Local Direction
+        glm::vec3 GetLocalForwardDirection(); // Get Local Direction
+
+        glm::vec3 GetLocalUpDirection();
+        glm::vec3 GetLocalRightDirection();
 
         void SetGlobalForwardDirection(const glm::vec3& direction);
         glm::vec3 GetGlobalForwardDirection();
+
+        glm::vec3 GetGlobalUpDirection();
+        glm::vec3 GetGlobalRightDirection();
 
         const glm::vec3& GetLocalPosition() const;
         const glm::vec3& GetLocalRotation() const;
@@ -243,7 +266,7 @@ namespace Louron {
         void SetTransform(const glm::mat4& transform);
 
         operator const glm::mat4()&;
-        glm::mat4 operator*(const Transform& other) const;
+        glm::mat4 operator*(const TransformComponent& other) const;
 
         void Serialize(YAML::Emitter& out);
         bool Deserialize(const YAML::Node data);
@@ -270,9 +293,9 @@ namespace Louron {
     struct DirectionalLightComponent;
     struct SkyboxComponent;
 
-    struct Rigidbody;
-    struct SphereCollider;
-    struct BoxCollider;
+    struct RigidbodyComponent;
+    struct SphereColliderComponent;
+    struct BoxColliderComponent;
 
     using AllComponents = ComponentGroup<
 
@@ -281,7 +304,8 @@ namespace Louron {
         IDComponent,
         TagComponent,
         HierarchyComponent,
-        Transform,
+        ScriptComponent,
+        TransformComponent,
 
         CameraComponent,
 
@@ -296,9 +320,9 @@ namespace Louron {
         SpotLightComponent, 
         DirectionalLightComponent, 
 
-        Rigidbody,
-        SphereCollider,
-        BoxCollider
+        RigidbodyComponent,
+        BoxColliderComponent,
+        SphereColliderComponent
     
     >;
 

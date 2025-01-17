@@ -46,7 +46,7 @@ namespace Louron {
 
 			PL_SSBO_DATA_LAYOUT() = default;
 
-			PL_SSBO_DATA_LAYOUT(const PointLightComponent& point_light, Transform& transform) {
+			PL_SSBO_DATA_LAYOUT(const PointLightComponent& point_light, TransformComponent& transform) {
 
 				position = { transform.GetGlobalPosition(), 1.0f };
 				shadowCastingType = static_cast<GLuint>(point_light.ShadowFlag);
@@ -92,7 +92,7 @@ namespace Louron {
 
 			SL_SSBO_DATA_LAYOUT() = default;
 
-			SL_SSBO_DATA_LAYOUT(const SpotLightComponent& spot_light, Transform& transform) {
+			SL_SSBO_DATA_LAYOUT(const SpotLightComponent& spot_light, TransformComponent& transform) {
 
 				position  = { transform.GetGlobalPosition(), 1.0f };
 				direction = { transform.GetGlobalForwardDirection(), 1.0f };
@@ -132,7 +132,7 @@ namespace Louron {
 
 			DL_SSBO_DATA_LAYOUT() = default;
 
-			DL_SSBO_DATA_LAYOUT(const DirectionalLightComponent& directional_light, Transform& transform) {
+			DL_SSBO_DATA_LAYOUT(const DirectionalLightComponent& directional_light, TransformComponent& transform) {
 				
 				direction = { transform.GetGlobalForwardDirection(), 1.0f };
 				shadowCastingType = static_cast<GLuint>(directional_light.ShadowFlag);
@@ -201,7 +201,9 @@ namespace Louron {
 
 		L_PROFILE_SCOPE("Forward Plus");
 
-		if (!m_Scene) {
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
 			L_CORE_ERROR("Invalid Scene! Please Use ForwardPlusPipeline::OnStartPipeline() Before Updating");
 			Renderer::ClearColour({ 0.0f, 0.0f, 0.0f, 1.0f });
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -209,7 +211,7 @@ namespace Louron {
 		}
 
 		Camera* camera = nullptr;
-		Entity camera_entity = m_Scene->GetPrimaryCameraEntity();
+		Entity camera_entity = scene_ref->GetPrimaryCameraEntity();
 		if (camera_entity) camera = camera_entity.GetComponent<CameraComponent>().CameraInstance.get();
 
 		if (camera) {
@@ -240,9 +242,11 @@ namespace Louron {
 				// Dispatch Thread
 				FP_Data.OctreeUpdateThread = std::thread([&]() -> void {
 
-					L_PROFILE_SCOPE("Forward Plus - Octree Update");
+					auto oct_scene_ref = m_Scene.lock();
 
-					if (auto oct_ref = m_Scene->GetOctree().lock(); oct_ref) {
+					L_PROFILE_SCOPE("Forward Plus - Octree Update");
+					
+					if (auto oct_ref = oct_scene_ref->GetOctree().lock(); oct_ref) {
 
 						std::unique_lock lock(oct_ref->GetOctreeMutex());
 						
@@ -251,11 +255,14 @@ namespace Louron {
 						std::vector<Entity> remove_entities{};
 						for (const auto& data_source : octree_data_sources) {
 
-							if (m_Scene->HasEntity(data_source->Data)) {
+							if (oct_scene_ref->HasEntity(data_source->Data)) {
 								Entity entity = data_source->Data;
 								if (!entity.HasComponent<AssetMeshFilter>() || !entity.HasComponent<AssetMeshRenderer>()) {
 									remove_entities.push_back(entity);
 								}
+							}
+							else {
+								remove_entities.push_back(data_source->Data);
 							}
 						}
 
@@ -263,7 +270,7 @@ namespace Louron {
 							oct_ref->Remove(entity);
 
 						oct_ref->TryShrinkOctree();
-						auto mesh_view = m_Scene->GetAllEntitiesWith<AssetMeshRenderer, AssetMeshFilter>();
+						auto mesh_view = oct_scene_ref->GetAllEntitiesWith<AssetMeshRenderer, AssetMeshFilter>();
 						for (const auto& entity_handle : mesh_view) {
 
 							auto& component = mesh_view.get<AssetMeshFilter>(entity_handle);
@@ -276,11 +283,11 @@ namespace Louron {
 							}
 
 							if (component.OctreeNeedsUpdate) {
-								if (oct_ref->Update({ entity_handle, m_Scene.get() }, component.TransformedAABB))
+								if (oct_ref->Update({ entity_handle, oct_scene_ref.get() }, component.TransformedAABB))
 									component.OctreeNeedsUpdate = false;
 								else {
 									L_CORE_WARN("Could Not Be Inserted Into Octree - Deleting Entity: {0}", component.GetEntity().GetName());
-									m_Scene->DestroyEntity({ entity_handle, m_Scene.get() });
+									oct_scene_ref->DestroyEntity({ entity_handle, oct_scene_ref.get() });
 								}
 							}
 						}
@@ -294,7 +301,7 @@ namespace Louron {
 				UpdateSSBOData();
 
 				// Bind FBO and clear color and depth buffers for the new frame
-				m_Scene->GetSceneFrameBuffer()->Bind();
+				scene_ref->GetSceneFrameBuffer()->Bind();
 				Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 				
 				glPolygonMode(GL_FRONT_AND_BACK, FP_Data.ShowWireframe ? GL_LINE : GL_FILL);
@@ -312,21 +319,21 @@ namespace Louron {
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 				// Unbind FBO to render to the screen
-				m_Scene->GetSceneFrameBuffer()->Unbind();
+				scene_ref->GetSceneFrameBuffer()->Unbind();
 
 				// Clear the standard OpenGL back buffer
 				Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-				if (m_Scene->GetSceneFrameBuffer()->GetConfig().RenderToScreen)
+				if (scene_ref->GetSceneFrameBuffer()->GetConfig().RenderToScreen)
 					RenderFBOQuad();
 			}
 		}
 		else {
 			L_CORE_WARN("No Primary Camera Found in Scene");
-			m_Scene->GetSceneFrameBuffer()->Bind();
+			scene_ref->GetSceneFrameBuffer()->Bind();
 			Renderer::ClearColour({ 0.0f, 0.0f, 0.0f, 1.0f });
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			m_Scene->GetSceneFrameBuffer()->Unbind();
+			scene_ref->GetSceneFrameBuffer()->Unbind();
 		}
 	}
 
@@ -344,29 +351,43 @@ namespace Louron {
 
 		m_Scene = scene;
 
-		if (!m_Scene->GetSceneFrameBuffer()) {
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
+
+		if (!scene_ref->GetSceneFrameBuffer()) {
 			L_CORE_ERROR("Framebuffer is Invalid.");
 			OnStopPipeline();
 			return;
 		}
 
-		if (!m_Scene->GetSceneFrameBuffer()->IsValid()) {
+		if (!scene_ref->GetSceneFrameBuffer()->IsValid()) {
 			L_CORE_ERROR("Framebuffer Setup Not Complete.");
 			OnStopPipeline();
 			return;
 		}
 
-		if (Entity cameraEntity = m_Scene->GetPrimaryCameraEntity())
-			cameraEntity.GetComponent<CameraComponent>().CameraInstance->UpdateProjMatrix();
+		if (Entity cameraEntity = scene_ref->GetPrimaryCameraEntity()) {
+
+			auto& camera_component = cameraEntity.GetComponent<CameraComponent>();
+
+			if(!camera_component.CameraInstance)
+				camera_component.CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
+
+			camera_component.CameraInstance->UpdateProjMatrix();
+		}
 		else {
-			cameraEntity = m_Scene->CreateEntity("Main Camera");
+			cameraEntity = scene_ref->CreateEntity("Main Camera");
 			cameraEntity.AddComponent<CameraComponent>();
 			cameraEntity.GetComponent<CameraComponent>().CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
 		}
 
 		// Calculate workgroups and generate SSBOs from screen size
-		FP_Data.workGroupsX = (unsigned int)std::ceil((float)m_Scene->GetSceneFrameBuffer()->GetConfig().Width / 16.0f);
-		FP_Data.workGroupsY = (unsigned int)std::ceil((float)m_Scene->GetSceneFrameBuffer()->GetConfig().Height / 16.0f);
+		FP_Data.workGroupsX = (unsigned int)std::ceil((float)scene_ref->GetSceneFrameBuffer()->GetConfig().Width / 16.0f);
+		FP_Data.workGroupsY = (unsigned int)std::ceil((float)scene_ref->GetSceneFrameBuffer()->GetConfig().Height / 16.0f);
 		size_t numberOfTiles = static_cast<size_t>(FP_Data.workGroupsX * FP_Data.workGroupsY);
 
 		// Setup Light Buffers
@@ -442,7 +463,11 @@ namespace Louron {
 	/// Reset OpenGL state configuration required by renderer and clean FP_Data and Light SSBOs.
 	/// </summary>
 	void ForwardPlusPipeline::OnStopPipeline() {
-				
+		
+		if (FP_Data.OctreeUpdateThread.joinable()) {
+			FP_Data.OctreeUpdateThread.join();
+		}
+
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
 		
@@ -467,7 +492,9 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::OnViewportResize() {
 
-		if (!m_Scene) {
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
 			L_CORE_ERROR("Invalid Scene! Please Use ForwardPlusPipeline::OnStartPipeline() Before Updating Viewport");
 			Renderer::ClearColour({ 1.0f, 1.0f, 1.0f, 1.0f });
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -475,10 +502,10 @@ namespace Louron {
 		}
 
 		// Update Projection Matrix of All Scene Cameras
-		auto camera_view = m_Scene->GetAllEntitiesWith<CameraComponent>();
+		auto camera_view = scene_ref->GetAllEntitiesWith<CameraComponent>();
 		for (const auto& entity : camera_view) {
 			if (auto cam_ref = camera_view.get<CameraComponent>(entity).CameraInstance; cam_ref) {
-				cam_ref->UpdateProjMatrix(glm::ivec2(m_Scene->GetSceneFrameBuffer()->GetConfig().Width, m_Scene->GetSceneFrameBuffer()->GetConfig().Height));
+				cam_ref->UpdateProjMatrix(glm::ivec2(scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height));
 			}
 		}
 
@@ -490,9 +517,16 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::UpdateComputeData() {
 
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
+
 		// Calculate Workgroups and Generate SSBOs from Screen Size
-		FP_Data.workGroupsX = (unsigned int)std::ceil((float)m_Scene->GetSceneFrameBuffer()->GetConfig().Width / 16.0f);
-		FP_Data.workGroupsY = (unsigned int)std::ceil((float)m_Scene->GetSceneFrameBuffer()->GetConfig().Height / 16.0f);
+		FP_Data.workGroupsX = (unsigned int)std::ceil((float)scene_ref->GetSceneFrameBuffer()->GetConfig().Width / 16.0f);
+		FP_Data.workGroupsY = (unsigned int)std::ceil((float)scene_ref->GetSceneFrameBuffer()->GetConfig().Height / 16.0f);
 		size_t numberOfTiles = static_cast<size_t>(FP_Data.workGroupsX * FP_Data.workGroupsY);
 
 		// Update Light Indice Buffers
@@ -510,6 +544,13 @@ namespace Louron {
 	/// Updates all Light Data in SSBOs
 	/// </summary>
 	void ForwardPlusPipeline::UpdateSSBOData() {
+
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
 
 		L_PROFILE_SCOPE("Forward Plus - Update SSBO Data");
 
@@ -539,7 +580,10 @@ namespace Louron {
 					auto& point_light = entity.GetComponent<PointLightComponent>();
 
 					if(point_light.Active)
-						s_PointLightVector.push_back({ point_light, entity.GetComponent<Transform>() });
+					{
+						s_PointLightVector.push_back({ point_light, entity.GetComponent<TransformComponent>() });
+						s_PointLightVector.back().radius *= 2.0f;
+					}
 				}
 
 				// Create Buffer Light at End of Vector if not full
@@ -570,7 +614,7 @@ namespace Louron {
 
 					auto& spot_light = entity.GetComponent<SpotLightComponent>();
 					if (spot_light.Active)
-						s_SpotLightVector.push_back({ spot_light, entity.GetComponent<Transform>() });
+						s_SpotLightVector.push_back({ spot_light, entity.GetComponent<TransformComponent>() });
 				}
 
 				// Create Buffer Light at End of Vector if not full
@@ -589,7 +633,7 @@ namespace Louron {
 			// Directional Lights
 			{
 				// Update Light Objects
-				auto view = m_Scene->GetAllEntitiesWith<Transform, DirectionalLightComponent>();
+				auto view = scene_ref->GetAllEntitiesWith<TransformComponent, DirectionalLightComponent>();
 
 				static std::vector<SSBOLightStructs::DL_SSBO_DATA_LAYOUT> s_DirectionalLightVector(MAX_DIRECTIONAL_LIGHTS);
 				s_DirectionalLightVector.clear();
@@ -600,7 +644,7 @@ namespace Louron {
 					if (s_DirectionalLightVector.size() >= MAX_DIRECTIONAL_LIGHTS)
 						break;
 
-					auto [transform, directional_light] = view.get<Transform, DirectionalLightComponent>(entity);
+					auto [transform, directional_light] = view.get<TransformComponent, DirectionalLightComponent>(entity);
 
 					if (directional_light.Active)
 						s_DirectionalLightVector.push_back({ directional_light, transform });
@@ -628,30 +672,37 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::ConductLightFrustumCull() {
 
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
+
 		L_PROFILE_SCOPE("Forward Plus - Frustum Culling (LIGHTS)");
 
-		auto pl_view = m_Scene->GetAllEntitiesWith<PointLightComponent>();
+		auto pl_view = scene_ref->GetAllEntitiesWith<PointLightComponent>();
 		for (const auto& entity_handle : pl_view) {
 
 			if (!pl_view.get<PointLightComponent>(entity_handle).Active)
 				continue;
 
-			Entity entity = { entity_handle, m_Scene.get() };
-			if (IsSphereInsideFrustum({ entity.GetComponent<Transform>().GetGlobalPosition(), entity.GetComponent<PointLightComponent>().Radius }, FP_Data.Camera_Frustum)) {
+			Entity entity = { entity_handle, scene_ref.get() };
+			if (IsSphereInsideFrustum({ entity.GetComponent<TransformComponent>().GetGlobalPosition(), entity.GetComponent<PointLightComponent>().Radius }, FP_Data.Camera_Frustum)) {
 				FP_Data.PLEntities.push_back(entity);
 			}
 
 		}
 
-		auto sl_view = m_Scene->GetAllEntitiesWith<SpotLightComponent>();
+		auto sl_view = scene_ref->GetAllEntitiesWith<SpotLightComponent>();
 		for (const auto& entity_handle : sl_view) {
 
 			if (!sl_view.get<SpotLightComponent>(entity_handle).Active)
 				continue;
 
-			Entity entity = { entity_handle, m_Scene.get() };
+			Entity entity = { entity_handle, scene_ref.get() };
 
-			auto& transform = entity.GetComponent<Transform>();
+			auto& transform = entity.GetComponent<TransformComponent>();
 			auto& light = entity.GetComponent<SpotLightComponent>();
 
 			float half_angle = glm::radians(light.Angle * 0.5f);
@@ -681,8 +732,15 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::ConductRenderableFrustumCull() {
 
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
+
 		L_PROFILE_SCOPE("Forward Plus - Frustum Culling Octree Query");
-		if (auto oct_ref = m_Scene->GetOctree().lock(); oct_ref) {
+		if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
 
 			const auto& query_vec = oct_ref->Query(FP_Data.Camera_Frustum);
 
@@ -717,7 +775,14 @@ namespace Louron {
 
 		L_PROFILE_SCOPE("Forward Plus - Depth Pass");
 
-		m_Scene->GetSceneFrameBuffer()->ClearEntityPixelData(NULL_UUID);
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
+
+		scene_ref->GetSceneFrameBuffer()->ClearEntityPixelData(NULL_UUID);
 
 		// Key #1 - Distance - Value UUID of Entities that have submeshes
 		std::vector<std::tuple<float, UUID, std::shared_ptr<SubMesh>>> sorted_entities;
@@ -728,12 +793,14 @@ namespace Louron {
 
 			for (auto& entity : FP_Data.RenderableEntities) {
 
+				if (!scene_ref->ValidEntity(entity)) continue;
+
 				auto asset_mesh = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
 
 				if (!asset_mesh)
 					continue;
 
-				const glm::vec3& objectPosition = entity.GetComponent<Transform>().GetGlobalPosition();
+				const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
 				float distance = glm::length(objectPosition - cam_position);
 
 				for (std::shared_ptr<SubMesh> sub_mesh : asset_mesh->SubMeshes) {
@@ -754,7 +821,7 @@ namespace Louron {
 				shader->SetMat4("u_View", camera->GetViewMatrix());
 
 				for (auto& [distance, entity_uuid, sub_mesh] : sorted_entities) {
-					shader->SetMat4("u_Model", m_Scene->FindEntityByUUID(entity_uuid).GetComponent<Transform>().GetGlobalTransform());
+					shader->SetMat4("u_Model", scene_ref->FindEntityByUUID(entity_uuid).GetComponent<TransformComponent>().GetGlobalTransform());
 					shader->SetUInt("u_EntityID", entity_uuid);
 
 					Renderer::DrawSubMesh(sub_mesh);
@@ -775,6 +842,14 @@ namespace Louron {
 	/// and determine which lights impact each tile frustum.
 	/// </summary>
 	void ForwardPlusPipeline::ConductTiledBasedLightCull(Camera* camera) {
+
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
+
 		L_PROFILE_SCOPE("Tile Based Cull");
 		// Conduct Light Cull
 		std::shared_ptr<Shader> lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
@@ -783,11 +858,11 @@ namespace Louron {
 
 			lightCull->SetMat4("u_View", camera->GetViewMatrix());
 			lightCull->SetMat4("u_Proj", camera->GetProjMatrix());
-			lightCull->SetiVec2("u_ScreenSize", glm::ivec2(m_Scene->GetSceneFrameBuffer()->GetConfig().Width, m_Scene->GetSceneFrameBuffer()->GetConfig().Height));
+			lightCull->SetiVec2("u_ScreenSize", glm::ivec2(scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height));
 
 			// Bind depth to texture 4 so this does not interfere with any diffuse, normal, or specular textures used 
 			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, m_Scene->GetSceneFrameBuffer()->GetTexture(FrameBufferTexture::DepthTexture));
+			glBindTexture(GL_TEXTURE_2D, scene_ref->GetSceneFrameBuffer()->GetTexture(FrameBufferTexture::DepthTexture));
 			lightCull->SetInt("u_Depth", 4);
 
 			glDispatchCompute(FP_Data.workGroupsX, FP_Data.workGroupsY, 1);
@@ -812,6 +887,13 @@ namespace Louron {
 	void ForwardPlusPipeline::ConductRenderPass(Camera* camera) {
 
 		L_PROFILE_SCOPE("Forward Plus - Render Pass");
+
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
 
 		//// Render All MeshComponents in Scene
 
@@ -839,6 +921,8 @@ namespace Louron {
 
 			// Identify Renderables - we have culling happy! :)
 			for (auto& entity : FP_Data.RenderableEntities) {
+
+				if (!scene_ref->ValidEntity(entity)) continue;
 
 				auto& component = entity.GetComponent<AssetMeshFilter>();
 				auto& mesh_asset = fast_loaded_asset_references[component.MeshFilterAssetHandle];
@@ -898,7 +982,7 @@ namespace Louron {
 						transforms.reserve(entity_count);
 
 						for (const auto& entity : entities) {
-							const auto& transform = m_Scene->FindEntityByUUID(entity).GetComponent<Transform>().GetGlobalTransform();
+							const auto& transform = scene_ref->FindEntityByUUID(entity).GetComponent<TransformComponent>().GetGlobalTransform();
 							transforms.push_back(transform);
 						}
 
@@ -906,7 +990,7 @@ namespace Louron {
 
 					}
 					else {
-						const auto& transform = m_Scene->FindEntityByUUID(entities[0]).GetComponent<Transform>().GetGlobalTransform();
+						const auto& transform = scene_ref->FindEntityByUUID(entities[0]).GetComponent<TransformComponent>().GetGlobalTransform();
 						shader->SetMat4("u_VertexIn.Model", transform);
 						Renderer::DrawSubMesh(sub_mesh);
 					}
@@ -914,7 +998,7 @@ namespace Louron {
 			}
 		}
 
-		auto skyboxView = m_Scene->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
+		auto skyboxView = scene_ref->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
 		if (skyboxView.begin() != skyboxView.end()) {
 
 			for (const auto& entity : skyboxView) {
@@ -939,7 +1023,7 @@ namespace Louron {
 		}
 
 		// RENDER DEBUG VIEW FOR OCTREE
-		if (auto octree_ref = m_Scene->GetOctree().lock(); octree_ref && m_Scene->GetDisplayOctree()) {
+		if (auto octree_ref = scene_ref->GetOctree().lock(); octree_ref && scene_ref->GetDisplayOctree()) {
 
 			auto& debug_line_shader = Engine::Get().GetShaderLibrary().GetShader("Debug_Line_Draw");
 
@@ -968,6 +1052,9 @@ namespace Louron {
 			bounds_matricies.clear();
 
 			for (auto& entity : FP_Data.RenderableEntities) {
+
+				if (!scene_ref->ValidEntity(entity)) continue;
+
 				if(entity.HasComponent<AssetMeshFilter>())
 					bounds_matricies.push_back(entity.GetComponent<AssetMeshFilter>().TransformedAABB.GetGlobalBoundsMat4());
 			}
@@ -987,6 +1074,13 @@ namespace Louron {
 
 	void ForwardPlusPipeline::RenderFBOQuad() {
 
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
+
 		if (!FP_Data.Screen_Quad_VAO) {
 			return;
 		}
@@ -996,7 +1090,7 @@ namespace Louron {
 		{
 			shader->Bind();
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, m_Scene->GetSceneFrameBuffer()->GetTexture(FrameBufferTexture::ColourTexture));
+			glBindTexture(GL_TEXTURE_2D, scene_ref->GetSceneFrameBuffer()->GetTexture(FrameBufferTexture::ColourTexture));
 			shader->SetInt("u_ScreenTexture", 0);
 
 			FP_Data.Screen_Quad_VAO->Bind();
@@ -1038,48 +1132,5 @@ namespace Louron {
 	}
 
 #pragma endregion
-
-	void Frustum::RecalculateFrustum(const glm::mat4& viewProjectionMatrix)
-	{		// Left plane
-		planes[0].normal.x = viewProjectionMatrix[0][3] + viewProjectionMatrix[0][0];
-		planes[0].normal.y = viewProjectionMatrix[1][3] + viewProjectionMatrix[1][0];
-		planes[0].normal.z = viewProjectionMatrix[2][3] + viewProjectionMatrix[2][0];
-		planes[0].distance = viewProjectionMatrix[3][3] + viewProjectionMatrix[3][0];
-
-		// Right plane
-		planes[1].normal.x = viewProjectionMatrix[0][3] - viewProjectionMatrix[0][0];
-		planes[1].normal.y = viewProjectionMatrix[1][3] - viewProjectionMatrix[1][0];
-		planes[1].normal.z = viewProjectionMatrix[2][3] - viewProjectionMatrix[2][0];
-		planes[1].distance = viewProjectionMatrix[3][3] - viewProjectionMatrix[3][0];
-
-		// Bottom plane
-		planes[2].normal.x = viewProjectionMatrix[0][3] + viewProjectionMatrix[0][1];
-		planes[2].normal.y = viewProjectionMatrix[1][3] + viewProjectionMatrix[1][1];
-		planes[2].normal.z = viewProjectionMatrix[2][3] + viewProjectionMatrix[2][1];
-		planes[2].distance = viewProjectionMatrix[3][3] + viewProjectionMatrix[3][1];
-
-		// Top plane
-		planes[3].normal.x = viewProjectionMatrix[0][3] - viewProjectionMatrix[0][1];
-		planes[3].normal.y = viewProjectionMatrix[1][3] - viewProjectionMatrix[1][1];
-		planes[3].normal.z = viewProjectionMatrix[2][3] - viewProjectionMatrix[2][1];
-		planes[3].distance = viewProjectionMatrix[3][3] - viewProjectionMatrix[3][1];
-
-		// Near plane
-		planes[4].normal.x = viewProjectionMatrix[0][3] + viewProjectionMatrix[0][2];
-		planes[4].normal.y = viewProjectionMatrix[1][3] + viewProjectionMatrix[1][2];
-		planes[4].normal.z = viewProjectionMatrix[2][3] + viewProjectionMatrix[2][2];
-		planes[4].distance = viewProjectionMatrix[3][3] + viewProjectionMatrix[3][2];
-
-		// Far plane
-		planes[5].normal.x = viewProjectionMatrix[0][3] - viewProjectionMatrix[0][2];
-		planes[5].normal.y = viewProjectionMatrix[1][3] - viewProjectionMatrix[1][2];
-		planes[5].normal.z = viewProjectionMatrix[2][3] - viewProjectionMatrix[2][2];
-		planes[5].distance = viewProjectionMatrix[3][3] - viewProjectionMatrix[3][2];
-
-		// Normalize the planes
-		for (int i = 0; i < 6; ++i) {
-			planes[i].normalize();
-		}
-	}
 
 }

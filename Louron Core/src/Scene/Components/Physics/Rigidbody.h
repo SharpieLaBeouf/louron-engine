@@ -22,7 +22,7 @@ class YAML::Node;
 
 namespace Louron {
 
-	struct Rigidbody : public Component {
+	struct RigidbodyComponent : public Component {
 
 	private:
 
@@ -43,13 +43,15 @@ namespace Louron {
 
 	public:
 
-		Rigidbody() = default;
-		Rigidbody(Transform* transform, PxScene* scene);
-		Rigidbody(const Rigidbody& other);
-		Rigidbody(Rigidbody&& other) = default;
-		~Rigidbody() = default;
+		void Init(TransformComponent* transform, PxScene* scene);
+		void Shutdown();
 
-		Rigidbody& operator=(const Rigidbody& other);
+		RigidbodyComponent() = default;
+		RigidbodyComponent(const RigidbodyComponent& other);
+		RigidbodyComponent(RigidbodyComponent&& other) = default;
+		~RigidbodyComponent() = default;
+
+		RigidbodyComponent& operator=(const RigidbodyComponent& other);
 
 		/// <summary>
 		/// Only use this method for direct access to the actor instance.
@@ -79,6 +81,7 @@ namespace Louron {
 		void SetAutomaticCentreOfMass(const bool& automaticCentreOfMass);
 		void SetGravity(const bool& useGravity);
 		void SetKinematic(const bool& isKinematic);
+
 		void SetPositionConstraint(const glm::bvec3& positionConstraint);
 		void SetRotationConstraint(const glm::bvec3& rotationConstraint);
 
@@ -99,7 +102,7 @@ namespace Louron {
 		};
 
 		// This ensures that any force that is applied is not applied 
-		// whilst simulate is processing physics changes
+		// whilst PhysxScene::simulate is processing physics changes
 		std::vector<DeferredForce> m_DeferredForce;
 		std::vector<DeferredTorque> m_DeferredTorque;
 	};

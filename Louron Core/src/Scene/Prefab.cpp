@@ -46,7 +46,7 @@ namespace Louron {
 		m_PrefabRegistry.emplace_or_replace<IDComponent>(entity, (uint32_t)entity);
 
 		// 2. Add Transform Component
-		m_PrefabRegistry.emplace_or_replace<Transform>(entity);
+		m_PrefabRegistry.emplace_or_replace<TransformComponent>(entity);
 
 		// 3. Add Tag Component
 		auto& tag = m_PrefabRegistry.emplace_or_replace<TagComponent>(entity);
@@ -165,9 +165,9 @@ namespace Louron {
 			}
 
 			// 1.f. Transform Component
-			if (start_entity.HasComponent<Transform>()) {
-				auto& component = start_entity.GetComponent<Transform>();
-				m_PrefabRegistry.emplace_or_replace<Transform>(prefab_entity_handle, component);
+			if (start_entity.HasComponent<TransformComponent>()) {
+				auto& component = start_entity.GetComponent<TransformComponent>();
+				m_PrefabRegistry.emplace_or_replace<TransformComponent>(prefab_entity_handle, component);
 			}
 
 			// 1.g. MeshFilter
@@ -207,21 +207,27 @@ namespace Louron {
 			}
 
 			// 1.m. Rigidbody Component
-			if (start_entity.HasComponent<Rigidbody>()) {
-				auto& component = start_entity.GetComponent<Rigidbody>();
-				m_PrefabRegistry.emplace_or_replace<Rigidbody>(prefab_entity_handle, component);
+			if (start_entity.HasComponent<RigidbodyComponent>()) {
+				auto& component = start_entity.GetComponent<RigidbodyComponent>();
+				m_PrefabRegistry.emplace_or_replace<RigidbodyComponent>(prefab_entity_handle, component);
 			}
 
 			// 1.n. Sphere Collider
-			if (start_entity.HasComponent<SphereCollider>()) {
-				auto& component = start_entity.GetComponent<SphereCollider>();
-				m_PrefabRegistry.emplace_or_replace<SphereCollider>(prefab_entity_handle, component);
+			if (start_entity.HasComponent<SphereColliderComponent>()) {
+				auto& component = start_entity.GetComponent<SphereColliderComponent>();
+				m_PrefabRegistry.emplace_or_replace<SphereColliderComponent>(prefab_entity_handle, component);
 			}
 
 			// 1.o. Box Collider
-			if (start_entity.HasComponent<BoxCollider>()) {
-				auto& component = start_entity.GetComponent<BoxCollider>();
-				m_PrefabRegistry.emplace_or_replace<BoxCollider>(prefab_entity_handle, component);
+			if (start_entity.HasComponent<BoxColliderComponent>()) {
+				auto& component = start_entity.GetComponent<BoxColliderComponent>();
+				m_PrefabRegistry.emplace_or_replace<BoxColliderComponent>(prefab_entity_handle, component);
+			}
+
+			// 1.o. Script Component
+			if (start_entity.HasComponent<ScriptComponent>()) {
+				auto& component = start_entity.GetComponent<ScriptComponent>();
+				m_PrefabRegistry.emplace_or_replace<ScriptComponent>(prefab_entity_handle, component);
 			}
 		}
 

@@ -14,7 +14,7 @@
 
 namespace Louron {
 
-	enum L_RENDER_PIPELINE {
+	enum L_RENDER_PIPELINE : uint8_t {
 		FORWARD = 0,
 		FORWARD_PLUS = 1,
 		DEFERRED = 2
@@ -45,7 +45,7 @@ namespace Louron {
 
 	protected:
 
-		std::shared_ptr<Louron::Scene> m_Scene;
+		std::weak_ptr<Louron::Scene> m_Scene;
 	};
 
 	class ForwardPlusPipeline : public RenderPipeline {

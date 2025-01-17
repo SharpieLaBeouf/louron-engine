@@ -149,8 +149,12 @@ namespace Louron {
 			entity.GetComponent<HierarchyComponent>().Serialize(out);
 		}
 
-		if (entity.HasComponent<Transform>()) {
-			entity.GetComponent<Transform>().Serialize(out);
+		if (entity.HasComponent<ScriptComponent>()) {
+			entity.GetComponent<ScriptComponent>().Serialize(out);
+		}
+
+		if (entity.HasComponent<TransformComponent>()) {
+			entity.GetComponent<TransformComponent>().Serialize(out);
 		}
 
 		if (entity.HasComponent<CameraComponent>()) {
@@ -181,16 +185,16 @@ namespace Louron {
 			entity.GetComponent<DirectionalLightComponent>().Serialize(out);
 		}
 
-		if (entity.HasComponent<Rigidbody>()) {
-			entity.GetComponent<Rigidbody>().Serialize(out);
+		if (entity.HasComponent<RigidbodyComponent>()) {
+			entity.GetComponent<RigidbodyComponent>().Serialize(out);
 		}
 
-		if (entity.HasComponent<SphereCollider>()) {
-			entity.GetComponent<SphereCollider>().Serialize(out);
+		if (entity.HasComponent<SphereColliderComponent>()) {
+			entity.GetComponent<SphereColliderComponent>().Serialize(out);
 		}
 
-		if (entity.HasComponent<BoxCollider>()) {
-			entity.GetComponent<SphereCollider>().Serialize(out);
+		if (entity.HasComponent<BoxColliderComponent>()) {
+			entity.GetComponent<BoxColliderComponent>().Serialize(out);
 		}
 
 		out << YAML::EndMap;
@@ -211,37 +215,35 @@ namespace Louron {
 			L_CORE_WARN("Incompatible Scene File Extension");
 			L_CORE_WARN("Extension Used: {0}", outFilePath.extension().string());
 			L_CORE_WARN("Extension Expected: .lscene");
+			return false;
 		}
-		else
-		{
 
-			YAML::Emitter out;
-			out << YAML::BeginMap;
-			out << YAML::Key << "Scene Name" << YAML::Value << scene_ref->m_SceneConfig.Name;
-			out << YAML::Key << "Scene Asset Directory" << YAML::Value << scene_ref->m_SceneConfig.AssetDirectory.string();
-			out << YAML::Key << "Scene Pipeline Type" << YAML::Value << (int)scene_ref->m_SceneConfig.ScenePipelineType;
+		YAML::Emitter out;
+		out << YAML::BeginMap;
+		out << YAML::Key << "Scene Name" << YAML::Value << scene_ref->m_SceneConfig.Name;
+		out << YAML::Key << "Scene Asset Directory" << YAML::Value << scene_ref->m_SceneConfig.AssetDirectory.string();
+		out << YAML::Key << "Scene Pipeline Type" << YAML::Value << std::to_string((uint8_t)scene_ref->m_SceneConfig.ScenePipelineType);
 
-			out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
+		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
-			scene_ref->m_Registry.each([&](auto entityID)
-				{
-					Entity entity = { entityID, scene_ref.get()};
-					if (!entity)
-						return;
+		scene_ref->m_Registry.each([&](auto entityID)
+			{
+				Entity entity = { entityID, scene_ref.get()};
+				if (!entity)
+					return;
 
-					SerializeEntity(out, entity);
-				});
+				SerializeEntity(out, entity);
+			});
 
-			out << YAML::EndSeq << YAML::EndMap;
+		out << YAML::EndSeq << YAML::EndMap;
 
-			if(outFilePath.has_parent_path())
-				std::filesystem::create_directories(outFilePath.parent_path());
+		if(outFilePath.has_parent_path())
+			std::filesystem::create_directories(outFilePath.parent_path());
 
-			std::ofstream fout(outFilePath);
-			fout << out.c_str();
-			return true;
-		}
-		return false;
+		std::ofstream fout(outFilePath);
+		fout << out.c_str();
+		return true;
+		
 	}
 
 	bool SceneSerializer::Deserialize(const std::filesystem::path& sceneFilePath) {
@@ -291,7 +293,8 @@ namespace Louron {
 				return false;
 			}
 			else {
-				scene_ref->m_SceneConfig.ScenePipelineType = (L_RENDER_PIPELINE)data["Scene Pipeline Type"].as<int>();
+
+				scene_ref->m_SceneConfig.ScenePipelineType = (L_RENDER_PIPELINE)data["Scene Pipeline Type"].as<uint8_t>();
 
 				switch (scene_ref->m_SceneConfig.ScenePipelineType) {
 				case L_RENDER_PIPELINE::FORWARD:
@@ -326,10 +329,17 @@ namespace Louron {
 						entityHierarchy.Deserialize(hierarchy);
 					}
 
+					// Script
+					auto script = entity["ScriptComponent"];
+					if (script) {
+						auto& entityScript = deserializedEntity.AddComponent<ScriptComponent>();
+						entityScript.Deserialize(script, deserializedEntity);
+					}
+
 					// Transform
 					auto transform = entity["TransformComponent"];
 					if (transform) {
-						auto& entityTransform = deserializedEntity.GetComponent<Transform>();
+						auto& entityTransform = deserializedEntity.GetComponent<TransformComponent>();
 						entityTransform.Deserialize(transform);
 					}
 
@@ -408,51 +418,38 @@ namespace Louron {
 					auto rigidBody = entity["RigidbodyComponent"];
 					if (rigidBody) {
 
-						auto& entityRigidBody = deserializedEntity.AddComponent<Rigidbody>();
+						auto& entityRigidBody = deserializedEntity.AddComponent<RigidbodyComponent>();
 
 						if (!entityRigidBody.Deserialize(rigidBody))
 							L_CORE_WARN("Deserialisation of Rigidbody Not Complete.");
-
-						if(entityRigidBody.GetActor()) {
-							entityRigidBody.GetActor()->AddFlag(RigidbodyFlag_TransformUpdated);
-							entityRigidBody.GetActor()->AddFlag(RigidbodyFlag_ShapesUpdated);
-						}
 					}
 
 					// Sphere Collider
 					auto sphereCollider = entity["SphereColliderComponent"];
 					if (sphereCollider) {
 
-						auto& entitySphereCollider = deserializedEntity.AddComponent<SphereCollider>();
+						auto& entitySphereCollider = deserializedEntity.AddComponent<SphereColliderComponent>();
 
 						if (!entitySphereCollider.Deserialize(sphereCollider))
 							L_CORE_WARN("Deserialisation of Sphere Collider Not Complete.");
-
-						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-						entitySphereCollider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
 					}
 
 					// Box Collider
 					auto boxCollider = entity["BoxColliderComponent"];
 					if (boxCollider) {
 
-						auto& entityBoxCollider = deserializedEntity.AddComponent<BoxCollider>();
+						auto& entityBoxCollider = deserializedEntity.AddComponent<BoxColliderComponent>();
 
 						if (!entityBoxCollider.Deserialize(boxCollider))
 							L_CORE_WARN("Deserialisation of Box Collider Not Complete.");
-
-						entityBoxCollider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-						entityBoxCollider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-						entityBoxCollider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
 					}
 				}
 			}
-			PhysicsSystem::Update(scene_ref);
+			//PhysicsSystem::Update(scene_ref);
 
-			auto transform_update = scene_ref->GetAllEntitiesWith<Transform>();
+			auto transform_update = scene_ref->GetAllEntitiesWith<TransformComponent>();
 			for (const auto& entity_handle : transform_update) {
-				transform_update.get<Transform>(entity_handle).SetPosition(transform_update.get<Transform>(entity_handle).GetLocalPosition());
+				transform_update.get<TransformComponent>(entity_handle).SetPosition(transform_update.get<TransformComponent>(entity_handle).GetLocalPosition());
 			}
 
 			// Update Camera Component
@@ -460,12 +457,13 @@ namespace Louron {
 
 			if (camera_entity) {
 				camera_entity.GetComponent<CameraComponent>().CameraInstance->Update(Time::Get().GetDeltaTime());
-				camera_entity.GetComponent<Transform>().SetPosition(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
-				camera_entity.GetComponent<Transform>().SetGlobalForwardDirection(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetCameraDirection());
+				camera_entity.GetComponent<TransformComponent>().SetPosition(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
+				camera_entity.GetComponent<TransformComponent>().SetGlobalForwardDirection(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetCameraDirection());
 			}
 			else {
 				auto camera = scene_ref->CreateEntity("Main Camera");
-				camera.AddComponent<CameraComponent>();
+				auto& camera_component = camera.AddComponent<CameraComponent>();
+				camera_component.CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
 			}
 
 			// Calculate Overall Scene Octree

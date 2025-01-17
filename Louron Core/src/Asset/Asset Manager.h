@@ -87,6 +87,8 @@ namespace Louron {
 
 	public:
 
+		EditorAssetManager();
+
 		template <typename TAssetType>
 		std::shared_ptr<TAssetType> GetAsset(AssetHandle handle) {
 			// Determine the expected AssetType based on TAssetType
@@ -142,7 +144,7 @@ namespace Louron {
 
 		void RefreshAssetRegistry();
 
-		void SerializeAssetRegistry();
+		void SerializeAssetRegistry(const std::filesystem::path& asset_registry_path = "");
 		bool DeserializeAssetRegistry();
 
 	private:

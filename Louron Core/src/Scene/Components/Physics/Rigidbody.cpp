@@ -19,21 +19,27 @@
 
 namespace Louron {
 
-	Rigidbody::Rigidbody(Transform* transform, PxScene* scene) : m_PhysScene(scene)
-	{
-		if (!&PxGetPhysics() || !m_PhysScene) {
+	void RigidbodyComponent::Init(TransformComponent* transform, PxScene* scene) {
+
+		if (!&PxGetPhysics() || !scene) {
 			L_CORE_ERROR("PhysXPhysics or PhysXScene Not Initialized.");
 			return;
 		}
 
-		if(!transform) {
+		if (!transform) {
 			L_CORE_ERROR("Rigidbody Constructor - Transform Pointer Invalid.");
 			return;
 		}
 
+		m_PhysScene = scene;
+
 		glm::vec3 position = transform->GetGlobalPosition();
 		glm::quat quaternion = glm::quat(glm::radians(transform->GetGlobalRotation()));
-		m_RigidDynamic = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
+		
+		PxTransform trans = { position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w) };
+		m_RigidDynamic = std::make_shared<RigidDynamic>();
+		
+		m_RigidDynamic->Init(trans);
 
 		if (!m_RigidDynamic && !*m_RigidDynamic) {
 			L_CORE_ERROR("Could Not Create Rigid Dynamic Actor.");
@@ -55,53 +61,21 @@ namespace Louron {
 		m_RigidDynamic->AddFlag(RigidbodyFlag_TransformUpdated);
 	}
 
-	Rigidbody::Rigidbody(const Rigidbody& other) {
+	void RigidbodyComponent::Shutdown() {
 
-		m_Mass = other.m_Mass;
-		m_Drag = other.m_Drag;
-		m_AngularDrag = other.m_AngularDrag;
+		if(m_PhysScene)
+			m_PhysScene->removeActor(*m_RigidDynamic->GetActor());
 
-		m_AutomaticCentreOfMass = other.m_AutomaticCentreOfMass;
-		m_UseGravity = other.m_UseGravity;
-		m_IsKinematic = other.m_IsKinematic;
-
-		m_PositionConstraint = other.m_PositionConstraint;
-		m_RotationConstraint = other.m_RotationConstraint;
-
-		Entity entity = GetEntity();
-		if (entity && entity.GetScene())
-		{
-			if (!m_RigidDynamic)
-			{
-				m_PhysScene = entity.GetScene()->GetPhysScene();
-				auto& transform = entity.GetComponent<Transform>();
-				glm::vec3 position = transform.GetGlobalPosition();
-				glm::quat quaternion = glm::quat(glm::radians(transform.GetGlobalRotation()));
-				m_RigidDynamic = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
-
-				m_PhysScene->addActor(*m_RigidDynamic->GetActor());
-			}
-
-			// Set initial properties
-			SetMass(m_Mass);
-			SetDrag(m_Drag);
-			SetAngularDrag(m_AngularDrag);
-			SetGravity(m_UseGravity);
-			SetKinematic(m_IsKinematic);
-
-			PxRigidBodyExt::setMassAndUpdateInertia(*m_RigidDynamic->GetActor(), m_Mass);
-
-			m_RigidDynamic->AddFlag(RigidbodyFlag_ShapesUpdated);
-			m_RigidDynamic->AddFlag(RigidbodyFlag_TransformUpdated);
-		}
-		else
-		{
-			m_PhysScene = nullptr;
+		if(m_RigidDynamic) {
+			m_RigidDynamic->Shutdown();
 			m_RigidDynamic = nullptr;
 		}
+
+		m_PhysScene = nullptr;
+
 	}
 
-	Rigidbody& Rigidbody::operator=(const Rigidbody& other) {
+	RigidbodyComponent::RigidbodyComponent(const RigidbodyComponent& other) {
 
 		m_Mass = other.m_Mass;
 		m_Drag = other.m_Drag;
@@ -114,91 +88,78 @@ namespace Louron {
 		m_PositionConstraint = other.m_PositionConstraint;
 		m_RotationConstraint = other.m_RotationConstraint;
 
-		Entity entity = GetEntity();
-		if (entity && entity.GetScene())
-		{
+		m_PhysScene = nullptr;
+		m_RigidDynamic = nullptr;
+	}
 
-			if(!m_RigidDynamic)
-			{
-				m_PhysScene = entity.GetScene()->GetPhysScene();
-				auto& transform = entity.GetComponent<Transform>();
-				glm::vec3 position = transform.GetGlobalPosition();
-				glm::quat quaternion = glm::quat(glm::radians(transform.GetGlobalRotation()));
-				m_RigidDynamic = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
+	RigidbodyComponent& RigidbodyComponent::operator=(const RigidbodyComponent& other) {
 
-				m_PhysScene->addActor(*m_RigidDynamic->GetActor());
-			}
+		m_Mass = other.m_Mass;
+		m_Drag = other.m_Drag;
+		m_AngularDrag = other.m_AngularDrag;
 
-			// Set initial properties
-			SetMass(m_Mass);
-			SetDrag(m_Drag);
-			SetAngularDrag(m_AngularDrag);
-			SetGravity(m_UseGravity);
-			SetKinematic(m_IsKinematic);
+		m_AutomaticCentreOfMass = other.m_AutomaticCentreOfMass;
+		m_UseGravity = other.m_UseGravity;
+		m_IsKinematic = other.m_IsKinematic;
 
-			PxRigidBodyExt::setMassAndUpdateInertia(*m_RigidDynamic->GetActor(), m_Mass);
+		m_PositionConstraint = other.m_PositionConstraint;
+		m_RotationConstraint = other.m_RotationConstraint;
 
-			m_RigidDynamic->AddFlag(RigidbodyFlag_ShapesUpdated);
-			m_RigidDynamic->AddFlag(RigidbodyFlag_TransformUpdated);
+		m_PhysScene = nullptr;
+		m_RigidDynamic = nullptr;
 
-		}
-		else
-		{
-			m_PhysScene = nullptr;
-			m_RigidDynamic = nullptr;
-		}
 		return *this;
 	}
 
-	std::shared_ptr<RigidDynamic> Rigidbody::GetActor() { return m_RigidDynamic; }
+	std::shared_ptr<RigidDynamic> RigidbodyComponent::GetActor() { return m_RigidDynamic; }
 
-	const float& Rigidbody::GetMass() const { return m_Mass; }
-	const float& Rigidbody::GetDrag() const { return m_Drag; }
-	const float& Rigidbody::GetAngularDrag() const { return m_AngularDrag; }
-	const bool& Rigidbody::IsAutomaticCentreOfMassEnabled() const { return m_AutomaticCentreOfMass; }
-	const bool& Rigidbody::IsGravityEnabled() const { return m_UseGravity; }
-	const bool& Rigidbody::IsKinematicEnabled() const { return m_IsKinematic; }
+	const float& RigidbodyComponent::GetMass() const { return m_Mass; }
+	const float& RigidbodyComponent::GetDrag() const { return m_Drag; }
+	const float& RigidbodyComponent::GetAngularDrag() const { return m_AngularDrag; }
+	const bool& RigidbodyComponent::IsAutomaticCentreOfMassEnabled() const { return m_AutomaticCentreOfMass; }
+	const bool& RigidbodyComponent::IsGravityEnabled() const { return m_UseGravity; }
+	const bool& RigidbodyComponent::IsKinematicEnabled() const { return m_IsKinematic; }
 
-	const glm::bvec3& Rigidbody::GetPositionConstraint() const { return m_PositionConstraint; }
-	const glm::bvec3& Rigidbody::GetRotationConstraint() const { return m_RotationConstraint; }
+	const glm::bvec3& RigidbodyComponent::GetPositionConstraint() const { return m_PositionConstraint; }
+	const glm::bvec3& RigidbodyComponent::GetRotationConstraint() const { return m_RotationConstraint; }
 
-	void Rigidbody::SetMass(const float& mass) {
+	void RigidbodyComponent::SetMass(const float& mass) {
 		m_Mass = mass;
 		if (m_RigidDynamic) m_RigidDynamic->SetMass(m_Mass);
 	}
 
-	void Rigidbody::SetDrag(const float& drag) {
+	void RigidbodyComponent::SetDrag(const float& drag) {
 		m_Drag = drag;
 		if (m_RigidDynamic) m_RigidDynamic->SetLinearDamping(m_Drag);
 	}
 
-	void Rigidbody::SetAngularDrag(const float& angularDrag) {
+	void RigidbodyComponent::SetAngularDrag(const float& angularDrag) {
 		m_AngularDrag = angularDrag;
 		if (m_RigidDynamic) m_RigidDynamic->SetAngularDamping(m_AngularDrag);
 	}
 
-	void Rigidbody::SetAutomaticCentreOfMass(const bool& automaticCentreOfMass) {
+	void RigidbodyComponent::SetAutomaticCentreOfMass(const bool& automaticCentreOfMass) {
 		// TODO: have option for custom centre of gravity
 
 		m_AutomaticCentreOfMass = automaticCentreOfMass;
 	}
 
-	void Rigidbody::SetGravity(const bool& useGravity) {
+	void RigidbodyComponent::SetGravity(const bool& useGravity) {
 		m_UseGravity = useGravity;
 		if (m_RigidDynamic) m_RigidDynamic->SetGravity(useGravity);
 	}
 
-	void Rigidbody::SetKinematic(const bool& isKinematic) {
+	void RigidbodyComponent::SetKinematic(const bool& isKinematic) {
 		m_IsKinematic = isKinematic;
 		if (m_RigidDynamic) m_RigidDynamic->SetKinematic(isKinematic);
 	}
 
-	void Rigidbody::SetPositionConstraint(const glm::bvec3& positionConstraint) {
+	void RigidbodyComponent::SetPositionConstraint(const glm::bvec3& positionConstraint) {
 
 		// TODO: apply Physx Constraint
 		m_PositionConstraint = positionConstraint;
 	}
-	void Rigidbody::SetRotationConstraint(const glm::bvec3& rotationConstraint) {
+	void RigidbodyComponent::SetRotationConstraint(const glm::bvec3& rotationConstraint) {
 
 		// TODO: apply Physx Constraint
 		m_RotationConstraint = rotationConstraint;
@@ -207,10 +168,10 @@ namespace Louron {
 	// Apply force to the rigid body
 	// If the scene is currently in simulation, we want to defer 
 	// this force to next frames physics simulation 
-	void Rigidbody::ApplyForce(const glm::vec3& force, PxForceMode::Enum forceMode) {
+	void RigidbodyComponent::ApplyForce(const glm::vec3& force, PxForceMode::Enum forceMode) {
 		if (m_RigidDynamic) {
 			Entity entity = GetEntity();
-			if (entity.GetScene()->IsPhysicsSimulating())
+			if (entity.GetScene()->IsPhysicsCalculating())
 				m_DeferredForce.push_back({ force, forceMode });
 			else
 				m_RigidDynamic->AddForce(PxVec3(force.x, force.y, force.z), forceMode);
@@ -220,17 +181,17 @@ namespace Louron {
 	// Apply torque to the rigid body
 	// If the scene is currently in simulation, we want to defer 
 	// this torque to next frames physics simulation 
-	void Rigidbody::ApplyTorque(const glm::vec3& torque) {
+	void RigidbodyComponent::ApplyTorque(const glm::vec3& torque) {
 		if (m_RigidDynamic) {
 			Entity entity = GetEntity();
-			if (entity.GetScene()->IsPhysicsSimulating())
+			if (entity.GetScene()->IsPhysicsCalculating())
 				m_DeferredTorque.push_back({ torque });
 			else
 				m_RigidDynamic->AddTorque(PxVec3(torque.x, torque.y, torque.z));
 		}
 	}
 
-	void Rigidbody::Serialize(YAML::Emitter& out)
+	void RigidbodyComponent::Serialize(YAML::Emitter& out)
 	{
 		out << YAML::Key << "RigidbodyComponent";
 		out << YAML::BeginMap;
@@ -260,7 +221,7 @@ namespace Louron {
 		out << YAML::EndMap;
 	}
 
-	bool Rigidbody::Deserialize(const YAML::Node data)
+	bool RigidbodyComponent::Deserialize(const YAML::Node data)
 	{
 		// Deserialize the Mass value
 		if (data["Mass"]) {
@@ -296,10 +257,10 @@ namespace Louron {
 		if (data["PositionConstraint"] && data["PositionConstraint"].IsSequence()) {
 			const YAML::Node& positionNode = data["PositionConstraint"];
 
-			glm::vec3 temp{};
-			temp.x = positionNode[0].as<float>();
-			temp.y = positionNode[1].as<float>();
-			temp.z = positionNode[2].as<float>();
+			glm::bvec3 temp{};
+			temp.x = positionNode[0].as<bool>();
+			temp.y = positionNode[1].as<bool>();
+			temp.z = positionNode[2].as<bool>();
 
 			SetPositionConstraint(temp);
 		}
@@ -308,10 +269,10 @@ namespace Louron {
 		if (data["RotationConstraint"] && data["RotationConstraint"].IsSequence()) {
 			const YAML::Node& rotationNode = data["RotationConstraint"];
 
-			glm::vec3 temp{};
-			temp.x = rotationNode[0].as<float>();
-			temp.y = rotationNode[1].as<float>();
-			temp.z = rotationNode[2].as<float>();
+			glm::bvec3 temp{};
+			temp.x = rotationNode[0].as<bool>();
+			temp.y = rotationNode[1].as<bool>();
+			temp.z = rotationNode[2].as<bool>();
 
 			SetRotationConstraint(temp);
 		}

@@ -21,14 +21,27 @@ namespace YAML {
 
 namespace Louron {
 
-    struct Rigidbody;
+    struct RigidbodyComponent;
     class RigidStatic;
     class RigidDynamic;
     class PhysicsShape;
     class PhysicsMaterial;
     class Entity;
 
-    struct SphereCollider : public Component {
+    /// <summary>
+    /// Flags that are set to determine what state changes have occured
+    /// each frame so the PhysicsSystem may process these changes.
+    /// </summary>
+    enum ColliderFlags : uint8_t {
+
+        ColliderFlag_None = 0,
+
+        ColliderFlag_TransformUpdated = 1U << 0,  // Only add this flag where there have been manual changes made to the transform of the shape.
+        ColliderFlag_RigidbodyUpdated = 1U << 1,  // Add this flag when there have been changes to the rigidbody reference.
+        ColliderFlag_ShapePropsUpdated = 1U << 2,	// Add this flag when the properties of the shape have been updated.
+    };
+
+    struct SphereColliderComponent : public Component {
 
     private:
 
@@ -39,8 +52,7 @@ namespace Louron {
         bool m_IsTrigger = false;
         glm::vec3 m_Centre{ 0.0f, 0.0f, 0.0f };
 
-        std::function<void(Entity&, Entity&)> OnCollideCallback;
-        std::function<void(Entity&, Entity&)> OnTriggerCallback;
+        ColliderFlags m_StateFlags = ColliderFlag_None;
 
         // we do this because we store this in the PxShape void* userData,
         // we don't want any cases when the memory of the entityUUID is 
@@ -56,24 +68,33 @@ namespace Louron {
 
     public:
 
-        SphereCollider();
-        SphereCollider(glm::vec3 SphereCentre, float SphereRadius);
-        SphereCollider(const SphereCollider& other);
-        SphereCollider(SphereCollider&& other) = default;
-        ~SphereCollider();
+        void Init();
+        void Shutdown();
 
-        SphereCollider& operator=(const SphereCollider& other);
+        SphereColliderComponent();
+        SphereColliderComponent(glm::vec3 SphereCentre, float SphereRadius);
+        SphereColliderComponent(const SphereColliderComponent& other);
+        SphereColliderComponent(SphereColliderComponent&& other) noexcept;
+        ~SphereColliderComponent();
+
+        SphereColliderComponent& operator=(const SphereColliderComponent& other);
+        SphereColliderComponent& operator=(SphereColliderComponent&& other) noexcept;
 
         void SetColliderUserData(const UUID& uuid);
-        // Setter functions for callbacks
-        void SetOnCollideCallback(const std::function<void(Entity&, Entity&)>& callback) { OnCollideCallback = callback; }
-        void SetOnTriggerCallback(const std::function<void(Entity&, Entity&)>& callback) { OnTriggerCallback = callback; }
 
         const UUID& GetRigidbodyUUID() const { return m_RigidbodyUUID; }
 
         void Release();
 
-        void UpdateTransform(Transform& collider_transform, Transform& rigidbody_transform);
+        void UpdateTransform(TransformComponent& collider_transform, TransformComponent& rigidbody_transform);
+
+        // FLAGS
+        void AddFlag(ColliderFlags flag);
+        void ClearFlag(ColliderFlags flag);
+        bool CheckFlag(ColliderFlags flag) const;
+        bool NoFlagsSet() const;
+        void ClearFlags();
+        ColliderFlags GetFlags() const;
 
         // GETTERS
         const bool& IsTrigger() const;
@@ -109,7 +130,7 @@ namespace Louron {
 
     };
 
-    struct BoxCollider : public Component {
+    struct BoxColliderComponent : public Component {
 
     private:
 
@@ -120,8 +141,7 @@ namespace Louron {
         glm::vec3 m_Centre{ 0.0f, 0.0f, 0.0f };
         glm::vec3 m_BoxExtents{ 1.0f, 1.0f, 1.0f };
 
-        std::function<void(Entity&, Entity&)> OnCollideCallback;
-        std::function<void(Entity&, Entity&)> OnTriggerCallback;
+        ColliderFlags m_StateFlags = ColliderFlag_None;
 
         // we do this because we store this in the PxShape void* userData,
         // we don't want any cases when the memory of the entityUUID is 
@@ -137,24 +157,33 @@ namespace Louron {
 
     public:
 
-        BoxCollider();
-        BoxCollider(const glm::vec3& boxCentre, const glm::vec3& boxExtents);
-        BoxCollider(const BoxCollider& other);
-        BoxCollider(BoxCollider&& other) = default;
-        ~BoxCollider();
+        void Init();
+        void Shutdown();
 
-        BoxCollider& operator=(const BoxCollider& other);
+        BoxColliderComponent();
+        BoxColliderComponent(const glm::vec3& boxCentre, const glm::vec3& boxExtents);
+        BoxColliderComponent(const BoxColliderComponent& other);
+        BoxColliderComponent(BoxColliderComponent&& other) noexcept;
+        ~BoxColliderComponent();
+
+        BoxColliderComponent& operator=(const BoxColliderComponent& other);
+        BoxColliderComponent& operator=(BoxColliderComponent&& other) noexcept;
 
         void SetColliderUserData(const UUID& uuid);
-        // Setter functions for callbacks
-        void SetOnCollideCallback(const std::function<void(Entity&, Entity&)>& callback) { OnCollideCallback = callback; }
-        void SetOnTriggerCallback(const std::function<void(Entity&, Entity&)>& callback) { OnTriggerCallback = callback; }
 
         const UUID& GetRigidbodyUUID() const { return m_RigidbodyUUID; }
 
         void Release();
 
-        void UpdateTransform(Transform& collider_transform, Transform& rigidbody_transform);
+        void UpdateTransform(TransformComponent& collider_transform, TransformComponent& rigidbody_transform);
+
+        // FLAGS
+        void AddFlag(ColliderFlags flag);
+        void ClearFlag(ColliderFlags flag);
+        bool CheckFlag(ColliderFlags flag) const;
+        bool NoFlagsSet() const;
+        void ClearFlags();
+        ColliderFlags GetFlags() const;
 
         // GETTERS
         const bool& IsTrigger() const;

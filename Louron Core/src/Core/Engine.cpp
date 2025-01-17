@@ -10,6 +10,10 @@
 
 #include "../Renderer/Renderer.h"
 
+#include "../Scripting/Script Manager.h"
+
+#include "../Project/Project.h"
+
 // C++ Standard Library Headers
 #include <filesystem>
 
@@ -130,6 +134,16 @@ namespace Louron {
 
         Audio::Shutdown();
         Time::Shutdown();
+
+        // Shutdown scene properly if still running
+        auto scene = Project::GetActiveScene();
+        if (scene->IsRunning())
+            scene->OnRuntimeStop();
+
+        if (scene->IsSimulating())
+            scene->OnSimulationStop();
+
+        scene->OnStop();
     }
 
     bool Engine::OnWindowClose() {

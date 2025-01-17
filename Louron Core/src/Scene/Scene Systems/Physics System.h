@@ -16,20 +16,20 @@ namespace Louron {
 	class Scene;
 	class Entity;
 
-	struct Rigidbody;
-	struct SphereCollider;
-	struct BoxCollider;
+	struct RigidbodyComponent;
+	struct SphereColliderComponent;
+	struct BoxColliderComponent;
 
 	class PhysicsSystem {
 
 
 	public:
 
-		static Rigidbody& AddRigidBody(Entity entity, Scene* scene);
+		static RigidbodyComponent& AddRigidBody(Entity entity, Scene* scene);
 		static void RemoveRigidBody(Entity entity, Scene* scene);
 
-		static SphereCollider& AddSphereCollider(Entity entity, Scene* scene);
-		static BoxCollider& AddBoxCollider(Entity entity, Scene* scene);
+		static SphereColliderComponent& AddSphereCollider(Entity entity, Scene* scene);
+		static BoxColliderComponent& AddBoxCollider(Entity entity, Scene* scene);
 		static void RemoveCollider(Entity entity, Scene* scene, PxGeometryType::Enum colliderType);
 
 		static void Update(std::shared_ptr<Scene> scene);

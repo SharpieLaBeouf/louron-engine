@@ -56,7 +56,8 @@ namespace Louron {
 		std::string profile_name = "Scene Import: " + meta_data.FilePath.string();
 		L_PROFILE_SCOPE(profile_name.c_str());
 
-		return LoadScene(asset_map, asset_reg, Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath);
+		auto project = Project::GetActiveProject();
+		return LoadScene(asset_map, asset_reg, project->GetProjectDirectory() / project->GetConfig().AssetDirectory / meta_data.FilePath);
 	}
 
 	std::shared_ptr<Scene> SceneImporter::LoadScene(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path) {
@@ -70,7 +71,8 @@ namespace Louron {
 	void SceneImporter::SaveScene(std::shared_ptr<Scene> scene, const std::filesystem::path& path) {
 
 		SceneSerializer serializer(scene);
-		serializer.Serialize(Project::GetActiveProject()->GetConfig().AssetDirectory / path);
+		auto project = Project::GetActiveProject();
+		serializer.Serialize(project->GetProjectDirectory() / project->GetConfig().AssetDirectory / path);
 	}
 
 #pragma endregion
@@ -80,7 +82,8 @@ namespace Louron {
 	std::shared_ptr<Texture> TextureImporter::ImportTexture2D(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data) {
 		L_PROFILE_SCOPE("Texture Import");
 
-		return LoadTexture2D(Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath);
+		auto project = Project::GetActiveProject();
+		return LoadTexture2D(project->GetProjectDirectory() / project->GetConfig().AssetDirectory / meta_data.FilePath);
 	}
 
 	std::shared_ptr<Texture> TextureImporter::LoadTexture2D(const std::filesystem::path& path) {
@@ -99,7 +102,8 @@ namespace Louron {
 			YAML::Node data;
 
 			try {
-				data = YAML::LoadFile((Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath).string());
+				auto project = Project::GetActiveProject();
+				data = YAML::LoadFile((project->GetProjectDirectory() / project->GetConfig().AssetDirectory / meta_data.FilePath).string());
 			}
 			catch (YAML::ParserException e) {
 				L_CORE_ERROR("YAML-CPP Failed to Load Scene File: '{0}', {1}", meta_data.FilePath.string(), e.what());
@@ -153,7 +157,7 @@ namespace Louron {
 
 		std::shared_ptr<SkyboxMaterial> material = std::make_shared<SkyboxMaterial>();
 
-		if (material->Deserialize(path)) {
+		if (material->Deserialize(Project::GetActiveProject()->GetProjectDirectory() / "Assets" / path)) {
 			return material;
 		}
 		
@@ -191,7 +195,8 @@ namespace Louron {
 
 	std::shared_ptr<Prefab> ModelImporter::ImportModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data)
 	{
-		return LoadModel(asset_map, asset_reg, handle, Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath);
+		auto project = Project::GetActiveProject();
+		return LoadModel(asset_map, asset_reg, handle, project->GetProjectDirectory() / project->GetConfig().AssetDirectory / meta_data.FilePath);
 	}
 
 	std::shared_ptr<Prefab> ModelImporter::LoadModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const std::filesystem::path& path)
@@ -261,7 +266,7 @@ namespace Louron {
 			vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
 			vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
 			
-			if (mesh->mTextureCoords) 
+			if (mesh->mTextureCoords[0])
 				vertex.texCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
 			
 			if (mesh->mTangents)
@@ -289,8 +294,10 @@ namespace Louron {
 		aiString materialName;
 		material->Get(AI_MATKEY_NAME, materialName);
 
+		auto project = Project::GetActiveProject();
 		AssetHandle asset_material_handle = static_cast<uint32_t>(std::hash<std::string>{}(
-			std::string(AssetTypeToString(AssetType::Material_Standard)) + normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory)) + materialName.C_Str()
+
+			std::string(AssetTypeToString(AssetType::Material_Standard)) + normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory)) + materialName.C_Str()
 		));
 
 		// If the Material has not already been loaded into the asset map, we 
@@ -299,7 +306,7 @@ namespace Louron {
 		if (asset_map->count(asset_material_handle) == 0) {
 
 			AssetMetaData material_metadata;
-			material_metadata.FilePath = normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+			material_metadata.FilePath = normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 			material_metadata.Type = AssetType::Material_Standard;
 			material_metadata.AssetName = materialName.C_Str();
 			material_metadata.ParentAssetHandle = parent_asset_handle;
@@ -330,19 +337,19 @@ namespace Louron {
 
 				aiString assimp_texture_string;
 				material->GetTexture(texture_base_colour_type, 0, &assimp_texture_string);
-				std::filesystem::path resolved_texture_path = ResolveTexturePath(assimp_texture_string.C_Str(), path.string(), Project::GetActiveProject()->GetConfig().AssetDirectory.string());
+				std::filesystem::path resolved_texture_path = ResolveTexturePath(assimp_texture_string.C_Str(), path.string(), (project->GetProjectDirectory() / project->GetConfig().AssetDirectory).string());
 				resolved_texture_path = std::filesystem::relative(resolved_texture_path, std::filesystem::current_path());
 
 				if (auto material_texture_ref = scene->GetEmbeddedTexture(assimp_texture_string.C_Str())) {
 
 					AssetHandle asset_texture_handle = static_cast<uint32_t>(std::hash<std::string>{}(
-						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory)) + assimp_texture_string.C_Str()
+						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory)) + assimp_texture_string.C_Str()
 					));
 
 					if (asset_map->count(asset_texture_handle) == 0) {
 
 						AssetMetaData texture_metadata;
-						texture_metadata.FilePath = normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+						texture_metadata.FilePath = normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 						texture_metadata.Type = AssetType::Texture2D;
 						texture_metadata.AssetName = assimp_texture_string.C_Str();
 						texture_metadata.ParentAssetHandle = parent_asset_handle;
@@ -369,13 +376,13 @@ namespace Louron {
 				else if (std::filesystem::exists(resolved_texture_path)) {
 
 					AssetHandle asset_texture_handle = static_cast<uint32_t>(std::hash<std::string>{}(
-						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(resolved_texture_path, Project::GetActiveProject()->GetConfig().AssetDirectory))
+						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(resolved_texture_path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory))
 						));
 
 					if (asset_map->count(asset_texture_handle) == 0) {
 
 						AssetMetaData texture_metadata;
-						texture_metadata.FilePath = normalise_path(std::filesystem::relative(resolved_texture_path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+						texture_metadata.FilePath = normalise_path(std::filesystem::relative(resolved_texture_path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 						texture_metadata.Type = AssetType::Texture2D;
 						texture_metadata.AssetName = resolved_texture_path.filename().replace_extension().string();
 						texture_metadata.ParentAssetHandle = NULL_UUID; // We explictly make sure this is NULL as this type of asset does not need the model to be loaded in order to load this texture!
@@ -403,19 +410,19 @@ namespace Louron {
 
 				aiString assimp_texture_string;
 				material->GetTexture(aiTextureType_METALNESS, 0, &assimp_texture_string);
-				std::filesystem::path resolved_texture_path = ResolveTexturePath(assimp_texture_string.C_Str(), path.string(), Project::GetActiveProject()->GetConfig().AssetDirectory.string());
+				std::filesystem::path resolved_texture_path = ResolveTexturePath(assimp_texture_string.C_Str(), path.string(), (project->GetProjectDirectory() / project->GetConfig().AssetDirectory).string());
 				resolved_texture_path = std::filesystem::relative(resolved_texture_path, std::filesystem::current_path());
 
 				if (auto material_texture_ref = scene->GetEmbeddedTexture(assimp_texture_string.C_Str())) {
 
 					AssetHandle asset_texture_handle = static_cast<uint32_t>(std::hash<std::string>{}(
-						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory)) + assimp_texture_string.C_Str()
+						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory)) + assimp_texture_string.C_Str()
 					));
 
 					if (asset_map->count(asset_texture_handle) == 0) {
 
 						AssetMetaData texture_metadata;
-						texture_metadata.FilePath = normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+						texture_metadata.FilePath = normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 						texture_metadata.Type = AssetType::Texture2D;
 						texture_metadata.AssetName = assimp_texture_string.C_Str();
 						texture_metadata.ParentAssetHandle = parent_asset_handle;
@@ -442,13 +449,13 @@ namespace Louron {
 				else if (std::filesystem::exists(resolved_texture_path)) {
 
 					AssetHandle asset_texture_handle = static_cast<uint32_t>(std::hash<std::string>{}(
-						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(resolved_texture_path, Project::GetActiveProject()->GetConfig().AssetDirectory))
+						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(resolved_texture_path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory))
 					));
 
 					if (asset_map->count(asset_texture_handle) == 0) {
 
 						AssetMetaData texture_metadata;
-						texture_metadata.FilePath = normalise_path(std::filesystem::relative(resolved_texture_path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+						texture_metadata.FilePath = normalise_path(std::filesystem::relative(resolved_texture_path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 						texture_metadata.Type = AssetType::Texture2D;
 						texture_metadata.AssetName = resolved_texture_path.filename().replace_extension().string();
 						texture_metadata.ParentAssetHandle = NULL_UUID; // We explictly make sure this is NULL as this type of asset does not need the model to be loaded in order to load this texture!
@@ -475,19 +482,19 @@ namespace Louron {
 
 				aiString assimp_texture_string;
 				material->GetTexture(aiTextureType_NORMALS, 0, &assimp_texture_string);
-				std::filesystem::path resolved_texture_path = ResolveTexturePath(assimp_texture_string.C_Str(), path.string(), Project::GetActiveProject()->GetConfig().AssetDirectory.string());
+				std::filesystem::path resolved_texture_path = ResolveTexturePath(assimp_texture_string.C_Str(), path.string(), (project->GetProjectDirectory() / project->GetConfig().AssetDirectory).string());
 				resolved_texture_path = std::filesystem::relative(resolved_texture_path, std::filesystem::current_path());
 
 				if (auto material_texture_ref = scene->GetEmbeddedTexture(assimp_texture_string.C_Str())) {
 
 					AssetHandle asset_texture_handle = static_cast<uint32_t>(std::hash<std::string>{}(
-						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory)) + assimp_texture_string.C_Str()
+						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory)) + assimp_texture_string.C_Str()
 						));
 
 					if (asset_map->count(asset_texture_handle) == 0) {
 
 						AssetMetaData texture_metadata;
-						texture_metadata.FilePath = normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+						texture_metadata.FilePath = normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 						texture_metadata.Type = AssetType::Texture2D;
 						texture_metadata.AssetName = assimp_texture_string.C_Str();
 						texture_metadata.ParentAssetHandle = parent_asset_handle;
@@ -513,13 +520,13 @@ namespace Louron {
 				}
 				else if (std::filesystem::exists(resolved_texture_path)) {
 					AssetHandle asset_texture_handle = static_cast<uint32_t>(std::hash<std::string>{}(
-						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(resolved_texture_path, Project::GetActiveProject()->GetConfig().AssetDirectory))
+						std::string(AssetTypeToString(AssetType::Texture2D)) + normalise_path(std::filesystem::relative(resolved_texture_path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory))
 						));
 
 					if (asset_map->count(asset_texture_handle) == 0) {
 
 						AssetMetaData texture_metadata;
-						texture_metadata.FilePath = normalise_path(std::filesystem::relative(resolved_texture_path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+						texture_metadata.FilePath = normalise_path(std::filesystem::relative(resolved_texture_path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 						texture_metadata.Type = AssetType::Texture2D;
 						texture_metadata.AssetName = resolved_texture_path.filename().replace_extension().string();
 						texture_metadata.ParentAssetHandle = NULL_UUID; // We explictly make sure this is NULL as this type of asset does not need the model to be loaded in order to load this texture!
@@ -566,15 +573,21 @@ namespace Louron {
 		entt::entity current_entity_handle = entt::null;
 
 		// Check if the current note is the root node, if so we will just get the Root Entity of the current prefab and update it's name to the mesh
-		if (node == scene->mRootNode) {
+		if (node == scene->mRootNode && node->mNumChildren > 1) {
 			current_entity_handle = model_prefab->GetRootEntity();
 			model_prefab->SetPrefabName(path.filename().replace_extension().string());
 		}
 
 		if (node->mNumMeshes > 0) {
 
+			if (current_entity_handle == entt::null && parent_entity_handle == entt::null) {
+				current_entity_handle = model_prefab->GetRootEntity();
+				model_prefab->SetPrefabName(path.filename().replace_extension().string());
+			}
+
 			if (current_entity_handle == entt::null) 
 				current_entity_handle = model_prefab->CreateEntity(node->mName.C_Str());
+			
 			
 			if (parent_entity_handle != entt::null) 
 			{
@@ -585,8 +598,9 @@ namespace Louron {
 			std::shared_ptr<Asset> asset_mesh = std::make_shared<AssetMesh>();
 			std::shared_ptr<AssetMesh> asset_mesh_casted = std::static_pointer_cast<AssetMesh>(asset_mesh);
 
+			auto project = Project::GetActiveProject();
 			AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
-				std::string(AssetTypeToString(AssetType::Mesh)) + normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory)) + node->mName.C_Str()
+				std::string(AssetTypeToString(AssetType::Mesh)) + normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory)) + node->mName.C_Str()
 			));
 
 			if (asset_map->count(handle) == 0) {
@@ -597,10 +611,10 @@ namespace Louron {
 				AssetMetaData metadata;
 				
 
-				if (std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory).empty())
+				if (std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory).empty())
 					metadata.FilePath = path;
 				else
-					metadata.FilePath = normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+					metadata.FilePath = normalise_path(std::filesystem::relative(path, project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 
 				metadata.Type = AssetType::Mesh;
 				metadata.AssetName = node->mName.C_Str();

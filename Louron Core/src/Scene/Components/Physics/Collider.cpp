@@ -10,6 +10,7 @@
 #include "../../Entity.h"
 
 #include "../../../Core/Logging.h"
+#include "../../../Project/Project.h"
 
 // C++ Standard Library Headers
 
@@ -22,85 +23,153 @@
 
 namespace Louron {
 
-#pragma region SphereCollider
+#pragma region SphereColliderComponent
 
 
-    SphereCollider::SphereCollider() {
-        m_Material = std::make_shared<PhysicsMaterial>();
+    void SphereColliderComponent::Init()
+    {
+        GetMaterial()->Init();
+
         m_Shape = std::make_shared<PhysicsShape>(PxSphereGeometry(m_Radius * 2.0f), *m_Material->GetMaterial());
+
+        AddFlag(ColliderFlag_TransformUpdated);
+        AddFlag(ColliderFlag_RigidbodyUpdated);
+        AddFlag(ColliderFlag_ShapePropsUpdated);
+
+        if(auto entity = GetEntity(); entity)
+            SetColliderUserData(entity.GetUUID());
+
+        SetIsTrigger(m_IsTrigger);
+        SetCentre(m_Centre);
+        SetRadius(m_Radius);
     }
 
-    SphereCollider::SphereCollider(glm::vec3 SphereCentre, float SphereRadius) : m_Centre(SphereCentre), m_Radius(SphereRadius) {
-        m_Material = std::make_shared<PhysicsMaterial>();
-        m_Shape = std::make_shared<PhysicsShape>(PxSphereGeometry(m_Radius * 2.0f), *m_Material->GetMaterial());
+    void SphereColliderComponent::Shutdown()
+    {
+        if(m_Material)
+            m_Material->Shutdown();
+        Release();
     }
 
-    SphereCollider::SphereCollider(const SphereCollider& other) {
+    SphereColliderComponent::SphereColliderComponent() {
+        m_Material = std::make_shared<PhysicsMaterial>();
+    }
+
+    SphereColliderComponent::SphereColliderComponent(glm::vec3 SphereCentre, float SphereRadius) : m_Centre(SphereCentre), m_Radius(SphereRadius) {
+        m_Material = std::make_shared<PhysicsMaterial>();
+    }
+
+    SphereColliderComponent::SphereColliderComponent(const SphereColliderComponent& other) {
+
+        scene = other.scene;
 
         m_Radius = other.m_Radius;
         m_IsTrigger = other.m_IsTrigger;
         m_Centre = other.m_Centre;
 
-        Entity entity = GetEntity();
-
-        if (entity)
-            m_EntityUUID = entity.GetUUID();
-        else
-            m_EntityUUID = NULL_UUID;
-
-        m_RigidbodyUUID = NULL_UUID;
-
-        if(other.m_Material)
-            m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
-        else
-            m_Material = m_Material = std::make_shared<PhysicsMaterial>();
-
-        m_Shape = std::make_shared<PhysicsShape>(PxSphereGeometry(m_Radius * 2.0f), *m_Material->GetMaterial());
-    }
-
-    SphereCollider::~SphereCollider() {
-
-    }
-
-    SphereCollider& SphereCollider::operator=(const SphereCollider& other) {
-
-        m_Radius = other.m_Radius;
-        m_IsTrigger = other.m_IsTrigger;
-        m_Centre = other.m_Centre;
+        m_StateFlags = other.m_StateFlags;
 
         Entity entity = GetEntity();
 
-        if (entity)
-            m_EntityUUID = entity.GetUUID();
-        else
-            m_EntityUUID = NULL_UUID;
-
+        m_EntityUUID = entity ? entity.GetUUID() : (UUID)NULL_UUID;
         m_RigidbodyUUID = NULL_UUID;
 
         if (other.m_Material)
             m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
-        else
-            m_Material = m_Material = std::make_shared<PhysicsMaterial>();
 
-        m_Shape = std::make_shared<PhysicsShape>(PxSphereGeometry(m_Radius * 2.0f), *m_Material->GetMaterial());
+        if (scene->IsRunning() || scene->IsSimulating())
+            Init();
+    }
 
-        SetColliderUserData(m_EntityUUID);
+    SphereColliderComponent::SphereColliderComponent(SphereColliderComponent&& other) noexcept {
 
-        m_Shape->AddFlag(ColliderFlag_TransformUpdated);
-        m_Shape->AddFlag(ColliderFlag_RigidbodyUpdated);
-        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+        // Component Base Class Move
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+        scene = other.scene; other.scene = nullptr;
 
+        // Sphere Collider Class Move
+        m_Radius = other.m_Radius; other.m_Radius = 0.5f;
+        m_IsTrigger = other.m_IsTrigger; other.m_IsTrigger = false;
+        m_Centre = other.m_Centre; other.m_Centre = { 0.0f, 0.0f, 0.0f };
+
+        m_RigidbodyUUID = other.m_RigidbodyUUID; other.m_RigidbodyUUID = NULL_UUID;
+        m_EntityUUID = other.m_EntityUUID; other.m_EntityUUID = NULL_UUID;
+
+        m_StateFlags = other.m_StateFlags; other.m_StateFlags = ColliderFlag_None;
+
+        m_Shape = other.m_Shape; other.m_Shape = nullptr;
+        m_Material = other.m_Material; other.m_Material = nullptr;
+    }
+
+    SphereColliderComponent::~SphereColliderComponent() {
+        if (m_Material)
+            m_Material->Shutdown();
+    }
+
+    // COPY ASSIGNMENT OPERATOR
+    SphereColliderComponent& SphereColliderComponent::operator=(const SphereColliderComponent& other) {
+
+        if (this == &other || !scene)
+            return *this;
+
+        this->Shutdown();
+
+        m_Radius = other.m_Radius;
+        m_IsTrigger = other.m_IsTrigger;
+        m_Centre = other.m_Centre;
+
+        m_StateFlags = other.m_StateFlags;
+
+        Entity entity = GetEntity();
+
+        m_EntityUUID = entity ? entity.GetUUID() : (UUID)NULL_UUID;
+        m_RigidbodyUUID = NULL_UUID;
+
+        if(other.m_Material)
+            m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
+
+        if (scene->IsRunning() || scene->IsSimulating())
+            Init();
+        
         return *this;
     }
 
-    void SphereCollider::SetColliderUserData(const UUID& uuid) {
+    // MOVE ASSIGNMENT OPERATOR
+    SphereColliderComponent& SphereColliderComponent::operator=(SphereColliderComponent&& other) noexcept
+    {
+        if (this == &other) // Guard against self-assignment
+            return *this;
+
+        this->Shutdown();
+
+        // Component Base Class Move
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+        scene = other.scene; other.scene = nullptr;
+
+        // Sphere Collider Class Move
+        m_Radius = other.m_Radius; other.m_Radius = 0.5f;
+        m_IsTrigger = other.m_IsTrigger; other.m_IsTrigger = false;
+        m_Centre = other.m_Centre; other.m_Centre = { 0.0f, 0.0f, 0.0f };
+
+        m_RigidbodyUUID = other.m_RigidbodyUUID; other.m_RigidbodyUUID = NULL_UUID;
+        m_EntityUUID = other.m_EntityUUID; other.m_EntityUUID = NULL_UUID;
+
+        m_StateFlags = other.m_StateFlags; other.m_StateFlags = ColliderFlag_None;
+
+        m_Shape = other.m_Shape; other.m_Shape = nullptr;
+        m_Material = other.m_Material; other.m_Material = nullptr;
+        
+        return *this;
+    }
+
+    void SphereColliderComponent::SetColliderUserData(const UUID& uuid) {
         m_EntityUUID = uuid;
-        if (m_Shape) {
+        if (m_Shape && m_Shape->GetShape()) {
             m_Shape->GetShape()->userData = reinterpret_cast<void*>(static_cast<uintptr_t>((uint32_t)m_EntityUUID));
         }
     }
 
-    void SphereCollider::Release() {
+    void SphereColliderComponent::Release() {
 
         if(m_Shape) {
             m_Shape->Release();
@@ -108,11 +177,11 @@ namespace Louron {
         }
 
         if(m_Material)
-            m_Material = nullptr;
+            m_Material->Shutdown();
 
     }
 
-    void SphereCollider::CreateStaticRigidbody() {
+    void SphereColliderComponent::CreateStaticRigidbody() {
 
         Entity entity = GetEntity();
         if (!entity || !entity.GetScene()) {
@@ -122,10 +191,11 @@ namespace Louron {
 
         ResetRigidbody();
 
-        const glm::vec3& position = entity.GetComponent<Transform>().GetGlobalPosition();
-        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetComponent<Transform>().GetGlobalRotation()));
+        const glm::vec3& position = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetComponent<TransformComponent>().GetGlobalRotation()));
         
-        m_Shape->m_StaticBody = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
+        m_Shape->m_StaticBody = std::make_shared<RigidDynamic>();
+        m_Shape->m_StaticBody->Init(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
 
         m_Shape->m_StaticBody->GetActor()->attachShape(*m_Shape->m_Shape);
 
@@ -134,8 +204,8 @@ namespace Louron {
         PxRigidBodyExt::updateMassAndInertia(*m_Shape->m_StaticBody->GetActor(), 1.0f);
         entity.GetScene()->GetPhysScene()->addActor(*m_Shape->m_StaticBody->GetActor());
 
-        m_Shape->AddFlag(ColliderFlag_TransformUpdated);
-        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+        AddFlag(ColliderFlag_TransformUpdated);
+        AddFlag(ColliderFlag_ShapePropsUpdated);
 
         m_Shape->m_RigidbodyRef = m_Shape->m_StaticBody;
         m_RigidbodyUUID = entity.GetUUID();
@@ -145,7 +215,7 @@ namespace Louron {
     /// <summary>
     /// Updates the weak_ptr reference to the RigidDynamic, and the Rigidbody entity UUID.
     /// </summary>
-    void SphereCollider::UpdateRigidbody(const UUID& rigidbodyEntityUUID) {
+    void SphereColliderComponent::UpdateRigidbody(const UUID& rigidbodyEntityUUID) {
 
         Entity entity = GetEntity();
         if (!entity || !entity.GetScene()) {
@@ -160,19 +230,19 @@ namespace Louron {
             return;
         }
         
-        if (!entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<Rigidbody>()) {
+        if (!entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<RigidbodyComponent>()) {
             
             L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Does Not Have Rigidbody Component!");
             CreateStaticRigidbody();
             return;
         }
 
-        if (auto rb_ref = entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<Rigidbody>().GetActor();  rb_ref && *rb_ref) {
+        if (auto rb_ref = entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<RigidbodyComponent>().GetActor();  rb_ref && *rb_ref) {
 
             ResetRigidbody();
 
-            m_Shape->AddFlag(ColliderFlag_RigidbodyUpdated);
-            m_Shape->AddFlag(ColliderFlag_TransformUpdated);
+            AddFlag(ColliderFlag_RigidbodyUpdated);
+            AddFlag(ColliderFlag_TransformUpdated);
 
             m_Shape->m_RigidbodyRef = rb_ref;
             m_RigidbodyUUID = rigidbodyEntityUUID;
@@ -190,7 +260,7 @@ namespace Louron {
     /// <summary>
     /// Reset the weak_ptr to the RigidDynamic and the Rigidbody entity UUID.
     /// </summary>
-    void SphereCollider::ResetRigidbody() {
+    void SphereColliderComponent::ResetRigidbody() {
 
         if (auto rb_ref = m_Shape->m_RigidbodyRef.lock(); rb_ref && *rb_ref)
             rb_ref->DetachShape(m_Shape);
@@ -207,20 +277,20 @@ namespace Louron {
         m_Shape->SetLocalPose({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f });
 
         Entity entity = GetEntity();
-        SetRadius(glm::compMax(entity.GetComponent<Transform>().GetGlobalScale()) / 2.0f);
+        SetRadius(glm::compMax(entity.GetComponent<TransformComponent>().GetGlobalScale()) / 2.0f);
     }
 
     // GETTERS
-    const bool& SphereCollider::IsTrigger() const { return m_IsTrigger; }
-    std::shared_ptr<PhysicsMaterial> SphereCollider::GetMaterial() const { return m_Material; }
+    const bool& SphereColliderComponent::IsTrigger() const { return m_IsTrigger; }
+    std::shared_ptr<PhysicsMaterial> SphereColliderComponent::GetMaterial() const { return m_Material; }
 
-    const glm::vec3& SphereCollider::GetCentre() const { return m_Centre; }
-    const float& SphereCollider::GetRadius() const { return m_Radius; }
+    const glm::vec3& SphereColliderComponent::GetCentre() const { return m_Centre; }
+    const float& SphereColliderComponent::GetRadius() const { return m_Radius; }
 
-    std::shared_ptr<PhysicsShape> SphereCollider::GetShape() const { return m_Shape; }
+    std::shared_ptr<PhysicsShape> SphereColliderComponent::GetShape() const { return m_Shape; }
 
     // SETTERS
-    void SphereCollider::SetIsTrigger(bool isTrigger) {
+    void SphereColliderComponent::SetIsTrigger(bool isTrigger) {
         m_IsTrigger = isTrigger;
         if (m_Shape) {
             m_Shape->SetFlag(PxShapeFlag::eSIMULATION_SHAPE, !isTrigger);
@@ -228,7 +298,7 @@ namespace Louron {
         }
     }
 
-    void SphereCollider::SetMaterial(std::shared_ptr<PhysicsMaterial> material) {
+    void SphereColliderComponent::SetMaterial(std::shared_ptr<PhysicsMaterial> material) {
         if (material) {
             m_Material = material;
             if (m_Shape) {
@@ -240,19 +310,19 @@ namespace Louron {
         }
     }
 
-    void SphereCollider::SetCentre(const glm::vec3& centre) {
+    void SphereColliderComponent::SetCentre(const glm::vec3& centre) {
         m_Centre = centre;
 
-        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+        AddFlag(ColliderFlag_ShapePropsUpdated);
     }
 
-    void SphereCollider::SetRadius(float radius) {
+    void SphereColliderComponent::SetRadius(float radius) {
         m_Radius = radius;
 
-        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+        AddFlag(ColliderFlag_ShapePropsUpdated);
     }
 
-    void SphereCollider::Serialize(YAML::Emitter& out)
+    void SphereColliderComponent::Serialize(YAML::Emitter& out)
     {
         out << YAML::Key << "SphereColliderComponent";
         out << YAML::BeginMap;
@@ -279,7 +349,7 @@ namespace Louron {
         out << YAML::EndMap;
     }
 
-    bool SphereCollider::Deserialize(const YAML::Node data)
+    bool SphereColliderComponent::Deserialize(const YAML::Node data)
     {
         // Deserialize the IsTrigger value
         if (data["IsTrigger"]) {
@@ -321,7 +391,7 @@ namespace Louron {
     }
 
 
-    void SphereCollider::UpdateTransform(Transform& collider_transform, Transform& rigidbody_transform) {
+    void SphereColliderComponent::UpdateTransform(TransformComponent& collider_transform, TransformComponent& rigidbody_transform) {
 
         glm::vec3 position = glm::vec3(0.0f);
         glm::vec3 scale = glm::vec3(1.0f);
@@ -369,89 +439,170 @@ namespace Louron {
         }
     }
 
-#pragma endregion
+    #pragma region Flagging System
 
-#pragma region BoxCollider
+        void SphereColliderComponent::AddFlag(ColliderFlags flag) { m_StateFlags = static_cast<ColliderFlags>(m_StateFlags | flag); }
+        void SphereColliderComponent::ClearFlag(ColliderFlags flag) { m_StateFlags = static_cast<ColliderFlags>(m_StateFlags & ~flag); }
+        bool SphereColliderComponent::CheckFlag(ColliderFlags flag) const { return (m_StateFlags & static_cast<ColliderFlags>(flag)) != ColliderFlag_None; }
+        bool SphereColliderComponent::NoFlagsSet() const { return m_StateFlags == ColliderFlag_None; }
+        void SphereColliderComponent::ClearFlags() { m_StateFlags = ColliderFlag_None; }
+        ColliderFlags SphereColliderComponent::GetFlags() const { return m_StateFlags; }
 
+    #pragma endregion
 
-    BoxCollider::BoxCollider() {
-        m_Material = std::make_shared<PhysicsMaterial>();
+    #pragma endregion
+
+#pragma region BoxColliderComponent
+
+    void BoxColliderComponent::Init() {
+
+        GetMaterial()->Init();
+
         m_Shape = std::make_shared<PhysicsShape>(PxBoxGeometry(m_BoxExtents.x, m_BoxExtents.y, m_BoxExtents.z), *m_Material->GetMaterial());
+
+        AddFlag(ColliderFlag_TransformUpdated);
+        AddFlag(ColliderFlag_RigidbodyUpdated);
+        AddFlag(ColliderFlag_ShapePropsUpdated);
+
+        if (auto entity = GetEntity(); entity)
+            SetColliderUserData(entity.GetUUID());
+
+        SetIsTrigger(m_IsTrigger);
+        SetCentre(m_Centre);
+        SetSize(m_BoxExtents);
     }
 
-    BoxCollider::BoxCollider(const glm::vec3& boxCentre, const glm::vec3& boxExtents) : m_Centre(boxCentre), m_BoxExtents(glm::abs(boxExtents)) {
-        m_Material = std::make_shared<PhysicsMaterial>();
-        m_Shape = std::make_shared<PhysicsShape>(PxBoxGeometry(m_BoxExtents.x, m_BoxExtents.y, m_BoxExtents.z), *m_Material->GetMaterial());
+    void BoxColliderComponent::Shutdown() {
+        if(m_Material)
+            m_Material->Shutdown();
+        Release();
     }
 
-    BoxCollider::BoxCollider(const BoxCollider& other) {
+    BoxColliderComponent::BoxColliderComponent() {
+        m_Material = std::make_shared<PhysicsMaterial>();
+    }
+
+    BoxColliderComponent::BoxColliderComponent(const glm::vec3& boxCentre, const glm::vec3& boxExtents) : m_Centre(boxCentre), m_BoxExtents(glm::abs(boxExtents)) { 
+        m_Material = std::make_shared<PhysicsMaterial>();
+    }
+
+    // COPY CONSTRUCTOR
+    // If you make a copy of this during runtime, you need to ensure 
+    // that the correct entity_uuid and scene are set afterward! 
+    BoxColliderComponent::BoxColliderComponent(const BoxColliderComponent& other) {
+
+        entity_uuid = other.entity_uuid;
+        scene = other.scene;
 
         m_BoxExtents = other.m_BoxExtents;
         m_IsTrigger = other.m_IsTrigger;
         m_Centre = other.m_Centre;
 
-        Entity entity = GetEntity();
-        if (entity)
-            m_EntityUUID = entity.GetUUID();
-        else
-            m_EntityUUID = NULL_UUID;
+        m_StateFlags = other.m_StateFlags;
 
-        m_RigidbodyUUID = NULL_UUID;
-
-        m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
-        m_Shape = std::make_shared<PhysicsShape>(PxBoxGeometry(m_BoxExtents.x, m_BoxExtents.y, m_BoxExtents.z), *m_Material->GetMaterial());
-    }
-
-    BoxCollider::~BoxCollider() {
+        if (other.m_Material)
+            m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
 
     }
 
-    BoxCollider& BoxCollider::operator=(const BoxCollider& other) {
+    BoxColliderComponent::BoxColliderComponent(BoxColliderComponent&& other) noexcept
+    {
+        // Component Base Class Move
+        scene = other.scene; other.scene = nullptr;
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+
+        // Sphere Collider Class Move
+        m_BoxExtents = other.m_BoxExtents; other.m_BoxExtents = { 1.0f, 1.0f, 1.0f };
+        m_IsTrigger = other.m_IsTrigger; other.m_IsTrigger = false;
+        m_Centre = other.m_Centre; other.m_Centre = { 0.0f, 0.0f, 0.0f };
+
+        m_RigidbodyUUID = other.m_RigidbodyUUID; other.m_RigidbodyUUID = NULL_UUID;
+        m_EntityUUID = other.m_EntityUUID; other.m_EntityUUID = NULL_UUID;
+
+        m_StateFlags = other.m_StateFlags; other.m_StateFlags = ColliderFlag_None;
+
+        m_Shape = other.m_Shape; other.m_Shape = nullptr;
+        m_Material = other.m_Material; other.m_Material = nullptr;
+
+    }
+
+    BoxColliderComponent::~BoxColliderComponent() {
+        if (m_Material)
+            m_Material = nullptr;
+    }
+
+    // COPY ASSIGNMENT OPERATOR
+    BoxColliderComponent& BoxColliderComponent::operator=(const BoxColliderComponent& other) {
+
+        if (this == &other || !scene)
+            return *this;
+
+        this->Shutdown();
 
         m_BoxExtents = other.m_BoxExtents;
         m_IsTrigger = other.m_IsTrigger;
         m_Centre = other.m_Centre;
 
-        Entity entity = GetEntity();
-        if (entity)
-            m_EntityUUID = entity.GetUUID();
-        else
-            m_EntityUUID = NULL_UUID;
+        m_StateFlags = other.m_StateFlags;
 
+        Entity entity = GetEntity();
+
+        m_EntityUUID = entity ? entity.GetUUID() : (UUID)NULL_UUID;
         m_RigidbodyUUID = NULL_UUID;
 
-        m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
-        m_Shape = std::make_shared<PhysicsShape>(PxBoxGeometry(m_BoxExtents.x, m_BoxExtents.y, m_BoxExtents.z), *m_Material->GetMaterial());
+        if (other.m_Material)
+            m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
 
-        SetColliderUserData(m_EntityUUID);
-
-        m_Shape->AddFlag(ColliderFlag_TransformUpdated);
-        m_Shape->AddFlag(ColliderFlag_RigidbodyUpdated);
-        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+        if (scene->IsRunning() || scene->IsSimulating())
+            Init();
 
         return *this;
     }
 
-    void BoxCollider::SetColliderUserData(const UUID& uuid) {
+    BoxColliderComponent& BoxColliderComponent::operator=(BoxColliderComponent&& other) noexcept
+    {
+        if (this == &other) // Guard against self-assignment
+            return *this;
+
+        this->Shutdown();
+
+        // Component Base Class Move
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+        scene = other.scene; other.scene = nullptr;
+
+        // Sphere Collider Class Move
+        m_BoxExtents = other.m_BoxExtents; other.m_BoxExtents = { 1.0f, 1.0f, 1.0f };
+        m_IsTrigger = other.m_IsTrigger; other.m_IsTrigger = false;
+        m_Centre = other.m_Centre; other.m_Centre = { 0.0f, 0.0f, 0.0f };
+
+        m_RigidbodyUUID = other.m_RigidbodyUUID; other.m_RigidbodyUUID = NULL_UUID;
+        m_EntityUUID = other.m_EntityUUID; other.m_EntityUUID = NULL_UUID;
+
+        m_StateFlags = other.m_StateFlags; other.m_StateFlags = ColliderFlag_None;
+
+
+        m_Shape = other.m_Shape; other.m_Shape = nullptr;
+        m_Material = other.m_Material; other.m_Material = nullptr;
+
+        return *this;
+    }
+
+    void BoxColliderComponent::SetColliderUserData(const UUID& uuid) {
         m_EntityUUID = uuid;
-        if (m_Shape) {
+        if (m_Shape && m_Shape->GetShape()) {
             m_Shape->GetShape()->userData = reinterpret_cast<void*>(static_cast<uintptr_t>(m_EntityUUID));
         }
     }
 
-    void BoxCollider::Release() {
+    void BoxColliderComponent::Release() {
 
         if (m_Shape) {
             m_Shape->Release();
             m_Shape = nullptr;
         }
-
-        if (m_Material)
-            m_Material = nullptr;
-
     }
 
-    void BoxCollider::CreateStaticRigidbody() {
+    void BoxColliderComponent::CreateStaticRigidbody() {
 
         Entity entity = GetEntity();
         if (!entity || !entity.GetScene()) {
@@ -461,10 +612,11 @@ namespace Louron {
 
         this->ResetRigidbody();
 
-        const glm::vec3& position = entity.GetComponent<Transform>().GetGlobalPosition();
-        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetComponent<Transform>().GetGlobalRotation()));
+        const glm::vec3& position = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetComponent<TransformComponent>().GetGlobalRotation()));
 
-        m_Shape->m_StaticBody = std::make_shared<RigidDynamic>(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
+        m_Shape->m_StaticBody = std::make_shared<RigidDynamic>();
+        m_Shape->m_StaticBody->Init(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
 
         m_Shape->m_StaticBody->GetActor()->attachShape(*m_Shape->m_Shape);
 
@@ -473,8 +625,8 @@ namespace Louron {
         PxRigidBodyExt::updateMassAndInertia(*m_Shape->m_StaticBody->GetActor(), 1.0f);
         entity.GetScene()->GetPhysScene()->addActor(*m_Shape->m_StaticBody->GetActor());
 
-        m_Shape->AddFlag(ColliderFlag_TransformUpdated);
-        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+        AddFlag(ColliderFlag_TransformUpdated);
+        AddFlag(ColliderFlag_ShapePropsUpdated);
 
         m_Shape->m_RigidbodyRef = m_Shape->m_StaticBody;
         m_RigidbodyUUID = entity.GetUUID();
@@ -484,7 +636,7 @@ namespace Louron {
     /// <summary>
     /// Updates the weak_ptr reference to the RigidDynamic, and the Rigidbody entity UUID.
     /// </summary>
-    void BoxCollider::UpdateRigidbody(const UUID& rigidbodyEntityUUID) {
+    void BoxColliderComponent::UpdateRigidbody(const UUID& rigidbodyEntityUUID) {
 
         Entity entity = GetEntity();
         if (!entity || !entity.GetScene()) {
@@ -499,19 +651,19 @@ namespace Louron {
             return;
         }
 
-        if (!entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<Rigidbody>()) {
+        if (!entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).HasComponent<RigidbodyComponent>()) {
 
             L_CORE_WARN("Cannot Update Rigidbody - New Rigidbody Entity Does Not Have Rigidbody Component!");
             CreateStaticRigidbody();
             return;
         }
 
-        if (auto rb_ref = entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<Rigidbody>().GetActor();  rb_ref && *rb_ref) {
+        if (auto rb_ref = entity.GetScene()->FindEntityByUUID(rigidbodyEntityUUID).GetComponent<RigidbodyComponent>().GetActor();  rb_ref && *rb_ref) {
 
             ResetRigidbody();
 
-            m_Shape->AddFlag(ColliderFlag_RigidbodyUpdated);
-            m_Shape->AddFlag(ColliderFlag_TransformUpdated);
+           AddFlag(ColliderFlag_RigidbodyUpdated);
+           AddFlag(ColliderFlag_TransformUpdated);
 
             m_Shape->m_RigidbodyRef = rb_ref;
             m_RigidbodyUUID = rigidbodyEntityUUID;
@@ -529,7 +681,7 @@ namespace Louron {
     /// <summary>
     /// Reset the weak_ptr to the RigidDynamic and the Rigidbody entity UUID.
     /// </summary>
-    void BoxCollider::ResetRigidbody() {
+    void BoxColliderComponent::ResetRigidbody() {
 
         if (auto rb_ref = m_Shape->m_RigidbodyRef.lock(); rb_ref && *rb_ref)
             rb_ref->DetachShape(m_Shape);
@@ -545,16 +697,16 @@ namespace Louron {
     }
 
     // GETTERS
-    const bool& BoxCollider::IsTrigger() const { return m_IsTrigger; }
-    std::shared_ptr<PhysicsMaterial> BoxCollider::GetMaterial() const { return m_Material; }
+    const bool& BoxColliderComponent::IsTrigger() const { return m_IsTrigger; }
+    std::shared_ptr<PhysicsMaterial> BoxColliderComponent::GetMaterial() const { return m_Material; }
 
-    const glm::vec3& BoxCollider::GetCentre() const { return m_Centre; }
-    const glm::vec3& BoxCollider::GetSize() const { return m_BoxExtents; }
+    const glm::vec3& BoxColliderComponent::GetCentre() const { return m_Centre; }
+    const glm::vec3& BoxColliderComponent::GetSize() const { return m_BoxExtents; }
 
-    std::shared_ptr<PhysicsShape> BoxCollider::GetShape() const { return m_Shape; }
+    std::shared_ptr<PhysicsShape> BoxColliderComponent::GetShape() const { return m_Shape; }
 
     // SETTERS
-    void BoxCollider::SetIsTrigger(bool isTrigger) {
+    void BoxColliderComponent::SetIsTrigger(bool isTrigger) {
         m_IsTrigger = isTrigger;
         if (m_Shape) {
             m_Shape->SetFlag(PxShapeFlag::eSIMULATION_SHAPE, !isTrigger);
@@ -562,7 +714,7 @@ namespace Louron {
         }
     }
 
-    void BoxCollider::SetMaterial(std::shared_ptr<PhysicsMaterial> material) {
+    void BoxColliderComponent::SetMaterial(std::shared_ptr<PhysicsMaterial> material) {
         if (material) {
             m_Material = material;
             if (m_Shape) {
@@ -574,19 +726,19 @@ namespace Louron {
         }
     }
 
-    void BoxCollider::SetCentre(const glm::vec3& centre) {
+    void BoxColliderComponent::SetCentre(const glm::vec3& centre) {
         m_Centre = centre;
 
-        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+        AddFlag(ColliderFlag_ShapePropsUpdated);
     }
 
-    void BoxCollider::SetSize(const glm::vec3& boxExtents) {
+    void BoxColliderComponent::SetSize(const glm::vec3& boxExtents) {
         m_BoxExtents = glm::abs(boxExtents);
 
-        m_Shape->AddFlag(ColliderFlag_ShapePropsUpdated);
+        AddFlag(ColliderFlag_ShapePropsUpdated);
     }
 
-    void BoxCollider::Serialize(YAML::Emitter& out)
+    void BoxColliderComponent::Serialize(YAML::Emitter& out)
     {
         out << YAML::Key << "BoxColliderComponent";
         out << YAML::BeginMap;
@@ -617,7 +769,7 @@ namespace Louron {
         out << YAML::EndMap;
     }
 
-    bool BoxCollider::Deserialize(const YAML::Node data)
+    bool BoxColliderComponent::Deserialize(const YAML::Node data)
     {
         // Deserialize the IsTrigger value
         if (data["IsTrigger"]) {
@@ -667,7 +819,7 @@ namespace Louron {
     }
 
 
-    void BoxCollider::UpdateTransform(Transform& collider_transform, Transform& rigidbody_transform) {
+    void BoxColliderComponent::UpdateTransform(TransformComponent& collider_transform, TransformComponent& rigidbody_transform) {
 
         glm::vec3 position = glm::vec3(0.0f);
         glm::vec3 scale = glm::vec3(1.0f);
@@ -718,6 +870,17 @@ namespace Louron {
         }
     }
 
-#pragma endregion
+    #pragma region Flagging System
+
+    void BoxColliderComponent::AddFlag(ColliderFlags flag) { m_StateFlags = static_cast<ColliderFlags>(m_StateFlags | flag); }
+    void BoxColliderComponent::ClearFlag(ColliderFlags flag) { m_StateFlags = static_cast<ColliderFlags>(m_StateFlags & ~flag); }
+    bool BoxColliderComponent::CheckFlag(ColliderFlags flag) const { return (m_StateFlags & static_cast<ColliderFlags>(flag)) != ColliderFlag_None; }
+    bool BoxColliderComponent::NoFlagsSet() const { return m_StateFlags == ColliderFlag_None; }
+    void BoxColliderComponent::ClearFlags() { m_StateFlags = ColliderFlag_None; }
+    ColliderFlags BoxColliderComponent::GetFlags() const { return m_StateFlags; }
+
+    #pragma endregion
+
+    #pragma endregion
 
 }

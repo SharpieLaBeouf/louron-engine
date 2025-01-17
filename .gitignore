@@ -340,3 +340,9 @@ ASALocalRun/
 healthchecksdb
 /Louron2020/libs/assimp/assimp-vc142-mt.lib
 /Louron2020/libs/assimp/assimp-vc142-mtd.lib
+/.editorconfig
+/Louron Editor/Resources/Scripting/Louron Script Core.deps.json
+/Louron Editor/Resources/Scripting/Louron Script Core.dll
+/Louron Editor/Sandbox Project/Assets/Scripts/Binaries/Louron Script Core.dll
+/Louron Editor/Sandbox Project/Assets/Scripts/Binaries/SandboxProject.deps.json
+/Louron Editor/Sandbox Project/Assets/Scripts/Binaries/SandboxProject.dll

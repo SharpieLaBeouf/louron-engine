@@ -3,6 +3,7 @@
 // Louron Core Headers
 #include "Scene.h"
 
+#include "Components/Light.h"
 #include "Components/UUID.h"
 #include "Components/Mesh.h"
 #include "Components/Components.h"
@@ -10,6 +11,8 @@
 #include "Components/Physics/Rigidbody.h"
 
 #include "Scene Systems/Physics System.h"
+
+#include "../Scripting/Script Manager.h"
 
 // C++ Standard Library Headers
 #include <iostream>
@@ -35,57 +38,6 @@ namespace Louron {
 		template<typename T, typename... Args>
 		T& AddComponent(Args&&... args) {
 
-			#pragma region Rigidbody
-			// Check if Component is Rigidbody Type
-			if constexpr (std::is_same_v<T, Rigidbody>) {
-
-				if (HasComponent<Rigidbody>())
-					return GetComponent<Rigidbody>();
-				
-				Rigidbody& component = PhysicsSystem::AddRigidBody(*this, m_Scene);
-
-				component.scene = m_Scene;
-				component.entity_uuid = m_Scene->m_Registry.get<IDComponent>(m_EntityHandle).ID;
-
-				return component;
-			}
-
-			#pragma endregion
-
-			#pragma region SphereCollider
-
-			if constexpr (std::is_same_v<T, SphereCollider>) {
-
-				if (HasComponent<SphereCollider>())
-					return GetComponent<SphereCollider>();
-
-				SphereCollider& component = PhysicsSystem::AddSphereCollider(*this, m_Scene);
-
-				component.scene = m_Scene;
-				component.entity_uuid = m_Scene->m_Registry.get<IDComponent>(m_EntityHandle).ID;
-
-				return component;
-			}
-
-			#pragma endregion
-
-			#pragma region BoxCollider
-
-			if constexpr (std::is_same_v<T, BoxCollider>) {
-
-				if (HasComponent<BoxCollider>())
-					return GetComponent<BoxCollider>();
-
-				BoxCollider& component = PhysicsSystem::AddBoxCollider({ m_EntityHandle, m_Scene }, m_Scene);
-
-				component.scene = m_Scene;
-				component.entity_uuid = m_Scene->m_Registry.get<IDComponent>(m_EntityHandle).ID;
-
-				return component;
-			}
-
-			#pragma endregion
-
 			if (HasComponent<T>()) {
 				L_CORE_WARN("Entity Already Has: {0}", typeid(T).name());
 				return GetComponent<T>();
@@ -95,6 +47,42 @@ namespace Louron {
 
 			component.scene = m_Scene;
 			component.entity_uuid = m_Scene->m_Registry.get<IDComponent>(m_EntityHandle).ID;
+
+			if constexpr (std::is_same_v<T, ScriptComponent>) {
+				if(m_Scene && m_Scene->IsRunning())
+					ScriptManager::OnCreateEntity(*this);
+			}
+
+			if constexpr (std::is_same_v<T, RigidbodyComponent>) {
+				if ((m_Scene->IsRunning() || m_Scene->IsSimulating()) && m_Scene->GetPhysScene())
+					component.Init(&GetComponent<TransformComponent>(), m_Scene->GetPhysScene());
+
+				if (HasComponent<BoxColliderComponent>())
+				{
+					GetComponent<BoxColliderComponent>().AddFlag(ColliderFlag_RigidbodyUpdated);
+					GetComponent<BoxColliderComponent>().AddFlag(ColliderFlag_ShapePropsUpdated);
+					GetComponent<BoxColliderComponent>().AddFlag(ColliderFlag_TransformUpdated);
+				}
+
+				if (HasComponent<SphereColliderComponent>())
+				{
+					GetComponent<SphereColliderComponent>().AddFlag(ColliderFlag_RigidbodyUpdated);
+					GetComponent<SphereColliderComponent>().AddFlag(ColliderFlag_ShapePropsUpdated);
+					GetComponent<SphereColliderComponent>().AddFlag(ColliderFlag_TransformUpdated);
+				}
+			}
+
+			if constexpr (std::is_same_v<T, BoxColliderComponent> || std::is_same_v<T, SphereColliderComponent>) {
+				if ((m_Scene->IsRunning() || m_Scene->IsSimulating()) && m_Scene->GetPhysScene())
+					component.Init();
+
+				if (HasComponent<RigidbodyComponent>())
+					if (auto actor_ref = GetComponent<RigidbodyComponent>().GetActor(); actor_ref && *actor_ref)
+					{
+						actor_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
+						actor_ref->AddFlag(RigidbodyFlag_TransformUpdated);
+					}
+			}
 
 			return component;
 		}
@@ -144,16 +132,16 @@ namespace Louron {
 		template <typename T>
 		void RemoveComponent() {
 
-			if constexpr (std::is_same_v<T, Rigidbody>) {
-				if(HasComponent<Rigidbody>())
+			if constexpr (std::is_same_v<T, RigidbodyComponent>) {
+				if(HasComponent<RigidbodyComponent>())
 					PhysicsSystem::RemoveRigidBody({ m_EntityHandle, m_Scene }, m_Scene);
 			}
-			if constexpr (std::is_same_v<T, SphereCollider>) {
-				if(HasComponent<SphereCollider>())
+			if constexpr (std::is_same_v<T, SphereColliderComponent>) {
+				if(HasComponent<SphereColliderComponent>())
 					PhysicsSystem::RemoveCollider({ m_EntityHandle, m_Scene }, m_Scene, PxGeometryType::eSPHERE);
 			}
-			if constexpr (std::is_same_v<T, BoxCollider>) {
-				if (HasComponent<BoxCollider>())
+			if constexpr (std::is_same_v<T, BoxColliderComponent>) {
+				if (HasComponent<BoxColliderComponent>())
 					PhysicsSystem::RemoveCollider({ m_EntityHandle, m_Scene}, m_Scene, PxGeometryType::eBOX);
 			}
 
@@ -164,10 +152,8 @@ namespace Louron {
 		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 
-		bool operator==(const Entity& other) {
-			if (m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene)
-				return true;
-			return false;
+		bool operator==(const Entity& other) const {
+			return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene;
 		}
 
 		// This returns the UUID reference to the Component

@@ -1,0 +1,191 @@
+Scene Name: Sanbox Script Scene
+Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
+Scene Pipeline Type: 1
+Entities:
+  - Entity: 1886447739
+    TagComponent:
+      Tag: Floor
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 4233385606
+    TransformComponent:
+      Translation: [0, -8.60000038, 0]
+      Rotation: [0, -0, 0]
+      Scale: [20, 1, 20]
+    MeshFilterComponent:
+      MeshAssetHandle: 3850464143
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 4057542052
+    RigidbodyComponent:
+      Mass: 10
+      Drag: 0
+      AngularDrag: 0.0500000007
+      AutomaticCentreOfMass: true
+      UseGravity: true
+      IsKinematic: true
+      PositionConstraint: [false, false, false]
+      RotationConstraint: [false, false, false]
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 1872186740
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-70.8000031, -60, 4.9000001]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 0.800172985, 0.514705896, 1]
+      Intensity: 1
+  - Entity: 4115850506
+    TagComponent:
+      Tag: Script Objects
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 3773169967
+        - 1678864458
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 1332520780
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [-60.9450035, 11.5170069, -20.5765667]
+      Rotation: [-149.22493, -62.8229866, 131.481064]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        FOV: 60
+        MovementToggle: true
+        MovementSpeed: 10
+        MovementYDamp: 0.649999976
+        MouseSensitivity: 0.100000001
+        MouseToggledOff: false
+        Position: [-60.9450035, 11.5170069, -20.5765667]
+        Yaw: 23.8034439
+        Pitch: -13.5150204
+      Primary: true
+      ClearFlag: Skybox
+      ClearColour: [0.897058845, 0.909169555, 1, 1]
+    SkyboxComponent:
+      MaterialAssetHandle: 1778786993
+  - Entity: 4233385606
+    TagComponent:
+      Tag: Flickering Light
+    HierarchyComponent:
+      Parent: 1886447739
+      Children:
+        []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.LightFlicker
+        Fields:
+          - Name: minIntensity
+            Type: Float
+            Data: 80
+          - Name: maxIntensity
+            Type: Float
+            Data: 100
+          - Name: flickerSpeed
+            Type: Float
+            Data: 10
+    TransformComponent:
+      Translation: [0, 7, 0]
+      Rotation: [0, -0, 0]
+      Scale: [0.049999997, 1, 0.099999994]
+    PointLightComponent:
+      Active: true
+      Colour: [1, 0.470588207, 0, 1]
+      Radius: 10
+      Intensity: 25.0499992
+  - Entity: 3773169967
+    TagComponent:
+      Tag: Crazy Sphere!
+    HierarchyComponent:
+      Parent: 4115850506
+      Children:
+        []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.CrazyScript
+        Fields:
+          - Name: MaxRegion
+            Type: Vector3
+            Data: [10, 10, 40]
+          - Name: Speed
+            Type: Float
+            Data: 50
+    TransformComponent:
+      Translation: [0, 9.60000038, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 293103916
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1375892428
+  - Entity: 1678864458
+    TagComponent:
+      Tag: Crazy Goblin!
+    HierarchyComponent:
+      Parent: 4115850506
+      Children:
+        - 104901465
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.PlayerMoveScript
+        Fields:
+          - Name: speed
+            Type: Float
+            Data: 20
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, -90, 0]
+      Scale: [5, 5, 5]
+    MeshFilterComponent:
+      MeshAssetHandle: 1692962371
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3535300567
+  - Entity: 104901465
+    TagComponent:
+      Tag: Ominous Light
+    HierarchyComponent:
+      Parent: 1678864458
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 1.20000005, 0]
+      Rotation: [-90, 1, 1]
+      Scale: [0.200000018, 0.200000003, 0.200000018]
+    PointLightComponent:
+      Active: true
+      Colour: [1, 0, 0, 1]
+      Radius: 3.04999995
+      Intensity: 100

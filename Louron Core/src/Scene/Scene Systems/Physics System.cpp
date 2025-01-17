@@ -38,9 +38,9 @@ namespace Louron {
 		ColliderType& collider = entity.GetComponent<ColliderType>();
 
 		// 1. Current Entity Has Rigidbody and Shape Does Not Already Refer to Rigidbody
-		if (collider.GetShape()->CheckFlag(ColliderFlag_RigidbodyUpdated)) {
+		if (collider.CheckFlag(ColliderFlag_RigidbodyUpdated)) {
 
-			if (entity.HasComponent<Rigidbody>()) {
+			if (entity.HasComponent<RigidbodyComponent>()) {
 
 				// Remove Collider from Previous Rigidbody
 				if (auto old_rb_ref = collider.GetShape()->GetRigidbody(); old_rb_ref && *old_rb_ref)
@@ -53,16 +53,16 @@ namespace Louron {
 				if (auto new_rb_ref = collider.GetShape()->GetRigidbody(); new_rb_ref && *new_rb_ref)
 					new_rb_ref->AttachShape(collider.GetShape(), entity.GetUUID());
 
-				collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-				collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
-				collider.GetShape()->ClearFlag(ColliderFlag_RigidbodyUpdated);
+				collider.AddFlag(ColliderFlag_ShapePropsUpdated);
+				collider.AddFlag(ColliderFlag_TransformUpdated);
+				collider.ClearFlag(ColliderFlag_RigidbodyUpdated);
 			}
 		}
 
 		// 2. Check Parent(s) for Rigidbody
-		if (collider.GetShape()->CheckFlag(ColliderFlag_RigidbodyUpdated)) {
+		if (collider.CheckFlag(ColliderFlag_RigidbodyUpdated)) {
 
-			if (auto rb_ref = collider.GetComponentInParent<Rigidbody>(); rb_ref && rb_ref->GetActor() && *rb_ref->GetActor()) {
+			if (auto rb_ref = collider.GetComponentInParent<RigidbodyComponent>(); rb_ref && rb_ref->GetActor() && *rb_ref->GetActor()) {
 
 				// Remove Collider from Previous Rigidbody
 				if (auto old_rb_ref = collider.GetShape()->GetRigidbody(); old_rb_ref && *old_rb_ref)
@@ -74,9 +74,9 @@ namespace Louron {
 				if (auto new_rb_ref = collider.GetShape()->GetRigidbody(); new_rb_ref && *new_rb_ref)
 					new_rb_ref->AttachShape(collider.GetShape(), entity.GetUUID());
 
-				collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-				collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
-				collider.GetShape()->ClearFlag(ColliderFlag_RigidbodyUpdated);
+				collider.AddFlag(ColliderFlag_ShapePropsUpdated);
+				collider.AddFlag(ColliderFlag_TransformUpdated);
+				collider.ClearFlag(ColliderFlag_RigidbodyUpdated);
 			}
 
 		}
@@ -86,100 +86,44 @@ namespace Louron {
 		//    This is the fall through for if there is not a rigidbody attached to the 
 		//	  current entity
 		//
-		if (collider.GetShape()->CheckFlag(ColliderFlag_RigidbodyUpdated)) {
+		if (collider.CheckFlag(ColliderFlag_RigidbodyUpdated)) {
 
 			// Remove Collider from Previous Rigidbody
 			if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && *rb_ref)
 				rb_ref->DetachShape(collider.GetShape());
 
+			L_CORE_INFO(entity.GetName());
 			collider.CreateStaticRigidbody();
 
-			collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-			collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
+			collider.AddFlag(ColliderFlag_ShapePropsUpdated);
+			collider.AddFlag(ColliderFlag_TransformUpdated);
 		}
 
 		// 4. Update Shape Transform and Shape Properties
-		if (collider.GetShape()->CheckFlag(ColliderFlag_ShapePropsUpdated) || collider.GetShape()->CheckFlag(ColliderFlag_TransformUpdated)) {
+		if (collider.CheckFlag(ColliderFlag_ShapePropsUpdated) || collider.CheckFlag(ColliderFlag_TransformUpdated)) {
 
 			if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && *rb_ref)
 				rb_ref->AddFlag(RigidbodyFlag_TransformUpdated);
 
-			collider.UpdateTransform(entity.GetComponent<Transform>(), entity.GetScene()->FindEntityByUUID(collider.GetRigidbodyUUID()).GetComponent<Transform>());
+			collider.UpdateTransform(entity.GetComponent<TransformComponent>(), entity.GetScene()->FindEntityByUUID(collider.GetRigidbodyUUID()).GetComponent<TransformComponent>());
 		}
 
-		collider.GetShape()->ClearFlags();
+		collider.ClearFlags();
 
 	}
 
-	template void ProcessColliderChanges<SphereCollider>(Entity& entity);
-	template void ProcessColliderChanges<BoxCollider>(Entity& entity);
+	template void ProcessColliderChanges<SphereColliderComponent>(Entity& entity);
+	template void ProcessColliderChanges<BoxColliderComponent>(Entity& entity);
 
 #pragma endregion
 
-#pragma region Rigidbody
-
-	Rigidbody& PhysicsSystem::AddRigidBody(Entity entity, Scene* scene) {
-
-		// We want to first update all flags of colliders within this entity 
-		// and it's children that do not have a rigidbody. If there is a child 
-		// of this entity that has a rigidbody, we won't update their children 
-		// as their children will refer to that rigidbody and that would be 
-		// unchanged for them
-		{
-			std::function<void(Entity)> update_child_collider_flags =
-
-			[&](Entity start_entity) -> void {
-
-				if (!start_entity.HasComponent<Rigidbody>()) {
-
-					// Check if current entity has a collider component, so we 
-					// can link the collider to this rigidbody.
-					if (start_entity.HasComponent<SphereCollider>()) {
-
-						auto& collider = entity.GetComponent<SphereCollider>();
-
-						collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-						collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
-						collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-					}
-					if (start_entity.HasComponent<BoxCollider>()) {
-
-						auto& collider = entity.GetComponent<BoxCollider>();
-
-						collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-						collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
-						collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
-					}
-
-					if (start_entity.HasComponent<HierarchyComponent>()) {
-
-						for (const auto& child_uuid : start_entity.GetComponent<HierarchyComponent>().GetChildren()) {
-
-							update_child_collider_flags(start_entity.GetScene()->FindEntityByUUID(child_uuid));
-						}
-
-					}
-
-				}
-
-			};
-
-			update_child_collider_flags(entity);
-		}
-
-		Transform& entity_transform = entity.GetComponent<Transform>();
-		PxScene* physics_scene = scene->GetPhysScene();
-
-		Rigidbody& component = scene->m_Registry.emplace<Rigidbody>(entity, &entity_transform, physics_scene);
-
-		return component;
-	}
+#pragma region RigidbodyComponent
 
 	void PhysicsSystem::RemoveRigidBody(Entity entity, Scene* scene) {
 
-		auto& component = entity.GetComponent<Rigidbody>();
+		auto& component = entity.GetComponent<RigidbodyComponent>();
 
-		if (!entity.HasComponent<Rigidbody>()) {
+		if (!entity.HasComponent<RigidbodyComponent>()) {
 			L_CORE_WARN("Entity Does Not Have Rigidbody - Cannot Remove Component That Isn't There.");
 			return;
 		}
@@ -197,15 +141,15 @@ namespace Louron {
 					if (!shape_entity)
 						continue;
 
-					if (shape_entity.HasComponent<SphereCollider>()) {
+					if (shape_entity.HasComponent<SphereColliderComponent>()) {
 
-						shape_entity.GetComponent<SphereCollider>().ResetRigidbody();
-						shape_entity.GetComponent<SphereCollider>().GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+						shape_entity.GetComponent<SphereColliderComponent>().ResetRigidbody();
+						shape_entity.GetComponent<SphereColliderComponent>().AddFlag(ColliderFlag_RigidbodyUpdated);
 					}
-					if (shape_entity.HasComponent<BoxCollider>()) {
-
-						shape_entity.GetComponent<BoxCollider>().ResetRigidbody();
-						shape_entity.GetComponent<BoxCollider>().GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
+					if (shape_entity.HasComponent<BoxColliderComponent>()) {
+						L_CORE_INFO(shape_entity.GetName());
+						shape_entity.GetComponent<BoxColliderComponent>().ResetRigidbody();
+						shape_entity.GetComponent<BoxColliderComponent>().AddFlag(ColliderFlag_RigidbodyUpdated);
 					}
 				}
 			}
@@ -227,13 +171,13 @@ namespace Louron {
 			physScene->removeActor(*component.GetActor()->GetActor());
 
 			// 4. Delete Actor
-			entity.GetComponent<Rigidbody>().GetActor()->Release();
-			entity.GetComponent<Rigidbody>().m_RigidDynamic = nullptr;
+			entity.GetComponent<RigidbodyComponent>().GetActor()->Release();
+			entity.GetComponent<RigidbodyComponent>().m_RigidDynamic = nullptr;
 
 		}
 
 		// 5. Remove Rigidbody Component from Entity
-		scene->m_Registry.remove_if_exists<Rigidbody>(entity);
+		scene->m_Registry.remove_if_exists<RigidbodyComponent>(entity);
 
 		L_CORE_INFO("Rigidbody Has Been Successfully Removed from Entity ({0}:{1}).", entity.GetName(), entity.GetUUID());
 	}
@@ -242,29 +186,29 @@ namespace Louron {
 
 #pragma region Colliders
 
-	SphereCollider& PhysicsSystem::AddSphereCollider(Entity entity, Scene* scene) {
+	SphereColliderComponent& PhysicsSystem::AddSphereCollider(Entity entity, Scene* scene) {
 
-		SphereCollider& collider = scene->m_Registry.emplace<SphereCollider>(entity);
+		SphereColliderComponent& collider = scene->m_Registry.emplace<SphereColliderComponent>(entity);
 
 		collider.SetColliderUserData(entity.GetUUID());
 
-		collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
-		collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-		collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
+		collider.AddFlag(ColliderFlag_TransformUpdated);
+		collider.AddFlag(ColliderFlag_RigidbodyUpdated);
+		collider.AddFlag(ColliderFlag_ShapePropsUpdated);
 
 		return collider;
 		
 	}
 
-	BoxCollider& PhysicsSystem::AddBoxCollider(Entity entity, Scene* scene) {
+	BoxColliderComponent& PhysicsSystem::AddBoxCollider(Entity entity, Scene* scene) {
 
-		BoxCollider& collider = scene->m_Registry.emplace<BoxCollider>(entity);
+		BoxColliderComponent& collider = scene->m_Registry.emplace<BoxColliderComponent>(entity);
 
 		collider.SetColliderUserData(entity.GetUUID());
 
-		collider.GetShape()->AddFlag(ColliderFlag_TransformUpdated);
-		collider.GetShape()->AddFlag(ColliderFlag_RigidbodyUpdated);
-		collider.GetShape()->AddFlag(ColliderFlag_ShapePropsUpdated);
+		collider.AddFlag(ColliderFlag_TransformUpdated);
+		collider.AddFlag(ColliderFlag_RigidbodyUpdated);
+		collider.AddFlag(ColliderFlag_ShapePropsUpdated);
 
 		return collider;
 
@@ -274,56 +218,60 @@ namespace Louron {
 
 		if (colliderType == PxGeometryType::eSPHERE) {
 
-			if (!entity.HasComponent<SphereCollider>()) {
+			if (!entity.HasComponent<SphereColliderComponent>()) {
 				L_CORE_WARN("Entity Does Not Have Sphere Collider - Cannot Remove Component That Isn't There.");
 				return;
 			}
 
-			SphereCollider& collider = entity.GetComponent<SphereCollider>();
+			SphereColliderComponent& collider = entity.GetComponent<SphereColliderComponent>();
 
-			if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && !collider.GetShape()->IsStatic()) {
+			if(collider.GetShape()) {
+				if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && !collider.GetShape()->IsStatic()) {
 
-				rb_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
+					rb_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
 
-				rb_ref->DetachShape(collider.GetShape());
-				collider.ResetRigidbody();
-			}
-			else if (rb_ref && collider.GetShape()->IsStatic()) {
+					rb_ref->DetachShape(collider.GetShape());
+					collider.ResetRigidbody();
+				}
+				else if (rb_ref && collider.GetShape()->IsStatic()) {
 
-				scene->GetPhysScene()->removeActor(*collider.GetShape()->GetRigidbody()->GetActor());
-				collider.ResetRigidbody();
+					scene->GetPhysScene()->removeActor(*collider.GetShape()->GetRigidbody()->GetActor());
+					collider.ResetRigidbody();
+				}
 			}
 
 			collider.Release();
-			scene->m_Registry.remove_if_exists<SphereCollider>(entity);
+			scene->m_Registry.remove_if_exists<SphereColliderComponent>(entity);
 
 			L_CORE_INFO("Sphere Collider Has Been Successfully Removed from Entity ({0}:{1}).", entity.GetName(), entity.GetUUID());
 		}
 
 		if (colliderType == PxGeometryType::eBOX) {
 
-			if (!entity.HasComponent<BoxCollider>()) {
+			if (!entity.HasComponent<BoxColliderComponent>()) {
 				L_CORE_WARN("Entity Does Not Have Box Collider - Cannot Remove Component That Isn't There.");
 				return;
 			}
 
-			BoxCollider& collider = entity.GetComponent<BoxCollider>();
+			BoxColliderComponent& collider = entity.GetComponent<BoxColliderComponent>();
 
-			if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && !collider.GetShape()->IsStatic()) {
+			if (collider.GetShape()) {
+				if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && !collider.GetShape()->IsStatic()) {
 
-				rb_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
+					rb_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
 
-				rb_ref->DetachShape(collider.GetShape());
-				collider.ResetRigidbody();
-			}
-			else if (rb_ref && collider.GetShape()->IsStatic()) {
+					rb_ref->DetachShape(collider.GetShape());
+					collider.ResetRigidbody();
+				}
+				else if (rb_ref && collider.GetShape()->IsStatic()) {
 
-				scene->GetPhysScene()->removeActor(*collider.GetShape()->GetRigidbody()->GetActor());
-				collider.ResetRigidbody();
+					scene->GetPhysScene()->removeActor(*collider.GetShape()->GetRigidbody()->GetActor());
+					collider.ResetRigidbody();
+				}
 			}
 
 			collider.Release();
-			scene->m_Registry.remove_if_exists<BoxCollider>(entity);
+			scene->m_Registry.remove_if_exists<BoxColliderComponent>(entity);
 
 			L_CORE_INFO("Box Collider Has Been Successfully Removed from Entity ({0}:{1}).", entity.GetName(), entity.GetUUID());
 		}
@@ -340,9 +288,9 @@ namespace Louron {
 		if (!scene->m_IsPaused) {
 
 			// Process all Deferred forces from last update
-			auto view = scene->GetAllEntitiesWith<Rigidbody>();
+			auto view = scene->GetAllEntitiesWith<RigidbodyComponent>();
 			for (auto& entity_handle : view) {
-				auto& rb_ref = view.get<Rigidbody>(entity_handle);
+				auto& rb_ref = view.get<RigidbodyComponent>(entity_handle);
 				if(rb_ref.GetActor()) {
 					if (!rb_ref.m_DeferredForce.empty()) {
 						for (const auto& action : rb_ref.m_DeferredForce) {
@@ -372,16 +320,16 @@ namespace Louron {
 	void PhysicsSystem::UpdatePhysicsObjects(std::shared_ptr<Scene> scene) {
 		
 		// 1. Update Sphere Colliders
-		auto sc_view = scene->GetAllEntitiesWith<SphereCollider>();
+		auto sc_view = scene->GetAllEntitiesWith<SphereColliderComponent>();
 		if (sc_view.begin() != sc_view.end()) {
 			for (const auto& entity_handle : sc_view) {
 
-				auto& collider = sc_view.get<SphereCollider>(entity_handle);
+				auto& collider = sc_view.get<SphereColliderComponent>(entity_handle);
 
-				if (!collider.GetShape()->NoFlagsSet()) {
+				if (!collider.NoFlagsSet()) {
 					Entity entity = { entity_handle, scene.get()};
 
-					ProcessColliderChanges<SphereCollider>(entity);
+					ProcessColliderChanges<SphereColliderComponent>(entity);
 				}
 
 			}
@@ -389,27 +337,27 @@ namespace Louron {
 		}
 
 		// 2. Update Box Colliders
-		auto bc_view = scene->GetAllEntitiesWith<BoxCollider>();
+		auto bc_view = scene->GetAllEntitiesWith<BoxColliderComponent>();
 		if (bc_view.begin() != bc_view.end()) {
 			for (const auto& entity_handle : bc_view) {
 
-				auto& collider = bc_view.get<BoxCollider>(entity_handle);
+				auto& collider = bc_view.get<BoxColliderComponent>(entity_handle);
 
-				if (!collider.GetShape()->NoFlagsSet()) {
+				if (!collider.NoFlagsSet()) {
 					Entity entity = { entity_handle, scene.get()};
 
-					ProcessColliderChanges<BoxCollider>(entity);
+					ProcessColliderChanges<BoxColliderComponent>(entity);
 				}
 
 			}
 
 		}
 
-		auto rb_view = scene->GetAllEntitiesWith<Rigidbody>();
+		auto rb_view = scene->GetAllEntitiesWith<RigidbodyComponent>();
 		if (rb_view.begin() != rb_view.end()) {
 			for (const auto& entity_handle : rb_view) {
 
-				auto& rigidbody = rb_view.get<Rigidbody>(entity_handle);
+				auto& rigidbody = rb_view.get<RigidbodyComponent>(entity_handle);
 
 				// 1. Current Entity Has Rigidbody and Shape Does Not Already Refer to Rigidbody
 				if(rigidbody.GetActor())
@@ -419,7 +367,7 @@ namespace Louron {
 					}
 
 					if (rigidbody.GetActor()->CheckFlag(RigidbodyFlag_TransformUpdated)) {
-						rigidbody.GetActor()->SetGlobalPose(rigidbody.GetEntity().GetComponent<Transform>());
+						rigidbody.GetActor()->SetGlobalPose(rigidbody.GetEntity().GetComponent<TransformComponent>());
 					}
 
 					rigidbody.GetActor()->ClearFlags();
@@ -460,10 +408,10 @@ namespace Louron {
 
 		std::function<void(Entity)> update_physics = [&](Entity start_entity) -> void {
 			
-			if(start_entity && start_entity.HasComponent<Rigidbody>()) {
+			if(start_entity && start_entity.HasComponent<RigidbodyComponent>()) {
 
-				auto& transform = start_entity.GetComponent<Transform>();
-				auto& rigidbody = start_entity.GetComponent<Rigidbody>();
+				auto& transform = start_entity.GetComponent<TransformComponent>();
+				auto& rigidbody = start_entity.GetComponent<RigidbodyComponent>();
 
 				if(rigidbody.GetActor()) {
 					PxTransform physics_transform = rigidbody.GetActor()->GetGlobalPose();

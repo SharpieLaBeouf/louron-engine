@@ -16,6 +16,7 @@
 #include "Components/Physics/Collider.h"
 #include "Components/Physics/Rigidbody.h"
 #include "Components/Physics/PhysicsWrappers.h"
+#include "Components/Physics/CollisionCallback.h"
 
 #include "Scene Systems/Physics System.h"
 
@@ -28,6 +29,11 @@
 #include "../Core/Input.h"
 
 #include "../OpenGL/Framebuffer.h"
+
+#include "../Scripting/Script Manager.h"
+#include "../Scripting/Script Connector.h"
+
+#include "../Project/Project.h"
 
 // C++ Standard Library Headers
 #include <iomanip>
@@ -44,60 +50,28 @@ namespace Louron {
 		PxFilterObjectAttributes attributes0, PxFilterData filterData0,
 		PxFilterObjectAttributes attributes1, PxFilterData filterData1,
 		PxPairFlags& pairFlags, const void* constantBlock, PxU32 constantBlockSize) {
-		pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eNOTIFY_TOUCH_FOUND;
+		pairFlags = PxPairFlag::eCONTACT_DEFAULT | PxPairFlag::eNOTIFY_TOUCH_FOUND | PxPairFlag::eNOTIFY_TOUCH_PERSISTS | PxPairFlag::eNOTIFY_TOUCH_LOST;
 		return PxFilterFlag::eDEFAULT;
 	}
 
 	Scene::Scene() {
-		// Create PhysX Scene
-		PxSceneDesc sceneDesc(PxGetPhysics().getTolerancesScale());
-		sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
-		sceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2);
-		sceneDesc.filterShader = CustomFilterShader;
-		m_PhysxScene = PxGetPhysics().createScene(sceneDesc);
-
-#ifdef _DEBUG
-		PxPvdSceneClient* pvdClient = m_PhysxScene->getScenePvdClient();
-		if (pvdClient)
-		{
-			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
-			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
-			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
-		}
-#endif
 
 		m_SceneConfig.SceneFilePath = "Scenes/Untitled Scene.lscene";
 
 		m_SceneConfig.Name = m_SceneConfig.SceneFilePath.filename().replace_extension().string();
 		m_SceneConfig.AssetDirectory = "Assets/";
-		m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
-		
+
+		m_SceneConfig.ScenePipelineType = L_RENDER_PIPELINE::FORWARD_PLUS;
 		m_SceneConfig.ScenePipeline = std::make_shared<ForwardPlusPipeline>();
 	}
 
 	Scene::Scene(L_RENDER_PIPELINE pipeline) {
-		// Create PhysX Scene
-		PxSceneDesc sceneDesc(PxGetPhysics().getTolerancesScale());
-		sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
-		sceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2);
-		sceneDesc.filterShader = CustomFilterShader;
-		m_PhysxScene = PxGetPhysics().createScene(sceneDesc);
-
-#ifdef _DEBUG
-		PxPvdSceneClient* pvdClient = m_PhysxScene->getScenePvdClient();
-		if (pvdClient)
-		{
-			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
-			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
-			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
-		}
-#endif
 
 		m_SceneConfig.SceneFilePath = "Scenes/Untitled Scene.lscene";
 
 		m_SceneConfig.Name = m_SceneConfig.SceneFilePath.filename().replace_extension().string();
 		m_SceneConfig.AssetDirectory = "Assets/";
-		m_SceneConfig.ScenePipeline = std::make_shared<RenderPipeline>();
+		m_SceneConfig.ScenePipelineType = pipeline;
 		
 		switch (pipeline) {
 		case L_RENDER_PIPELINE::FORWARD:
@@ -110,13 +84,6 @@ namespace Louron {
 			m_SceneConfig.ScenePipeline = std::make_shared<DeferredPipeline>();
 			break;
 		}
-
-	}
-
-	Scene::~Scene() {
-
-
-		m_PhysxScene->release();
 
 	}
 
@@ -145,7 +112,7 @@ namespace Louron {
 
 			SceneSerializer serializer(std::static_pointer_cast<Scene>(shared_from_this()));
 			if (serializer.Deserialize(outFilePath)) {
-				m_SceneConfig.SceneFilePath = outFilePath;
+				m_SceneConfig.SceneFilePath = std::filesystem::relative(outFilePath, Project::GetActiveProject()->GetProjectDirectory());
 				return true;
 			}
 
@@ -180,15 +147,27 @@ namespace Louron {
 		auto& temp = entity.AddComponent<IDComponent>(uuid);
 
 		// 2. Add Transform Component
-		entity.AddComponent<Transform>();
+		entity.AddComponent<TransformComponent>();
 
 		// 3. Add Tag Component
 		std::string uniqueName = name.empty() ? "Untitled Entity" : name;
 		int suffix = 1;
 		std::string baseName = uniqueName;
 
-		// Ensure the name is unique by appending a numeric suffix
-		while (FindEntityByName(uniqueName)) {
+		// Ensure the name is unique by appending a numeric suffix		
+		auto check_tags = [&](const char* name) -> bool {
+
+			auto view = m_Registry.view<TagComponent>();
+			for (auto entity : view) {
+				const TagComponent& tag = view.get<TagComponent>(entity);
+				if (tag.Tag == name)
+					return true;
+			}
+
+			return false;
+		};
+
+		while (check_tags(uniqueName.c_str())) {
 			uniqueName = baseName + " (" + std::to_string(suffix++) + ")";
 		}
 		auto& tag = entity.AddComponent<TagComponent>();
@@ -205,25 +184,44 @@ namespace Louron {
 	#pragma region Component Copying
 
 	template<typename... Component>
-	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	static void CopyComponent(entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap, Scene* scene_ref)
 	{
 		([&]()
 			{
 				auto view = src.view<Component>();
 				for (auto srcEntity : view)
 				{
-					entt::entity dstEntity = enttMap.at(src.get<IDComponent>(srcEntity).ID);
+					UUID dest_id = src.get<IDComponent>(srcEntity).ID;
+					entt::entity dstEntity = enttMap.at(dest_id);
 
 					auto& srcComponent = src.get<Component>(srcEntity);
-					dst.emplace_or_replace<Component>(dstEntity, srcComponent);
+					
+					// Store entity uuid and scene of source component
+					UUID source_uuid = srcComponent.entity_uuid;
+					Scene* source_scene = srcComponent.scene;
+
+					// Change source component uuid and scene to new id and scene
+					srcComponent.entity_uuid = dest_id;
+					srcComponent.scene = scene_ref;
+
+					// Copy construct new component with new id and scene
+					auto& dstComponent = dst.emplace_or_replace<Component>(dstEntity, srcComponent);
+					
+					// Ensure new component has the correct id and scene ref
+					dstComponent.entity_uuid = dest_id;
+					dstComponent.scene = scene_ref;
+
+					// Revert source component to its normal state
+					srcComponent.entity_uuid = source_uuid;
+					srcComponent.scene = source_scene;
 				}
 			}(), ...);
 	}
 
 	template<typename... Component>
-	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap)
+	static void CopyComponent(ComponentGroup<Component...>, entt::registry& dst, entt::registry& src, const std::unordered_map<UUID, entt::entity>& enttMap, Scene* scene_ref)
 	{
-		CopyComponent<Component...>(dst, src, enttMap);
+		CopyComponent<Component...>(dst, src, enttMap, scene_ref);
 	}
 
 	template<typename... Component>
@@ -241,8 +239,6 @@ namespace Louron {
 	{
 		CopyComponentIfExists<Component...>(dst, src);
 	}
-
-	#pragma endregion
 
 	/// <summary>
 	/// Copy Constructor and Operator Deleted in ENTT for Registry.
@@ -265,9 +261,63 @@ namespace Louron {
 		}
 
 		// Copy components (except IDComponent and TagComponent)
-		CopyComponent(AllComponents{}, dstSceneRegistry, srcSceneRegistry, enttMap);
+		CopyComponent(AllComponents{}, dstSceneRegistry, srcSceneRegistry, enttMap, this);
 		return true;
 	}
+
+	std::shared_ptr<Scene> Scene::Copy(std::shared_ptr<Scene> source_scene)
+	{
+		L_RENDER_PIPELINE pipeline = source_scene->GetConfig().ScenePipelineType;
+
+		std::shared_ptr<Scene> dest_scene = std::make_shared<Scene>(pipeline);
+
+		dest_scene->m_DisplayOctree = source_scene->m_DisplayOctree;
+		dest_scene->m_IsPaused = source_scene->m_IsPaused;
+		dest_scene->m_IsRunning = source_scene->m_IsRunning;
+		dest_scene->m_IsPhysicsCalculating = source_scene->m_IsPhysicsCalculating;
+
+		dest_scene->m_SceneConfig.AssetDirectory = source_scene->m_SceneConfig.AssetDirectory;
+		dest_scene->m_SceneConfig.Name = source_scene->m_SceneConfig.Name;
+		dest_scene->m_SceneConfig.SceneFilePath = source_scene->m_SceneConfig.SceneFilePath;
+		dest_scene->m_SceneConfig.ScenePipelineType = source_scene->m_SceneConfig.ScenePipelineType;
+
+		dest_scene->CopyRegistry(source_scene);
+
+		// Generate Octree for New Scene
+		{
+			// Calculate Overall Scene Octree
+			OctreeBoundsConfig octree_config{};
+
+			std::vector<OctreeBounds<Entity>::OctreeData> data_sources;
+
+			auto bounds_view_mesh = dest_scene->GetAllEntitiesWith<AssetMeshFilter, AssetMeshRenderer>();
+			for (const auto& entity_handle : bounds_view_mesh) {
+				auto& mesh_filter = bounds_view_mesh.get<AssetMeshFilter>(entity_handle);
+
+				// Ensure the AABB is up to date
+				mesh_filter.UpdateTransformedAABB();
+
+				const auto& aabb = mesh_filter.TransformedAABB;
+
+				data_sources.push_back(std::make_shared<OctreeDataSource<Entity>>(mesh_filter.GetEntity(), aabb));
+			}
+
+			octree_config.Looseness = 1.25f;
+			octree_config.PreferredDataSourceLimit = 8;
+
+			// Create the octree and insert data sources
+			dest_scene->m_Octree = std::make_shared<OctreeBounds<Entity>>(octree_config, data_sources);
+		}
+
+		auto view = dest_scene->GetAllEntitiesWith<IDComponent>();
+		for (auto& entity : view) {
+			Entity ent = { entity, dest_scene.get() };
+		}
+
+		return dest_scene;
+	}
+
+	#pragma endregion
 
 	void Scene::SetPhysScene(PxScene* physScene) {
 
@@ -292,7 +342,6 @@ namespace Louron {
 	void Scene::SetSceneFrameBuffer(std::shared_ptr<FrameBuffer> framebuffer) { m_SceneFrameBuffer = framebuffer; }
 	std::shared_ptr<FrameBuffer> Scene::GetSceneFrameBuffer() const { return m_SceneFrameBuffer; }
 
-
 	// TODO: Duplicates Entity in Scene
 	Entity Scene::DuplicateEntity(Entity entity) {
 		return Entity();
@@ -313,25 +362,33 @@ namespace Louron {
 			return;
 		}
 
+		if (m_IsRunning && entity.HasComponent<ScriptComponent>())
+			ScriptManager::OnDestroyEntity(entity);
+
 		// 3. Call Physics System Remove Methods
-		if (entity.HasAnyComponent<Rigidbody, SphereCollider, BoxCollider>()) {
-			
-			if (entity.HasComponent<Rigidbody>())
+		if (entity.HasAnyComponent<RigidbodyComponent, SphereColliderComponent, BoxColliderComponent>()) {
+
+			if (entity.HasComponent<RigidbodyComponent>())
 				PhysicsSystem::RemoveRigidBody(entity, this);
 
-			if (entity.HasComponent<SphereCollider>())
+			if (entity.HasComponent<SphereColliderComponent>())
 				PhysicsSystem::RemoveCollider(entity, this, PxGeometryType::eSPHERE);
 
-			if (entity.HasComponent<BoxCollider>())
+			if (entity.HasComponent<BoxColliderComponent>())
 				PhysicsSystem::RemoveCollider(entity, this, PxGeometryType::eBOX);
 		}
 
 		// 4. Remove From Parent and Destroy All Children
 		if (entity.HasComponent<HierarchyComponent>()) {
 
+			auto& component = entity.GetComponent<HierarchyComponent>();
+
+			if (component.HasParent()) 
+				component.DetachParent();
+			
 			// Make a copy of the child list so we don't invalidate 
 			// the iterator whilst destroying children
-			std::vector<UUID> children_vec = entity.GetComponent<HierarchyComponent>().GetChildren();
+			std::vector<UUID> children_vec = component.GetChildren();
 			for (const auto& children_uuid : children_vec) 
 				DestroyEntity(FindEntityByUUID(children_uuid));
 		}
@@ -355,6 +412,11 @@ namespace Louron {
 
 		L_CORE_WARN("Scene Does Not Have an Entity Named: {0}", name);
 		return Entity{ entt::null, nullptr };
+	}
+
+	bool Scene::HasEntityByUUID(UUID uuid)
+	{
+		return m_EntityMap->find(uuid) != m_EntityMap->end();
 	}
 
 	Entity Scene::FindEntityByUUID(UUID uuid)
@@ -383,7 +445,9 @@ namespace Louron {
 
 	bool Scene::HasEntity(const Entity& entity)
 	{
-		return m_Registry.has(entity);
+		if(ValidEntity(entity))
+			return m_Registry.has(entity);
+		return false;
 	}
 	bool Scene::HasEntity(const std::string& name)
 	{
@@ -394,7 +458,12 @@ namespace Louron {
 		return (FindEntityByUUID(uuid)) ? true : false;
 	}
 
-	Entity Scene::InstantiatePrefab(std::shared_ptr<Prefab> prefab, std::optional<Transform> transform, const UUID& parent_uuid)
+	bool Scene::ValidEntity(const Entity& entity)
+	{
+		return m_Registry.valid(entity);
+	}
+
+	Entity Scene::InstantiatePrefab(std::shared_ptr<Prefab> prefab, std::optional<TransformComponent> transform, const UUID& parent_uuid)
 	{
 		if (!prefab)
 			return {};
@@ -440,20 +509,20 @@ namespace Louron {
 				}
 
 				// 1.f. Transform Component
-				if (prefab_registry->has<Transform>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<Transform>(start_prefab_entity);
-					instantiated_entity.RemoveComponent<Transform>(); // Remove so we can use copy constructor for transform
+				if (prefab_registry->has<TransformComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<TransformComponent>(start_prefab_entity);
+					instantiated_entity.RemoveComponent<TransformComponent>(); // Remove so we can use copy constructor for transform
 					
 					if (parent_uuid == NULL_UUID) { 
 						// If we are the root entity, we check if the transform 
 						// passed has a value, if not, standard copy from prefab
 						if (transform.has_value())
-							instantiated_entity.AddComponent<Transform>(transform.value());
+							instantiated_entity.AddComponent<TransformComponent>(transform.value());
 						else
-							instantiated_entity.AddComponent<Transform>(component);
+							instantiated_entity.AddComponent<TransformComponent>(component);
 					}
 					else {
-						instantiated_entity.AddComponent<Transform>(component);
+						instantiated_entity.AddComponent<TransformComponent>(component);
 					}
 				}
 
@@ -494,21 +563,27 @@ namespace Louron {
 				}
 
 				// 1.m. Rigidbody Component
-				if (prefab_registry->has<Rigidbody>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<Rigidbody>(start_prefab_entity);
-					instantiated_entity.AddComponent<Rigidbody>() = component;
+				if (prefab_registry->has<RigidbodyComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<RigidbodyComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<RigidbodyComponent>() = component;
 				}
 
 				// 1.n. Sphere Collider
-				if (prefab_registry->has<SphereCollider>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<SphereCollider>(start_prefab_entity);
-					instantiated_entity.AddComponent<SphereCollider>() = component;
+				if (prefab_registry->has<SphereColliderComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<SphereColliderComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<SphereColliderComponent>() = component;
 				}
 
 				// 1.o. Box Collider
-				if (prefab_registry->has<BoxCollider>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<BoxCollider>(start_prefab_entity);
-					instantiated_entity.AddComponent<BoxCollider>() = component;
+				if (prefab_registry->has<BoxColliderComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<BoxColliderComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<BoxColliderComponent>() = component;
+				}
+
+				// 1.p. Script Component
+				if (prefab_registry->has<ScriptComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<ScriptComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<ScriptComponent>() = component;
 				}
 			}
 
@@ -540,9 +615,94 @@ namespace Louron {
 
 #pragma region Scene Logic
 
+	// SCENE HARD START & STOP
+
+	// All scenes are started when they are created, not when we 
+	// are playing. This is to setup required things such as 
+	// collision callbacks and rendering pipeline
 	void Scene::OnStart() {
 
+		m_SceneConfig.ScenePipeline->OnStartPipeline(std::static_pointer_cast<Scene>(shared_from_this()));
+	}
+
+	void Scene::OnStop() {
+
+		if (m_IsRunning)
+			OnRuntimeStop();
+
+		if (m_IsSimulating)
+			OnSimulationStop();
+
+		m_IsRunning = false;
+		m_IsSimulating = false;
+
+		m_SceneConfig.ScenePipeline->OnStopPipeline();
+	}
+
+	// RUNTIME
+	void Scene::OnRuntimeStart() {
+
 		m_IsRunning = true;
+
+		// Scripting
+		{
+			ScriptManager::OnRuntimeStart(std::static_pointer_cast<Scene>(shared_from_this()));
+			// Instantiate all script entities
+
+			auto view = m_Registry.view<ScriptComponent>();
+			for (auto e : view)
+			{
+				Entity entity = { e, this };
+				ScriptManager::OnCreateEntity(entity);
+			}
+		}
+
+		OnPhysicsStart();
+	}
+	
+	void Scene::OnRuntimeStop() {
+
+		m_IsRunning = false;
+		m_IsSimulating = false;
+
+		ScriptManager::OnRuntimeStop();
+		OnPhysicsStop();
+	}
+
+	// PHYSICS SIMULATION
+	void Scene::OnSimulationStart() { 
+
+		m_IsSimulating = true;
+
+		OnPhysicsStart();
+	}
+
+	void Scene::OnSimulationStop() {
+
+		m_IsRunning = false;
+		m_IsSimulating = false;
+
+		OnPhysicsStop();
+	}
+
+	void Scene::OnPhysicsStart() {
+
+		// 1. Create new PhysX scene
+		PxSceneDesc sceneDesc(PxGetPhysics().getTolerancesScale());
+		sceneDesc.gravity = PxVec3(0.0f, -9.81f, 0.0f);
+		sceneDesc.cpuDispatcher = PxDefaultCpuDispatcherCreate(2);
+		sceneDesc.filterShader = CustomFilterShader;
+		m_PhysxScene = PxGetPhysics().createScene(sceneDesc);
+
+		#ifdef _DEBUG
+		PxPvdSceneClient* pvdClient = m_PhysxScene->getScenePvdClient();
+		if (pvdClient)
+		{
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONSTRAINTS, true);
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_CONTACTS, true);
+			pvdClient->setScenePvdFlag(PxPvdSceneFlag::eTRANSMIT_SCENEQUERIES, true);
+		}
+		#endif
 
 		if (!m_CollisionCallback) {
 			m_CollisionCallback = std::make_unique<CollisionCallback>(std::static_pointer_cast<Scene>(shared_from_this()));
@@ -550,17 +710,113 @@ namespace Louron {
 			m_PhysxScene->setSimulationEventCallback(m_CollisionCallback.get());
 		}
 
-		m_SceneConfig.ScenePipeline->OnStartPipeline(std::static_pointer_cast<Scene>(shared_from_this()));
+		// 2. Get All Entities with physics components
+		std::unordered_map<UUID, Entity> entities;
+		{
+			auto rb_view = GetAllEntitiesWith<RigidbodyComponent>();
+			for (auto& entt_id : rb_view)
+			{
+				Entity entity = { entt_id, this };
+				entities[entity.GetUUID()] = entity;
+			}
+			
+			auto bc_view = GetAllEntitiesWith<BoxColliderComponent>();
+			for (auto& entt_id : bc_view)
+			{
+				Entity entity = { entt_id, this };
+				entities[entity.GetUUID()] = entity;
+			}
+
+			auto sc_view = GetAllEntitiesWith<SphereColliderComponent>();
+			for (auto& entt_id : sc_view)
+			{
+				Entity entity = { entt_id, this };
+				entities[entity.GetUUID()] = entity;
+			}
+		}
+
+		// 3. Initialise All Physics Components
+		for (auto& [uuid, entity] : entities) {
+
+			if (entity.HasComponent<RigidbodyComponent>())
+				entity.GetComponent<RigidbodyComponent>().Init(&entity.GetComponent<TransformComponent>(), m_PhysxScene);
+			
+			if (entity.HasComponent<BoxColliderComponent>())
+				entity.GetComponent<BoxColliderComponent>().Init();
+			
+			if (entity.HasComponent<SphereColliderComponent>())
+				entity.GetComponent<SphereColliderComponent>().Init();
+			
+		}
 	}
 
+	void Scene::OnPhysicsStop() {
+
+		// 1. Get All Entities with physics components
+
+		std::unordered_map<UUID, Entity> entities;
+		{
+			auto rb_view = GetAllEntitiesWith<RigidbodyComponent>();
+			for (auto& entt_id : rb_view)
+			{
+				Entity entity = { entt_id, this };
+				entities[entity.GetUUID()] = entity;
+			}
+
+			auto bc_view = GetAllEntitiesWith<BoxColliderComponent>();
+			for (auto& entt_id : bc_view)
+			{
+				Entity entity = { entt_id, this };
+				entities[entity.GetUUID()] = entity;
+			}
+
+			auto sc_view = GetAllEntitiesWith<SphereColliderComponent>();
+			for (auto& entt_id : sc_view)
+			{
+				Entity entity = { entt_id, this };
+				entities[entity.GetUUID()] = entity;
+			}
+		}
+
+		// 2. Shutdown All Physics Components
+		for (auto& [uuid, entity] : entities) {
+
+			if (entity.HasComponent<RigidbodyComponent>())
+				entity.GetComponent<RigidbodyComponent>().Shutdown();
+
+			if (entity.HasComponent<BoxColliderComponent>())
+				entity.GetComponent<BoxColliderComponent>().Shutdown();
+
+			if (entity.HasComponent<SphereColliderComponent>())
+				entity.GetComponent<SphereColliderComponent>().Shutdown();
+		}
+
+		m_PhysxScene->release();
+		m_PhysxScene = nullptr;
+	}
+
+	// UPDATE
 	void Scene::OnUpdate() {
 
+		// Physics
+		if (!m_IsPaused && (m_IsRunning || m_IsSimulating)) {
+			PhysicsSystem::UpdatePhysicsObjects(std::static_pointer_cast<Scene>(shared_from_this()));
+		}
+
+		// Scripts - only if running
 		if (!m_IsPaused && m_IsRunning) {
 
-			PhysicsSystem::UpdatePhysicsObjects(std::static_pointer_cast<Scene>(shared_from_this()));
+			// See if any entities that have inactive scripts have recently become active
+			ScriptManager::CheckInactiveScriptsOnEntities();
 
-			m_SceneConfig.ScenePipeline->OnUpdate();
+			auto script_entities = m_Registry.view<ScriptComponent>();
+			for (auto script_entity : script_entities)
+				ScriptManager::OnUpdateEntity({ script_entity, this });
+			
 		}
+
+		// Always Render
+		m_SceneConfig.ScenePipeline->OnUpdate();
 	}
 
 	void Scene::OnUpdateGUI() {
@@ -570,11 +826,36 @@ namespace Louron {
 	}
 
 	void Scene::OnFixedUpdate() {
-		m_IsSimulatingPhysics = true;
 
-		PhysicsSystem::Update(std::static_pointer_cast<Scene>(shared_from_this()));
+		// Scripts - only if running
+		if (!m_IsPaused && m_IsRunning) {
 
-		m_IsSimulatingPhysics = false;
+			auto script_entities = m_Registry.view<ScriptComponent>();
+			for (auto script_entity : script_entities)
+				ScriptManager::OnFixedUpdateEntity({ script_entity, this });
+
+		}
+
+		// Physics
+		if (!m_IsPaused && (m_IsRunning || m_IsSimulating)) {
+
+			m_IsPhysicsCalculating = true;
+
+			PhysicsSystem::Update(std::static_pointer_cast<Scene>(shared_from_this()));
+
+			// Handle persistent collision triggers as trigger callback is not called when contact is persistent
+			for (const auto& pair : CollisionCallback::s_ActiveTriggers) {
+				Entity triggerEntity = FindEntityByUUID(pair.first);
+				Entity otherEntity = FindEntityByUUID(pair.second);
+
+				if (triggerEntity && otherEntity && triggerEntity.HasComponent<ScriptComponent>()) {
+					ScriptManager::OnCollideEntity(triggerEntity, otherEntity, _Collision_Type::TriggerStay);
+				}
+			}
+
+			m_IsPhysicsCalculating = false;
+		}
+
 	}
 
 	void Scene::OnViewportResize(const glm::ivec2& new_size) {
@@ -600,12 +881,6 @@ namespace Louron {
 
 	}
 
-	void Scene::OnStop() {
-
-		m_IsRunning = false;
-
-		m_SceneConfig.ScenePipeline->OnStopPipeline();
-	}
 
 #pragma endregion
 

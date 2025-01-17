@@ -1,6 +1,7 @@
 #pragma once
 
 // Louron Core Headers
+#include "../Core/KeyCodes.h"
 
 // C++ Standard Library Headers
 #include <string>

@@ -63,7 +63,7 @@ namespace Louron {
 		/// <summary>
 		/// Initial Bounds of the Octree Root Node.
 		/// </summary>
-		Bounds_AABB InitialBounds{};
+		Bounds_AABB InitialBounds{ glm::vec3 (-50.0f), glm::vec3(50.0f) };
 
 		/// <summary>
 		/// When a Node is Queried, and itself and it's children
@@ -897,9 +897,7 @@ namespace Louron {
 			while (!m_RootNode->Insert(data_source, 0, false)) {
 
 				if (octree_growth_attempts < max_attempts) {
-					if (!GrowOctree(data_source->Bounds.Center() - m_RootNode->GetNodeBounds().Center())) {
-						octree_growth_attempts = max_attempts;
-					}
+					GrowOctree(data_source->Bounds.Center() - m_RootNode->GetNodeBounds().Center());
 				}
 				else {
 					L_CORE_WARN("Could Not Grow the Octree to Fit Data Source.");
@@ -1276,8 +1274,8 @@ namespace Louron {
 
 			}
 			else {
-				m_Config.InitialBounds.BoundsMin = glm::vec3(50.0f);
-				m_Config.InitialBounds.BoundsMax = glm::vec3(-50.0f);
+				m_Config.InitialBounds.BoundsMin = glm::vec3(-1000.0f);
+				m_Config.InitialBounds.BoundsMax = glm::vec3(1000.0f);
 			}
 
 			// 3. Pre-allocate the global data vector

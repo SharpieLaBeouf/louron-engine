@@ -27,15 +27,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	Louron::LoggingSystem::Init();
 
-	auto app = Louron::CreateEngine({});
+    // Pass arguments to the engine
+    auto app = Louron::CreateEngine({});
 
 #endif
 
+    if (!app)
+        return -1;
 
 	app->Run();
 
 	delete app;
-
 
 	return 0;
 }

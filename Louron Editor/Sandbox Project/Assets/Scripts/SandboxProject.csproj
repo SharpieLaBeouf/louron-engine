@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>SandboxProject</RootNamespace>
+
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+
+    <BaseOutputPath>Binaries</BaseOutputPath>
+    <OutputPath>Binaries</OutputPath>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="Louron Script Core">
+      <HintPath>E:\Coding\Louron\Louron Editor\Resources\Scripting\Louron Script Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

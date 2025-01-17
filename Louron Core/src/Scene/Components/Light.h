@@ -26,7 +26,7 @@ namespace YAML {
 
 namespace Louron {
 
-	enum class ShadowTypeFlag {
+	enum class ShadowTypeFlag : uint8_t {
 
 		NoShadows	= 0,
 		HardShadows = 1,

@@ -168,6 +168,8 @@
     <ClCompile Include="src\OpenGL\Material.cpp" />
     <ClCompile Include="src\Scene\Components\Skybox.cpp" />
     <ClCompile Include="src\Scene\Components\UUID.cpp" />
+    <ClCompile Include="src\Scripting\Script Connector.cpp" />
+    <ClCompile Include="src\Scripting\Script Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\assimp\aabb.h" />
@@ -255,6 +257,7 @@
     <ClInclude Include="include\assimp\XMLTools.h" />
     <ClInclude Include="include\assimp\ZipArchiveIOSystem.h" />
     <ClInclude Include="include\entt\entt.hpp" />
+    <ClInclude Include="include\filewatch\FileWatch.hpp" />
     <ClInclude Include="include\glad\glad.h" />
     <ClInclude Include="include\glfw\glfw3.h" />
     <ClInclude Include="include\glfw\glfw3native.h" />
@@ -705,10 +708,12 @@
     <ClInclude Include="src\Core\EngineStart.h" />
     <ClInclude Include="src\Core\File Utilities.h" />
     <ClInclude Include="src\Core\GuiLayer.h" />
+    <ClInclude Include="src\Core\KeyCodes.h" />
     <ClInclude Include="src\Core\Layer.h" />
     <ClInclude Include="src\Core\LayerStack.h" />
     <ClInclude Include="src\Core\Logging.h" />
     <ClInclude Include="src\Core\Physics.h" />
+    <ClInclude Include="src\Core\Platform.h" />
     <ClInclude Include="src\Core\Time.h" />
     <ClInclude Include="src\Debug\Assert.h" />
     <ClInclude Include="src\Debug\Profiler.h" />
@@ -743,6 +748,8 @@
     <ClInclude Include="src\Core\Input.h" />
     <ClInclude Include="src\OpenGL\Shader.h" />
     <ClInclude Include="src\Core\Window.h" />
+    <ClInclude Include="src\Scripting\Script Connector.h" />
+    <ClInclude Include="src\Scripting\Script Manager.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="assets\Images\cube_texture.png" />
@@ -903,6 +910,8 @@
     <None Include="include\glm\gtx\wrap.inl" />
     <None Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CMakeDetermineCompilerABI_C.bin" />
     <None Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CMakeDetermineCompilerABI_CXX.bin" />
+    <None Include="libs\mono\LICENSE" />
+    <None Include="libs\mono\README.md" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

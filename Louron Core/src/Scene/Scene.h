@@ -34,7 +34,7 @@ namespace Louron {
 	struct FrameBufferConfig;
 	class UUID;
 
-	enum L_RENDER_PIPELINE;
+	enum L_RENDER_PIPELINE : uint8_t;
 
 	struct SceneConfig {
 
@@ -45,6 +45,7 @@ namespace Louron {
 		std::shared_ptr<RenderPipeline> ScenePipeline;
 
 		L_RENDER_PIPELINE ScenePipelineType;
+
 	};
 
 	class Scene : public Asset {
@@ -53,7 +54,7 @@ namespace Louron {
 
 		Scene();
 		Scene(L_RENDER_PIPELINE pipeline);
-		~Scene();
+		~Scene() = default;
 
 		bool LoadSceneFile(const std::filesystem::path& sceneFilePath);
 
@@ -62,26 +63,39 @@ namespace Louron {
 		Entity CreateEntity(const std::string& name = "");
 		Entity CreateEntity(UUID uuid, const std::string& name = "");
 
-		Entity InstantiatePrefab(std::shared_ptr<Prefab> prefab, std::optional<Transform> transform = std::nullopt, const UUID& parent_uuid = NULL_UUID);
+		Entity InstantiatePrefab(std::shared_ptr<Prefab> prefab, std::optional<TransformComponent> transform = std::nullopt, const UUID& parent_uuid = NULL_UUID);
 
 		Entity DuplicateEntity(Entity entity);
 		void DestroyEntity(Entity entity);
 		
 		Entity FindEntityByName(std::string_view name);
 		Entity FindEntityByUUID(UUID uuid);
+		bool HasEntityByUUID(UUID uuid);
 
 		bool HasEntity(const Entity& entity);
 		bool HasEntity(const std::string& name);
 		bool HasEntity(const UUID& uuid);
 
+		bool ValidEntity(const Entity& entity);
+
 	public:
 
 		bool IsRunning() const { return m_IsRunning; }
+		bool IsSimulating() const { return m_IsSimulating; }
 		bool IsPaused() const { return m_IsPaused; }
-		bool IsPhysicsSimulating() const { return m_IsSimulatingPhysics; }
+		bool IsPhysicsCalculating() const { return m_IsPhysicsCalculating; }
 
 		void OnStart();
 		void OnStop();
+
+		void OnRuntimeStart();
+		void OnRuntimeStop();
+
+		void OnSimulationStart();
+		void OnSimulationStop();
+
+		void OnPhysicsStart();
+		void OnPhysicsStop();
 
 		void OnUpdate();
 		void OnUpdateGUI();
@@ -120,6 +134,8 @@ namespace Louron {
 
 		std::weak_ptr<OctreeBounds<Entity>> GetOctree() const { return m_Octree; }
 
+		static std::shared_ptr<Scene> Copy(std::shared_ptr<Scene> source_scene);
+
 	private:
 
 		entt::registry m_Registry;
@@ -131,8 +147,9 @@ namespace Louron {
 		std::shared_ptr<FrameBuffer> m_SceneFrameBuffer = nullptr;
 
 		bool m_IsRunning = false;
+		bool m_IsSimulating = false;
 		bool m_IsPaused = false;
-		bool m_IsSimulatingPhysics = false;
+		bool m_IsPhysicsCalculating = false;
 
 		SceneConfig m_SceneConfig;
 

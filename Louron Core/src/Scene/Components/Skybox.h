@@ -19,7 +19,7 @@ class YAML::Node;
 
 namespace Louron {
 
-	enum L_SKYBOX_BINDING {
+	enum L_SKYBOX_BINDING : uint8_t {
 		RIGHT = 0,
 		LEFT = 1,
 		TOP = 2,
@@ -51,6 +51,8 @@ namespace Louron {
 		void UnBind();
 
 		void ConstructSkyboxCubeMap();
+
+		const std::array<AssetHandle, 6>& GetTextureAssetHandles() const { return m_TextureAssetHandles; }
 
 	private:
 

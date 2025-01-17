@@ -1,0 +1,6147 @@
+Scene Name: Sponza Scene
+Scene Asset Directory: E:\Coding\Louron\Louron Sandbox\Sandbox Project\Assets
+Scene Pipeline Type: 1
+Entities:
+  - Entity: 1101907407
+    TagComponent:
+      Tag: sponza.325
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 385764943
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3894272225
+  - Entity: 3252218991
+    TagComponent:
+      Tag: sponza.324
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 385764508
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3894272225
+  - Entity: 3098044467
+    TagComponent:
+      Tag: sponza.323
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 385764073
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3894272225
+  - Entity: 675959012
+    TagComponent:
+      Tag: sponza.322
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 385763638
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3894272225
+  - Entity: 2750572794
+    TagComponent:
+      Tag: sponza.321
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 385763203
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 1447538600
+    TagComponent:
+      Tag: sponza.320
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 385762768
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 897159904
+    TagComponent:
+      Tag: sponza.319
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386312608
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 1854376014
+    TagComponent:
+      Tag: sponza.318
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386313043
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 2450314685
+    TagComponent:
+      Tag: sponza.317
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386318698
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 358510276
+    TagComponent:
+      Tag: sponza.316
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386319133
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 2793187037
+    TagComponent:
+      Tag: sponza.315
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386317828
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 1578581556
+    TagComponent:
+      Tag: sponza.314
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386318263
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 3994720797
+    TagComponent:
+      Tag: sponza.313
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386316958
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 1514975968
+    TagComponent:
+      Tag: sponza.312
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386317393
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 2143097330
+    TagComponent:
+      Tag: sponza.311
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386316088
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 4114413790
+    TagComponent:
+      Tag: sponza.310
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386316523
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2723172537
+    TagComponent:
+      Tag: sponza.309
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386117293
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 786547862
+    TagComponent:
+      Tag: sponza.308
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386116858
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 536088529
+    TagComponent:
+      Tag: sponza.307
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386111203
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 417337089
+    TagComponent:
+      Tag: sponza.306
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386110768
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1376848857
+    TagComponent:
+      Tag: sponza.305
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386112073
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1417949405
+    TagComponent:
+      Tag: sponza.304
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386111638
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1474350812
+    TagComponent:
+      Tag: sponza.303
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386112943
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 244112404
+    TagComponent:
+      Tag: sponza.302
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386112508
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 736982254
+    TagComponent:
+      Tag: sponza.301
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386113813
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 106606785
+    TagComponent:
+      Tag: sponza.300
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 386113378
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 788173005
+    TagComponent:
+      Tag: sponza.299
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475823863
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2135486404
+    TagComponent:
+      Tag: sponza.298
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475823428
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1645011605
+    TagComponent:
+      Tag: sponza.297
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475819513
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1235510565
+    TagComponent:
+      Tag: sponza.296
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475819078
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 758033950
+    TagComponent:
+      Tag: sponza.295
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475818643
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 62932572
+    TagComponent:
+      Tag: sponza.294
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475818208
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2988567904
+    TagComponent:
+      Tag: sponza.293
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475821253
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1190292761
+    TagComponent:
+      Tag: sponza.292
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475820818
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1266945254
+    TagComponent:
+      Tag: sponza.291
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475820383
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 232914895
+    TagComponent:
+      Tag: sponza.290
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 475819948
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1556345638
+    TagComponent:
+      Tag: sponza.289
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476026138
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2943629950
+    TagComponent:
+      Tag: sponza.288
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476026573
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1391816826
+    TagComponent:
+      Tag: sponza.287
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476020048
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3751901514
+    TagComponent:
+      Tag: sponza.286
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476020483
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2641578190
+    TagComponent:
+      Tag: sponza.285
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476020918
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3640616588
+    TagComponent:
+      Tag: sponza.284
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476021353
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2889933537
+    TagComponent:
+      Tag: sponza.283
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476021788
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 868698811
+    TagComponent:
+      Tag: sponza.282
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476022223
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 247131562
+    TagComponent:
+      Tag: sponza.281
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476022658
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3731474614
+    TagComponent:
+      Tag: sponza.280
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 476023093
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3481630182
+    TagComponent:
+      Tag: sponza.279
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473931613
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 401572877
+    TagComponent:
+      Tag: sponza.278
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473931178
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1718388800
+    TagComponent:
+      Tag: sponza.277
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473925523
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1472152354
+    TagComponent:
+      Tag: sponza.276
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473925088
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1394799798
+    TagComponent:
+      Tag: sponza.275
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473926393
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3414880638
+    TagComponent:
+      Tag: sponza.274
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473925958
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2831419529
+    TagComponent:
+      Tag: sponza.273
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473927263
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2607796689
+    TagComponent:
+      Tag: sponza.272
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473926828
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 769139163
+    TagComponent:
+      Tag: sponza.271
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473928133
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1053319122
+    TagComponent:
+      Tag: sponza.270
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473927698
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2630336653
+    TagComponent:
+      Tag: sponza.269
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474126928
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 4166752942
+    TagComponent:
+      Tag: sponza.268
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474127363
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 4195285431
+    TagComponent:
+      Tag: sponza.140
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238896328
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2764804798
+    TagComponent:
+      Tag: sponza.136
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240247873
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3286048773
+    TagComponent:
+      Tag: sponza.134
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240247003
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 2662660643
+    TagComponent:
+      Tag: sponza.129
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240042553
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3296935388
+    TagComponent:
+      Tag: sponza.062
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302692123
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3673566097
+    TagComponent:
+      Tag: sponza.038
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303236308
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1232518353
+    TagComponent:
+      Tag: sponza.036
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303231958
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 1912972641
+    TagComponent:
+      Tag: sponza.003
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303787018
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 3315162998
+    TagComponent:
+      Tag: sponza.267
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474133018
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 4021432422
+  - Entity: 503685900
+    TagComponent:
+      Tag: sponza.266
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474133453
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3255253497
+  - Entity: 1755710461
+    TagComponent:
+      Tag: sponza.265
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474132148
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3255253497
+  - Entity: 2039616659
+    TagComponent:
+      Tag: sponza.264
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474132583
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1221005074
+  - Entity: 3407454474
+    TagComponent:
+      Tag: sponza.263
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474131278
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1221005074
+  - Entity: 412513114
+    TagComponent:
+      Tag: sponza.262
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474131713
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1779651635
+    TagComponent:
+      Tag: sponza.261
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474130408
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2312699129
+    TagComponent:
+      Tag: sponza.260
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474130843
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1025165414
+    TagComponent:
+      Tag: sponza.259
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473525323
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 58326410
+    TagComponent:
+      Tag: sponza.258
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473524888
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3128595823
+    TagComponent:
+      Tag: sponza.257
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473524453
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1312620523
+    TagComponent:
+      Tag: sponza.256
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473524018
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1125151492
+    TagComponent:
+      Tag: sponza.255
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473523583
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 672470466
+    TagComponent:
+      Tag: sponza.254
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473523148
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 267338838
+    TagComponent:
+      Tag: sponza.253
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473522713
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4049170966
+    TagComponent:
+      Tag: sponza.252
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473522278
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3489056733
+    TagComponent:
+      Tag: sponza.251
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473521843
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3922869791
+    TagComponent:
+      Tag: sponza.250
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473521408
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2976160946
+    TagComponent:
+      Tag: sponza.249
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473727598
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2386340726
+    TagComponent:
+      Tag: sponza.248
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473728033
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2474491126
+    TagComponent:
+      Tag: sponza.247
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473724988
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3933407877
+    TagComponent:
+      Tag: sponza.246
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473725423
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4084286803
+    TagComponent:
+      Tag: sponza.245
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473725858
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1054938538
+    TagComponent:
+      Tag: sponza.244
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473726293
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1122405192
+    TagComponent:
+      Tag: sponza.243
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473723248
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3785254727
+    TagComponent:
+      Tag: sponza.242
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473723683
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3015986952
+    TagComponent:
+      Tag: sponza.241
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473724118
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2003514695
+    TagComponent:
+      Tag: sponza.240
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 473724553
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3260794575
+    TagComponent:
+      Tag: sponza.239
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474674593
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1296181680
+    TagComponent:
+      Tag: sponza.238
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474674158
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1899979650
+    TagComponent:
+      Tag: sponza.237
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474671983
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2091501761
+    TagComponent:
+      Tag: sponza.236
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474671548
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2025662648
+    TagComponent:
+      Tag: sponza.235
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474672853
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3523515167
+    TagComponent:
+      Tag: sponza.234
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474672418
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 920778791
+    TagComponent:
+      Tag: sponza.233
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474670243
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2629141779
+    TagComponent:
+      Tag: sponza.232
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474669808
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3155863147
+    TagComponent:
+      Tag: sponza.231
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474671113
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3416836546
+    TagComponent:
+      Tag: sponza.230
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474670678
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 933491544
+    TagComponent:
+      Tag: sponza.229
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474876868
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 685593491
+    TagComponent:
+      Tag: sponza.228
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474877303
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3043928094
+    TagComponent:
+      Tag: sponza.227
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474872518
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2269234127
+    TagComponent:
+      Tag: sponza.226
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474872953
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3610287733
+    TagComponent:
+      Tag: sponza.225
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474871648
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3585581313
+    TagComponent:
+      Tag: sponza.224
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474872083
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1146846302
+    TagComponent:
+      Tag: sponza.223
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474874258
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 652048114
+    TagComponent:
+      Tag: sponza.222
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474874693
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3714486223
+    TagComponent:
+      Tag: sponza.221
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474873388
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 973308978
+    TagComponent:
+      Tag: sponza.220
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474873823
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1093774997
+    TagComponent:
+      Tag: sponza.219
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474275263
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3890128112
+    TagComponent:
+      Tag: sponza.218
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474274828
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3770940865
+    TagComponent:
+      Tag: sponza.217
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474277873
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 138649196
+    TagComponent:
+      Tag: sponza.216
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474277438
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 384255273
+    TagComponent:
+      Tag: sponza.215
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474277003
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2283100177
+    TagComponent:
+      Tag: sponza.214
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474276568
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4128521897
+    TagComponent:
+      Tag: sponza.213
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474279613
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2300902302
+    TagComponent:
+      Tag: sponza.212
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474279178
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2694874662
+    TagComponent:
+      Tag: sponza.211
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474278743
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4029856553
+    TagComponent:
+      Tag: sponza.210
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474278308
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4080784551
+    TagComponent:
+      Tag: sponza.209
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474477538
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1600707089
+    TagComponent:
+      Tag: sponza.208
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474477973
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 209794520
+    TagComponent:
+      Tag: sponza.207
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474478408
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4284893497
+    TagComponent:
+      Tag: sponza.206
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474478843
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3467058476
+    TagComponent:
+      Tag: sponza.205
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474479278
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1402767804
+    TagComponent:
+      Tag: sponza.204
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474479713
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2264418949
+    TagComponent:
+      Tag: sponza.203
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474480148
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4244797884
+    TagComponent:
+      Tag: sponza.202
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474480583
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3137212014
+    TagComponent:
+      Tag: sponza.201
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474481018
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1571072667
+    TagComponent:
+      Tag: sponza.200
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 474481453
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 415202776
+    TagComponent:
+      Tag: sponza.199
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238352578
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1237726050
+    TagComponent:
+      Tag: sponza.198
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238353013
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3407109361
+    TagComponent:
+      Tag: sponza.197
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238353448
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1562826518
+    TagComponent:
+      Tag: sponza.196
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238353883
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3814063502
+    TagComponent:
+      Tag: sponza.195
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238354318
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3227748044
+    TagComponent:
+      Tag: sponza.194
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238354753
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 134479087
+    TagComponent:
+      Tag: sponza.193
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238355188
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 488007731
+    TagComponent:
+      Tag: sponza.192
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238355623
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1144120818
+    TagComponent:
+      Tag: sponza.191
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238356058
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1002050068
+    TagComponent:
+      Tag: sponza.190
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238356493
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 736852715
+    TagComponent:
+      Tag: sponza.189
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238150303
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1229083813
+    TagComponent:
+      Tag: sponza.188
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238149868
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 501140429
+    TagComponent:
+      Tag: sponza.187
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238152913
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 576283724
+    TagComponent:
+      Tag: sponza.186
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238152478
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1802538117
+    TagComponent:
+      Tag: sponza.185
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238152043
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3016548869
+    TagComponent:
+      Tag: sponza.184
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238151608
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1132765313
+    TagComponent:
+      Tag: sponza.183
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238154653
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3519003375
+    TagComponent:
+      Tag: sponza.182
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238154218
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3857235588
+    TagComponent:
+      Tag: sponza.181
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238153783
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1518305869
+    TagComponent:
+      Tag: sponza.180
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238153348
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3665241264
+    TagComponent:
+      Tag: sponza.179
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239494888
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2640463242
+    TagComponent:
+      Tag: sponza.178
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239495323
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 46856199
+    TagComponent:
+      Tag: sponza.177
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239494018
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2355420094
+    TagComponent:
+      Tag: sponza.176
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239494453
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 197865659
+    TagComponent:
+      Tag: sponza.175
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239493148
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1940985958
+    TagComponent:
+      Tag: sponza.174
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239493583
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1612060243
+    TagComponent:
+      Tag: sponza.173
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239492278
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1963903673
+    TagComponent:
+      Tag: sponza.172
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239492713
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2459207187
+    TagComponent:
+      Tag: sponza.171
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239491408
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2319112212
+    TagComponent:
+      Tag: sponza.170
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239491843
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2686227849
+    TagComponent:
+      Tag: sponza.169
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239299573
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2160216870
+    TagComponent:
+      Tag: sponza.168
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239299138
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3895770115
+    TagComponent:
+      Tag: sponza.167
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239300443
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2476532026
+    TagComponent:
+      Tag: sponza.166
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239300008
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1271270500
+    TagComponent:
+      Tag: sponza.165
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239301313
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2777322198
+    TagComponent:
+      Tag: sponza.164
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239300878
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1357928873
+    TagComponent:
+      Tag: sponza.163
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239302183
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4281264338
+    TagComponent:
+      Tag: sponza.162
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239301748
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2347239789
+    TagComponent:
+      Tag: sponza.161
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239303053
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 607487385
+    TagComponent:
+      Tag: sponza.160
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239302618
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2116836445
+    TagComponent:
+      Tag: sponza.159
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239095558
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1339273605
+    TagComponent:
+      Tag: sponza.158
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239095993
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1919600600
+    TagComponent:
+      Tag: sponza.157
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239099908
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1985155771
+    TagComponent:
+      Tag: sponza.156
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239100343
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 931375820
+    TagComponent:
+      Tag: sponza.155
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239100778
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 876200786
+    TagComponent:
+      Tag: sponza.154
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239101213
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3540660130
+    TagComponent:
+      Tag: sponza.153
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239098168
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2938960726
+    TagComponent:
+      Tag: sponza.152
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239098603
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 203970715
+    TagComponent:
+      Tag: sponza.151
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239099038
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1914980293
+    TagComponent:
+      Tag: sponza.150
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239099473
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3689836868
+    TagComponent:
+      Tag: sponza.149
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238893283
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1654683509
+    TagComponent:
+      Tag: sponza.148
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238892848
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1174612206
+    TagComponent:
+      Tag: sponza.147
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238899373
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2512863731
+    TagComponent:
+      Tag: sponza.146
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238898938
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 725859615
+    TagComponent:
+      Tag: sponza.145
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238898503
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 85682577
+    TagComponent:
+      Tag: sponza.144
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238898068
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1177250254
+    TagComponent:
+      Tag: sponza.143
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238897633
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3368017976
+    TagComponent:
+      Tag: sponza.142
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238897198
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4266725481
+    TagComponent:
+      Tag: sponza.141
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 238896763
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4226525516
+    TagComponent:
+      Tag: sponza.139
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240244828
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 200974239
+    TagComponent:
+      Tag: sponza.137
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240247438
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1229472888
+    TagComponent:
+      Tag: sponza.135
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240246568
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 4195413795
+    TagComponent:
+      Tag: sponza.131
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240248308
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3724917182
+    TagComponent:
+      Tag: sponza.123
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240045163
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 431758237
+    TagComponent:
+      Tag: sponza.083
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302287138
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 2256243115
+    TagComponent:
+      Tag: sponza.079
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302486803
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1152349421
+    TagComponent:
+      Tag: sponza.037
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303232393
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1845865263
+    TagComponent:
+      Tag: sponza.035
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303231523
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 1946401492
+    TagComponent:
+      Tag: sponza.138
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240245263
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 1641791829
+        - 494610376
+  - Entity: 1725901280
+    TagComponent:
+      Tag: sponza.133
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240249178
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1999344654
+  - Entity: 1452205480
+    TagComponent:
+      Tag: sponza.132
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240249613
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 1999344654
+        - 28690685
+  - Entity: 3082468909
+    TagComponent:
+      Tag: sponza.130
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240248743
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1999344654
+  - Entity: 484168249
+    TagComponent:
+      Tag: sponza.128
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240042118
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 1999344654
+        - 28690685
+  - Entity: 3098933416
+    TagComponent:
+      Tag: sponza.127
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240046903
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1999344654
+  - Entity: 2637994155
+    TagComponent:
+      Tag: sponza.126
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240046468
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1999344654
+  - Entity: 3619406981
+    TagComponent:
+      Tag: sponza.125
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240047773
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1999344654
+  - Entity: 661696226
+    TagComponent:
+      Tag: sponza.124
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240047338
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 1999344654
+        - 28690685
+  - Entity: 1808550838
+    TagComponent:
+      Tag: sponza.122
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240044728
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 1999344654
+        - 28690685
+  - Entity: 2163228722
+    TagComponent:
+      Tag: sponza.121
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240046033
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 1919225848
+    TagComponent:
+      Tag: sponza.120
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 240045598
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 3130517389
+    TagComponent:
+      Tag: sponza.119
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239845498
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 1808271442
+    TagComponent:
+      Tag: sponza.118
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239845933
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 4184938694
+    TagComponent:
+      Tag: sponza.117
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239839408
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 360427522
+    TagComponent:
+      Tag: sponza.116
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239839843
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 1531441447
+    TagComponent:
+      Tag: sponza.115
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239840278
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 1216597191
+    TagComponent:
+      Tag: sponza.114
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239840713
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 264791439
+    TagComponent:
+      Tag: sponza.113
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239841148
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 4157562763
+    TagComponent:
+      Tag: sponza.112
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239841583
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 3345378710
+    TagComponent:
+      Tag: sponza.111
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239842018
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 3327418022
+    TagComponent:
+      Tag: sponza.110
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239842453
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 3088366144
+    TagComponent:
+      Tag: sponza.109
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239643223
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 1723382300
+    TagComponent:
+      Tag: sponza.108
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239642788
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 3068458207
+    TagComponent:
+      Tag: sponza.107
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239638873
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 846825700
+    TagComponent:
+      Tag: sponza.106
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239638438
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 3452708111
+    TagComponent:
+      Tag: sponza.105
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239638003
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 2326624064
+    TagComponent:
+      Tag: sponza.104
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239637568
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 1080331593
+    TagComponent:
+      Tag: sponza.103
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239640613
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 3749121005
+    TagComponent:
+      Tag: sponza.102
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239640178
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 1512493823
+    TagComponent:
+      Tag: sponza.101
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239639743
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 2693130516
+    TagComponent:
+      Tag: sponza.100
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 239639308
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 1545349414
+    TagComponent:
+      Tag: sponza.099
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302087473
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 4150167541
+    TagComponent:
+      Tag: sponza.098
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302087038
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 1480882170
+    TagComponent:
+      Tag: sponza.097
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302084863
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 4246524558
+    TagComponent:
+      Tag: sponza.096
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302084428
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 2181993091
+    TagComponent:
+      Tag: sponza.095
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302085733
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 4204767195
+    TagComponent:
+      Tag: sponza.094
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302085298
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 2538773705
+    TagComponent:
+      Tag: sponza.093
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302083123
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 2958227545
+    TagComponent:
+      Tag: sponza.092
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302082688
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 260635585
+    TagComponent:
+      Tag: sponza.091
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302083993
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 4197548799
+    TagComponent:
+      Tag: sponza.090
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302083558
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 192667672
+    TagComponent:
+      Tag: sponza.089
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302289748
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 599277294
+    TagComponent:
+      Tag: sponza.088
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302290183
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 2572147219
+    TagComponent:
+      Tag: sponza.087
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302285398
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 56422663
+    TagComponent:
+      Tag: sponza.086
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302285833
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 992642395
+    TagComponent:
+      Tag: sponza.085
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302284528
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 3014881418
+    TagComponent:
+      Tag: sponza.084
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302284963
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 2139841061
+    TagComponent:
+      Tag: sponza.082
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302287573
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 3783425933
+        - 663411937
+  - Entity: 3929157437
+    TagComponent:
+      Tag: sponza.081
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302286268
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3783425933
+  - Entity: 4065668836
+    TagComponent:
+      Tag: sponza.080
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302286703
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 663411937
+        - 3783425933
+  - Entity: 1126536681
+    TagComponent:
+      Tag: sponza.078
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302486368
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1685138546
+  - Entity: 2832241042
+    TagComponent:
+      Tag: sponza.077
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302492893
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1685138546
+  - Entity: 2005999386
+    TagComponent:
+      Tag: sponza.076
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302492458
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1685138546
+  - Entity: 3475378593
+    TagComponent:
+      Tag: sponza.075
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302492023
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1685138546
+  - Entity: 97677970
+    TagComponent:
+      Tag: sponza.074
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302491588
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 171649024
+  - Entity: 45241029
+    TagComponent:
+      Tag: sponza.073
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302491153
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 171649024
+  - Entity: 3321907307
+    TagComponent:
+      Tag: sponza.072
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302490718
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 171649024
+  - Entity: 3359201610
+    TagComponent:
+      Tag: sponza.071
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302490283
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 171649024
+  - Entity: 3239418707
+    TagComponent:
+      Tag: sponza.070
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302489848
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1684252844
+  - Entity: 933802236
+    TagComponent:
+      Tag: sponza.069
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302689078
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1684252844
+  - Entity: 3159830186
+    TagComponent:
+      Tag: sponza.068
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302689513
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1684252844
+  - Entity: 1921002498
+    TagComponent:
+      Tag: sponza.067
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302693428
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3694354355
+  - Entity: 1490462903
+    TagComponent:
+      Tag: sponza.066
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302693863
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3694354355
+  - Entity: 1054192447
+    TagComponent:
+      Tag: sponza.065
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302694298
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3694354355
+  - Entity: 1229155877
+    TagComponent:
+      Tag: sponza.064
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302694733
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 494610376
+        - 1641791829
+  - Entity: 3898862092
+    TagComponent:
+      Tag: sponza.063
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302691688
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 494610376
+        - 1641791829
+  - Entity: 2398993213
+    TagComponent:
+      Tag: sponza.061
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302692558
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 494610376
+        - 1641791829
+  - Entity: 1456975556
+    TagComponent:
+      Tag: sponza.060
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302692993
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 494610376
+        - 1641791829
+  - Entity: 3086040757
+    TagComponent:
+      Tag: sponza.059
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302837413
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 494610376
+        - 1641791829
+  - Entity: 2747418908
+    TagComponent:
+      Tag: sponza.058
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302836978
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 494610376
+        - 1641791829
+  - Entity: 1229538943
+    TagComponent:
+      Tag: sponza.057
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302838283
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 494610376
+        - 1641791829
+  - Entity: 361679751
+    TagComponent:
+      Tag: sponza.056
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302837848
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 4262308433
+    TagComponent:
+      Tag: sponza.055
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302839153
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 3348979166
+    TagComponent:
+      Tag: sponza.054
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302838718
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 2093951066
+    TagComponent:
+      Tag: sponza.053
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302840023
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 3654103387
+    TagComponent:
+      Tag: sponza.052
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302839588
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 2134957930
+    TagComponent:
+      Tag: sponza.051
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302840893
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 1435698959
+    TagComponent:
+      Tag: sponza.050
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 302840458
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 3165724644
+    TagComponent:
+      Tag: sponza.049
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303032728
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 846677946
+    TagComponent:
+      Tag: sponza.048
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303033163
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 602171117
+    TagComponent:
+      Tag: sponza.047
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303031858
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 413472716
+    TagComponent:
+      Tag: sponza.046
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303032293
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 4270000247
+    TagComponent:
+      Tag: sponza.045
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303030988
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 3744016072
+    TagComponent:
+      Tag: sponza.044
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303031423
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 1025263702
+    TagComponent:
+      Tag: sponza.043
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303030118
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 78631908
+    TagComponent:
+      Tag: sponza.042
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303030553
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 2170655194
+    TagComponent:
+      Tag: sponza.041
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303029248
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 2070659387
+    TagComponent:
+      Tag: sponza.040
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303029683
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 36573307
+    TagComponent:
+      Tag: sponza.039
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303236743
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3129944315
+  - Entity: 345969962
+    TagComponent:
+      Tag: sponza.034
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303231088
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 966684403
+    TagComponent:
+      Tag: sponza.033
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303234133
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 1718770409
+    TagComponent:
+      Tag: sponza.032
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303233698
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 1382933402
+    TagComponent:
+      Tag: sponza.031
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303233263
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 1084387412
+    TagComponent:
+      Tag: sponza.030
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303232828
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 2860209942
+    TagComponent:
+      Tag: sponza.029
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303439018
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 1862737374
+    TagComponent:
+      Tag: sponza.028
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303439453
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 3655691373
+    TagComponent:
+      Tag: sponza.027
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303432928
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 2728847515
+    TagComponent:
+      Tag: sponza.026
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303433363
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 1976841175
+    TagComponent:
+      Tag: sponza.025
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303433798
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1339331915
+  - Entity: 3866167209
+    TagComponent:
+      Tag: sponza.021
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303435538
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1999344654
+  - Entity: 1836926168
+    TagComponent:
+      Tag: sponza.017
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303640423
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 4021432422
+  - Entity: 1711361217
+    TagComponent:
+      Tag: sponza.016
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303639988
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3255253497
+  - Entity: 3315487362
+    TagComponent:
+      Tag: sponza.015
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303641293
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1221005074
+  - Entity: 3912850083
+    TagComponent:
+      Tag: sponza.013
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303638683
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2583335813
+  - Entity: 2735694522
+    TagComponent:
+      Tag: sponza.012
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303638248
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2236105920
+  - Entity: 3305575432
+    TagComponent:
+      Tag: sponza.011
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303639553
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3894272225
+  - Entity: 1886739161
+    TagComponent:
+      Tag: sponza.010
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303639118
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 224459175
+  - Entity: 163596877
+    TagComponent:
+      Tag: sponza.009
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303782668
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3383724757
+  - Entity: 2911607400
+    TagComponent:
+      Tag: sponza.008
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303783103
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 236077805
+  - Entity: 1161232016
+    TagComponent:
+      Tag: sponza.007
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303785278
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1688073180
+  - Entity: 2922101074
+    TagComponent:
+      Tag: sponza.006
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303785713
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1346799175
+  - Entity: 594043674
+    TagComponent:
+      Tag: sponza.005
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303784408
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1522848929
+  - Entity: 597219494
+    TagComponent:
+      Tag: sponza.001
+    HierarchyComponent:
+      Parent: 3577680295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 303786148
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1402736801
+  - Entity: 3577680295
+    TagComponent:
+      Tag: Sponza
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 597219494
+        - 594043674
+        - 2922101074
+        - 1161232016
+        - 2911607400
+        - 163596877
+        - 1886739161
+        - 3305575432
+        - 2735694522
+        - 3912850083
+        - 3315487362
+        - 1711361217
+        - 1836926168
+        - 3866167209
+        - 1976841175
+        - 2728847515
+        - 3655691373
+        - 1862737374
+        - 2860209942
+        - 1084387412
+        - 1382933402
+        - 1718770409
+        - 966684403
+        - 345969962
+        - 36573307
+        - 2070659387
+        - 2170655194
+        - 78631908
+        - 1025263702
+        - 3744016072
+        - 4270000247
+        - 413472716
+        - 602171117
+        - 846677946
+        - 3165724644
+        - 1435698959
+        - 2134957930
+        - 3654103387
+        - 2093951066
+        - 3348979166
+        - 4262308433
+        - 361679751
+        - 1229538943
+        - 2747418908
+        - 3086040757
+        - 1456975556
+        - 2398993213
+        - 3898862092
+        - 1229155877
+        - 1054192447
+        - 1490462903
+        - 1921002498
+        - 3159830186
+        - 933802236
+        - 3239418707
+        - 3359201610
+        - 3321907307
+        - 45241029
+        - 97677970
+        - 3475378593
+        - 2005999386
+        - 2832241042
+        - 1126536681
+        - 4065668836
+        - 3929157437
+        - 2139841061
+        - 3014881418
+        - 992642395
+        - 56422663
+        - 2572147219
+        - 599277294
+        - 192667672
+        - 4197548799
+        - 260635585
+        - 2958227545
+        - 2538773705
+        - 4204767195
+        - 2181993091
+        - 4246524558
+        - 1480882170
+        - 4150167541
+        - 1545349414
+        - 2693130516
+        - 1512493823
+        - 3749121005
+        - 1080331593
+        - 2326624064
+        - 3452708111
+        - 846825700
+        - 3068458207
+        - 1723382300
+        - 3088366144
+        - 3327418022
+        - 3345378710
+        - 4157562763
+        - 264791439
+        - 1216597191
+        - 1531441447
+        - 360427522
+        - 4184938694
+        - 1808271442
+        - 3130517389
+        - 1919225848
+        - 2163228722
+        - 1808550838
+        - 661696226
+        - 3619406981
+        - 2637994155
+        - 3098933416
+        - 484168249
+        - 3082468909
+        - 1452205480
+        - 1725901280
+        - 1946401492
+        - 1845865263
+        - 1152349421
+        - 2256243115
+        - 431758237
+        - 3724917182
+        - 4195413795
+        - 1229472888
+        - 200974239
+        - 4226525516
+        - 4266725481
+        - 3368017976
+        - 1177250254
+        - 85682577
+        - 725859615
+        - 2512863731
+        - 1174612206
+        - 1654683509
+        - 3689836868
+        - 1914980293
+        - 203970715
+        - 2938960726
+        - 3540660130
+        - 876200786
+        - 931375820
+        - 1985155771
+        - 1919600600
+        - 1339273605
+        - 2116836445
+        - 607487385
+        - 2347239789
+        - 4281264338
+        - 1357928873
+        - 2777322198
+        - 1271270500
+        - 2476532026
+        - 3895770115
+        - 2160216870
+        - 2686227849
+        - 2319112212
+        - 2459207187
+        - 1963903673
+        - 1612060243
+        - 1940985958
+        - 197865659
+        - 2355420094
+        - 46856199
+        - 2640463242
+        - 3665241264
+        - 1518305869
+        - 3857235588
+        - 3519003375
+        - 1132765313
+        - 3016548869
+        - 1802538117
+        - 576283724
+        - 501140429
+        - 1229083813
+        - 736852715
+        - 1002050068
+        - 1144120818
+        - 488007731
+        - 134479087
+        - 3227748044
+        - 3814063502
+        - 1562826518
+        - 3407109361
+        - 1237726050
+        - 415202776
+        - 1571072667
+        - 3137212014
+        - 4244797884
+        - 2264418949
+        - 1402767804
+        - 3467058476
+        - 4284893497
+        - 209794520
+        - 1600707089
+        - 4080784551
+        - 4029856553
+        - 2694874662
+        - 2300902302
+        - 4128521897
+        - 2283100177
+        - 384255273
+        - 138649196
+        - 3770940865
+        - 3890128112
+        - 1093774997
+        - 973308978
+        - 3714486223
+        - 652048114
+        - 1146846302
+        - 3585581313
+        - 3610287733
+        - 2269234127
+        - 3043928094
+        - 685593491
+        - 933491544
+        - 3416836546
+        - 3155863147
+        - 2629141779
+        - 920778791
+        - 3523515167
+        - 2025662648
+        - 2091501761
+        - 1899979650
+        - 1296181680
+        - 3260794575
+        - 2003514695
+        - 3015986952
+        - 3785254727
+        - 1122405192
+        - 1054938538
+        - 4084286803
+        - 3933407877
+        - 2474491126
+        - 2386340726
+        - 2976160946
+        - 3922869791
+        - 3489056733
+        - 4049170966
+        - 267338838
+        - 672470466
+        - 1125151492
+        - 1312620523
+        - 3128595823
+        - 58326410
+        - 1025165414
+        - 2312699129
+        - 1779651635
+        - 412513114
+        - 3407454474
+        - 2039616659
+        - 1755710461
+        - 503685900
+        - 3315162998
+        - 1912972641
+        - 1232518353
+        - 3673566097
+        - 3296935388
+        - 2662660643
+        - 3286048773
+        - 2764804798
+        - 4195285431
+        - 4166752942
+        - 2630336653
+        - 1053319122
+        - 769139163
+        - 2607796689
+        - 2831419529
+        - 3414880638
+        - 1394799798
+        - 1472152354
+        - 1718388800
+        - 401572877
+        - 3481630182
+        - 3731474614
+        - 247131562
+        - 868698811
+        - 2889933537
+        - 3640616588
+        - 2641578190
+        - 3751901514
+        - 1391816826
+        - 2943629950
+        - 1556345638
+        - 232914895
+        - 1266945254
+        - 1190292761
+        - 2988567904
+        - 62932572
+        - 758033950
+        - 1235510565
+        - 1645011605
+        - 2135486404
+        - 788173005
+        - 106606785
+        - 736982254
+        - 244112404
+        - 1474350812
+        - 1417949405
+        - 1376848857
+        - 417337089
+        - 536088529
+        - 786547862
+        - 2723172537
+        - 4114413790
+        - 2143097330
+        - 1514975968
+        - 3994720797
+        - 1578581556
+        - 2793187037
+        - 358510276
+        - 2450314685
+        - 1854376014
+        - 897159904
+        - 1447538600
+        - 2750572794
+        - 675959012
+        - 3098044467
+        - 3252218991
+        - 1101907407
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 45599558
+    TagComponent:
+      Tag: Lion Spot Lights
+    HierarchyComponent:
+      Parent: 1623733813
+      Children:
+        - 2951701278
+        - 2052443677
+        - 1067243746
+    TransformComponent:
+      Translation: [49.9500008, 12, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 1623733813
+    TagComponent:
+      Tag: Scene Lights
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 45599558
+        - 2106712506
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [0.307692289, 0.307692289, 0.307692289]
+  - Entity: 2108320714
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [9.14822102, 4.21260452, -0.299088717]
+      Rotation: [-144.697861, -84.4562073, 141.360703]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        FOV: 60
+        MovementToggle: true
+        MovementSpeed: 10
+        MovementYDamp: 0.649999976
+        MouseSensitivity: 0.100000001
+        MouseToggledOff: false
+        Position: [9.14822102, 4.21260452, -0.299088717]
+        Yaw: -715.470886
+        Pitch: -3.20037031
+      Primary: true
+      ClearFlag: Skybox
+      ClearColour: [1, 1, 1, 1]
+    SkyboxComponent:
+      MaterialAssetHandle: 1778786993
+  - Entity: 2951701278
+    TagComponent:
+      Tag: Red Light
+    HierarchyComponent:
+      Parent: 45599558
+      Children:
+        []
+    TransformComponent:
+      Translation: [3, 3, 4]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    PointLightComponent:
+      Active: true
+      Colour: [1, 0, 0, 1]
+      Radius: 10
+      Intensity: 4
+  - Entity: 2052443677
+    TagComponent:
+      Tag: Blue Light
+    HierarchyComponent:
+      Parent: 45599558
+      Children:
+        []
+    TransformComponent:
+      Translation: [3, 3, -4]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    PointLightComponent:
+      Active: true
+      Colour: [0.0294117928, 0, 1, 1]
+      Radius: 10
+      Intensity: 4
+  - Entity: 1067243746
+    TagComponent:
+      Tag: Green Light
+    HierarchyComponent:
+      Parent: 45599558
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, -3, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    PointLightComponent:
+      Active: true
+      Colour: [0, 1, 0, 1]
+      Radius: 10
+      Intensity: 4
+  - Entity: 2106712506
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 1623733813
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-124, -30, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: false
+      Colour: [1, 1, 1, 1]
+      Intensity: 1

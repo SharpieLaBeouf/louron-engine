@@ -113,7 +113,7 @@ namespace Louron {
 
 			// Transform the corner points
 			for (int i = 0; i < 8; ++i) {
-				glm::vec4 transformed_corner = GetComponent<Transform>()->GetGlobalTransform() * glm::vec4(corners[i], 1.0f);
+				glm::vec4 transformed_corner = GetComponent<TransformComponent>()->GetGlobalTransform() * glm::vec4(corners[i], 1.0f);
 				corners[i] = glm::vec3(transformed_corner);
 			}
 

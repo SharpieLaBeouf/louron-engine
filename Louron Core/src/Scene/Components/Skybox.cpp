@@ -75,9 +75,9 @@ namespace Louron {
 		const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(Handle);
 
 		if (path.empty())
-			out_path = Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath;
+			out_path = Project::GetActiveProject()->GetProjectDirectory() / Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath;
 		else
-			out_path = Project::GetActiveProject()->GetConfig().AssetDirectory / path;
+			out_path = Project::GetActiveProject()->GetProjectDirectory() / Project::GetActiveProject()->GetConfig().AssetDirectory / path;
 
 		YAML::Emitter out_file;
 		out_file << YAML::BeginMap;
@@ -171,6 +171,10 @@ namespace Louron {
 		// 4. Set opengl texture parameters
 		// 5. Release data for all textures
 
+		glDeleteTextures(1, &m_SkyboxID);
+		m_SkyboxID = -1;
+		glGenTextures(1, &m_SkyboxID);
+
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_SkyboxID);
 
 		const std::filesystem::path asset_directory = Project::GetActiveProject()->GetConfig().AssetDirectory;
@@ -181,7 +185,7 @@ namespace Louron {
 
 			if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(m_TextureAssetHandles[i])) {
 				int width, height, nrChannels;
-				const std::filesystem::path& texture_file_path = asset_directory / Project::GetStaticEditorAssetManager()->GetMetadata(m_TextureAssetHandles[i]).FilePath;
+				const std::filesystem::path& texture_file_path = Project::GetActiveProject()->GetProjectDirectory() / asset_directory / Project::GetStaticEditorAssetManager()->GetMetadata(m_TextureAssetHandles[i]).FilePath;
 				unsigned char* data = stbi_load(texture_file_path.string().c_str(), &width, &height, &nrChannels, 0);
 
 				if (data) {
@@ -194,12 +198,12 @@ namespace Louron {
 
 						stbir_pixel_layout pixel_format = format == GL_RGB ? stbir_pixel_layout::STBIR_RGB : stbir_pixel_layout::STBIR_RGBA;
 						stbir_resize_uint8_srgb(data, width, height, 0, resized_data, desired_size, desired_size, 0, pixel_format);
-						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, desired_size, desired_size, 0, format, GL_UNSIGNED_BYTE, resized_data);
+						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, desired_size, desired_size, 0, format, GL_UNSIGNED_BYTE, resized_data);
 
 						delete[] resized_data;
 					}
 					else {
-						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, desired_size, desired_size, 0, format, GL_UNSIGNED_BYTE, data);
+						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, desired_size, desired_size, 0, format, GL_UNSIGNED_BYTE, data);
 					}
 
 					stbi_image_free(data);
@@ -292,9 +296,9 @@ namespace Louron {
 
 		if (auto material_ref = Project::GetStaticEditorAssetManager()->GetAsset<SkyboxMaterial>(SkyboxMaterialAssetHandle); material_ref) {
 
-			material_ref->Serialize();
-
 			const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(SkyboxMaterialAssetHandle);
+			material_ref->Serialize(meta_data.FilePath);
+
 			L_CORE_INFO("Skybox Material ({0}) Saved At: {1}", meta_data.FilePath.filename().replace_extension().string().c_str(), meta_data.FilePath.string().c_str());
 
 		}
@@ -319,7 +323,7 @@ namespace Louron {
 			std::filesystem::path material_path = Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath;
 
 			try {
-				material_ref->Deserialize();
+				material_ref->Deserialize(Project::GetActiveProject()->GetProjectDirectory() / "Assets" / meta_data.FilePath);
 			}
 			catch (const std::exception& e) {
 				L_CORE_ERROR("Failed to deserialize Skybox Material from {0}: {1}", material_path.string(), e.what());

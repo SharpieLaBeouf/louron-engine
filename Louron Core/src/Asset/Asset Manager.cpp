@@ -31,7 +31,7 @@ namespace Louron {
 		// shared GLFW window context on the main thread. This is so that if the 
 		// registry is being updated, once it's complete we can delete the shared
 		// window context on the main thread!
-		if (s_AssetRegistryUpdateContext && !s_IsAssetRegistryUpdating.load()) {
+		if (s_AssetRegistryUpdateContext != nullptr && !s_IsAssetRegistryUpdating.load()) {
 			glfwDestroyWindow(s_AssetRegistryUpdateContext);
 			s_AssetRegistryUpdateContext = nullptr;
 		}
@@ -82,6 +82,7 @@ namespace Louron {
 				// 2.a.iii. Get loaded child asset
 				if (IsAssetLoaded(handle)) {
 					asset = m_LoadedAssets.at(handle);
+					asset->Handle = handle;
 				}
 				else {
 					asset = nullptr; // If the child asset was not loaded when the parent was, then it is invalid!
@@ -91,6 +92,7 @@ namespace Louron {
 			else {
 				const AssetMetaData& metadata = GetMetadata(handle);
 				asset = AssetImporter::ImportAsset(&m_LoadedAssets, &m_AssetRegistry, handle, metadata);
+				asset->Handle = handle;
 				if (!asset) {
 					L_CORE_ERROR("EditorAssetManager::GetAsset - Asset Import Failed!");
 					return nullptr;
@@ -101,6 +103,41 @@ namespace Louron {
 
 		// 3. RETURN - Return the instance of our Asset
 		return asset;
+	}
+
+	EditorAssetManager::EditorAssetManager()
+	{
+		AssetMetaData meta_data;
+
+		meta_data.FilePath = "Resources/Models/Cube.fbx";
+		meta_data.Type = AssetType::ModelImport;
+		meta_data.AssetName = "Cube";
+
+		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+			std::string(AssetTypeToString(meta_data.Type)) + meta_data.FilePath.string()
+		));
+
+		auto asset = ModelImporter::LoadModel(&m_LoadedAssets, &m_AssetRegistry, handle, meta_data.FilePath);
+		if (asset) {
+			asset->Handle = handle;
+			m_LoadedAssets[handle] = asset;
+			m_AssetRegistry[handle] = meta_data;
+		}
+
+		meta_data.FilePath = "Resources/Models/Sphere.fbx";
+		meta_data.Type = AssetType::ModelImport;
+		meta_data.AssetName = "Sphere";
+
+		handle = static_cast<uint32_t>(std::hash<std::string>{}(
+			std::string(AssetTypeToString(meta_data.Type)) + meta_data.FilePath.string()
+		));
+
+		asset = ModelImporter::LoadModel(&m_LoadedAssets, &m_AssetRegistry, handle, meta_data.FilePath);
+		if (asset) {
+			asset->Handle = handle;
+			m_LoadedAssets[handle] = asset;
+			m_AssetRegistry[handle] = meta_data;
+		}
 	}
 
 	bool EditorAssetManager::IsAssetHandleValid(AssetHandle handle) const {
@@ -121,7 +158,7 @@ namespace Louron {
 	AssetHandle EditorAssetManager::ImportAsset(const std::filesystem::path& filepath) {
 
 		AssetMetaData metadata;
-		metadata.FilePath = normalise_path(filepath);
+		metadata.FilePath = normalise_path(std::filesystem::relative(filepath, Project::GetActiveProject()->GetProjectDirectory() / "Assets"));
 		metadata.Type = GetAssetTypeFromFileExtension(metadata.FilePath.extension());
 		metadata.AssetName = metadata.FilePath.filename().replace_extension().string();
 
@@ -214,12 +251,12 @@ namespace Louron {
 						auto extension = entry.path().extension();
 
 						if (GetAssetTypeFromFileExtension(extension) == AssetType::Material_Skybox) {
-							deferred_asset_import.push_back(entry.path());
+							deferred_asset_import.push_back(std::filesystem::absolute(entry.path()));
 							continue;
 						}
 
 						if (s_AssetExtensionMap.find(extension) != s_AssetExtensionMap.end()) {
-							newAssetManager->ImportAsset(std::filesystem::relative(entry.path(), Project::GetActiveProject()->GetConfig().AssetDirectory));
+							newAssetManager->ImportAsset(std::filesystem::absolute(entry.path()));
 						}
 					}
 				}
@@ -228,11 +265,13 @@ namespace Louron {
 				// for loading as the metadata for dependencies may not 
 				// be caught by the above loop yet
 				for (const auto& path : deferred_asset_import) {
-					newAssetManager->ImportAsset(std::filesystem::relative(path, Project::GetActiveProject()->GetConfig().AssetDirectory));
+					newAssetManager->ImportAsset(std::filesystem::absolute(path));
 				}
 			};
 
-			importAssets(Project::GetActiveProject()->GetConfig().AssetDirectory);
+			auto project = Project::GetActiveProject();
+			std::filesystem::path my_path = std::filesystem::relative(project->GetProjectDirectory() / project->GetConfig().AssetDirectory);
+			importAssets(my_path);
 
 			// Remove references from old registry that no longer exist
 			const AssetRegistry& newRegistry = newAssetManager->GetAssetRegistry();
@@ -267,9 +306,12 @@ namespace Louron {
 		registry_load.detach();
 	}
 
-	void EditorAssetManager::SerializeAssetRegistry() {
+	void EditorAssetManager::SerializeAssetRegistry(const std::filesystem::path& asset_registry_path) {
 
-		auto path = Project::GetActiveProject()->GetConfig().AssetDirectory / Project::GetActiveProject()->GetConfig().AssetRegistry;
+		std::filesystem::path path = asset_registry_path; 
+
+		if (asset_registry_path == "") 
+			path = Project::GetActiveProject()->GetProjectDirectory() / Project::GetActiveProject()->GetConfig().AssetDirectory / Project::GetActiveProject()->GetConfig().AssetRegistry;
 
 		YAML::Emitter out;
 		{
@@ -297,7 +339,8 @@ namespace Louron {
 
 	bool EditorAssetManager::DeserializeAssetRegistry() {
 
-		auto path = Project::GetActiveProject()->GetConfig().AssetDirectory / Project::GetActiveProject()->GetConfig().AssetRegistry;
+		auto project = Project::GetActiveProject();
+		auto path = project->GetProjectDirectory() / project->GetConfig().AssetDirectory / project->GetConfig().AssetRegistry;
 
 		if (!std::filesystem::exists(path)) {
 			L_CORE_ERROR("Cannot Deserialise Asset Registry - Path Does Not Exist: {0}\n     Creating New Asset Registry.", path.string().c_str());
@@ -327,7 +370,9 @@ namespace Louron {
 			if (node["Name"])
 				metadata.AssetName = node["Name"].as<std::string>();
 			if(node["FilePath"])
+			{
 				metadata.FilePath = node["FilePath"].as<std::string>();
+			}
 			if(node["Type"])
 				metadata.Type = AssetTypeFromString(node["Type"].as<std::string>());
 			if (node["ParentAssetHandle"])
