@@ -48,7 +48,7 @@ void LouronEditorLayer::OnAttach() {
 	// 3. Then we have to load startup scene -> ScriptComponent serialisation requires the ScriptManager to be initialised
 	Project::GetActiveProject()->LoadStartupScene();
 
-	for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts/")) {
+	for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Scripts/")) {
 		if (entry.path().extension() == ".csproj") {
 			m_ScriptsCompiledSuccess = Utils::CompileAppAssembly(entry.path());
 			if (m_ScriptsCompiledSuccess)
@@ -94,14 +94,19 @@ void LouronEditorLayer::OnAttach() {
 
 	};
 	
-	m_IconPlay = std::make_shared<Texture>("Resources/Icons/PlayButton.png");
-	m_IconPause = std::make_shared<Texture>("Resources/Icons/PauseButton.png");
-	m_IconSimulate = std::make_shared<Texture>("Resources/Icons/SimulateButton.png");
-	m_IconStep = std::make_shared<Texture>("Resources/Icons/StepButton.png");
-	m_IconStop = std::make_shared<Texture>("Resources/Icons/StopButton.png");
+	m_IconPlay = TextureImporter::LoadTexture2D("Resources/Icons/PlayButton.png");
+	m_IconPause = TextureImporter::LoadTexture2D("Resources/Icons/PauseButton.png");
+	m_IconSimulate = TextureImporter::LoadTexture2D("Resources/Icons/SimulateButton.png");
+	m_IconStep = TextureImporter::LoadTexture2D("Resources/Icons/StepButton.png");
+	m_IconStop = TextureImporter::LoadTexture2D("Resources/Icons/StopButton.png");
 
 	m_ScriptsNeedCompiling.store(false, std::memory_order_relaxed);
-	m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts").string(), ScriptsModifiedEvent);
+	m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), ScriptsModifiedEvent);
+
+	m_PropertiesPanel = {};
+	m_HierarchyPanel = {};
+	m_ContentBrowserPanel = {};
+	m_ContentBrowserPanel.SetDirectory(Project::GetActiveProject()->GetProjectDirectory() / "Assets");
 }
 
 void LouronEditorLayer::OnDetach() {
@@ -255,7 +260,7 @@ void LouronEditorLayer::OnGuiRender() {
 							// 2. then ensure script manager has the correct assembly
 							ScriptManager::SetAppAssemblyPath(Project::GetActiveProject()->GetProjectDirectory() / Project::GetActiveProject()->GetConfig().AppScriptAssemblyPath);
 
-							for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts/")) {
+							for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Scripts/")) {
 								if (entry.path().extension() == ".csproj") {
 									m_ScriptsCompiledSuccess = Utils::CompileAppAssembly(entry.path());
 									ScriptManager::ReloadAssembly(); // Dont check if compilation succeeded because we need it to point the to updated assembly!
@@ -267,7 +272,7 @@ void LouronEditorLayer::OnGuiRender() {
 							Project::GetActiveProject()->LoadStartupScene();
 
 							m_ScriptFileWatcher.reset();
-							m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts").string(), ScriptsModifiedEvent);
+							m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), ScriptsModifiedEvent);
 
 							auto scene = Project::GetActiveScene();
 
@@ -319,7 +324,7 @@ void LouronEditorLayer::OnGuiRender() {
 				}
 
 				if (ImGui::MenuItem("Reload Script Assembly")) {
-					for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts/")) {
+					for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Scripts/")) {
 						if (entry.path().extension() == ".csproj") {
 							m_ScriptsCompiledSuccess = Utils::CompileAppAssembly(entry.path());
 							if(m_ScriptsCompiledSuccess)
@@ -473,12 +478,12 @@ void LouronEditorLayer::OnGuiRender() {
 					auto project = Project::NewProject(s_NewProjectName, s_NewFolderPath);
 
 					// Generate C# Scripting MSVC Solution - TODO: idk use some form of project build tools?
-					Utils::GenerateScriptingProject(project->GetConfig().Name, project->GetProjectDirectory() / project->GetConfig().AssetDirectory / "Scripts");
+					Utils::GenerateScriptingProject(project->GetConfig().Name, project->GetProjectDirectory() / "Scripts");
 
 					ScriptManager::SetAppAssemblyPath(project->GetProjectDirectory() / project->GetConfig().AppScriptAssemblyPath);
 
 					// Build initial DLL
-					for (const auto& entry : std::filesystem::directory_iterator(project->GetProjectDirectory() / project->GetConfig().AssetDirectory / "Scripts")) {
+					for (const auto& entry : std::filesystem::directory_iterator(project->GetProjectDirectory() / "Scripts")) {
 						if (entry.path().extension() == ".csproj") {
 							m_ScriptsCompiledSuccess = Utils::CompileAppAssembly(entry.path());
 							ScriptManager::ReloadAssembly(); // Dont check if compilation succeeded because we need it to point the to updated assembly!
@@ -487,7 +492,7 @@ void LouronEditorLayer::OnGuiRender() {
 					}
 
 					m_ScriptFileWatcher.reset();
-					m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts").string(), ScriptsModifiedEvent);
+					m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), ScriptsModifiedEvent);
 
 					auto scene = Project::GetActiveScene();
 
@@ -666,7 +671,7 @@ void LouronEditorLayer::OnGuiRender() {
 			m_ScriptFileWatcher.reset();
 
 			// Handle script recompilation logic
-			for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts/")) {
+			for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Scripts/")) {
 				if (entry.path().extension() == ".csproj") {
 					m_ScriptsCompiledSuccess = Utils::CompileAppAssembly(entry.path());
 					
@@ -677,7 +682,7 @@ void LouronEditorLayer::OnGuiRender() {
 				}
 			}
 
-			m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts").string(), ScriptsModifiedEvent);
+			m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), ScriptsModifiedEvent);
 			m_ScriptsNeedCompiling.store(false, std::memory_order_relaxed); // Reset the flag
 		}
 	}
@@ -927,6 +932,13 @@ void LouronEditorLayer::DisplayContentBrowserWindow() {
 	if (!m_ActiveGUIWindows["Content Browser"]) {
 		return;
 	}
+
+	ImGui::Begin("Content Browser", &m_ActiveGUIWindows["Content Browser"], 0);
+
+	m_ContentBrowserPanel.OnImGuiRender(*this);
+
+	ImGui::End();
+
 }
 
 void LouronEditorLayer::DisplayRenderStatsWindow() {
@@ -1369,9 +1381,15 @@ void LouronEditorLayer::NewScene() {
 	s_NewSceneName.clear();
 }
 
-void LouronEditorLayer::OpenScene() {
+void LouronEditorLayer::OpenScene(const std::filesystem::path& scene_file_path) {
 
-	std::string filepath = FileUtils::OpenFile("Louron Scene (*.lscene)\0*.lscene\0", Project::GetActiveProject()->GetProjectDirectory() / "Scenes");
+	std::string filepath;
+	
+	if (scene_file_path.empty())
+		FileUtils::OpenFile("Louron Scene (*.lscene)\0*.lscene\0", Project::GetActiveProject()->GetProjectDirectory() / "Scenes");
+	else
+		filepath = scene_file_path.string();
+
 	if (!filepath.empty()) {
 
 		m_SelectedEntity = {};

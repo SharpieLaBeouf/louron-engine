@@ -105,6 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Editor Layer\Panels\Content Browser Panel.cpp" />
     <ClCompile Include="source\Editor Layer\Panels\Hierarchy Panel.cpp" />
     <ClCompile Include="source\Editor Layer\Panels\Properties Panel.cpp" />
     <ClCompile Include="Source\Louron Editor Application.cpp" />
@@ -116,6 +117,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Editor Layer\Panels\Content Browser Panel.h" />
     <ClInclude Include="source\Editor Layer\Utils\Editor Script Utils.h" />
     <ClInclude Include="source\Editor Layer\Panels\Hierarchy Panel.h" />
     <ClInclude Include="source\Editor Layer\Louron Editor Layer.h" />

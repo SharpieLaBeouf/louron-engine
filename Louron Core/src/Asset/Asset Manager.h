@@ -42,6 +42,9 @@ namespace Louron {
 
 	public:
 
+		static AssetType GetAssetTypeFromFileExtension(const std::filesystem::path& extension);
+		static bool IsExtensionSupported(const std::filesystem::path& extension);
+
 		template <typename AssetType>
 		static std::shared_ptr<AssetType> GetAsset(AssetHandle handle) {
 
@@ -146,6 +149,8 @@ namespace Louron {
 
 		void SerializeAssetRegistry(const std::filesystem::path& asset_registry_path = "");
 		bool DeserializeAssetRegistry();
+
+		AssetHandle GetHandleFromFilePath(const std::filesystem::path& path);
 
 	private:
 		AssetRegistry m_AssetRegistry;

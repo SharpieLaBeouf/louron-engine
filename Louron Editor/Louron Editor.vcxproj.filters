@@ -27,6 +27,9 @@
     <ClCompile Include="source\Editor Layer\Panels\Hierarchy Panel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="source\Editor Layer\Panels\Content Browser Panel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Editor Layer\Louron Editor Layer.h">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="source\Editor Layer\Panels\Hierarchy Panel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\Editor Layer\Panels\Content Browser Panel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

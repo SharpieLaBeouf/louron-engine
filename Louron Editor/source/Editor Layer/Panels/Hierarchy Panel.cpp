@@ -20,7 +20,7 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 
 		ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_FramePadding;
 
-		flags |= ((uint32_t)selected_entity == (uint32_t)entity) ? ImGuiTreeNodeFlags_Selected : 0;
+		flags |= (selected_entity == entity) ? ImGuiTreeNodeFlags_Selected : 0;
 
 		if (entity.GetComponent<HierarchyComponent>().GetChildren().empty()) {
 			flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_DefaultOpen;
@@ -131,7 +131,7 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 			}
 			ImGui::EndDragDropTarget();
 		}
-		};
+	};
 
 	// Right-click on blank space
 	if (ImGui::BeginPopupContextWindow())
@@ -216,6 +216,56 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 
 		// Restore the previous highlight color
 		ImGui::PopStyleColor();
+
+		// DROP A FILE FROM THE CONTENT BROWSER
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+			// Convert the payload data (string) back into a filesystem path
+			std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+			std::filesystem::path dropped_path = dropped_path_str; // Convert to path
+
+			if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
+
+				AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+
+				switch (asset_type) {
+
+					case AssetType::ModelImport:
+					{
+						if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::ModelImport) {
+							auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);
+							Entity entity = scene_ref->InstantiatePrefab(prefab);
+							if (entity)
+								selected_entity = entity;
+							else
+								L_APP_WARN("Could Not Instantiate Model Into Scene.");
+						}
+						else {
+							L_APP_WARN("Invalid Asset Type Dropped Into Scene.");
+						}
+
+						break;
+					}
+
+					case AssetType::Prefab:
+					{
+						auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);
+						Entity entity = scene_ref->InstantiatePrefab(prefab);
+						if (entity)
+							selected_entity = entity;
+						else
+							L_APP_WARN("Could Not Instantiate Model Into Scene.");
+
+						break;
+					}
+
+				}
+
+			}
+			else {
+				L_CORE_WARN("Cannot Instantiate '{}' Into Scene.", dropped_path.filename().string());
+			}
+
+		}
 
 		ImGui::EndDragDropTarget();
 	}

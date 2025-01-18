@@ -69,8 +69,8 @@ Entities:
       Children:
         []
     TransformComponent:
-      Translation: [-60.9450035, 11.5170069, -20.5765667]
-      Rotation: [-149.22493, -62.8229866, 131.481064]
+      Translation: [-34.6563187, 6.65654612, 12.0106058]
+      Rotation: [-43.4848137, -74.4736786, 33.7256317]
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
@@ -80,9 +80,9 @@ Entities:
         MovementYDamp: 0.649999976
         MouseSensitivity: 0.100000001
         MouseToggledOff: false
-        Position: [-60.9450035, 11.5170069, -20.5765667]
-        Yaw: 23.8034439
-        Pitch: -13.5150204
+        Position: [-34.6563187, 6.65654612, 12.0106058]
+        Yaw: -11.3966084
+        Pitch: -10.6149654
       Primary: true
       ClearFlag: Skybox
       ClearColour: [0.897058845, 0.909169555, 1, 1]
@@ -181,11 +181,11 @@ Entities:
       Children:
         []
     TransformComponent:
-      Translation: [0, 1.20000005, 0]
+      Translation: [0, 1.20000005, 0.5]
       Rotation: [-90, 1, 1]
       Scale: [0.200000018, 0.200000003, 0.200000018]
     PointLightComponent:
       Active: true
       Colour: [1, 0, 0, 1]
-      Radius: 3.04999995
-      Intensity: 100
+      Radius: 50
+      Intensity: 5

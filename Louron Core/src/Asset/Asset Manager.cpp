@@ -14,7 +14,7 @@ namespace Louron {
 	static GLFWwindow* s_AssetRegistryUpdateContext = nullptr;
 	static std::atomic<bool> s_IsAssetRegistryUpdating = false;
 
-	static AssetType GetAssetTypeFromFileExtension(const std::filesystem::path& extension)
+	AssetType AssetManager::GetAssetTypeFromFileExtension(const std::filesystem::path& extension)
 	{
 		if (s_AssetExtensionMap.find(extension) == s_AssetExtensionMap.end())
 		{
@@ -92,11 +92,11 @@ namespace Louron {
 			else {
 				const AssetMetaData& metadata = GetMetadata(handle);
 				asset = AssetImporter::ImportAsset(&m_LoadedAssets, &m_AssetRegistry, handle, metadata);
-				asset->Handle = handle;
 				if (!asset) {
 					L_CORE_ERROR("EditorAssetManager::GetAsset - Asset Import Failed!");
 					return nullptr;
 				}
+				asset->Handle = handle;
 				m_LoadedAssets[handle] = asset;
 			}
 		}
@@ -159,7 +159,7 @@ namespace Louron {
 
 		AssetMetaData metadata;
 		metadata.FilePath = normalise_path(std::filesystem::relative(filepath, Project::GetActiveProject()->GetProjectDirectory() / "Assets"));
-		metadata.Type = GetAssetTypeFromFileExtension(metadata.FilePath.extension());
+		metadata.Type = AssetManager::GetAssetTypeFromFileExtension(metadata.FilePath.extension());
 		metadata.AssetName = metadata.FilePath.filename().replace_extension().string();
 
 		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
@@ -250,7 +250,7 @@ namespace Louron {
 					if (entry.is_regular_file()) {
 						auto extension = entry.path().extension();
 
-						if (GetAssetTypeFromFileExtension(extension) == AssetType::Material_Skybox) {
+						if (AssetManager::GetAssetTypeFromFileExtension(extension) == AssetType::Material_Skybox) {
 							deferred_asset_import.push_back(std::filesystem::absolute(entry.path()));
 							continue;
 						}
@@ -379,6 +379,21 @@ namespace Louron {
 				metadata.ParentAssetHandle = node["ParentAssetHandle"].as<uint32_t>();
 		}
 
+		return true;
+	}
+
+	AssetHandle EditorAssetManager::GetHandleFromFilePath(const std::filesystem::path& path) {
+
+		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+			std::string(AssetTypeToString(AssetManager::GetAssetTypeFromFileExtension(path.extension()))) + normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetProjectDirectory() / "Assets"))
+		));
+
+		return handle;
+	}
+
+	bool AssetManager::IsExtensionSupported(const std::filesystem::path& extension) {
+		if (s_AssetExtensionMap.find(extension) == s_AssetExtensionMap.end())
+			return false;
 		return true;
 	}
 

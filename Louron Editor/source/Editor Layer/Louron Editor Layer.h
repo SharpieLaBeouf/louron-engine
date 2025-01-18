@@ -5,6 +5,7 @@
 #include "Core/Layer.h"
 #include "Panels/Properties Panel.h"
 #include "Panels/Hierarchy Panel.h"
+#include "Panels/Content Browser Panel.h"
 
 // External
 #include "filewatch/FileWatch.hpp"
@@ -46,8 +47,9 @@ private:
 	};
 	SceneState m_SceneState = SceneState::Edit;
 
-	PropertiesPanel m_PropertiesPanel{};
-	HierarchyPanel m_HierarchyPanel{};
+	PropertiesPanel m_PropertiesPanel;
+	HierarchyPanel m_HierarchyPanel;
+	ContentBrowserPanel m_ContentBrowserPanel;
 
 	bool m_WindowWasUnfocused = false;
 	bool m_ScriptsCompiledSuccess = false;
@@ -68,7 +70,7 @@ private:
 	void CheckInput();
 
 	void NewScene();
-	void OpenScene();
+	void OpenScene(const std::filesystem::path& scene_file_path = "");
 	void SaveScene(bool save_as = false);
 
 	void DisplaySceneViewportWindow();
@@ -85,5 +87,7 @@ private:
 
 	void DisplayProjectProperties();
 	void DisplaySceneProperties();
+
+	friend class ContentBrowserPanel;
 
 };

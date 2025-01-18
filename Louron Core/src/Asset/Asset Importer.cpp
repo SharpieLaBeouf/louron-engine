@@ -101,9 +101,14 @@ namespace Louron {
 
 			YAML::Node data;
 
+			auto project = Project::GetActiveProject();
+			std::filesystem::path file_path = project->GetProjectDirectory() / project->GetConfig().AssetDirectory / meta_data.FilePath;
+
+			if (!std::filesystem::exists(file_path))
+				return nullptr;
+
 			try {
-				auto project = Project::GetActiveProject();
-				data = YAML::LoadFile((project->GetProjectDirectory() / project->GetConfig().AssetDirectory / meta_data.FilePath).string());
+				data = YAML::LoadFile(file_path.string());
 			}
 			catch (YAML::ParserException e) {
 				L_CORE_ERROR("YAML-CPP Failed to Load Scene File: '{0}', {1}", meta_data.FilePath.string(), e.what());
@@ -250,6 +255,7 @@ namespace Louron {
 		}
 
 		std::shared_ptr<Prefab> model_prefab = std::make_shared<Prefab>();
+		model_prefab->SetMutable(false);
 
 		ProcessNode(scene, scene->mRootNode, model_prefab, entt::null, asset_map, asset_reg, handle, path);
 

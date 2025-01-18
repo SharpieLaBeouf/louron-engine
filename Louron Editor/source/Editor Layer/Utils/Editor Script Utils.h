@@ -181,9 +181,6 @@ namespace Utils {
 
 		script_file_path.close();
 
-		std::string command = "start \"\" \"" + file_path.string() + "\"";
-		std::system(command.c_str());
-
 		L_CORE_INFO("Scripting solution file created at: {}", file_path.string());
 		L_CORE_INFO("Compile the App Assembly to Access Script Class.");
 		return projectName + "." + scriptName;
@@ -209,6 +206,151 @@ namespace Utils {
 			return false;
 		}
 
+	}
+
+	static std::string OnCreateNewScriptGUI(bool* script_create) {
+		std::string script_full_name;
+
+		if (*script_create){
+			ImGui::OpenPopup("Create New Script");
+
+			// Calculate window size: 25% of the screen width, minimum 300.0f
+			float windowWidth = glm::max(300.0f, ImGui::GetContentRegionAvail().x * 0.25f);
+			float windowHeight = 100.0f; // Fixed height
+			ImVec2 windowSize(windowWidth, windowHeight);
+			ImGui::SetNextWindowSize(windowSize);
+
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImVec2 viewportPos = viewport->Pos;
+			ImVec2 viewportSize = viewport->Size;
+
+			// Calculate centered position
+			ImVec2 windowPos(
+				viewportPos.x + (viewportSize.x - windowWidth) * 0.5f, // Center horizontally
+				viewportPos.y + (viewportSize.y - windowHeight) * 0.5f // Center vertically
+			);
+			ImGui::SetNextWindowPos(windowPos);
+		}
+
+
+		static std::filesystem::path new_script_path{};
+		static bool show_warning_popup = false;
+		if (ImGui::BeginPopupModal("Create New Script", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+
+			// Grey out the background
+			ImGui::Text("Create a New Script");
+
+			// Input fields
+
+			float first_coloumn_width = ImGui::CalcTextSize("Script Name").x + 10.0f;
+
+			ImGui::Columns(2, "New_Script_Cols", false);
+			ImGui::SetColumnWidth(-1, first_coloumn_width);
+
+			ImGui::Text("Script Name");
+
+			ImGui::NextColumn();
+
+			char buf[256];
+			strncpy_s(buf, new_script_path.string().c_str(), sizeof(buf));
+			ImGui::InputText("##Folder Path", buf, sizeof(buf));
+			new_script_path = buf;
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("...")) {
+				new_script_path = Louron::FileUtils::SaveFile("C# Script (*.cs)\0*.cs\0", (Louron::Project::GetActiveProject()->GetProjectDirectory() / "Scripts")); // Open File Dialog in Scripts Folder
+
+				if (new_script_path.lexically_normal().string().find((Louron::Project::GetActiveProject()->GetProjectDirectory() / "Scripts").lexically_normal().string()) != 0) {
+					new_script_path = "";
+					show_warning_popup = true; // Trigger warning popup
+					*script_create = false;
+				}
+				else {
+					new_script_path = new_script_path.filename();
+				}
+			}
+
+			ImGui::Columns(1);
+
+			// Buttons for Create and Cancel
+			if (ImGui::Button("Create") || Louron::Engine::Get().GetInput().GetKeyDown(GLFW_KEY_ENTER)) {
+
+				if (new_script_path.extension() != ".cs")
+					new_script_path.replace_extension(".cs");
+
+				new_script_path = std::filesystem::absolute(Louron::Project::GetActiveProject()->GetProjectDirectory() / "Scripts" / new_script_path);
+
+				//check if in script directory
+				if (new_script_path.lexically_normal().string().find((Louron::Project::GetActiveProject()->GetProjectDirectory() / "Scripts").lexically_normal().string()) != 0) {
+					new_script_path = "";
+					show_warning_popup = true; // Trigger warning popup
+					*script_create = false;
+				}
+				else {
+
+					script_full_name = Utils::GenerateScriptFile(Louron::Project::GetActiveProject()->GetConfig().Name, new_script_path);
+
+					std::string command = "start \"\" \"" + new_script_path.string() + "\"";
+					std::system(command.c_str());
+
+					// Add temporary class to the entity classes list, this is so that it shows in the editor.
+					// NOTE: We don't actually need to initialise a ScriptClass for this yet. The AppAssembly 
+					// will reload regardless when we're scripting, and it will add it anyway! This is more for
+					// user experience when creating a script.
+					Louron::ScriptManager::AddEntityClass(script_full_name, nullptr);
+
+					new_script_path = "";
+					*script_create = false; // Close the dialog
+					ImGui::CloseCurrentPopup();
+				}
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Cancel")) {
+				*script_create = false; // Close the dialog
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		// Warning popup
+		if (show_warning_popup) {
+			ImGui::OpenPopup("ScriptWarningPopup");
+
+			// Calculate window size: 25% of the screen width, minimum 300.0f
+			float windowWidth = glm::max(300.0f, ImGui::GetContentRegionAvail().x * 0.25f);
+			float windowHeight = 100.0f; // Fixed height
+			ImVec2 windowSize(windowWidth, windowHeight);
+			ImGui::SetNextWindowSize(windowSize);
+
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImVec2 viewportPos = viewport->Pos;
+			ImVec2 viewportSize = viewport->Size;
+
+			// Calculate centered position
+			ImVec2 windowPos(
+				viewportPos.x + (viewportSize.x - windowWidth) * 0.5f, // Center horizontally
+				viewportPos.y + (viewportSize.y - windowHeight) * 0.5f // Center vertically
+			);
+			ImGui::SetNextWindowPos(windowPos);
+		}
+
+		if (ImGui::BeginPopupModal("ScriptWarningPopup", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
+			ImGui::TextWrapped("The selected file path is not within the Scripts directory. Please choose a valid path within the Scripts directory.");
+
+			if (ImGui::Button("OK")) {
+				show_warning_popup = false; // Close the warning popup
+				*script_create = true;
+				ImGui::CloseCurrentPopup();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		return script_full_name;
 	}
 
 }

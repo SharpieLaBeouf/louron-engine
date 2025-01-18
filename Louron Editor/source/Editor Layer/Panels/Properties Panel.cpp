@@ -351,26 +351,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 			if (scene_ref->IsRunning()) ImGui::BeginDisabled();
 			if (ImGui::Button("Create New Script") || script_create) {
-
-				ImGui::OpenPopup("Create New Script");
 				script_create = true;
-
-				// Calculate window size: 25% of the screen width, minimum 300.0f
-				float windowWidth = glm::max(300.0f, ImGui::GetContentRegionAvail().x * 0.25f);
-				float windowHeight = 100.0f; // Fixed height
-				ImVec2 windowSize(windowWidth, windowHeight);
-				ImGui::SetNextWindowSize(windowSize);
-
-				ImGuiViewport* viewport = ImGui::GetMainViewport();
-				ImVec2 viewportPos = viewport->Pos;
-				ImVec2 viewportSize = viewport->Size;
-
-				// Calculate centered position
-				ImVec2 windowPos(
-					viewportPos.x + (viewportSize.x - windowWidth) * 0.5f, // Center horizontally
-					viewportPos.y + (viewportSize.y - windowHeight) * 0.5f // Center vertically
-				);
-				ImGui::SetNextWindowPos(windowPos);
 			}
 			if (scene_ref->IsRunning()) ImGui::EndDisabled();
 
@@ -382,120 +363,9 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 			ImGui::Columns(1);
 
-			static std::filesystem::path new_script_path{};
-			static bool show_warning_popup = false;
-			if (ImGui::BeginPopupModal("Create New Script", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
-
-				// Grey out the background
-				ImGui::Text("Create a New Script");
-
-				// Input fields
-
-				float first_coloumn_width = ImGui::CalcTextSize("Script Name").x + 10.0f;
-
-				ImGui::Columns(2, "New_Script_Cols", false);
-				ImGui::SetColumnWidth(-1, first_coloumn_width);
-
-				ImGui::Text("Script Name");
-
-				ImGui::NextColumn();
-
-				char buf[256];
-				strncpy_s(buf, new_script_path.string().c_str(), sizeof(buf));
-				ImGui::InputText("##Folder Path", buf, sizeof(buf));
-				new_script_path = buf;
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("...")) {
-					new_script_path = FileUtils::SaveFile("C# Script (*.cs)\0*.cs\0", (Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts")); // Open File Dialog in Scripts Folder
-
-					if (new_script_path.lexically_normal().string().find((Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts").lexically_normal().string()) != 0) {
-						new_script_path = "";
-						show_warning_popup = true; // Trigger warning popup
-						script_create = false;
-					}
-					else {
-						new_script_path = new_script_path.filename();
-					}
-				}
-
-				ImGui::Columns(1);
-
-				// Buttons for Create and Cancel
-				if (ImGui::Button("Create") || Engine::Get().GetInput().GetKeyDown(GLFW_KEY_ENTER)) {
-
-					if (new_script_path.extension() != ".cs")
-						new_script_path.replace_extension(".cs");
-
-					new_script_path = std::filesystem::absolute(Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts" / new_script_path);
-
-					//check if in script directory
-					if (new_script_path.lexically_normal().string().find((Project::GetActiveProject()->GetProjectDirectory() / "Assets/Scripts").lexically_normal().string()) != 0) {
-						new_script_path = "";
-						show_warning_popup = true; // Trigger warning popup
-						script_create = false;
-					}
-					else {
-
-						std::string script_full_name = Utils::GenerateScriptFile(Project::GetActiveProject()->GetConfig().Name, new_script_path);
-						component_script_vector.push_back({ script_full_name, true });
-
-						// Add temporary class to the entity classes list, this is so that it shows in the editor.
-						// NOTE: We don't actually need to initialise a ScriptClass for this yet. The AppAssembly 
-						// will reload regardless when we're scripting, and it will add it anyway! This is more for
-						// user experience when creating a script.
-						ScriptManager::AddEntityClass(script_full_name, nullptr); 
-
-						new_script_path = "";
-						script_create = false; // Close the dialog
-						ImGui::CloseCurrentPopup();
-					}
-				}
-
-				ImGui::SameLine();
-
-				if (ImGui::Button("Cancel")) {
-					script_create = false; // Close the dialog
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
-
-			// Warning popup
-			if (show_warning_popup) {
-				ImGui::OpenPopup("ScriptWarningPopup");
-
-				// Calculate window size: 25% of the screen width, minimum 300.0f
-				float windowWidth = glm::max(300.0f, ImGui::GetContentRegionAvail().x * 0.25f);
-				float windowHeight = 100.0f; // Fixed height
-				ImVec2 windowSize(windowWidth, windowHeight);
-				ImGui::SetNextWindowSize(windowSize);
-
-				ImGuiViewport* viewport = ImGui::GetMainViewport();
-				ImVec2 viewportPos = viewport->Pos;
-				ImVec2 viewportSize = viewport->Size;
-
-				// Calculate centered position
-				ImVec2 windowPos(
-					viewportPos.x + (viewportSize.x - windowWidth) * 0.5f, // Center horizontally
-					viewportPos.y + (viewportSize.y - windowHeight) * 0.5f // Center vertically
-				);
-				ImGui::SetNextWindowPos(windowPos);
-			}
-
-			if (ImGui::BeginPopupModal("ScriptWarningPopup", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize)) {
-				ImGui::TextWrapped("The selected file path is not within the Scripts directory. Please choose a valid path within the Scripts directory.");
-
-				if (ImGui::Button("OK")) {
-					show_warning_popup = false; // Close the warning popup
-					script_create = true;
-					ImGui::CloseCurrentPopup();
-				}
-
-				ImGui::EndPopup();
-			}
+			auto script_full_name = Utils::OnCreateNewScriptGUI(&script_create);
+			if (!script_full_name.empty())
+				component_script_vector.push_back({ script_full_name, true });
 
 			ImGui::TreePop();
 		}
@@ -1604,6 +1474,28 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 								}
 								else {
 									L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+								}
+							}
+
+							if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+
+								std::string dropped_asset_path_string(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+								std::filesystem::path dropped_asset_path = dropped_asset_path_string;
+
+								if (AssetManager::IsExtensionSupported(dropped_asset_path.extension())) {
+
+									AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_asset_path);
+
+									if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
+										asset_material->SetSkyboxFaceTexture(static_cast<L_SKYBOX_BINDING>(i), dropped_asset_handle);
+										asset_material->Serialize();
+									}
+									else {
+										L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+									}
+								}
+								else {
+									L_APP_WARN("Invalid File Path Dropped on Skybox Material Target.");
 								}
 							}
 							ImGui::EndDragDropTarget();

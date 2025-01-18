@@ -3,5 +3,5 @@ Project Config:
   StartScene: Scenes\Sanbox Script Scene.lscene
   AssetDirectory: Assets\
   AssetRegistry: AssetRegistry.lassetreg
-  CoreScriptModulePath: Assets\Scripts\Binaries\Louron Script Core.dll
-  AppScriptModulePath: Assets\Scripts\Binaries\SandboxProject.dll
+  CoreScriptModulePath: Scripts\Binaries\Louron Script Core.dll
+  AppScriptModulePath: Scripts\Binaries\SandboxProject.dll

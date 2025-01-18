@@ -75,11 +75,12 @@ namespace Louron {
 		// Create Project Directories
 		std::filesystem::path projectDirectory = outFilePath.parent_path();
 		std::filesystem::create_directories(projectDirectory / "Scenes");
+
+		std::filesystem::create_directories(projectDirectory / "Scripts/Binaries");
+
 		std::filesystem::create_directories(projectDirectory / "Assets/Audio");
 		std::filesystem::create_directories(projectDirectory / "Assets/Materials");
 		std::filesystem::create_directories(projectDirectory / "Assets/Models");
-		std::filesystem::create_directories(projectDirectory / "Assets/Scripts/Binaries");
-		std::filesystem::create_directories(projectDirectory / "Assets/Scripts/Source");
 		std::filesystem::create_directories(projectDirectory / "Assets/Shaders");
 		std::filesystem::create_directories(projectDirectory / "Assets/Textures");
 
@@ -92,11 +93,11 @@ namespace Louron {
 		project->m_Config.StartScene = "Scenes/Untitled Scene.lscene";
 		project->m_Config.AssetDirectory = "Assets/";
 		project->m_Config.AssetRegistry = "AssetRegistry.lassetreg";
-		project->m_Config.CoreScriptAssemblyPath = project->m_Config.AssetDirectory / "Scripts/Binaries/Louron Script Core.dll"; 
+		project->m_Config.CoreScriptAssemblyPath = "Scripts/Binaries/Louron Script Core.dll"; 
 		
 		std::string tempName = project->m_Config.Name; // Create a temporary copy
 		tempName.erase(std::remove(tempName.begin(), tempName.end(), ' '), tempName.end()); // Remove spaces
-		project->m_Config.AppScriptAssemblyPath = project->m_Config.AssetDirectory / "Scripts/Binaries" / (tempName + ".dll");
+		project->m_Config.AppScriptAssemblyPath = "Scripts/Binaries/" + tempName + ".dll";
 
 		// This is a new project. New projects can only be created in the editor environment.
 		// Additionally, as this is a new project, we will serialise the empty AssetManager to
