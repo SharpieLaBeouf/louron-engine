@@ -31,6 +31,7 @@ private:
 
 	bool m_SceneWindowFocused = false;
 	glm::ivec2 m_ViewportWindowSize = { 800, 600 };
+	std::array<glm::vec2, 2> m_ViewportBounds{};
 
 	Louron::Entity m_SelectedEntity;
 
@@ -51,6 +52,7 @@ private:
 	HierarchyPanel m_HierarchyPanel;
 	ContentBrowserPanel m_ContentBrowserPanel;
 
+	int m_GizmoType = -1;
 	bool m_WindowWasUnfocused = false;
 	bool m_ScriptsCompiledSuccess = false;
 	static std::atomic_bool m_ScriptsNeedCompiling;

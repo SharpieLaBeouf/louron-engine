@@ -458,7 +458,7 @@ namespace Louron {
 			if (camera_entity) {
 				camera_entity.GetComponent<CameraComponent>().CameraInstance->Update(Time::Get().GetDeltaTime());
 				camera_entity.GetComponent<TransformComponent>().SetPosition(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
-				camera_entity.GetComponent<TransformComponent>().SetGlobalForwardDirection(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetCameraDirection());
+				camera_entity.GetComponent<TransformComponent>().SetForwardDirection(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetCameraDirection());
 			}
 			else {
 				auto camera = scene_ref->CreateEntity("Main Camera");

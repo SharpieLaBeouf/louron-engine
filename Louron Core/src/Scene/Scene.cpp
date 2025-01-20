@@ -133,6 +133,11 @@ namespace Louron {
 	/// </summary>
 	Entity Scene::CreateEntity(UUID uuid, const std::string& name) {
 
+		std::unique_lock<std::mutex> lock;
+
+		if (m_Octree) 
+			lock = std::unique_lock<std::mutex>(m_Octree->GetOctreeMutex());
+		
 		while (true) {
 
 			if (m_EntityMap->find(uuid) == m_EntityMap->end())
@@ -349,6 +354,13 @@ namespace Louron {
 
 	// Destroys Entity in Scene
 	void Scene::DestroyEntity(Entity entity) {
+
+		// Need to lock the octree because it may be trying to 
+		// get things from scene as it's being deleted!
+		std::unique_lock<std::mutex> octree_lock;
+
+		if (m_Octree)
+			octree_lock = std::unique_lock<std::mutex>(m_Octree->GetOctreeMutex());
 
 		// 1. Check if entity is valid
 		if (!entity) {

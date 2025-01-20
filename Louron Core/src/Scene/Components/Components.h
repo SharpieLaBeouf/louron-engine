@@ -245,6 +245,7 @@ namespace Louron {
         void OnTransformUpdated();
         void UpdateLocalTransformMatrix();
 
+
     public:
 
         TransformComponent();
@@ -300,17 +301,13 @@ namespace Louron {
         glm::vec3 GetGlobalRotation();
         glm::vec3 GetGlobalScale();
 
-        void SetLocalForwardDirection(const glm::vec3& direction); // Set Local Direction
-        glm::vec3 GetLocalForwardDirection(); // Get Local Direction
+        void SetForwardDirection(const glm::vec3& direction);
+        void SetRightDirection(const glm::vec3& direction);
+        void SetUpDirection(const glm::vec3& direction);
 
-        glm::vec3 GetLocalUpDirection();
-        glm::vec3 GetLocalRightDirection();
-
-        void SetGlobalForwardDirection(const glm::vec3& direction);
-        glm::vec3 GetGlobalForwardDirection();
-
-        glm::vec3 GetGlobalUpDirection();
-        glm::vec3 GetGlobalRightDirection();
+        glm::vec3 GetForwardDirection();
+        glm::vec3 GetRightDirection();
+        glm::vec3 GetUpDirection();
 
         const glm::vec3& GetLocalPosition() const;
         const glm::vec3& GetLocalRotation() const;
@@ -326,6 +323,11 @@ namespace Louron {
 
         void Serialize(YAML::Emitter& out);
         bool Deserialize(const YAML::Node data);
+
+        // Helper function, converts transform matrix to PURE rotation matrix
+        static glm::vec3 GetPositionFromMatrix(const glm::mat4& transform);
+        static glm::vec3 GetRotationFromMatrix(const glm::mat4& transform);
+        static glm::vec3 GetScaleFromMatrix(const glm::mat4& transform);
 
     private:
 

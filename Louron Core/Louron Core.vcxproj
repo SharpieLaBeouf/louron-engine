@@ -46,14 +46,14 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include\physx;$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include\physx;$(ProjectDir)\include\imgui;$(ProjectDir)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs\physx;$(ProjectDir)\libs\spdlog;$(ProjectDir)\libs\yaml-cpp;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediates\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)\include\physx;$(ProjectDir)\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\include\physx;$(ProjectDir)\include\imgui;$(ProjectDir)\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\libs\assimp;$(ProjectDir)\libs\glad;$(ProjectDir)\libs\glfw;$(ProjectDir)\libs\physx;$(ProjectDir)\libs\spdlog;$(ProjectDir)\libs\yaml-cpp;$(ProjectDir)\libs;$(LibraryPath)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediates\</IntDir>
@@ -120,6 +120,11 @@
     <ClCompile Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CompilerIdCXX\CMakeCXXCompilerId.cpp" />
     <ClCompile Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CompilerIdC\CMakeCCompilerId.c" />
     <ClCompile Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\ShowIncludes\main.c" />
+    <ClCompile Include="include\imguizmo\GraphEditor.cpp" />
+    <ClCompile Include="include\imguizmo\ImCurveEdit.cpp" />
+    <ClCompile Include="include\imguizmo\ImGradient.cpp" />
+    <ClCompile Include="include\imguizmo\ImGuizmo.cpp" />
+    <ClCompile Include="include\imguizmo\ImSequencer.cpp" />
     <ClCompile Include="include\imgui\imgui.cpp" />
     <ClCompile Include="include\imgui\imgui_demo.cpp" />
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
@@ -547,6 +552,12 @@
     <ClInclude Include="include\glm\vec3.hpp" />
     <ClInclude Include="include\glm\vec4.hpp" />
     <ClInclude Include="include\glm\vector_relational.hpp" />
+    <ClInclude Include="include\imguizmo\GraphEditor.h" />
+    <ClInclude Include="include\imguizmo\ImCurveEdit.h" />
+    <ClInclude Include="include\imguizmo\ImGradient.h" />
+    <ClInclude Include="include\imguizmo\ImGuizmo.h" />
+    <ClInclude Include="include\imguizmo\ImSequencer.h" />
+    <ClInclude Include="include\imguizmo\ImZoomSlider.h" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
     <ClInclude Include="include\imgui\imgui_impl_glfw.h" />

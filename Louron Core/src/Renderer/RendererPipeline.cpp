@@ -95,7 +95,7 @@ namespace Louron {
 			SL_SSBO_DATA_LAYOUT(const SpotLightComponent& spot_light, TransformComponent& transform) {
 
 				position  = { transform.GetGlobalPosition(), 1.0f };
-				direction = { transform.GetGlobalForwardDirection(), 1.0f };
+				direction = { transform.GetForwardDirection(), 1.0f };
 				shadowCastingType = static_cast<GLuint>(spot_light.ShadowFlag);
 
 				colour = spot_light.Colour;
@@ -134,7 +134,7 @@ namespace Louron {
 
 			DL_SSBO_DATA_LAYOUT(const DirectionalLightComponent& directional_light, TransformComponent& transform) {
 				
-				direction = { transform.GetGlobalForwardDirection(), 1.0f };
+				direction = { transform.GetForwardDirection(), 1.0f };
 				shadowCastingType = static_cast<GLuint>(directional_light.ShadowFlag);
 
 				active = directional_light.Active ? 1 : 0;
@@ -710,12 +710,12 @@ namespace Louron {
 
 			Bounds_Sphere sphere;
 			if (half_angle > glm::pi<float>() / 4.0f) {
-				sphere.BoundsCentre = transform.GetGlobalPosition() + cosPenumbra * light.Range * transform.GetGlobalForwardDirection();
+				sphere.BoundsCentre = transform.GetGlobalPosition() + cosPenumbra * light.Range * transform.GetForwardDirection();
 				sphere.BoundsRadius = sin(half_angle) * light.Range;
 			}
 			else
 			{
-				sphere.BoundsCentre = transform.GetGlobalPosition() + light.Range / (2.0f * cosPenumbra) * transform.GetGlobalForwardDirection();
+				sphere.BoundsCentre = transform.GetGlobalPosition() + light.Range / (2.0f * cosPenumbra) * transform.GetForwardDirection();
 				sphere.BoundsRadius = light.Range / (2.0f * cosPenumbra);
 			}
 

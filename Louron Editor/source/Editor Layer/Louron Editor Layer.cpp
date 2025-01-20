@@ -6,8 +6,11 @@
 // C++ Headers
 
 // External
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <imgui/imgui_internal.h>
+#include <imguizmo/ImGuizmo.h>
 
 using namespace Louron;
 
@@ -128,7 +131,7 @@ void LouronEditorLayer::OnUpdate() {
 			if (camera_entity) {
 				camera_entity.GetComponent<CameraComponent>().CameraInstance->Update(Time::Get().GetDeltaTime());
 				camera_entity.GetComponent<TransformComponent>().SetPosition(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
-				camera_entity.GetComponent<TransformComponent>().SetGlobalForwardDirection(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetCameraDirection());
+				camera_entity.GetComponent<TransformComponent>().SetForwardDirection(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetCameraDirection());
 			}
 
 			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -859,14 +862,13 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
 		auto viewportOffset = ImGui::GetWindowPos();
 
-		glm::vec2 viewportBounds[2]; 
-		viewportBounds[0] = {viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y};
-		viewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
+		m_ViewportBounds[0] = {viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y};
+		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 
-		mx -= viewportBounds[0].x;
-		my -= viewportBounds[0].y;
+		mx -= m_ViewportBounds[0].x;
+		my -= m_ViewportBounds[0].y;
 
-		glm::vec2 viewportSize = viewportBounds[1] - viewportBounds[0];
+		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
 
 		my = viewportSize.y - my;
 		int mouseX = (int)mx;
@@ -878,6 +880,50 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 			if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
 				uint32_t pixelData = Project::GetActiveScene()->GetSceneFrameBuffer()->ReadEntityPixelData({ mouseX, mouseY });
 				m_SelectedEntity = pixelData == NULL_UUID ? Entity() : Project::GetActiveScene()->FindEntityByUUID(pixelData);
+			}
+		}
+
+		Entity selectedEntity = m_SelectedEntity;
+		if (selectedEntity && m_GizmoType != -1)
+		{
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetRect(	m_ViewportBounds[0].x,  m_ViewportBounds[0].y,
+								m_ViewportBounds[1].x - m_ViewportBounds[0].x,
+								m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+			// Editor camera
+			const glm::mat4& cameraProjection = scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->GetProjMatrix();
+			glm::mat4 cameraView = scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->GetViewMatrix();
+
+			// Entity transform
+			auto& transform_component = selectedEntity.GetComponent<TransformComponent>();
+			glm::mat4 transform = transform_component.GetGlobalTransform();
+
+			// Snapping
+			bool snap = Engine::Get().GetInput().GetKey(GLFW_KEY_LEFT_CONTROL);
+			float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+			// Snap to 45 degrees for rotation
+			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+				snapValue = 45.0f;
+
+			float snapValues[3] = { snapValue, snapValue, snapValue };
+
+			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+				nullptr, snap ? &snapValue : nullptr);
+
+			if (ImGuizmo::IsUsing())
+			{
+				glm::vec3 position, rotation, scale;
+
+				position = TransformComponent::GetPositionFromMatrix(transform);
+				rotation = TransformComponent::GetRotationFromMatrix(transform);
+				scale = TransformComponent::GetScaleFromMatrix(transform);
+
+				transform_component.SetGlobalPosition(position);
+				transform_component.SetGlobalRotation(rotation);
+				transform_component.SetGlobalScale(scale);
 			}
 		}
 	}
@@ -1371,6 +1417,29 @@ void LouronEditorLayer::CheckInput() {
 			else {
 				SaveScene();
 			}
+		}
+	}
+	else {
+
+		if (input.GetKeyDown(GLFW_KEY_Q)) {
+
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = -1;
+		}
+		if (input.GetKeyDown(GLFW_KEY_G)) {
+
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
+		}
+		if (input.GetKeyDown(GLFW_KEY_R)) {
+
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::ROTATE;
+		}
+		if (input.GetKeyDown(GLFW_KEY_S)) {
+
+			if (!ImGuizmo::IsUsing())
+				m_GizmoType = ImGuizmo::OPERATION::SCALE;
 		}
 	}
 }

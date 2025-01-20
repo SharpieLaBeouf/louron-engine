@@ -8,8 +8,9 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 
-    <BaseOutputPath>Binaries</BaseOutputPath>
     <OutputPath>Binaries</OutputPath>
+    <BaseOutputPath>Binaries</BaseOutputPath>
+    <BaseIntermediateOutputPath>Binaries/obj</BaseIntermediateOutputPath>
 
   </PropertyGroup>
 

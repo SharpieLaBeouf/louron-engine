@@ -29,32 +29,6 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 				switch (asset_type) {
 
 					case AssetType::ModelImport:
-					{
-						if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::ModelImport) {
-							auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);
-							Entity entity = scene_ref->InstantiatePrefab(prefab);
-							if (entity)
-							{
-								selected_entity = entity;
-
-								if (parent_uuid != NULL_UUID)
-									entity.GetComponent<HierarchyComponent>().AttachParent(parent_uuid);
-
-								auto& transform = entity.GetComponent<TransformComponent>();
-								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
-								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
-								transform.SetScale({ 1.0f, 1.0f, 1.0f });
-							}
-							else
-								L_APP_WARN("Could Not Instantiate Model Into Scene.");
-						}
-						else {
-							L_APP_WARN("Invalid Asset Type Dropped Into Scene.");
-						}
-
-						break;
-					}
-
 					case AssetType::Prefab:
 					{
 						auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);

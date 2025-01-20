@@ -13,13 +13,13 @@ namespace SandboxProject
 		
 		public void OnStart()
 		{
-			
+				Debug.Log($"SHOOT Rotation: {transform.rotation.ToString()}");
 		}
 		
 		public void OnUpdate()
 		{
-			if(Input.GetMouseButton(MouseButton.Mouse_Button_Left)){
-				Entity clone = Instantiate(bullet_prefab, transform.position + (transform.front * 3.0f));
+			if(Input.GetMouseButtonDown(MouseButton.Mouse_Button_Left)){
+				Entity clone = Instantiate(bullet_prefab, transform.position);
 				clone.GetComponent<RigidbodyComponent>().ApplyForce(transform.front * speed, ForceMode.eIMPULSE);
 			}
 		}

@@ -217,11 +217,8 @@ namespace Louron {
 		virtual AssetType GetAssetType(AssetHandle handle) const override;
 
 		/// <summary>
-		/// This will Import an Asset give a file path. This file path HAS to be relative 
-		/// to the AssetDirectory path. If it is not relative, it will not load!
+		/// This will Import an Asset give a file path.
 		/// </summary>
-		/// <param name="filepath">Needs to be relative to Project Asset Directory</param>
-		/// <returns>Handle that Asset has been created with.</returns>
 		AssetHandle ImportAsset(const std::filesystem::path& filepath);
 
 		const AssetMetaData& GetMetadata(AssetHandle handle) const;

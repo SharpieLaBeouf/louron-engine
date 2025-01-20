@@ -388,7 +388,7 @@ namespace Louron {
 
 		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
 
-		*ref = entity_transform.GetGlobalForwardDirection();
+		*ref = entity_transform.GetForwardDirection();
 	}
 
 	static void TransformComponent_GetUp(UUID entityID, glm::vec3* ref)
@@ -403,7 +403,7 @@ namespace Louron {
 
 		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
 
-		*ref = entity_transform.GetGlobalUpDirection();
+		*ref = entity_transform.GetUpDirection();
 	}
 
 	static void TransformComponent_GetRight(UUID entityID, glm::vec3* ref)
@@ -418,7 +418,7 @@ namespace Louron {
 
 		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
 
-		*ref = entity_transform.GetGlobalRightDirection();
+		*ref = entity_transform.GetRightDirection();
 	}
 
 #pragma endregion

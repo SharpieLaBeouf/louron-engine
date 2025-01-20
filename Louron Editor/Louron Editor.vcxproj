@@ -45,13 +45,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include\imgui;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(SolutionDir)\Louron Core\libs\mono;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include\imgui;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(SolutionDir)\Louron Core\libs\mono;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>

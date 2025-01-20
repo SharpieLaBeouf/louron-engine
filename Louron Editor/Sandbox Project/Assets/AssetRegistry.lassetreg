@@ -1849,6 +1849,11 @@ AssetRegistry:
     FilePath: Models/Cube/Red_Cube.fbx
     Type: AssetType::Mesh
     ParentAssetHandle: 1691785717
+  - Handle: 653242855
+    Name: AK47
+    FilePath: Models/AK47/AK47.fbx
+    Type: AssetType::Mesh
+    ParentAssetHandle: 2867117269
   - Handle: 653584075
     Name: sponza_thorn_spec
     FilePath: Models/Sponza/Sponza.fbm/sponza_thorn_spec.tga
@@ -2499,11 +2504,6 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Barrels/Barrel_01.fbx
     Type: AssetType::ModelImport
     ParentAssetHandle: 4294967295
-  - Handle: 2153831608
-    Name: Crazy Goblin!
-    FilePath: Crazy Goblin!.lprefab
-    Type: AssetType::Prefab
-    ParentAssetHandle: 4294967295
   - Handle: 2160578162
     Name: candelabra_005_lit
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_05_Lit.fbx
@@ -2634,6 +2634,11 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_10_Unlit.fbx
     Type: AssetType::ModelImport
     ParentAssetHandle: 4294967295
+  - Handle: 2377665544
+    Name: AK47 Material
+    FilePath: Models/AK47/AK47.fbx
+    Type: AssetType::Material_Standard
+    ParentAssetHandle: 2867117269
   - Handle: 2385307421
     Name: backpack_specular
     FilePath: Models/BackPack/backpack_specular.jpg
@@ -2654,6 +2659,11 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_08_Unlit.fbx
     Type: AssetType::Mesh
     ParentAssetHandle: 1494901882
+  - Handle: 2455265339
+    Name: ak-47
+    FilePath: Models/AK47/AK47.fbm/ak-47.jpg
+    Type: AssetType::Texture2D
+    ParentAssetHandle: 4294967295
   - Handle: 2455307518
     Name: candelabra_004_unlit
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_04_Unlit.fbx
@@ -2809,6 +2819,11 @@ AssetRegistry:
     FilePath: Models/Cube/Blue_Cube.fbx
     Type: AssetType::Material_Standard
     ParentAssetHandle: 1750229396
+  - Handle: 2867117269
+    Name: AK47
+    FilePath: Models/AK47/AK47.fbx
+    Type: AssetType::ModelImport
+    ParentAssetHandle: 4294967295
   - Handle: 2869396274
     Name: entourage_set_01_atlas.005
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_02_Lit.fbx
@@ -2829,11 +2844,6 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Chairs/Chair_Wood_Cloth_White.fbx
     Type: AssetType::Material_Standard
     ParentAssetHandle: 3437686578
-  - Handle: 2893359719
-    Name: TestPrefab
-    FilePath: TestPrefab.lprefab
-    Type: AssetType::Prefab
-    ParentAssetHandle: 4294967295
   - Handle: 2901272759
     Name: entourage_set_01_atlas.021
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_10_Lit.fbx
@@ -2944,11 +2954,6 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Door/Door_Wood.fbx
     Type: AssetType::Mesh
     ParentAssetHandle: 1015536818
-  - Handle: 3175703965
-    Name: Bullet
-    FilePath: Bullet.lprefab
-    Type: AssetType::Prefab
-    ParentAssetHandle: 4294967295
   - Handle: 3196295046
     Name: Door_Steel
     FilePath: Models/Dungeon Kit/Door/Door_Steel.fbx
@@ -2989,11 +2994,6 @@ AssetRegistry:
     FilePath: Models/Cube/PBR_CUBE.fbx
     Type: AssetType::Mesh
     ParentAssetHandle: 3602894860
-  - Handle: 3315915409
-    Name: Floor
-    FilePath: Floor.lprefab
-    Type: AssetType::Prefab
-    ParentAssetHandle: 4294967295
   - Handle: 3318426815
     Name: chair_wood
     FilePath: Models/Dungeon Kit/Chairs/Chair_Wood.fbx
