@@ -73,6 +73,7 @@ namespace Louron {
 		bool EnableDebugging = true;
 
 		ScriptClass EntityClass;
+		ScriptClass PrefabClass;
 		// Key is {Namespace}.{ClassName} - Value is shared_ptr to ScriptClass
 		std::unordered_map<std::string, std::shared_ptr<ScriptClass>> EntityClasses;
 
@@ -315,6 +316,7 @@ namespace Louron {
 
 		// 6. Setup EntityClass ScriptClass
 		s_Data->EntityClass = ScriptClass("Louron", "Entity", true);
+		s_Data->PrefabClass = ScriptClass("Louron", "Prefab", true);
 
 	}
 
@@ -480,6 +482,7 @@ namespace Louron {
 
 		// Retrieve and instantiate class
 		s_Data->EntityClass = ScriptClass("Louron", "Entity", true);
+		s_Data->PrefabClass = ScriptClass("Louron", "Prefab", true);
 	}
 
 	void ScriptManager::OnRuntimeStart(std::shared_ptr<Scene> scene)
@@ -561,6 +564,9 @@ namespace Louron {
 						else if (fieldInstance.Field.Type == ScriptFieldType::Entity) { // Set Entity value
 							instance->SetFieldEntityValue(fieldInstance, *(UUID*)fieldInstance.m_Buffer);
 						}
+						else if (fieldInstance.Field.Type == ScriptFieldType::Prefab) { // Set Prefab value
+							instance->SetFieldPrefabValue(fieldInstance, *(AssetHandle*)fieldInstance.m_Buffer);
+						}
 						else { // Set values for other fields that are not components
 							instance->SetFieldValueInternal(name, fieldInstance.m_Buffer);
 						}
@@ -605,6 +611,9 @@ namespace Louron {
 						}
 						else if (fieldInstance.Field.Type == ScriptFieldType::Entity) { // Set Entity value
 							instance->SetFieldEntityValue(fieldInstance, *(UUID*)fieldInstance.m_Buffer);
+						}
+						else if (fieldInstance.Field.Type == ScriptFieldType::Prefab) { // Set Prefab value
+							instance->SetFieldPrefabValue(fieldInstance, *(AssetHandle*)fieldInstance.m_Buffer);
 						}
 						else { // Set values for other fields that are not components
 							instance->SetFieldValueInternal(name, fieldInstance.m_Buffer);
@@ -956,26 +965,79 @@ namespace Louron {
 		MonoClassField* entity_field_in_script = mono_class_get_field_from_name(m_ScriptClass->GetMonoClass(), field_name.c_str());
 
 		if (!entity_field_in_script)
-			return UUID(); // Return a default UUID if the field is not found
+			return NULL_UUID; // Return a default UUID if the field is not found
 
 		// Retrieve the MonoObject stored in the field
 		MonoObject* entity_instance = nullptr;
 		mono_field_get_value(m_Instance, entity_field_in_script, &entity_instance);
 
 		if (!entity_instance)
-			return UUID(); // Return a default UUID if the field has no value
+			return NULL_UUID; // Return a default UUID if the field has no value
 
 		// Get the Entity::ID field from the Entity class
 		ScriptClass& entity_class = s_Data->EntityClass;
 		MonoClassField* id_field_in_entity = mono_class_get_field_from_name(entity_class.GetMonoClass(), "ID");
 
 		if (!id_field_in_entity)
-			return UUID(); // Return a default UUID if the ID field is not found
+			return NULL_UUID; // Return a default UUID if the ID field is not found
 
 		// Retrieve the value of the ID field
 		mono_field_get_value(entity_instance, id_field_in_entity, s_FieldValueBuffer);
 
 		return *(UUID*)s_FieldValueBuffer;
+	}
+
+	void ScriptInstance::SetFieldPrefabValue(const ScriptFieldInstance& field_instance, AssetHandle value)
+	{
+		ScriptClass& prefab_class = s_Data->PrefabClass;
+
+		MonoClassField* prefab_field_in_script = mono_class_get_field_from_name(m_ScriptClass->GetMonoClass(), field_instance.Field.Name.c_str());
+
+		if (!prefab_field_in_script)
+			return;
+
+		MonoObject* prefab_instance = mono_object_new(s_Data->AppDomain, prefab_class.GetMonoClass()); // CREATE - create a new object
+
+		if (!prefab_instance)
+			return;
+
+		MonoMethod* prefab_constructor = prefab_class.GetMethod(".ctor", 1);
+
+		if (!prefab_constructor)
+			return;
+
+		void* param = &value;
+		prefab_class.InvokeMethod(prefab_instance, prefab_constructor, &param); // INITIALISE - Call the parametered constructor to pass the UUID
+
+		mono_field_set_value(m_Instance, prefab_field_in_script, (void*)prefab_instance); // ASSIGN - set the object to the field in our Script Instance
+	}
+
+	AssetHandle ScriptInstance::GetFieldPrefabValue(const std::string& field_name)
+	{
+		// Get the MonoClassField corresponding to the field_name
+		MonoClassField* prefab_field_in_script = mono_class_get_field_from_name(m_ScriptClass->GetMonoClass(), field_name.c_str());
+
+		if (!prefab_field_in_script)
+			return NULL_UUID; // Return a default UUID if the field is not found
+
+		// Retrieve the MonoObject stored in the field
+		MonoObject* prefab_instance = nullptr;
+		mono_field_get_value(m_Instance, prefab_field_in_script, &prefab_instance);
+
+		if (!prefab_instance)
+			return NULL_UUID; // Return a default UUID if the field has no value
+
+		// Get the Entity::ID field from the Entity class
+		ScriptClass& entity_class = s_Data->PrefabClass;
+		MonoClassField* handle_field_in_prefab_class = mono_class_get_field_from_name(entity_class.GetMonoClass(), "Asset_Handle");
+
+		if (!handle_field_in_prefab_class)
+			return NULL_UUID; // Return a default UUID if the ID field is not found
+
+		// Retrieve the value of the AssetHandle field
+		mono_field_get_value(prefab_instance, handle_field_in_prefab_class, s_FieldValueBuffer);
+
+		return *(AssetHandle*)s_FieldValueBuffer;
 	}
 
 	void ScriptInstance::SetFieldComponentPropertyValue(const ScriptFieldInstance& field_instance, UUID value)
@@ -1012,7 +1074,7 @@ namespace Louron {
 		if (!componentField)
 		{
 			// Field not found, return a default UUID or handle error
-			return UUID();
+			return NULL_UUID;
 		}
 
 		// Retrieve the value of the field (component instance) from the script instance
@@ -1022,7 +1084,7 @@ namespace Louron {
 		if (!componentInstance)
 		{
 			// If the component instance is null, return a default UUID
-			return UUID();
+			return NULL_UUID;
 		}
 
 		// Retrieve the property "Entity" from the component class
@@ -1031,7 +1093,7 @@ namespace Louron {
 		if (!entityProperty)
 		{
 			// Property "Entity" not found, return a default UUID
-			return UUID();
+			return NULL_UUID;
 		}
 
 		// Get the value of the "Entity" property
@@ -1039,7 +1101,7 @@ namespace Louron {
 		if (!entityInstance)
 		{
 			// If the Entity object is null, return a default UUID
-			return UUID();
+			return NULL_UUID;
 		}
 
 		// Use s_Data->EntityClass to retrieve the "m_UUID" field
@@ -1047,7 +1109,7 @@ namespace Louron {
 		if (!uuidField)
 		{
 			// UUID field not found in the Entity class, return a default UUID
-			return UUID();
+			return NULL_UUID;
 		}
 
 		// Retrieve the UUID value from the Entity instance

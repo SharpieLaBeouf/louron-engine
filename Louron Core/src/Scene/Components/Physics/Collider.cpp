@@ -28,6 +28,8 @@ namespace Louron {
 
     void SphereColliderComponent::Init()
     {
+        this->Shutdown(); // Make sure we are actually shutdown before initialising!
+
         GetMaterial()->Init();
 
         m_Shape = std::make_shared<PhysicsShape>(PxSphereGeometry(m_Radius * 2.0f), *m_Material->GetMaterial());
@@ -61,7 +63,11 @@ namespace Louron {
 
     SphereColliderComponent::SphereColliderComponent(const SphereColliderComponent& other) {
 
-        scene = other.scene;
+        if(!scene)
+            scene = other.scene;
+
+        if (entity_uuid == NULL_UUID)
+            entity_uuid = other.entity_uuid;
 
         m_Radius = other.m_Radius;
         m_IsTrigger = other.m_IsTrigger;
@@ -69,23 +75,22 @@ namespace Louron {
 
         m_StateFlags = other.m_StateFlags;
 
-        Entity entity = GetEntity();
-
+        Entity entity = (scene && entity_uuid != NULL_UUID) ? entity = GetEntity() : Entity();
         m_EntityUUID = entity ? entity.GetUUID() : (UUID)NULL_UUID;
         m_RigidbodyUUID = NULL_UUID;
 
         if (other.m_Material)
             m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
 
-        if (scene->IsRunning() || scene->IsSimulating())
+        if (scene && (scene->IsRunning() || scene->IsSimulating()))
             Init();
     }
 
     SphereColliderComponent::SphereColliderComponent(SphereColliderComponent&& other) noexcept {
 
         // Component Base Class Move
-        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
         scene = other.scene; other.scene = nullptr;
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
 
         // Sphere Collider Class Move
         m_Radius = other.m_Radius; other.m_Radius = 0.5f;
@@ -109,8 +114,11 @@ namespace Louron {
     // COPY ASSIGNMENT OPERATOR
     SphereColliderComponent& SphereColliderComponent::operator=(const SphereColliderComponent& other) {
 
-        if (this == &other || !scene)
+        if (this == &other)
             return *this;
+
+        if (!scene)
+            scene = other.scene;
 
         this->Shutdown();
 
@@ -120,15 +128,24 @@ namespace Louron {
 
         m_StateFlags = other.m_StateFlags;
 
-        Entity entity = GetEntity();
-
+        Entity entity = (scene && entity_uuid != NULL_UUID) ? entity = GetEntity() : Entity();
         m_EntityUUID = entity ? entity.GetUUID() : (UUID)NULL_UUID;
         m_RigidbodyUUID = NULL_UUID;
+
+        if (m_Material) {
+            m_Material->Shutdown();
+            m_Material = nullptr;
+        }
+
+        if (m_Shape)  {
+            m_Shape->Release();
+            m_Shape = nullptr;
+        }
 
         if(other.m_Material)
             m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
 
-        if (scene->IsRunning() || scene->IsSimulating())
+        if (scene && (scene->IsRunning() || scene->IsSimulating()))
             Init();
         
         return *this;
@@ -143,8 +160,8 @@ namespace Louron {
         this->Shutdown();
 
         // Component Base Class Move
-        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
         scene = other.scene; other.scene = nullptr;
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
 
         // Sphere Collider Class Move
         m_Radius = other.m_Radius; other.m_Radius = 0.5f;
@@ -155,6 +172,16 @@ namespace Louron {
         m_EntityUUID = other.m_EntityUUID; other.m_EntityUUID = NULL_UUID;
 
         m_StateFlags = other.m_StateFlags; other.m_StateFlags = ColliderFlag_None;
+
+        if (m_Material) {
+            m_Material->Shutdown();
+            m_Material = nullptr;
+        }
+
+        if (m_Shape) {
+            m_Shape->Release();
+            m_Shape = nullptr;
+        }
 
         m_Shape = other.m_Shape; other.m_Shape = nullptr;
         m_Material = other.m_Material; other.m_Material = nullptr;
@@ -450,11 +477,13 @@ namespace Louron {
 
     #pragma endregion
 
-    #pragma endregion
+#pragma endregion
 
 #pragma region BoxColliderComponent
 
     void BoxColliderComponent::Init() {
+
+        this->Shutdown(); // Make sure we are actually shutdown before initialising!
 
         GetMaterial()->Init();
 
@@ -491,8 +520,11 @@ namespace Louron {
     // that the correct entity_uuid and scene are set afterward! 
     BoxColliderComponent::BoxColliderComponent(const BoxColliderComponent& other) {
 
-        entity_uuid = other.entity_uuid;
-        scene = other.scene;
+        if (!scene)
+            scene = other.scene;
+
+        if (entity_uuid == NULL_UUID)
+            entity_uuid = other.entity_uuid;
 
         m_BoxExtents = other.m_BoxExtents;
         m_IsTrigger = other.m_IsTrigger;
@@ -500,9 +532,15 @@ namespace Louron {
 
         m_StateFlags = other.m_StateFlags;
 
+        Entity entity = (scene && entity_uuid != NULL_UUID) ? entity = GetEntity() : Entity();
+        m_EntityUUID = entity ? entity.GetUUID() : (UUID)NULL_UUID;
+        m_RigidbodyUUID = NULL_UUID;
+
         if (other.m_Material)
             m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
 
+        if (scene && (scene->IsRunning() || scene->IsSimulating()))
+            Init();
     }
 
     BoxColliderComponent::BoxColliderComponent(BoxColliderComponent&& other) noexcept
@@ -534,8 +572,11 @@ namespace Louron {
     // COPY ASSIGNMENT OPERATOR
     BoxColliderComponent& BoxColliderComponent::operator=(const BoxColliderComponent& other) {
 
-        if (this == &other || !scene)
+        if (this == &other)
             return *this;
+
+        if (!scene)
+            scene = other.scene;
 
         this->Shutdown();
 
@@ -545,11 +586,19 @@ namespace Louron {
 
         m_StateFlags = other.m_StateFlags;
 
-        Entity entity = GetEntity();
-
+        Entity entity = (scene && entity_uuid != NULL_UUID) ? entity = GetEntity() : Entity();
         m_EntityUUID = entity ? entity.GetUUID() : (UUID)NULL_UUID;
         m_RigidbodyUUID = NULL_UUID;
 
+        if (m_Material) {
+            m_Material->Shutdown();
+            m_Material = nullptr;
+        }
+
+        if (m_Shape) {
+            m_Shape->Release();
+            m_Shape = nullptr;
+        }
         if (other.m_Material)
             m_Material = std::make_shared<PhysicsMaterial>(*other.m_Material);
 
@@ -567,8 +616,8 @@ namespace Louron {
         this->Shutdown();
 
         // Component Base Class Move
-        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
         scene = other.scene; other.scene = nullptr;
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
 
         // Sphere Collider Class Move
         m_BoxExtents = other.m_BoxExtents; other.m_BoxExtents = { 1.0f, 1.0f, 1.0f };
@@ -580,6 +629,15 @@ namespace Louron {
 
         m_StateFlags = other.m_StateFlags; other.m_StateFlags = ColliderFlag_None;
 
+        if (m_Material) {
+            m_Material->Shutdown();
+            m_Material = nullptr;
+        }
+
+        if (m_Shape) {
+            m_Shape->Release();
+            m_Shape = nullptr;
+        }
 
         m_Shape = other.m_Shape; other.m_Shape = nullptr;
         m_Material = other.m_Material; other.m_Material = nullptr;
@@ -600,6 +658,9 @@ namespace Louron {
             m_Shape->Release();
             m_Shape = nullptr;
         }
+
+        if (m_Material)
+            m_Material->Shutdown();
     }
 
     void BoxColliderComponent::CreateStaticRigidbody() {
@@ -881,6 +942,6 @@ namespace Louron {
 
     #pragma endregion
 
-    #pragma endregion
+ #pragma endregion
 
 }

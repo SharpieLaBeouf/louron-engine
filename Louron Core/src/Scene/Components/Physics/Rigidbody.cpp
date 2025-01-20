@@ -21,6 +21,8 @@ namespace Louron {
 
 	void RigidbodyComponent::Init(TransformComponent* transform, PxScene* scene) {
 
+		this->Shutdown(); // Make sure we are shutdown before initialising!
+
 		if (!&PxGetPhysics() || !scene) {
 			L_CORE_ERROR("PhysXPhysics or PhysXScene Not Initialized.");
 			return;
@@ -63,7 +65,7 @@ namespace Louron {
 
 	void RigidbodyComponent::Shutdown() {
 
-		if(m_PhysScene)
+		if(m_PhysScene && m_RigidDynamic && m_RigidDynamic->GetActor())
 			m_PhysScene->removeActor(*m_RigidDynamic->GetActor());
 
 		if(m_RigidDynamic) {
@@ -72,11 +74,16 @@ namespace Louron {
 		}
 
 		m_PhysScene = nullptr;
-
 	}
 
 	RigidbodyComponent::RigidbodyComponent(const RigidbodyComponent& other) {
 
+		if (!scene)
+			scene = other.scene;
+
+		if (!entity_uuid)
+			entity_uuid = other.entity_uuid;
+
 		m_Mass = other.m_Mass;
 		m_Drag = other.m_Drag;
 		m_AngularDrag = other.m_AngularDrag;
@@ -88,12 +95,59 @@ namespace Louron {
 		m_PositionConstraint = other.m_PositionConstraint;
 		m_RotationConstraint = other.m_RotationConstraint;
 
-		m_PhysScene = nullptr;
-		m_RigidDynamic = nullptr;
+		m_DeferredForce = other.m_DeferredForce;
+		m_DeferredTorque = other.m_DeferredTorque;
+
+		if (scene && (scene->IsRunning() || scene->IsSimulating()))
+		{
+			Init(&GetEntity().GetComponent<TransformComponent>(), scene->GetPhysScene());
+		}
+		else {
+
+			m_PhysScene = nullptr;
+			m_RigidDynamic = nullptr;
+		}
+	}
+
+	RigidbodyComponent::RigidbodyComponent(RigidbodyComponent&& other) noexcept
+	{
+		// Component Base Class Move
+		entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+		scene = other.scene; other.scene = nullptr;
+
+		// Rigidbody Component Class Move
+		m_Mass = other.m_Mass; other.m_Mass = 1.0f;
+		m_Drag = other.m_Drag; other.m_Drag = 0.0f;
+		m_AngularDrag = other.m_AngularDrag; other.m_AngularDrag = 0.05f;
+
+		m_AutomaticCentreOfMass = other.m_AutomaticCentreOfMass; other.m_AutomaticCentreOfMass = true;
+		m_UseGravity = other.m_UseGravity; other.m_UseGravity = true;
+		m_IsKinematic = other.m_IsKinematic; other.m_IsKinematic = false;
+
+		m_PositionConstraint = other.m_PositionConstraint; other.m_PositionConstraint = { false, false, false };
+		m_RotationConstraint = other.m_RotationConstraint; other.m_RotationConstraint = { false, false, false };
+
+		m_RigidDynamic = other.m_RigidDynamic; other.m_RigidDynamic = nullptr;
+		m_PhysScene = other.m_PhysScene; other.m_PhysScene = nullptr;
+
+		m_DeferredForce = std::move(other.m_DeferredForce); other.m_DeferredForce.clear();
+		m_DeferredTorque = std::move(other.m_DeferredTorque); other.m_DeferredTorque.clear();
+
 	}
 
 	RigidbodyComponent& RigidbodyComponent::operator=(const RigidbodyComponent& other) {
 
+		if (this == &other || !scene)
+			return *this;
+
+		this->Shutdown();
+
+		if (!scene)
+			scene = other.scene;
+
+		if (!entity_uuid)
+			entity_uuid = other.entity_uuid;
+
 		m_Mass = other.m_Mass;
 		m_Drag = other.m_Drag;
 		m_AngularDrag = other.m_AngularDrag;
@@ -105,10 +159,53 @@ namespace Louron {
 		m_PositionConstraint = other.m_PositionConstraint;
 		m_RotationConstraint = other.m_RotationConstraint;
 
-		m_PhysScene = nullptr;
-		m_RigidDynamic = nullptr;
+		m_DeferredForce = other.m_DeferredForce;
+		m_DeferredTorque = other.m_DeferredTorque;
+
+		if (scene->IsRunning() || scene->IsSimulating())
+		{
+			Init(&GetEntity().GetComponent<TransformComponent>(), scene->GetPhysScene());
+		}
+		else {
+
+			m_PhysScene = nullptr;
+			m_RigidDynamic = nullptr;
+		}
 
 		return *this;
+	}
+
+	RigidbodyComponent& RigidbodyComponent::operator=(RigidbodyComponent&& other) noexcept
+	{
+		if (this == &other) // Guard against self-assignment
+			return *this;
+
+		this->Shutdown();
+
+		// Component Base Class Move
+		entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+		scene = other.scene; other.scene = nullptr;
+
+		// Rigidbody Component Class Move
+		m_Mass = other.m_Mass; other.m_Mass = 1.0f;
+		m_Drag = other.m_Drag; other.m_Drag = 0.0f;
+		m_AngularDrag = other.m_AngularDrag; other.m_AngularDrag = 0.05f;
+
+		m_AutomaticCentreOfMass = other.m_AutomaticCentreOfMass; other.m_AutomaticCentreOfMass = true;
+		m_UseGravity = other.m_UseGravity; other.m_UseGravity = true;
+		m_IsKinematic = other.m_IsKinematic; other.m_IsKinematic = false;
+
+		m_PositionConstraint = other.m_PositionConstraint; other.m_PositionConstraint = { false, false, false };
+		m_RotationConstraint = other.m_RotationConstraint; other.m_RotationConstraint = { false, false, false };
+
+		m_RigidDynamic = other.m_RigidDynamic; other.m_RigidDynamic = nullptr;
+		m_PhysScene = other.m_PhysScene; other.m_PhysScene = nullptr;
+
+		m_DeferredForce = std::move(other.m_DeferredForce); other.m_DeferredForce.clear();
+		m_DeferredTorque = std::move(other.m_DeferredTorque); other.m_DeferredTorque.clear();
+
+		return *this;
+
 	}
 
 	std::shared_ptr<RigidDynamic> RigidbodyComponent::GetActor() { return m_RigidDynamic; }

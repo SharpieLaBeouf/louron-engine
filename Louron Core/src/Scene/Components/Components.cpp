@@ -33,6 +33,88 @@ namespace Louron {
         AddFlag(TransformFlag_PropertiesUpdated);
     }
 
+    TransformComponent::TransformComponent(const TransformComponent& other)
+    {
+        if (!scene)
+            scene = other.scene;
+
+        if (entity_uuid == NULL_UUID)
+            entity_uuid = other.entity_uuid;
+
+        m_Position = other.m_Position;
+        m_Rotation = other.m_Rotation;
+        m_Scale = other.m_Scale;
+
+        m_LocalTransform = other.m_LocalTransform;
+        m_GlobalTransform = other.m_GlobalTransform;
+
+        m_StateFlags = other.m_StateFlags;
+        AddFlag(TransformFlag_PropertiesUpdated);
+    }
+
+    TransformComponent::TransformComponent(TransformComponent&& other) noexcept
+    {
+        scene = other.scene; other.scene = nullptr;
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+
+        m_Position = other.m_Position; other.m_Position = glm::vec3(0.0f);
+        m_Rotation = other.m_Rotation; other.m_Rotation = glm::vec3(0.0f);
+        m_Scale = other.m_Scale; other.m_Scale = glm::vec3(1.0f);
+
+        m_LocalTransform = other.m_LocalTransform; other.m_LocalTransform = glm::mat4(1.0f);
+        m_GlobalTransform = other.m_GlobalTransform; other.m_GlobalTransform = glm::mat4(1.0f);
+
+        m_StateFlags = other.m_StateFlags; other.m_StateFlags = TransformFlag_None;
+
+        AddFlag(TransformFlag_PropertiesUpdated);
+    }
+
+    TransformComponent& TransformComponent::operator=(const TransformComponent& other)
+    {
+        if (this == &other)
+            return *this;
+
+
+        if (!scene)
+            scene = other.scene;
+
+        m_Position = other.m_Position;
+        m_Rotation = other.m_Rotation;
+        m_Scale = other.m_Scale;
+
+        m_LocalTransform = other.m_LocalTransform;
+        m_GlobalTransform = other.m_GlobalTransform;
+
+        m_StateFlags = other.m_StateFlags;
+
+        AddFlag(TransformFlag_PropertiesUpdated);
+
+        return *this;
+    }
+
+    TransformComponent& TransformComponent::operator=(TransformComponent&& other) noexcept
+    {
+        if (this == &other)
+            return *this;
+
+
+        scene = other.scene; other.scene = nullptr;
+        entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+
+        m_Position = other.m_Position; other.m_Position = glm::vec3(0.0f);
+        m_Rotation = other.m_Rotation; other.m_Rotation = glm::vec3(0.0f);
+        m_Scale = other.m_Scale; other.m_Scale = glm::vec3(1.0f);
+
+        m_LocalTransform = other.m_LocalTransform; other.m_LocalTransform = glm::mat4(1.0f);
+        m_GlobalTransform = other.m_GlobalTransform; other.m_GlobalTransform = glm::mat4(1.0f);
+
+        m_StateFlags = other.m_StateFlags; other.m_StateFlags = TransformFlag_None;
+
+        AddFlag(TransformFlag_PropertiesUpdated);
+
+        return *this;
+    }
+
     TransformComponent::TransformComponent(const glm::vec3& translation) : m_Position(translation) {
         AddFlag(TransformFlag_PropertiesUpdated);
     }
@@ -49,6 +131,7 @@ namespace Louron {
     /// </summary>
     /// <param name="newScale">This will be the new fixed position.</param>
     void TransformComponent::SetPosition(const glm::vec3& newPosition) {
+
         m_Position = newPosition;
         AddFlag(TransformFlag_PropertiesUpdated);
         UpdateLocalTransformMatrix();
@@ -1164,6 +1247,48 @@ namespace Louron {
         return true;
     }
 
+    void TagComponent::SetUniqueName(const std::string& name)
+    {
+        std::string uniqueName = name.empty() ? "Untitled Entity" : name;
+        int suffix = 1;
+        std::string baseName = uniqueName;
+
+        // Ensure the name is unique by appending a numeric suffix
+        auto check_tags = [&](const char* name) -> bool {
+
+            if (GetComponent<HierarchyComponent>()->HasParent()) { // Has Parent
+                std::vector<UUID> uuids = GetComponentInParent<HierarchyComponent>()->GetChildren();
+                for (auto& uuid : uuids) {
+
+                    if (uuid == entity_uuid)
+                        continue;
+
+                    const TagComponent& tag = scene->FindEntityByUUID(uuid).GetComponent<TagComponent>();
+                    if (tag.Tag == name)
+                        return true;
+                }
+            }
+            else { // At Root Level
+
+                auto view = scene->GetAllEntitiesWith<HierarchyComponent, TagComponent>();
+                for (auto& entity : view) {
+
+                    if (!view.get<HierarchyComponent>(entity).HasParent()) {
+                        if (view.get<TagComponent>(entity).Tag == name)
+                            return true;
+                    }
+                }
+            }
+
+            return false;
+        };
+
+        while (check_tags(uniqueName.c_str())) {
+            uniqueName = baseName + " (" + std::to_string(suffix++) + ")";
+        }
+        Tag = uniqueName;
+    }
+
     void CameraComponent::Serialize(YAML::Emitter& out)
     {
 
@@ -1354,12 +1479,12 @@ namespace Louron {
     Entity Component::GetEntity() const {
 
         if (!scene) {
-            L_CORE_ASSERT(scene, "Cannot Get Entity - Current Entity Has Invalid Scene Reference!");
+            L_CORE_ERROR("Cannot Get Entity - Current Entity Has Invalid Scene Reference!");
             return {};
         }
         
         if (!scene->HasEntity(entity_uuid)) {
-            L_CORE_ASSERT(scene, "Cannot Get Entity - Current Entity Is Invalid!");
+            L_CORE_ERROR("Cannot Get Entity - Current Entity Is Invalid!");
             return {};
         }
 
@@ -1487,7 +1612,7 @@ namespace Louron {
         out << YAML::EndMap;
     }
 
-    bool ScriptComponent::Deserialize(const YAML::Node data, Entity entity)
+    bool ScriptComponent::Deserialize(const YAML::Node data, UUID entity_uuid)
     {
         for (int i = 1; i < data.size() + 1; i++) {
 
@@ -1508,7 +1633,7 @@ namespace Louron {
                     if (entity_class) {
 
                         const auto& fields = entity_class->GetFields();
-                        auto& entity_fields = ScriptManager::GetScriptFieldMap(entity.GetUUID(), script_name);
+                        auto& entity_fields = ScriptManager::GetScriptFieldMap(entity_uuid, script_name);
 
                         for (auto script_field : field_node) {
 
@@ -1524,14 +1649,6 @@ namespace Louron {
                             }
 
                             field_instance.Field = fields.at(field_name);
-
-                        /*  case ScriptFieldType::FieldType:                   \
-                            {                                                  \
-                                Type data = scriptField["Data"].as<Type>();    \
-                                fieldInstance.SetValue(data);                  \
-                                break;                                         \
-                            }
-                        */
 
                             switch (type) {
 

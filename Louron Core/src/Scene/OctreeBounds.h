@@ -228,7 +228,7 @@ namespace Louron {
 						}
 					}
 
-					L_CORE_WARN("Data Misalignment - Data Source Could Not Be Removed From Children.");
+					L_CORE_WARN("Octree - Data Misalignment: Data Source Could Not Be Removed From Children.");
 					return false; // If this could not be removed from children, what the heck has happened here?
 				}
 
@@ -450,7 +450,7 @@ namespace Louron {
 			/// </summary>
 			void RevalidateNodes(size_t start_index) {
 
-				L_CORE_ASSERT(start_index + m_DataSourceSize <= m_Octree->m_DataSources.size(), "Index Out Of Bounds!");
+				L_CORE_ASSERT(start_index + m_DataSourceSize <= m_Octree->m_DataSources.size(), "Octree - Index Out Of Bounds!");
 
 				m_DataSourceIndex = start_index;
 
@@ -540,7 +540,7 @@ namespace Louron {
 			bool IsRootNode() const {
 
 				if (!m_Octree) {
-					L_CORE_ERROR("Octree Node Does Not Contain Valid Reference to Octree.");
+					L_CORE_ERROR("Octree - Node Does Not Contain Valid Reference to Octree.");
 					return false;
 				}
 
@@ -885,7 +885,7 @@ namespace Louron {
 		bool Insert(OctreeData data_source) {
 
 			if (!m_RootNode) {
-				L_CORE_ERROR("Root Node Invalid or Octree Not Built - Cannot Insert Data Source.");
+				L_CORE_ERROR("Octree - Root Node Invalid or Octree Not Built - Cannot Insert Data Source.");
 				return false;
 			}
 
@@ -900,7 +900,7 @@ namespace Louron {
 					GrowOctree(data_source->Bounds.Center() - m_RootNode->GetNodeBounds().Center());
 				}
 				else {
-					L_CORE_WARN("Could Not Grow the Octree to Fit Data Source.");
+					L_CORE_WARN("Octree - Could Not Grow the Octree to Fit Data Source.");
 					m_RootNode = old_root_node_for_if_fail;
 					return false;
 				}
@@ -1005,7 +1005,7 @@ namespace Louron {
 			});
 			
 			if (it == m_DataSources.end()) {
-				L_CORE_WARN("Data Not Found in Data Sources.");
+				L_CORE_WARN("Octree - Data Not Found in Data Sources.");
 				return false;
 			}
 
@@ -1013,7 +1013,7 @@ namespace Louron {
 			size_t position = std::distance(m_DataSources.begin(), it);
 			
 			if (!m_RootNode->Remove(position)) {
-				L_CORE_ERROR("Data Not Actually Contained Within Octree.");
+				L_CORE_ERROR("Octree - Data Not Actually Contained Within Octree.");
 				return false;
 			}
 
@@ -1326,7 +1326,7 @@ namespace Louron {
 			// 7. Get the node index of the new root node which holds the old root node
 			int child_index = new_root_node->BestFitChild(m_RootNode->GetNodeBounds().Center());
 			if (child_index == -1) {
-				L_CORE_ERROR("Could Not Determine Child Region for Old Root Node.");
+				L_CORE_ERROR("Octree - Could Not Determine Child Region for Old Root Node.");
 				return false;
 			}
 
@@ -1335,7 +1335,7 @@ namespace Louron {
 				m_RootNode = new_root_node;
 			}
 			else {
-				L_CORE_ERROR("Could Not Set Old Root Node as Child to New Root Node - Invalid Index.");
+				L_CORE_ERROR("Octree - Could Not Set Old Root Node as Child to New Root Node - Invalid Index.");
 				return false;
 			}
 			return true;

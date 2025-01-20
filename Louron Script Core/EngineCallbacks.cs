@@ -10,6 +10,9 @@ namespace Louron
         #region Entity
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Entity_DestroyEntity(uint entityID);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Entity_AddComponent(uint entityID, Type componentType);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -17,6 +20,16 @@ namespace Louron
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static bool Entity_HasComponent(uint entityID, Type componentType);
+
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Entity_Instantiate(uint entityID, ref uint prefab_asset_handle, out uint prefab_clone_entity_id); // Returns UUID of new entity!
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint Entity_GetParent(uint entityID);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Entity_SetParent(uint entityID, uint parentID);
 
         #endregion
 
@@ -76,6 +89,16 @@ namespace Louron
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void TransformComponent_SetScale(uint entityID, ref Vector3 reference);
+
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void TransformComponent_GetFront(uint entityID, ref Vector3 reference);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void TransformComponent_GetUp(uint entityID, ref Vector3 reference);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void TransformComponent_GetRight(uint entityID, ref Vector3 reference);
 
         #endregion
 

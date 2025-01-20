@@ -199,6 +199,11 @@ namespace Louron
             return Zero; // Return zero vector if length is zero to avoid division by zero
         }
 
+        // Overriding the ToString method
+        public override readonly string ToString()
+        {
+            return $"Vector2({X}, {Y})";
+        }
         #endregion
     }
 

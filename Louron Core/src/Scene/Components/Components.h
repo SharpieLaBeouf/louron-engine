@@ -74,7 +74,7 @@ namespace Louron {
         ScriptComponent(const std::vector<std::pair<std::string, bool>>& script_name) : Scripts(script_name) { }
 
         void Serialize(YAML::Emitter& out) const;
-        bool Deserialize(const YAML::Node data, Entity entity);
+        bool Deserialize(const YAML::Node data, UUID entity_uuid);
     };
 
     struct IDComponent : public Component {
@@ -98,6 +98,8 @@ namespace Louron {
 
         void Serialize(YAML::Emitter& out);
         bool Deserialize(const YAML::Node data);
+
+        void SetUniqueName(const std::string& name);
 	};
 
     struct HierarchyComponent : public Component {
@@ -105,7 +107,57 @@ namespace Louron {
     public:
 
         HierarchyComponent() = default;
-        HierarchyComponent(const HierarchyComponent&) = default;
+        HierarchyComponent(const HierarchyComponent& other) {
+
+            entity_uuid = other.entity_uuid;
+            scene = other.scene;
+            m_Parent = other.m_Parent;
+            m_Children = other.m_Children;
+            m_HierarchyOrderIndex = other.m_HierarchyOrderIndex;
+        }
+
+        HierarchyComponent(HierarchyComponent&& other) noexcept {
+
+            entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+            scene = other.scene; other.scene = nullptr;
+            m_Parent = other.m_Parent; other.m_Parent = NULL_UUID;
+
+            m_Children = std::move(other.m_Children); // Move the children directly
+            other.m_Children.clear();
+
+            m_HierarchyOrderIndex = other.m_HierarchyOrderIndex; other.m_HierarchyOrderIndex = -1;
+        }
+
+        HierarchyComponent& operator=(const HierarchyComponent& other) {
+
+            if (this == &other || !scene)
+                return *this;
+
+            entity_uuid = other.entity_uuid;
+            scene = other.scene;
+            m_Parent = other.m_Parent;
+            m_Children = other.m_Children;
+            m_HierarchyOrderIndex = other.m_HierarchyOrderIndex;
+
+            return *this;
+        }
+
+        HierarchyComponent& operator=(HierarchyComponent&& other) noexcept {
+
+            if (this == &other || !scene)
+                return *this;
+
+            entity_uuid = other.entity_uuid; other.entity_uuid = NULL_UUID;
+            scene = other.scene; other.scene = nullptr;
+            m_Parent = other.m_Parent; other.m_Parent = NULL_UUID;
+
+            m_Children = std::move(other.m_Children); // Move the children directly
+            other.m_Children.clear();
+
+            m_HierarchyOrderIndex = other.m_HierarchyOrderIndex; other.m_HierarchyOrderIndex = -1;
+
+            return *this;
+        }
 
         void AttachParent(const UUID& newParentID);
         void DetachParent();
@@ -196,8 +248,12 @@ namespace Louron {
     public:
 
         TransformComponent();
-        TransformComponent(const TransformComponent&) = default;
+        TransformComponent(const TransformComponent& other);
+        TransformComponent(TransformComponent&& other) noexcept;
         TransformComponent(const glm::vec3& translation);
+
+        TransformComponent& operator=(const TransformComponent& other);
+        TransformComponent& operator=(TransformComponent&& other) noexcept;
 
         // FLAGS
         void AddFlag(TransformFlags flag);

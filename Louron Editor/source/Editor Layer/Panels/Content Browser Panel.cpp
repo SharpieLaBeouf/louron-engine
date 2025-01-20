@@ -114,6 +114,23 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 					}
 				}
 
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_UUID")) {
+					Louron::UUID droppedEntityUUID = *(const Louron::UUID*)payload->Data;
+					Entity droppedEntity = Project::GetActiveScene()->FindEntityByUUID(droppedEntityUUID);
+
+					if (droppedEntity) {
+
+						std::shared_ptr<Prefab> prefab = std::make_shared<Prefab>(droppedEntity);
+						if (prefab) 
+						{
+							std::filesystem::path file_path = m_CurrentDirectory / (droppedEntity.GetName() + ".lprefab");
+							AssetHandle handle = Project::GetStaticEditorAssetManager()->CreateAsset(prefab, file_path, Project::GetActiveProject()->GetProjectDirectory());
+							prefab->Serialize(file_path, Project::GetStaticEditorAssetManager()->GetMetadata(handle));
+						}
+					}
+				}
+
+
 				ImGui::EndDragDropTarget();
 			}
 
@@ -565,6 +582,9 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 			}
 		}
 		ImGui::EndChild();
+
+		directory_folder_drop_target(m_CurrentDirectory);
+
 
 		// -------------        File Slider        -------------
 		//ImGui::TableNextRow();

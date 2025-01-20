@@ -1554,6 +1554,64 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 			{
 				switch (field.Type) {
 
+				case ScriptFieldType::Prefab:
+				{
+
+					ImGui::Text(name.c_str());
+					ImGui::NextColumn();
+
+					AssetHandle data = instance->GetFieldPrefabValue(name);
+					std::string label = "##" + name + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type));
+
+					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + (" (Prefab)") : ("None (Prefab)");
+
+					char buffer[256];
+					strcpy_s(buffer, sizeof(buffer), text.c_str());
+					ImGui::InputText(label.c_str(), buffer, sizeof(buffer), ImGuiInputTextFlags_ReadOnly);
+
+					if (ImGui::BeginDragDropTarget()) {
+
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+							// Convert the payload data (string) back into a filesystem path
+							std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+							std::filesystem::path dropped_path = dropped_path_str; // Convert to path
+
+							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
+
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+
+								switch (asset_type) {
+
+								case AssetType::Prefab:
+								case AssetType::ModelImport:
+								{
+									instance->SetFieldPrefabValue(ScriptManager::GetScriptFieldMap(selected_entity.GetUUID(), script_name).at(name), dropped_asset_handle);
+
+									break;
+								}
+								default: {
+
+									L_APP_WARN("Cannot Set Asset Type {} to Script Prefab Field.", dropped_path.extension().string());
+									break;
+								}
+
+								}
+
+							}
+							else {
+								L_APP_WARN("Cannot Set Prefab {} to Script.", dropped_path.filename().string());
+							}
+
+						}
+						ImGui::EndDragDropTarget();
+					}
+
+					ImGui::NextColumn();
+
+
+					break;
+				}
 				case ScriptFieldType::Entity:
 				case ScriptFieldType::TransformComponent:
 				case ScriptFieldType::TagComponent:
@@ -1565,7 +1623,6 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 				case ScriptFieldType::BoxColliderComponent:
 				case ScriptFieldType::SphereColliderComponent:
 				case ScriptFieldType::Component:
-				case ScriptFieldType::Prefab:
 				{
 					ImGui::Text(name.c_str());
 					ImGui::NextColumn();
@@ -1820,6 +1877,66 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 				ScriptFieldInstance& scriptField = entityFields.at(name);
 				switch (field.Type) {
 
+				case ScriptFieldType::Prefab:
+				{
+
+					ImGui::Text(name.c_str());
+					ImGui::NextColumn();
+
+					AssetHandle data = scriptField.GetValue<AssetHandle>();
+					std::string label = "##" + name + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type));
+
+					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
+
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + (" (Prefab)") : ("None (Prefab)");
+
+					char buffer[256];
+					strcpy_s(buffer, sizeof(buffer), text.c_str());
+					ImGui::InputText(label.c_str(), buffer, sizeof(buffer), ImGuiInputTextFlags_ReadOnly);
+
+					if (ImGui::BeginDragDropTarget()) {
+
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+							// Convert the payload data (string) back into a filesystem path
+							std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+							std::filesystem::path dropped_path = dropped_path_str; // Convert to path
+
+							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
+
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+
+								switch (asset_type) {
+
+									case AssetType::Prefab:
+									case AssetType::ModelImport:
+									{
+										ScriptFieldInstance& scriptField = entityFields.at(name);
+										scriptField.SetValue<AssetHandle>(dropped_asset_handle);
+
+										break;
+									}
+									default: {
+
+										L_APP_WARN("Cannot Set Asset Type {} to Script Prefab Field.", dropped_path.extension().string());
+										break;
+									}
+
+								}
+
+							}
+							else {
+								L_APP_WARN("Cannot Set Prefab {} to Script.", dropped_path.filename().string());
+							}
+
+						}
+						ImGui::EndDragDropTarget();
+					}
+
+					ImGui::NextColumn();
+
+
+					break;
+				}
 				case ScriptFieldType::Entity:
 				case ScriptFieldType::TransformComponent:
 				case ScriptFieldType::TagComponent:
@@ -1831,7 +1948,6 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 				case ScriptFieldType::BoxColliderComponent:
 				case ScriptFieldType::SphereColliderComponent:
 				case ScriptFieldType::Component:
-				case ScriptFieldType::Prefab:
 				{
 					ImGui::Text(name.c_str());
 					ImGui::NextColumn();
@@ -2052,6 +2168,69 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 			{
 				switch (field.Type)
 				{
+
+				case ScriptFieldType::Prefab:
+				{
+
+					ImGui::Text(name.c_str());
+					ImGui::NextColumn();
+
+					AssetHandle data = field.GetInitialValue<AssetHandle>();
+					std::string label = "##" + name + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type));
+
+					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
+
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + (" (Prefab)") : ("None (Prefab)");
+
+					char buffer[256];
+					strcpy_s(buffer, sizeof(buffer), text.c_str());
+					ImGui::InputText(label.c_str(), buffer, sizeof(buffer), ImGuiInputTextFlags_ReadOnly);
+
+					if (ImGui::BeginDragDropTarget()) {
+						
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+							// Convert the payload data (string) back into a filesystem path
+							std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+							std::filesystem::path dropped_path = dropped_path_str; // Convert to path
+
+							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
+
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+
+								switch (asset_type) {
+
+									case AssetType::Prefab:
+									case AssetType::ModelImport:
+									{
+
+										ScriptFieldInstance& scriptField = entityFields[name];
+										scriptField.Field = fields.at(name);
+										scriptField.SetValue<AssetHandle>(dropped_asset_handle);
+
+										break;
+									}
+									default: {
+
+										L_APP_WARN("Cannot Set Asset Type {} to Script Prefab Field.", dropped_path.extension().string());
+										break;
+									}
+
+								}
+
+							}
+							else {
+								L_APP_WARN("Cannot Set Prefab {} to Script.", dropped_path.filename().string());
+							}
+
+						}
+						ImGui::EndDragDropTarget();
+					}
+
+					ImGui::NextColumn();
+
+
+					break;
+				}
 				case ScriptFieldType::Entity:
 				case ScriptFieldType::TransformComponent:
 				case ScriptFieldType::TagComponent:
@@ -2063,7 +2242,6 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 				case ScriptFieldType::BoxColliderComponent:
 				case ScriptFieldType::SphereColliderComponent:
 				case ScriptFieldType::Component:
-				case ScriptFieldType::Prefab:
 				{
 					ImGui::Text(name.c_str());
 					ImGui::NextColumn();
@@ -2375,7 +2553,8 @@ void PropertiesPanel::DisplayEntitySelectionModal(Entity& selected_entity)
 		if (scene_ref->IsRunning()) {
 
 			if (auto instance = ScriptManager::GetEntityScriptInstance(selected_entity.GetUUID(), modal_box_script_name); instance) {
-				instance->SetFieldValue(modal_box_field_name, entity.GetUUID());
+
+				instance->SetFieldEntityValue(ScriptManager::GetScriptFieldMap(selected_entity.GetUUID(), modal_box_script_name).at(modal_box_field_name), entity.GetUUID());
 
 				modal_box_open = false;
 				modal_box_field_type = ScriptFieldType::None;

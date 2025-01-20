@@ -31,6 +31,7 @@ namespace SandboxProject
     public Vector4 Vector4Field = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
 
     public Entity EntityField;
+    public Prefab PrefabField;
     public TransformComponent TransformComponentField;
     public TagComponent TagComponentField;
     public ScriptComponent ScriptComponentField;
@@ -40,10 +41,12 @@ namespace SandboxProject
     public RigidbodyComponent RigidbodyComponentField;
     public BoxColliderComponent BoxColliderComponentField;
     public SphereColliderComponent SphereColliderComponentField;
+
     public Component ComponentField;
 
 		public void OnStart()
 		{
+
 		}
 		
 		public void OnUpdate()

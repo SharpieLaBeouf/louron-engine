@@ -221,6 +221,9 @@ namespace Louron {
 		void SetFieldComponentPropertyValue(const ScriptFieldInstance& field_instance, UUID value);
 		UUID GetComponentPropertyValue(const std::string& field_name);
 
+		void SetFieldPrefabValue(const ScriptFieldInstance& field_instance, AssetHandle value);
+		AssetHandle GetFieldPrefabValue(const std::string& field_name);
+
 	private:
 
 		bool GetFieldValueInternal(const std::string& name, void* buffer);

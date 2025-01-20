@@ -13,6 +13,106 @@
 #include "Components/Physics/Rigidbody.h"
 #include "Components/Physics/PhysicsWrappers.h"
 
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
+#include <yaml-cpp/yaml.h>
+
+namespace YAML {
+
+	template<>
+	struct convert<glm::vec2>
+	{
+		static Node encode(const glm::vec2& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec2& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 2)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<glm::vec3>
+	{
+		static Node encode(const glm::vec3& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.push_back(rhs.z);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec3& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 3)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			rhs.z = node[2].as<float>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<glm::vec4>
+	{
+		static Node encode(const glm::vec4& rhs)
+		{
+			Node node;
+			node.push_back(rhs.x);
+			node.push_back(rhs.y);
+			node.push_back(rhs.z);
+			node.push_back(rhs.w);
+			node.SetStyle(EmitterStyle::Flow);
+			return node;
+		}
+
+		static bool decode(const Node& node, glm::vec4& rhs)
+		{
+			if (!node.IsSequence() || node.size() != 4)
+				return false;
+
+			rhs.x = node[0].as<float>();
+			rhs.y = node[1].as<float>();
+			rhs.z = node[2].as<float>();
+			rhs.w = node[3].as<float>();
+			return true;
+		}
+	};
+
+	template<>
+	struct convert<Louron::UUID>
+	{
+		static Node encode(const Louron::UUID& uuid)
+		{
+			Node node;
+			node.push_back((uint32_t)uuid);
+			return node;
+		}
+
+		static bool decode(const Node& node, Louron::UUID& uuid)
+		{
+			uuid = node.as<uint32_t>();
+			return true;
+		}
+	};
+}
+
 namespace Louron {
 
 	Prefab::Prefab() {
@@ -33,6 +133,7 @@ namespace Louron {
 	}
 
 	entt::entity Prefab::CreateEntity(const std::string& name) {
+
 		entt::entity entity = m_PrefabRegistry.create();
 
 		// 1. Add UUID Component
@@ -43,17 +144,17 @@ namespace Louron {
 		// to ensure this prefab does not impact other entities
 		// throughout the Scene that are already instantiated from
 		// this prefab!
-		m_PrefabRegistry.emplace_or_replace<IDComponent>(entity, (uint32_t)entity);
+		AddComponent<IDComponent>(entity, (uint32_t)entity);
 
 		// 2. Add Transform Component
-		m_PrefabRegistry.emplace_or_replace<TransformComponent>(entity);
+		AddComponent<TransformComponent>(entity);
 
 		// 3. Add Tag Component
-		auto& tag = m_PrefabRegistry.emplace_or_replace<TagComponent>(entity);
+		auto& tag = AddComponent<TagComponent>(entity);
 		tag.Tag = name.empty() ? "Untitled Entity" : name;
 
 		// 4. Add Hierarchy Component
-		auto& hierarchy = m_PrefabRegistry.emplace_or_replace<HierarchyComponent>(entity);
+		auto& hierarchy = AddComponent<HierarchyComponent>(entity);
 		if(m_PrefabRegistry.valid(m_RootEntity) && m_PrefabRegistry.has<IDComponent>(m_RootEntity)) {
 			hierarchy.m_Parent = m_PrefabRegistry.get<IDComponent>(m_RootEntity).ID;
 		}
@@ -105,16 +206,6 @@ namespace Louron {
 
 	bool Prefab::HasEntity(const std::string& name) {
 		return m_PrefabRegistry.valid(FindEntityByName(name));
-	}
-
-	// TODO: IMPLEMENT
-	void Prefab::Serialize() {
-		return;
-	}
-
-	// TODO: IMPLEMENT
-	bool Louron::Prefab::Deserialize() {
-		return false;
 	}
 
 	entt::entity Prefab::CopyEntity(Entity start_entity, UUID parent_uuid) {
@@ -246,4 +337,324 @@ namespace Louron {
 
 		return prefab_entity_handle;
 	}
+
+	void Prefab::SerializeSubEntity(YAML::Emitter& out, entt::entity entity)
+	{
+
+		out << YAML::BeginMap;
+
+		if (HasComponent<IDComponent>(entity)) {
+			GetComponent<IDComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<TagComponent>(entity)) {
+			GetComponent<TagComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<HierarchyComponent>(entity)) {
+			GetComponent<HierarchyComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<ScriptComponent>(entity)) {
+			GetComponent<ScriptComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<TransformComponent>(entity)) {
+			GetComponent<TransformComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<CameraComponent>(entity)) {
+			GetComponent<CameraComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<AssetMeshFilter>(entity)) {
+			GetComponent<AssetMeshFilter>(entity).Serialize(out);
+		}
+
+		if (HasComponent<AssetMeshRenderer>(entity)) {
+			GetComponent<AssetMeshRenderer>(entity).Serialize(out);
+		}
+
+		if (HasComponent<SkyboxComponent>(entity)) {
+			GetComponent<SkyboxComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<PointLightComponent>(entity)) {
+			GetComponent<PointLightComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<SpotLightComponent>(entity)) {
+			GetComponent<SpotLightComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<DirectionalLightComponent>(entity)) {
+			GetComponent<DirectionalLightComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<RigidbodyComponent>(entity)) {
+			GetComponent<RigidbodyComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<SphereColliderComponent>(entity)) {
+			GetComponent<SphereColliderComponent>(entity).Serialize(out);
+		}
+
+		if (HasComponent<BoxColliderComponent>(entity)) {
+			GetComponent<BoxColliderComponent>(entity).Serialize(out);
+		}
+
+		out << YAML::EndMap;
+
+	}
+
+	void Prefab::DeserializeSubEntity(entt::entity entity, entt::entity parent_entity, const std::unordered_map<UUID, YAML::Node>& entity_node_map, UUID node_index)
+	{
+		const YAML::Node entity_node = entity_node_map.at(node_index);
+
+		// UUID
+		UUID uuid = entity_node["Entity"].as<uint32_t>();
+		std::string tag_string = entity_node["TagComponent"]["Tag"].as<std::string>();
+		GetComponent<TagComponent>(entity).Deserialize(entity_node["TagComponent"]);
+
+		// Hierarchy
+		auto hierarchy = entity_node["HierarchyComponent"];
+		if (hierarchy) {
+			auto& entityHierarchy = GetComponent<HierarchyComponent>(entity);
+			entityHierarchy.Deserialize(hierarchy);
+		}
+
+		// Script
+		auto script = entity_node["ScriptComponent"];
+		if (script) {
+			auto& entityScript = AddComponent<ScriptComponent>(entity);
+			entityScript.Deserialize(script, uuid);
+		}
+
+		// Transform
+		auto transform = entity_node["TransformComponent"];
+		if (transform) {
+			auto& entityTransform = GetComponent<TransformComponent>(entity);
+			entityTransform.Deserialize(transform);
+		}
+
+		// Camera
+		auto camera = entity_node["CameraComponent"];
+		if (camera) {
+
+			auto& entityCamera = AddComponent<CameraComponent>(entity);
+			entityCamera.CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f));
+
+			if (!entityCamera.Deserialize(camera))
+				L_CORE_WARN("Deserialisation of Camera Component Not Complete.");
+		}
+
+		// Mesh Filter
+		auto meshFilter = entity_node["MeshFilterComponent"];
+		if (meshFilter) {
+
+			auto& entityMeshFilter = AddComponent<AssetMeshFilter>(entity);
+
+			if (!entityMeshFilter.Deserialize(meshFilter))
+				L_CORE_WARN("Deserialisation of Mesh Filter Not Complete.");
+		}
+
+		// Mesh Renderer
+		auto meshRenderer = entity_node["MeshRendererComponent"];
+		if (meshRenderer) {
+
+			auto& entityMeshRenderer = AddComponent<AssetMeshRenderer>(entity);
+
+			if (!entityMeshRenderer.Deserialize(meshRenderer))
+				L_CORE_WARN("Deserialisation of Mesh Renderer Not Complete.");
+		}
+
+		// Skybox Component and Skybox Material
+		auto skybox = entity_node["SkyboxComponent"];
+		if (skybox) {
+
+			auto& skyboxComponent = AddComponent<SkyboxComponent>(entity);
+
+			if (!skyboxComponent.Deserialize(skybox))
+				L_CORE_WARN("Deserialisation of Sky Box Not Complete.");
+		}
+
+		// Point Light
+		auto pointLight = entity_node["PointLightComponent"];
+		if (pointLight) {
+
+			auto& entityPointLight = AddComponent<PointLightComponent>(entity);
+
+			if (!entityPointLight.Deserialize(pointLight))
+				L_CORE_WARN("Deserialisation of Point Light Not Complete.");
+		}
+
+		// Spot Light
+		auto spotLight = entity_node["SpotLightComponent"];
+		if (spotLight) {
+
+			auto& entitySpotLight = AddComponent<SpotLightComponent>(entity);
+
+			if (!entitySpotLight.Deserialize(spotLight))
+				L_CORE_WARN("Deserialisation of Spot Light Not Complete.");
+		}
+
+		// Directional Light
+		auto directionalLight = entity_node["DirectionalLightComponent"];
+		if (directionalLight) {
+
+			auto& entityDirectionalLight = AddComponent<DirectionalLightComponent>(entity);
+
+			if (!entityDirectionalLight.Deserialize(directionalLight))
+				L_CORE_WARN("Deserialisation of Directional Light Not Complete.");
+		}
+
+		// Rigidbody
+		auto rigidBody = entity_node["RigidbodyComponent"];
+		if (rigidBody) {
+
+			auto& entityRigidBody = AddComponent<RigidbodyComponent>(entity);
+
+			if (!entityRigidBody.Deserialize(rigidBody))
+				L_CORE_WARN("Deserialisation of Rigidbody Not Complete.");
+		}
+
+		// Sphere Collider
+		auto sphereCollider = entity_node["SphereColliderComponent"];
+		if (sphereCollider) {
+
+			auto& entitySphereCollider = AddComponent<SphereColliderComponent>(entity);
+
+			if (!entitySphereCollider.Deserialize(sphereCollider))
+				L_CORE_WARN("Deserialisation of Sphere Collider Not Complete.");
+		}
+
+		// Box Collider
+		auto boxCollider = entity_node["BoxColliderComponent"];
+		if (boxCollider) {
+
+			auto& entityBoxCollider = AddComponent<BoxColliderComponent>(entity);
+
+			if (!entityBoxCollider.Deserialize(boxCollider))
+				L_CORE_WARN("Deserialisation of Box Collider Not Complete.");
+		}
+
+		// Have to defer creating child entities to the end!
+		// This is because when creating a new entity, ENTT changes all the data up boo!
+		std::vector<UUID> children = GetComponent<HierarchyComponent>(entity).GetChildren(); // Make copy 
+		for (auto& child : children) {
+			entt::entity child_entity = CreateEntity("To Deserialise");
+			DeserializeSubEntity(child_entity, entity, entity_node_map, child);
+		}
+		children = GetComponent<HierarchyComponent>(entity).GetChildren();
+	}
+
+	// TODO: IMPLEMENT
+	bool Prefab::Serialize(const std::filesystem::path& file_path, const AssetMetaData& asset_meta_data) {
+
+		// Is path a file or directory?
+		if (std::filesystem::is_directory(file_path)) {
+			L_CORE_ERROR("Could Not Serialise Prefab as Directory.");
+			return false;
+		}
+
+		// Create Directory if Doesn't Exist
+		if (!std::filesystem::exists(file_path.parent_path()))
+			std::filesystem::create_directories(file_path.parent_path());
+
+		if (file_path.extension() != ".lprefab") {
+
+			L_CORE_WARN("Incompatible Prefab File Extension");
+			L_CORE_WARN("	Extension Used: {0}", file_path.extension().string());
+			L_CORE_WARN("	Extension Expected: ..lprefab");
+			return false;
+		}
+
+		YAML::Emitter out;
+		out << YAML::BeginMap;
+		out << YAML::Key << "Prefab Name" << YAML::Value << m_PrefabName;
+		out << YAML::Key << "PrefabEntities" << YAML::Value << YAML::BeginSeq;
+
+		m_PrefabRegistry.each(
+			[&](auto entityID){
+				entt::entity entity = entityID;
+				if (entity == entt::null)
+					return;
+
+				SerializeSubEntity(out, entity);
+			}
+		);
+
+		out << YAML::EndSeq << YAML::EndMap;
+
+		std::ofstream fout(file_path);
+		fout << out.c_str();
+		return true;
+	}
+
+	// TODO: IMPLEMENT
+	bool Prefab::Deserialize(const std::filesystem::path& file_path) {
+
+		if (file_path.extension() != ".lprefab") {
+
+			L_CORE_WARN("Incompatible Prefab File Extension");
+			L_CORE_WARN("	Extension Used: {0}", file_path.extension().string());
+			L_CORE_WARN("	Extension Expected: ..lprefab");
+			return false;
+		}
+
+		YAML::Node data;
+
+		try {
+			data = YAML::LoadFile(file_path.string());
+		}
+		catch (YAML::ParserException e) {
+			L_CORE_ERROR("YAML-CPP Failed to Load Prefab File: '{0}', {1}", file_path.string(), e.what());
+			return false;
+		}
+
+		if (!data["Prefab Name"]) {
+			L_CORE_ERROR("Prefab Name Node Not Correctly Declared in File: \'{0}\'", file_path.string());
+			return false;
+		}
+		else {
+			m_PrefabName = data["Prefab Name"].as<std::string>();
+		}
+
+		YAML::Node entities = data["PrefabEntities"];
+
+		if (!entities)
+			return false; // No Data Node
+
+		if (entities.size() < 1)
+			return false; // No Actual Entities
+		
+		// We won't need this as we will get all ROOT entities and their children through the following
+		//DestroyEntity(m_RootEntity);
+
+		std::unordered_map<UUID, YAML::Node> node_map; // Store the node by value
+		for (int i = 0; i < entities.size(); i++) {
+			UUID uuid = entities[i]["Entity"].as<uint32_t>();
+			node_map[uuid] = entities[i];
+		}
+		
+		// Find All ROOT entities and create them (they will create their own children)
+		for (auto entity : entities) {
+
+			UUID uuid = entity["Entity"].as<uint32_t>();
+
+			auto hierarchy_data = entity["HierarchyComponent"];
+			if (hierarchy_data) {
+
+				HierarchyComponent temp_hierarchy_component{};
+				temp_hierarchy_component.Deserialize(hierarchy_data);
+
+				if (!temp_hierarchy_component.HasParent()) {
+					DeserializeSubEntity(m_RootEntity, entt::null, node_map, uuid);
+				}
+			}
+		}
+
+		return true;
+	}
+
 }

@@ -228,18 +228,6 @@ namespace Louron
             return Zero; // Return zero vector if length is zero to avoid division by zero
         }
 
-        // Transform function: Applies a quaternion rotation to the vector
-        public static Vector3 Transform(Vector3 vector, Quaternion quaternion)
-        {
-            // Quaternion * Vector3 * Quaternion.Inverse (Rotation transformation)
-            Quaternion qv = new Quaternion(vector.X, vector.Y, vector.Z, 0);
-            Quaternion qConjugate = new Quaternion(-quaternion.X, -quaternion.Y, -quaternion.Z, quaternion.W);
-
-            Quaternion result = quaternion * qv * qConjugate;
-
-            return new Vector3(result.X, result.Y, result.Z);
-        }
-
         // Overriding the ToString method
         public override readonly string ToString()
         {

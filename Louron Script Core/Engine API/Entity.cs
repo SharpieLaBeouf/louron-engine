@@ -51,9 +51,66 @@ namespace Louron
             }
         }
 
+        public Entity parent
+        {
+            get
+            {
+                return new Entity(EngineCallbacks.Entity_GetParent(ID));
+            }
+
+            set
+            {
+                EngineCallbacks.Entity_SetParent(ID, value.ID);
+            }
+        }
+
         #endregion
 
         #region Entity Public Methods
+
+        public static void Destroy(uint entity_id)
+        {
+            if (entity_id != System.UInt32.MaxValue) { // Is not null
+                EngineCallbacks.Entity_DestroyEntity(entity_id);
+            }
+        }
+
+        public Entity Instantiate(Prefab prefab)
+        {
+            EngineCallbacks.Entity_Instantiate(ID, ref prefab.Asset_Handle, out uint prefab_clone_entity_id);
+            return new Entity(prefab_clone_entity_id);
+        }
+        public Entity Instantiate(Prefab prefab, Entity parent)
+        {
+            EngineCallbacks.Entity_Instantiate(ID, ref prefab.Asset_Handle, out uint prefab_clone_entity_id);
+            Entity ent = new Entity(prefab_clone_entity_id);
+            ent.parent = parent;
+            return ent;
+        }
+        public Entity Instantiate(Prefab prefab, Vector3 position)
+        {
+            EngineCallbacks.Entity_Instantiate(ID, ref prefab.Asset_Handle, out uint prefab_clone_entity_id);
+            Entity ent = new Entity(prefab_clone_entity_id);
+            ent.transform.position = position;
+            return ent;
+        }
+        public Entity Instantiate(Prefab prefab, Vector3 position, Vector3 rotation)
+        {
+            EngineCallbacks.Entity_Instantiate(ID, ref prefab.Asset_Handle, out uint prefab_clone_entity_id);
+            Entity ent = new Entity(prefab_clone_entity_id);
+            ent.transform.position = position;
+            ent.transform.rotation = rotation;
+            return ent;
+        }
+        public Entity Instantiate(Prefab prefab, Vector3 position, Vector3 rotation, Vector3 scale)
+        {
+            EngineCallbacks.Entity_Instantiate(ID, ref prefab.Asset_Handle, out uint prefab_clone_entity_id);
+            Entity ent = new Entity(prefab_clone_entity_id);
+            ent.transform.position = position;
+            ent.transform.rotation = rotation;
+            ent.transform.scale = scale;
+            return ent;
+        }
 
         public T AddComponent<T>() where T : Component, new()
         {
@@ -117,5 +174,6 @@ namespace Louron
         }
 
         #endregion
+
     }
 }

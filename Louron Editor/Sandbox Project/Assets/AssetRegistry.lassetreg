@@ -2499,6 +2499,11 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Barrels/Barrel_01.fbx
     Type: AssetType::ModelImport
     ParentAssetHandle: 4294967295
+  - Handle: 2153831608
+    Name: Crazy Goblin!
+    FilePath: Crazy Goblin!.lprefab
+    Type: AssetType::Prefab
+    ParentAssetHandle: 4294967295
   - Handle: 2160578162
     Name: candelabra_005_lit
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_05_Lit.fbx
@@ -2739,6 +2744,11 @@ AssetRegistry:
     FilePath: Models/Sponza/Sponza.fbm/vase_round_spec.tga
     Type: AssetType::Texture2D
     ParentAssetHandle: 4294967295
+  - Handle: 2695176800
+    Name: Crazy Goblin!
+    FilePath: Prefabs/Crazy Goblin!.lprefab
+    Type: AssetType::Prefab
+    ParentAssetHandle: 4294967295
   - Handle: 2715647630
     Name: candelabra_006_lit
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_06_Lit.fbx
@@ -2779,6 +2789,11 @@ AssetRegistry:
     FilePath: Models/Cube/Black_Cube.fbx
     Type: AssetType::Mesh
     ParentAssetHandle: 3702602609
+  - Handle: 2792494709
+    Name: Bullet
+    FilePath: Prefabs/Bullet.lprefab
+    Type: AssetType::Prefab
+    ParentAssetHandle: 4294967295
   - Handle: 2807745834
     Name: tile_01
     FilePath: Models/Dungeon Kit/Floor and Wall/Tile_01.fbx
@@ -2814,6 +2829,11 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Chairs/Chair_Wood_Cloth_White.fbx
     Type: AssetType::Material_Standard
     ParentAssetHandle: 3437686578
+  - Handle: 2893359719
+    Name: TestPrefab
+    FilePath: TestPrefab.lprefab
+    Type: AssetType::Prefab
+    ParentAssetHandle: 4294967295
   - Handle: 2901272759
     Name: entourage_set_01_atlas.021
     FilePath: Models/Dungeon Kit/Candelabra/Candelabra_10_Lit.fbx
@@ -2924,6 +2944,11 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Door/Door_Wood.fbx
     Type: AssetType::Mesh
     ParentAssetHandle: 1015536818
+  - Handle: 3175703965
+    Name: Bullet
+    FilePath: Bullet.lprefab
+    Type: AssetType::Prefab
+    ParentAssetHandle: 4294967295
   - Handle: 3196295046
     Name: Door_Steel
     FilePath: Models/Dungeon Kit/Door/Door_Steel.fbx
@@ -2964,6 +2989,11 @@ AssetRegistry:
     FilePath: Models/Cube/PBR_CUBE.fbx
     Type: AssetType::Mesh
     ParentAssetHandle: 3602894860
+  - Handle: 3315915409
+    Name: Floor
+    FilePath: Floor.lprefab
+    Type: AssetType::Prefab
+    ParentAssetHandle: 4294967295
   - Handle: 3318426815
     Name: chair_wood
     FilePath: Models/Dungeon Kit/Chairs/Chair_Wood.fbx

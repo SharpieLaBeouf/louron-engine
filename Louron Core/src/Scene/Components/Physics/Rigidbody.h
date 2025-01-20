@@ -48,10 +48,11 @@ namespace Louron {
 
 		RigidbodyComponent() = default;
 		RigidbodyComponent(const RigidbodyComponent& other);
-		RigidbodyComponent(RigidbodyComponent&& other) = default;
+		RigidbodyComponent(RigidbodyComponent&& other) noexcept;
 		~RigidbodyComponent() = default;
 
 		RigidbodyComponent& operator=(const RigidbodyComponent& other);
+		RigidbodyComponent& operator=(RigidbodyComponent&& other) noexcept;
 
 		/// <summary>
 		/// Only use this method for direct access to the actor instance.

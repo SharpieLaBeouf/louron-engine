@@ -2,6 +2,8 @@
 
 #include "Asset.h"
 
+#include "../Core/Logging.h"
+
 #include <map>
 #include <memory>
 
@@ -44,6 +46,23 @@ namespace Louron {
 
 		static AssetType GetAssetTypeFromFileExtension(const std::filesystem::path& extension);
 		static bool IsExtensionSupported(const std::filesystem::path& extension);
+
+		static std::string NormalisePath(const std::filesystem::path& p) {
+
+			std::filesystem::path temp_path = std::filesystem::weakly_canonical(p);
+
+			std::string path_str = temp_path.string();
+
+			std::replace(path_str.begin(), path_str.end(), '\\', '/');
+
+			return path_str;
+		}
+
+		template <typename AssetType>
+		static AssetHandle CreateAsset(std::shared_ptr<AssetType> asset, const std::filesystem::path& file_path, const std::filesystem::path& project_file_path) {
+
+			return 0;
+		}
 
 		template <typename AssetType>
 		static std::shared_ptr<AssetType> GetAsset(AssetHandle handle) {
@@ -93,6 +112,63 @@ namespace Louron {
 		EditorAssetManager();
 
 		template <typename TAssetType>
+		AssetHandle CreateAsset(std::shared_ptr<TAssetType> asset, const std::filesystem::path& file_path, const std::filesystem::path& project_directory) {
+
+			if (!asset)
+				return NULL_UUID;
+
+			// Determine the expected AssetType based on TAssetType
+			AssetType asset_type = AssetType::None;
+			if constexpr (std::is_same_v<TAssetType, Texture>) {
+				asset_type = AssetType::Texture2D;
+			}
+			else if constexpr (std::is_same_v<TAssetType, AssetMesh>) {
+				asset_type = AssetType::Mesh;
+			}
+			else if constexpr (std::is_same_v<TAssetType, Prefab>) {
+				asset_type = AssetType::Prefab;
+			}
+			else if constexpr (std::is_same_v<TAssetType, SkyboxMaterial>) {
+				asset_type = AssetType::Material_Skybox; // Check this first so we can return Material_Skybox opposed to Material_Standard
+			}
+			else if constexpr (std::is_base_of_v<Material, TAssetType>) {
+				asset_type = AssetType::Material_Standard; // Material is a base class that may have derived classes
+			}
+			else {
+				// If TAssetType does not match any known type, return
+				return;
+			}
+
+			AssetMetaData meta_data;
+			meta_data.FilePath = AssetManager::NormalisePath(std::filesystem::relative(file_path, project_directory / "Assets"));
+			meta_data.Type = asset_type;
+			meta_data.AssetName = file_path.stem().string();
+
+			AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+				std::string(AssetTypeToString(meta_data.Type)) + meta_data.FilePath.string()
+			));
+
+			if (m_LoadedAssets.count(handle) == 0) {
+				if (asset) {
+					asset->Handle = handle;
+					m_LoadedAssets[handle] = asset;
+					m_AssetRegistry[handle] = meta_data;
+					SerializeAssetRegistry();
+				}
+				else {
+					handle = NULL_UUID;
+				}
+			}
+			else {
+				L_CORE_INFO("Asset Already Registered: {0}", meta_data.FilePath.string());
+			}
+
+			return handle;
+
+
+		}
+
+		template <typename TAssetType>
 		std::shared_ptr<TAssetType> GetAsset(AssetHandle handle) {
 			// Determine the expected AssetType based on TAssetType
 			AssetType expectedType;
@@ -103,7 +179,7 @@ namespace Louron {
 				expectedType = AssetType::Mesh;
 			}
 			else if constexpr (std::is_same_v<TAssetType, Prefab>) {
-				expectedType = AssetType::ModelImport; // ModelImport is technically a Prefab as we create a Prefab when we import a model file
+				expectedType = AssetType::Prefab;
 			}
 			else if constexpr (std::is_same_v<TAssetType, SkyboxMaterial>) {
 				expectedType = AssetType::Material_Skybox; // Check this first so we can return Material_Skybox opposed to Material_Standard
@@ -116,14 +192,22 @@ namespace Louron {
 				return nullptr;
 			}
 
-			if (!IsAssetHandleValid(handle))
-				return nullptr;
-
-			// Check if the type matches
-			if (m_AssetRegistry[handle].Type != expectedType) {
-				return nullptr;
+			if constexpr (std::is_same_v<TAssetType, Prefab>) {
+				// Model Imports are prefabs but there is no dedicated type 
+				// for a model import, so we check both 
+				if (m_AssetRegistry[handle].Type == AssetType::ModelImport || m_AssetRegistry[handle].Type == AssetType::Prefab)
+					return std::static_pointer_cast<TAssetType>(GetAsset(handle));
+				
 			}
-			return std::static_pointer_cast<TAssetType>(GetAsset(handle));
+			else {
+
+				// Check if the type matches
+				if (m_AssetRegistry[handle].Type == expectedType)
+					return std::static_pointer_cast<TAssetType>(GetAsset(handle));
+				
+			}
+
+			return nullptr;
 		}
 
 		virtual std::shared_ptr<Asset> GetAsset(AssetHandle handle) override;

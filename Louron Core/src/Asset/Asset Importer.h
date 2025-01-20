@@ -42,8 +42,10 @@ namespace Louron {
 
 	class PrefabImporter {
 
-		//static std::shared_ptr<Prefab> ImportPrefab(AssetHandle handle, const AssetMetaData& meta_data);
-		//static std::shared_ptr<Prefab> LoadPrefab(const std::filesystem::path& path);
+	public:
+
+		static std::shared_ptr<Prefab> ImportPrefab(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& metadata);
+		static std::shared_ptr<Prefab> LoadPrefab(const std::filesystem::path& path);
 
 	};
 
@@ -88,16 +90,5 @@ namespace Louron {
 		static std::shared_ptr<SkyboxMaterial> LoadMaterialSkybox(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path);
 
 	};
-
-	static std::string normalise_path(const std::filesystem::path& p) {
-
-		std::filesystem::path temp_path = std::filesystem::weakly_canonical(p);
-
-		std::string path_str = temp_path.string();
-
-		std::replace(path_str.begin(), path_str.end(), '\\', '/');
-
-		return path_str;
-	}
 
 }

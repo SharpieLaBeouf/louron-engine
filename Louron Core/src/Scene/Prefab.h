@@ -20,6 +20,8 @@
 // External Vendor Library Headers
 #include <entt/entt.hpp>
 
+namespace YAML { class Emitter; class Node; }
+
 namespace Louron {
 
 	class Entity;
@@ -119,15 +121,26 @@ namespace Louron {
 		auto GetAllEntitiesWith() { return m_PrefabRegistry.view<Components...>(); }
 
 		entt::registry* GetRegistry() { return &m_PrefabRegistry; }
-
-		void Serialize();
-		bool Deserialize();
+		
+		/// <summary>
+		/// Will Serialise the Prefab into a file.
+		/// </summary>
+		/// <param name="file_path">Needs to be valid file path with .lprefab extension.</param>
+		bool Serialize(const std::filesystem::path& file_path, const AssetMetaData& asset_meta_data);
+		bool Deserialize(const std::filesystem::path& file_path);
 
 		virtual AssetType GetType() const override { return AssetType::Prefab; }
 
 		operator bool() const { return m_RootEntity != entt::null; }
 
+		bool IsMutable() const { return m_Mutable; }
+		void SetMutable(const bool& is_mutable) { m_Mutable = is_mutable; }
+
 	private:
+
+		void SerializeSubEntity(YAML::Emitter& out, entt::entity entity);
+		void DeserializeSubEntity(entt::entity entity, entt::entity parent_entity, const std::unordered_map<UUID, YAML::Node>& entity_node_map, UUID node_index);
+
 
 		std::unordered_map<UUID, entt::entity> m_EntityMap;
 
@@ -138,7 +151,7 @@ namespace Louron {
 
 		std::string m_PrefabName;
 
-		int m_InstantiationCount = 0;
+		bool m_Mutable = false;
 		
 		friend class Scene;
 	};

@@ -216,7 +216,7 @@
         // Normalize function
         public readonly Vector4 Normalize()
         {
-            float length = (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+            float length = (float)Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
             if (length > 0)
             {
                 return this * (1.0f / length);
@@ -227,7 +227,7 @@
         // Static Normalize function
         public static Vector4 Normalize(Vector4 v)
         {
-            float length = (float)Math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z);
+            float length = (float)Math.Sqrt(v.X * v.X + v.Y * v.Y + v.Z * v.Z + v.W * v.W);
             if (length > 0)
             {
                 return v * (1.0f / length);
@@ -235,22 +235,10 @@
             return Zero; // Return zero vector if length is zero to avoid division by zero
         }
 
-        // Transform function: Applies a quaternion rotation to the vector
-        public static Vector4 Transform(Vector4 vector, Quaternion quaternion)
-        {
-            // Quaternion * Vector4 * Quaternion.Inverse (Rotation transformation)
-            Quaternion qv = new Quaternion(vector.X, vector.Y, vector.Z, 0);
-            Quaternion qConjugate = new Quaternion(-quaternion.X, -quaternion.Y, -quaternion.Z, quaternion.W);
-
-            Quaternion result = quaternion * qv * qConjugate;
-
-            return new Vector4(result.X, result.Y, result.Z, result.W);
-        }
-
         // Overriding the ToString method
         public override readonly string ToString()
         {
-            return $"Vector4({X}, {Y}, {Z})";
+            return $"Vector4({X}, {Y}, {Z}, {W})";
         }
 
         #endregion

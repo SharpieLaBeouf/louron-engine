@@ -369,13 +369,21 @@ namespace Louron {
 		if (entity.HasAnyComponent<RigidbodyComponent, SphereColliderComponent, BoxColliderComponent>()) {
 
 			if (entity.HasComponent<RigidbodyComponent>())
+			{
+				entity.GetComponent<RigidbodyComponent>().Shutdown();
 				PhysicsSystem::RemoveRigidBody(entity, this);
+			}
 
 			if (entity.HasComponent<SphereColliderComponent>())
+			{
+				entity.GetComponent<SphereColliderComponent>().Shutdown();
 				PhysicsSystem::RemoveCollider(entity, this, PxGeometryType::eSPHERE);
-
+			}
 			if (entity.HasComponent<BoxColliderComponent>())
+			{
+				entity.GetComponent<BoxColliderComponent>().Shutdown();
 				PhysicsSystem::RemoveCollider(entity, this, PxGeometryType::eBOX);
+			}
 		}
 
 		// 4. Remove From Parent and Destroy All Children
@@ -511,18 +519,28 @@ namespace Louron {
 				// 1.f. Transform Component
 				if (prefab_registry->has<TransformComponent>(start_prefab_entity)) {
 					auto& component = prefab_registry->get<TransformComponent>(start_prefab_entity);
-					instantiated_entity.RemoveComponent<TransformComponent>(); // Remove so we can use copy constructor for transform
+					auto& transform_component = instantiated_entity.GetComponent<TransformComponent>();
 					
 					if (parent_uuid == NULL_UUID) { 
 						// If we are the root entity, we check if the transform 
 						// passed has a value, if not, standard copy from prefab
 						if (transform.has_value())
-							instantiated_entity.AddComponent<TransformComponent>(transform.value());
+						{
+							transform_component.SetPosition(transform.value().GetLocalPosition());
+							transform_component.SetRotation(transform.value().GetLocalRotation());
+							transform_component.SetScale(transform.value().GetLocalScale());
+						}
 						else
-							instantiated_entity.AddComponent<TransformComponent>(component);
+						{
+							transform_component.SetPosition(component.GetLocalPosition());
+							transform_component.SetRotation(component.GetLocalRotation());
+							transform_component.SetScale(component.GetLocalScale());
+						}
 					}
 					else {
-						instantiated_entity.AddComponent<TransformComponent>(component);
+						transform_component.SetPosition(component.GetLocalPosition());
+						transform_component.SetRotation(component.GetLocalRotation());
+						transform_component.SetScale(component.GetLocalScale());
 					}
 				}
 
@@ -564,26 +582,44 @@ namespace Louron {
 
 				// 1.m. Rigidbody Component
 				if (prefab_registry->has<RigidbodyComponent>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<RigidbodyComponent>(start_prefab_entity);
-					instantiated_entity.AddComponent<RigidbodyComponent>() = component;
+					RigidbodyComponent component = prefab_registry->get<RigidbodyComponent>(start_prefab_entity);
+					auto& ent_rb_component = instantiated_entity.AddComponent<RigidbodyComponent>(); 
+					ent_rb_component = component;
+
+					if (IsRunning() || IsSimulating())
+						instantiated_entity.GetComponent<RigidbodyComponent>().Init(&instantiated_entity.GetComponent<TransformComponent>(), m_PhysxScene);
 				}
 
 				// 1.n. Sphere Collider
 				if (prefab_registry->has<SphereColliderComponent>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<SphereColliderComponent>(start_prefab_entity);
-					instantiated_entity.AddComponent<SphereColliderComponent>() = component;
+					SphereColliderComponent component = prefab_registry->get<SphereColliderComponent>(start_prefab_entity);
+					auto& ent_sc_component = instantiated_entity.AddComponent<SphereColliderComponent>();
+					ent_sc_component = component;
+
+
+					if (IsRunning() || IsSimulating())
+						instantiated_entity.GetComponent<SphereColliderComponent>().Init();
 				}
 
 				// 1.o. Box Collider
 				if (prefab_registry->has<BoxColliderComponent>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<BoxColliderComponent>(start_prefab_entity);
-					instantiated_entity.AddComponent<BoxColliderComponent>() = component;
+					BoxColliderComponent component = prefab_registry->get<BoxColliderComponent>(start_prefab_entity);
+					auto& ent_bc_component = instantiated_entity.AddComponent<BoxColliderComponent>();
+					ent_bc_component = std::move(component);
+
+					if (IsRunning() || IsSimulating())
+						instantiated_entity.GetComponent<BoxColliderComponent>().Init();
 				}
 
 				// 1.p. Script Component
 				if (prefab_registry->has<ScriptComponent>(start_prefab_entity)) {
 					auto& component = prefab_registry->get<ScriptComponent>(start_prefab_entity);
-					instantiated_entity.AddComponent<ScriptComponent>() = component;
+					instantiated_entity.AddComponent<ScriptComponent>(component);
+
+					// TODO: Add functionality to move script and script fields from prefabs into new components
+					// basically just need to copy the ScriptFieldInstances from the prefabs entries in the scriptmanager
+					// to this new entity! easy peasy...
+
 				}
 			}
 
@@ -603,10 +639,6 @@ namespace Louron {
 		};
 
 		Entity instantiated_entity = copy_prefab_entity(prefab_root_entity, parent_uuid);
-
-		prefab->m_InstantiationCount++;
-
-		instantiated_entity.GetComponent<TagComponent>().Tag = instantiated_entity.GetComponent<TagComponent>().Tag + "_" + std::to_string(prefab->m_InstantiationCount);
 
 		return instantiated_entity;
 	}

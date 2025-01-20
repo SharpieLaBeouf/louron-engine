@@ -7,9 +7,12 @@
 #include "../Core/Input.h"
 #include "../Scene/Scene.h"
 #include "../Scene/Entity.h"
+#include "../Scene/Prefab.h"
 #include "../Scene/Components/Components.h"
 #include "../Scene/Components/Light.h"
 #include "../Scene/Components/Skybox.h"
+
+#include "../Project/Project.h"
 
 #include "Script Manager.h"
 
@@ -45,6 +48,18 @@ namespace Louron {
 			case 3:		L_CORE_FATAL(ScriptingUtils::MonoStringToString(message));	break;
 			default:	L_CORE_INFO(ScriptingUtils::MonoStringToString(message));	break;
 		}
+	}
+
+#pragma region Entity
+
+	static void Entity_DestroyEntity(UUID entityID) {
+
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		scene->DestroyEntity(entity);
 	}
 
 	static void Entity_AddComponent(UUID entityID, MonoReflectionType* componentType)
@@ -141,6 +156,48 @@ namespace Louron {
 		return s_EntityHasComponentFuncs.at(managedType)(entity);
 	}
 
+	static void Entity_Instantiate(UUID entityID, uint32_t* handle, uint32_t* prefab_clone_uuid) {
+
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity)
+			return;
+
+		auto prefab_asset = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(*handle);
+
+		Entity prefab_clone = scene->InstantiatePrefab(prefab_asset);
+		if (prefab_clone) {
+			prefab_clone.GetComponent<TagComponent>().SetUniqueName(prefab_asset->GetPrefabName());
+			*prefab_clone_uuid = prefab_clone.GetUUID();
+		}
+	}
+
+	static UUID Entity_GetParent(UUID entityID) {
+
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) 
+			return NULL_UUID;
+
+		return entity.GetComponent<HierarchyComponent>().GetParentID();
+	}
+
+	static void Entity_SetParent(UUID entityID, UUID parentID) {
+
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityID);
+		Entity parent = scene->FindEntityByUUID(parentID);
+		if (!entity || !parent)
+			return;
+		
+		entity.GetComponent<HierarchyComponent>().AttachParent(parentID);
+	}
+
+#pragma endregion
+
 #pragma region Input
 
 	static bool Input_GetKey(KeyCode keyCode) {
@@ -193,7 +250,7 @@ namespace Louron {
 		glm::vec3 scale;
 	};
 
-	static void Transform_GetTransform(UUID entityID, _Transform* out_transform)
+	static void TransformComponent_GetTransform(UUID entityID, _Transform* out_transform)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -211,7 +268,7 @@ namespace Louron {
 		*out_transform = trans;
 	}
 
-	static void Transform_SetTransform(UUID entityID, _Transform* transform)
+	static void TransformComponent_SetTransform(UUID entityID, _Transform* transform)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -227,7 +284,7 @@ namespace Louron {
 		entity_transform.SetGlobalScale(transform->scale);
 	}
 
-	static void Transform_GetPosition(UUID entityID, glm::vec3* ref)
+	static void TransformComponent_GetPosition(UUID entityID, glm::vec3* ref)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -242,7 +299,7 @@ namespace Louron {
 		*ref = entity_transform.GetGlobalPosition();
 	}
 
-	static void Transform_SetPosition(UUID entityID, glm::vec3* ref)
+	static void TransformComponent_SetPosition(UUID entityID, glm::vec3* ref)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -258,7 +315,7 @@ namespace Louron {
 	}
 
 
-	static void Transform_GetRotation(UUID entityID, glm::vec3* ref)
+	static void TransformComponent_GetRotation(UUID entityID, glm::vec3* ref)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -273,7 +330,7 @@ namespace Louron {
 		*ref = entity_transform.GetGlobalRotation();
 	}
 
-	static void Transform_SetRotation(UUID entityID, glm::vec3* ref)
+	static void TransformComponent_SetRotation(UUID entityID, glm::vec3* ref)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -289,7 +346,7 @@ namespace Louron {
 	}
 
 
-	static void Transform_GetScale(UUID entityID, glm::vec3* ref)
+	static void TransformComponent_GetScale(UUID entityID, glm::vec3* ref)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -304,7 +361,7 @@ namespace Louron {
 		*ref = entity_transform.GetGlobalScale();
 	}
 
-	static void Transform_SetScale(UUID entityID, glm::vec3* ref)
+	static void TransformComponent_SetScale(UUID entityID, glm::vec3* ref)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -317,6 +374,51 @@ namespace Louron {
 		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
 
 		entity_transform.SetGlobalScale(*ref);
+	}
+
+	static void TransformComponent_GetFront(UUID entityID, glm::vec3* ref)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<TransformComponent>())
+			return;
+
+		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+
+		*ref = entity_transform.GetGlobalForwardDirection();
+	}
+
+	static void TransformComponent_GetUp(UUID entityID, glm::vec3* ref)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<TransformComponent>())
+			return;
+
+		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+
+		*ref = entity_transform.GetGlobalUpDirection();
+	}
+
+	static void TransformComponent_GetRight(UUID entityID, glm::vec3* ref)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<TransformComponent>())
+			return;
+
+		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+
+		*ref = entity_transform.GetGlobalRightDirection();
 	}
 
 #pragma endregion
@@ -1307,9 +1409,15 @@ namespace Louron {
 
 		mono_add_internal_call("Louron.EngineCallbacks::Debug_LogMessage", NativeLog);
 
+		mono_add_internal_call("Louron.EngineCallbacks::Entity_DestroyEntity", Entity_DestroyEntity);
 		mono_add_internal_call("Louron.EngineCallbacks::Entity_AddComponent", Entity_AddComponent);
 		mono_add_internal_call("Louron.EngineCallbacks::Entity_RemoveComponent", Entity_RemoveComponent);
 		mono_add_internal_call("Louron.EngineCallbacks::Entity_HasComponent", Entity_HasComponent);
+
+		mono_add_internal_call("Louron.EngineCallbacks::Entity_Instantiate", Entity_Instantiate);
+
+		mono_add_internal_call("Louron.EngineCallbacks::Entity_GetParent", Entity_GetParent);
+		mono_add_internal_call("Louron.EngineCallbacks::Entity_SetParent", Entity_SetParent);
 		
 		mono_add_internal_call("Louron.EngineCallbacks::Input_GetKey", Input_GetKey);
 		mono_add_internal_call("Louron.EngineCallbacks::Input_GetKeyDown", Input_GetKeyDown);
@@ -1322,17 +1430,21 @@ namespace Louron {
 		mono_add_internal_call("Louron.EngineCallbacks::Time_GetDeltaTime", Time_GetDeltaTime);
 		mono_add_internal_call("Louron.EngineCallbacks::Time_GetCurrentTime", Time_GetCurrentTime);
 
-		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetTransform", Transform_GetTransform);
-		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_SetTransform", Transform_SetTransform);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetTransform", TransformComponent_GetTransform);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_SetTransform", TransformComponent_SetTransform);
 
-		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetPosition", Transform_GetPosition);
-		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_SetPosition", Transform_SetPosition);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetPosition", TransformComponent_GetPosition);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_SetPosition", TransformComponent_SetPosition);
 
-		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetRotation", Transform_GetRotation);
-		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_SetRotation", Transform_SetRotation);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetRotation", TransformComponent_GetRotation);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_SetRotation", TransformComponent_SetRotation);
 
-		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetScale", Transform_GetScale);
-		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_SetScale", Transform_SetScale);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetScale", TransformComponent_GetScale);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_SetScale", TransformComponent_SetScale);
+
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetFront", TransformComponent_GetFront);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetUp", TransformComponent_GetUp);
+		mono_add_internal_call("Louron.EngineCallbacks::TransformComponent_GetRight", TransformComponent_GetRight);
 
 		mono_add_internal_call("Louron.EngineCallbacks::TagComponent_GetTag", Tag_GetTag);
 		mono_add_internal_call("Louron.EngineCallbacks::TagComponent_SetTag", Tag_SetTag);

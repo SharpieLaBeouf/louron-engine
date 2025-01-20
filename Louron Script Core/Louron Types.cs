@@ -13,7 +13,12 @@ namespace Louron
     {
         public Transform() { ID = 0; }
 
-        internal Transform(uint id) { ID = id; }
+        internal Transform(uint id) { 
+            ID = id;
+            _position = position;
+            _rotation = rotation;
+            _scale = scale;
+        }
 
         public readonly uint ID;
 
@@ -21,11 +26,7 @@ namespace Louron
         {
             get
             {
-                Vector3 reference = new Vector3();
-                EngineCallbacks.TransformComponent_GetPosition(ID, ref reference);
-
-                _position = reference;
-
+                EngineCallbacks.TransformComponent_GetPosition(ID, ref _position);
                 return _position; 
             }
             set
@@ -70,21 +71,17 @@ namespace Louron
             }
         }
 
-        private Vector3 _position;
-        private Vector3 _rotation;
-        private Vector3 _scale;
-
-        // Helper function to convert degrees to radians
-        private static float DegreesToRadians(float degrees)
-        {
-            return degrees * (MathF.PI / 180f);
-        }
+        private Vector3 _position = new Vector3();
+        private Vector3 _rotation = new Vector3();
+        private Vector3 _scale = new Vector3();
 
         public Vector3 up
         {
             get
             {
-                return Vector3.Normalize(Vector3.Transform(Vector3.Up, GetRotationQuaternion()));
+                Vector3 reference = new Vector3();
+                EngineCallbacks.TransformComponent_GetUp(ID, ref reference);
+                return reference;
             }
         }
 
@@ -92,7 +89,9 @@ namespace Louron
         {
             get
             {
-                return Vector3.Normalize(Vector3.Transform(Vector3.Front, GetRotationQuaternion()));
+                Vector3 reference = new Vector3();
+                EngineCallbacks.TransformComponent_GetFront(ID, ref reference);
+                return reference;
             }
         }
 
@@ -100,23 +99,22 @@ namespace Louron
         {
             get
             {
-                return Vector3.Normalize(Vector3.Transform(Vector3.Right, GetRotationQuaternion()));
+                Vector3 reference = new Vector3();
+                EngineCallbacks.TransformComponent_GetRight(ID, ref reference);
+                return reference;
             }
         }
+    }
 
-        // Generate a rotation quaternion from Euler angles
-        private Quaternion GetRotationQuaternion()
+    public class Prefab
+    {
+        internal Prefab(uint asset_handle) { Asset_Handle = asset_handle; }
+
+        internal uint Asset_Handle;
+
+        public uint ID
         {
-            float pitch = DegreesToRadians(rotation.X); // Rotation around X-axis
-            float yaw = DegreesToRadians(rotation.Y);   // Rotation around Y-axis
-            float roll = DegreesToRadians(rotation.Z);  // Rotation around Z-axis
-
-            Quaternion qPitch = Quaternion.CreateFromAxisAngle(Vector3.Right, pitch);
-            Quaternion qYaw = Quaternion.CreateFromAxisAngle(Vector3.Up, yaw);
-            Quaternion qRoll = Quaternion.CreateFromAxisAngle(Vector3.Front, roll);
-
-            // Combine rotations in Yaw -> Pitch -> Roll order
-            return qYaw * qPitch * qRoll;
+            get { return Asset_Handle; }
         }
     }
 
@@ -141,4 +139,5 @@ namespace Louron
         public float StaticFriction;
         public float Bounciness;
     }
+
 }

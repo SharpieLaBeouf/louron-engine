@@ -1,0 +1,44 @@
+Prefab Name: Crazy Goblin!
+PrefabEntities:
+  - Entity: 1
+    TagComponent:
+      Tag: Ominous Light
+    HierarchyComponent:
+      Parent: 0
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 1.20000005, 0.5]
+      Rotation: [-90, 1, 1]
+      Scale: [0.200000018, 0.200000003, 0.200000018]
+    PointLightComponent:
+      Active: true
+      Colour: [1, 0, 0, 1]
+      Radius: 50
+      Intensity: 5
+  - Entity: 0
+    TagComponent:
+      Tag: Crazy Goblin!
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 1
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.PlayerMoveScript
+        Fields:
+          - Name: speed
+            Type: Float
+            Data: 20
+    TransformComponent:
+      Translation: [0, 0.5, 0]
+      Rotation: [0, -90, 0]
+      Scale: [5, 5, 5]
+    MeshFilterComponent:
+      MeshAssetHandle: 1692962371
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3535300567

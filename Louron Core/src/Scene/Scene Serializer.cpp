@@ -333,7 +333,7 @@ namespace Louron {
 					auto script = entity["ScriptComponent"];
 					if (script) {
 						auto& entityScript = deserializedEntity.AddComponent<ScriptComponent>();
-						entityScript.Deserialize(script, deserializedEntity);
+						entityScript.Deserialize(script, uuid);
 					}
 
 					// Transform

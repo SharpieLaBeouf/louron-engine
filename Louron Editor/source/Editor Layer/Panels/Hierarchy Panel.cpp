@@ -14,6 +14,92 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 	Louron::UUID parent_UUID = -1;
 	Entity entityToDelete = {};
 
+	auto drop_target_content_file = [&](Louron::UUID parent_uuid) {
+
+		// DROP A FILE FROM THE CONTENT BROWSER
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+			// Convert the payload data (string) back into a filesystem path
+			std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+			std::filesystem::path dropped_path = dropped_path_str; // Convert to path
+
+			if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
+
+				AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+
+				switch (asset_type) {
+
+					case AssetType::ModelImport:
+					{
+						if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::ModelImport) {
+							auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);
+							Entity entity = scene_ref->InstantiatePrefab(prefab);
+							if (entity)
+							{
+								selected_entity = entity;
+
+								if (parent_uuid != NULL_UUID)
+									entity.GetComponent<HierarchyComponent>().AttachParent(parent_uuid);
+
+								auto& transform = entity.GetComponent<TransformComponent>();
+								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
+								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
+								transform.SetScale({ 1.0f, 1.0f, 1.0f });
+							}
+							else
+								L_APP_WARN("Could Not Instantiate Model Into Scene.");
+						}
+						else {
+							L_APP_WARN("Invalid Asset Type Dropped Into Scene.");
+						}
+
+						break;
+					}
+
+					case AssetType::Prefab:
+					{
+						auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);
+
+						if (!prefab) {
+							L_APP_INFO("Attempting to Import New Asset.");
+
+							AssetHandle asset_handle = Project::GetStaticEditorAssetManager()->ImportAsset(dropped_path);
+							prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(asset_handle);
+						}
+
+						if (prefab) {
+
+							Entity entity = scene_ref->InstantiatePrefab(prefab);
+							entity.GetComponent<TagComponent>().SetUniqueName(prefab->GetPrefabName());
+							if (entity)
+							{
+								selected_entity = entity;
+
+								if (parent_uuid != NULL_UUID)
+									entity.GetComponent<HierarchyComponent>().AttachParent(parent_uuid);
+
+								auto& transform = entity.GetComponent<TransformComponent>();
+								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
+								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
+								transform.SetScale({ 1.0f, 1.0f, 1.0f });
+							}
+							else
+								L_APP_WARN("Could Not Instantiate Model Into Scene.");
+
+						}
+
+						break;
+					}
+
+				}
+
+			}
+			else {
+				L_CORE_WARN("Cannot Instantiate '{}' Into Scene.", dropped_path.filename().string());
+			}
+
+		}
+	};
+
 	std::function<void(Entity)> DrawEntity = [&](Entity entity) {
 
 		std::string tag = entity.GetComponent<TagComponent>().Tag;
@@ -66,7 +152,6 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 			if (ImGui::MenuItem("Delete Entity"))
 				entityToDelete = entity;
 
-
 			ImGui::EndPopup();
 		}
 
@@ -86,6 +171,7 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 
 			// Drag target
 			if (ImGui::BeginDragDropTarget()) {
+				
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_UUID")) {
 					Louron::UUID droppedEntityUUID = *(const Louron::UUID*)payload->Data;
 					Entity droppedEntity = scene_ref->FindEntityByUUID(droppedEntityUUID);
@@ -96,6 +182,9 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 					}
 					isDraggingEntity = false;
 				}
+
+				drop_target_content_file(entity.GetUUID());
+
 				ImGui::EndDragDropTarget();
 			}
 
@@ -119,6 +208,7 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 
 		// Drag target
 		if (ImGui::BeginDragDropTarget()) {
+			
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_UUID")) {
 				Louron::UUID droppedEntityUUID = *(const Louron::UUID*)payload->Data;
 				Entity droppedEntity = scene_ref->FindEntityByUUID(droppedEntityUUID);
@@ -129,6 +219,9 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 				}
 				isDraggingEntity = false;
 			}
+
+			drop_target_content_file(entity.GetUUID());
+
 			ImGui::EndDragDropTarget();
 		}
 	};
@@ -217,55 +310,7 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 		// Restore the previous highlight color
 		ImGui::PopStyleColor();
 
-		// DROP A FILE FROM THE CONTENT BROWSER
-		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
-			// Convert the payload data (string) back into a filesystem path
-			std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
-			std::filesystem::path dropped_path = dropped_path_str; // Convert to path
-
-			if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
-
-				AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
-
-				switch (asset_type) {
-
-					case AssetType::ModelImport:
-					{
-						if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::ModelImport) {
-							auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);
-							Entity entity = scene_ref->InstantiatePrefab(prefab);
-							if (entity)
-								selected_entity = entity;
-							else
-								L_APP_WARN("Could Not Instantiate Model Into Scene.");
-						}
-						else {
-							L_APP_WARN("Invalid Asset Type Dropped Into Scene.");
-						}
-
-						break;
-					}
-
-					case AssetType::Prefab:
-					{
-						auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);
-						Entity entity = scene_ref->InstantiatePrefab(prefab);
-						if (entity)
-							selected_entity = entity;
-						else
-							L_APP_WARN("Could Not Instantiate Model Into Scene.");
-
-						break;
-					}
-
-				}
-
-			}
-			else {
-				L_CORE_WARN("Cannot Instantiate '{}' Into Scene.", dropped_path.filename().string());
-			}
-
-		}
+		drop_target_content_file(NULL_UUID);
 
 		ImGui::EndDragDropTarget();
 	}

@@ -158,12 +158,12 @@ namespace Louron {
 	AssetHandle EditorAssetManager::ImportAsset(const std::filesystem::path& filepath) {
 
 		AssetMetaData metadata;
-		metadata.FilePath = normalise_path(std::filesystem::relative(filepath, Project::GetActiveProject()->GetProjectDirectory() / "Assets"));
+		metadata.FilePath = AssetManager::NormalisePath(std::filesystem::relative(filepath, Project::GetActiveProject()->GetProjectDirectory() / "Assets"));
 		metadata.Type = AssetManager::GetAssetTypeFromFileExtension(metadata.FilePath.extension());
 		metadata.AssetName = metadata.FilePath.filename().replace_extension().string();
 
 		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
-			std::string(AssetTypeToString(metadata.Type)) + metadata.FilePath.string()
+			std::string(AssetTypeToString(metadata.Type) + metadata.FilePath.string())
 		));
 
 		L_CORE_ASSERT(metadata.Type != AssetType::None, "Cannot Import Asset - MetaData Type Is Null.");
@@ -385,7 +385,7 @@ namespace Louron {
 	AssetHandle EditorAssetManager::GetHandleFromFilePath(const std::filesystem::path& path) {
 
 		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
-			std::string(AssetTypeToString(AssetManager::GetAssetTypeFromFileExtension(path.extension()))) + normalise_path(std::filesystem::relative(path, Project::GetActiveProject()->GetProjectDirectory() / "Assets"))
+			std::string(AssetTypeToString(AssetManager::GetAssetTypeFromFileExtension(path.extension()))) + AssetManager::NormalisePath(std::filesystem::relative(path, Project::GetActiveProject()->GetProjectDirectory() / "Assets"))
 		));
 
 		return handle;

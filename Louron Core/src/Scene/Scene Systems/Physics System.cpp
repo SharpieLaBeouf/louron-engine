@@ -414,14 +414,16 @@ namespace Louron {
 				auto& rigidbody = start_entity.GetComponent<RigidbodyComponent>();
 
 				if(rigidbody.GetActor()) {
-					PxTransform physics_transform = rigidbody.GetActor()->GetGlobalPose();
-					glm::quat quaternion(physics_transform.q.w, physics_transform.q.x, physics_transform.q.y, physics_transform.q.z);
-					glm::vec3 rotation = glm::degrees(glm::eulerAngles(quaternion));
+					if (!rigidbody.GetActor()->CheckFlag(RigidbodyFlag_TransformUpdated)) // Only update if we haven't manually updated
+					{
+						PxTransform physics_transform = rigidbody.GetActor()->GetGlobalPose();
+						glm::quat quaternion(physics_transform.q.w, physics_transform.q.x, physics_transform.q.y, physics_transform.q.z);
+						glm::vec3 rotation = glm::degrees(glm::eulerAngles(quaternion));
 
-					transform.SetGlobalPosition(glm::vec3(physics_transform.p.x, physics_transform.p.y, physics_transform.p.z));
-					transform.SetGlobalRotation(rotation);
+						transform.SetGlobalPosition(glm::vec3(physics_transform.p.x, physics_transform.p.y, physics_transform.p.z));
+						transform.SetGlobalRotation(rotation);
+					}
 				}
-
 			}
 			for (auto& child_uuid : start_entity.GetComponent<HierarchyComponent>().GetChildren()) {
 

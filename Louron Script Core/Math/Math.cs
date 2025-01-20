@@ -5,6 +5,11 @@ namespace Louron
     public struct LMath
     {
 
+        // Helper function to convert degrees to radians
+        public static float DegreesToRadians(float degrees)
+        {
+            return degrees * (MathF.PI / 180f);
+        }
         public static float PerlinNoise(float x, float y)
         {
             int xi, yi;                // integer component
