@@ -6068,15 +6068,10 @@ Entities:
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
+        Projection Type: Perspective
         FOV: 60
-        MovementToggle: true
-        MovementSpeed: 10
-        MovementYDamp: 0.649999976
-        MouseSensitivity: 0.100000001
-        MouseToggledOff: false
-        Position: [9.14822102, 4.21260452, -0.299088717]
-        Yaw: -715.470886
-        Pitch: -3.20037031
+        Near: 0.01
+        Far: 1000
       Primary: true
       ClearFlag: Skybox
       ClearColour: [1, 1, 1, 1]

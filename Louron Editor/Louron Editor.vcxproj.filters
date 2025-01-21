@@ -50,5 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\Shaders\Forward+\FP_Material_Shader.glsl" />
+    <None Include="Sandbox Project\Assets\Shaders\Stencil Outline Shader.glsl" />
   </ItemGroup>
 </Project>

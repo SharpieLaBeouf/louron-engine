@@ -6,7 +6,6 @@
 #include "Scene Serializer.h"
 #include "OctreeBounds.h"
 
-#include "Components/Camera.h"
 #include "Components/Components.h"
 #include "Components/Light.h"
 #include "Components/Mesh.h"
@@ -22,6 +21,7 @@
 
 #include "../Debug/Profiler.h"
 
+#include "../Renderer/Camera.h"
 #include "../Renderer/Renderer.h"
 #include "../Renderer/RendererPipeline.h"
 
@@ -658,9 +658,8 @@ namespace Louron {
 #pragma endregion
 
 #pragma region Scene Logic
-
+	
 	// SCENE HARD START & STOP
-
 	// All scenes are started when they are created, not when we 
 	// are playing. This is to setup required things such as 
 	// collision callbacks and rendering pipeline
@@ -840,7 +839,7 @@ namespace Louron {
 	}
 
 	// UPDATE
-	void Scene::OnUpdate() {
+	void Scene::OnUpdate(EditorCamera* editor_camera) {
 
 		// Physics
 		if (!m_IsPaused && (m_IsRunning || m_IsSimulating)) {
@@ -859,8 +858,68 @@ namespace Louron {
 			
 		}
 
-		// Always Render
-		m_SceneConfig.ScenePipeline->OnUpdate();
+		CameraBase* camera = nullptr;
+		Entity camera_entity = GetPrimaryCameraEntity();
+		if (camera_entity && !editor_camera)
+			camera = camera_entity.GetComponent<CameraComponent>().CameraInstance.get();
+		else if (editor_camera)
+			camera = reinterpret_cast<CameraBase*>(editor_camera);
+
+		if (camera) {
+
+			static glm::vec3 camera_position{};
+			static glm::mat4 projection_matrix{};
+			static glm::mat4 view_matrix{};
+
+			switch (camera->GetCameraType()) {
+
+				case Camera_Type::None:
+				{
+					camera_position = {};
+					projection_matrix = glm::mat4(1.0f);
+					view_matrix = glm::mat4(1.0f);
+					break;
+				}
+
+				case Camera_Type::SceneCamera:
+				{
+					camera_position = GetPrimaryCameraEntity().GetComponent<TransformComponent>().GetGlobalPosition();
+					projection_matrix = camera->GetProjection();
+					// If we are using a scene camera which is attached to a 
+					// camera compoennt, it is simple to get the view matrix 
+					// by simply inverting the global transform matrix
+					view_matrix = glm::inverse(GetPrimaryCameraEntity().GetComponent<TransformComponent>().GetGlobalTransform());
+					break;
+				}
+
+				case Camera_Type::EditorCamera:
+				{
+					camera_position = editor_camera->GetPosition();
+					projection_matrix = camera->GetProjection();
+					view_matrix = camera->GetViewMatrix();
+					break;
+				}
+			}
+
+			// Always Render
+			m_SceneFrameBuffer->Bind();
+			m_SceneConfig.ScenePipeline->OnUpdate(camera_position, projection_matrix, view_matrix);
+			m_SceneFrameBuffer->Unbind();
+
+			// Clear the standard OpenGL back buffer
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			if (m_SceneFrameBuffer->GetConfig().RenderToScreen)
+				m_SceneConfig.ScenePipeline->RenderFBOQuad();
+		}
+		else {
+			L_CORE_WARN("No Primary Camera Found in Scene");
+			m_SceneFrameBuffer->Bind();
+			Renderer::ClearColour({ 99.0f , 99.0f, 99.0f, 1.0f });
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			m_SceneFrameBuffer->Unbind();
+		}
+
 	}
 
 	void Scene::OnUpdateGUI() {

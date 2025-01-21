@@ -2,7 +2,6 @@
 
 #include "Entity.h"
 
-#include "Components/Camera.h"
 #include "Components/Components.h"
 #include "Components/Light.h"
 #include "Components/Mesh.h"
@@ -442,7 +441,7 @@ namespace Louron {
 		if (camera) {
 
 			auto& entityCamera = AddComponent<CameraComponent>(entity);
-			entityCamera.CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f));
+			entityCamera.CameraInstance = std::make_shared<SceneCamera>();
 
 			if (!entityCamera.Deserialize(camera))
 				L_CORE_WARN("Deserialisation of Camera Component Not Complete.");

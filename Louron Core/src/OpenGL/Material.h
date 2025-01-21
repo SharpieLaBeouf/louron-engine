@@ -30,7 +30,7 @@ namespace Louron {
 		L_MATERIAL_TRANSPARENT = 1
 	};
 
-	class Camera;
+	class CameraBase;
 
 	class Material : public Asset {
 
@@ -52,7 +52,7 @@ namespace Louron {
 		virtual void UnBind();
 
 		// Update Material Shader Uniforms
-		virtual void UpdateUniforms(const Camera& camera);
+		virtual void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 
 		// Getters and Setters
 
@@ -175,7 +175,7 @@ namespace Louron {
 		void UnBind() override;
 
 		// Update Material Shader Uniforms
-		void UpdateUniforms(const Camera& camera) override;
+		void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) override;
 
 		bool IsAlbedoTextureSet() const;
 		bool IsMetallicTextureSet() const;

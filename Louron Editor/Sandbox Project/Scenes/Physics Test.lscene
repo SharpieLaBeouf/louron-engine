@@ -2,9 +2,9 @@ Scene Name: Physics Test
 Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
 Scene Pipeline Type: 1
 Entities:
-  - Entity: 2808962520
+  - Entity: 822114972
     TagComponent:
-      Tag: Cube_1
+      Tag: Cube_6
     HierarchyComponent:
       Parent: 1461493785
       Children:
@@ -20,56 +20,9 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
-    SphereColliderComponent:
-      IsTrigger: false
-      Radius: 0.5
-      Centre: [0, 0, 0]
-      MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 1461493785
+  - Entity: 872676277
     TagComponent:
-      Tag: Physics Objects
-    HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        - 1886447739
-        - 2434563685
-        - 534466640
-        - 3523803972
-        - 1637413652
-        - 2539355436
-        - 872676277
-        - 822114972
-        - 2808962520
-    ScriptComponent:
-      Script_1:
-        Active: true
-        Script Name: SandboxProject.RandomiseCubeLocations
-        Fields:
-          - Name: cube1
-            Type: Entity
-            Data: 2808962520
-          - Name: cube2
-            Type: Entity
-            Data: 3523803972
-          - Name: cube3
-            Type: Entity
-            Data: 2539355436
-          - Name: cube4
-            Type: Entity
-            Data: 1637413652
-          - Name: cube5
-            Type: Entity
-            Data: 872676277
-          - Name: cube6
-            Type: Entity
-            Data: 822114972
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-  - Entity: 1637413652
-    TagComponent:
-      Tag: Cube_4
+      Tag: Cube_5
     HierarchyComponent:
       Parent: 1461493785
       Children:
@@ -85,17 +38,53 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
-  - Entity: 2198244872
+  - Entity: 2539355436
     TagComponent:
-      Tag: Sphere
+      Tag: Cube_3
     HierarchyComponent:
-      Parent: 2434563685
+      Parent: 1461493785
       Children:
         []
     TransformComponent:
-      Translation: [-1.19916391, -1.0734992, 5.74615431]
-      Rotation: [-89.9999542, 56.099968, 54.2000465]
-      Scale: [1.00000012, 0.99999994, 0.99999994]
+      Translation: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 921801044
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 13304964
+  - Entity: 3523803972
+    TagComponent:
+      Tag: Cube_2
+    HierarchyComponent:
+      Parent: 1461493785
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 921801044
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 13304964
+  - Entity: 534466640
+    TagComponent:
+      Tag: Physics Sphere
+    HierarchyComponent:
+      Parent: 1461493785
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 22.5, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
     MeshFilterComponent:
       MeshAssetHandle: 293103916
     MeshRendererComponent:
@@ -103,11 +92,119 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1375892428
+    RigidbodyComponent:
+      Mass: 1
+      Drag: 0
+      AngularDrag: 0.0500000007
+      AutomaticCentreOfMass: true
+      UseGravity: true
+      IsKinematic: false
+      PositionConstraint: [false, false, false]
+      RotationConstraint: [false, false, false]
     SphereColliderComponent:
       IsTrigger: false
       Radius: 0.5
       Centre: [0, 0, 0]
+      MaterialProperties: [0.600000024, 0.600000024, 1]
+  - Entity: 4233385606
+    TagComponent:
+      Tag: Flickering Light
+    HierarchyComponent:
+      Parent: 1886447739
+      Children:
+        []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.LightFlicker
+        Fields:
+          - Name: minIntensity
+            Type: Float
+            Data: 80
+          - Name: maxIntensity
+            Type: Float
+            Data: 100
+          - Name: flickerSpeed
+            Type: Float
+            Data: 10
+    TransformComponent:
+      Translation: [0, 7, 0]
+      Rotation: [0, -0, 0]
+      Scale: [0.049999997, 1, 0.099999994]
+    PointLightComponent:
+      Active: true
+      Colour: [0, 0.0294120312, 1, 1]
+      Radius: 20
+      Intensity: 100
+  - Entity: 1332520780
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [-84.8492126, 45.923645, -0.153106675]
+      Rotation: [-90.0190964, -79.6849823, 79.7037888]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        Projection Type: Orthographic
+        FOV: 10
+        Near: -1
+        Far: 1
+      Primary: true
+      ClearFlag: Skybox
+      ClearColour: [0.897058845, 0.909169555, 1, 1]
+    SkyboxComponent:
+      MaterialAssetHandle: 1778786993
+  - Entity: 2434563685
+    TagComponent:
+      Tag: Cube
+    HierarchyComponent:
+      Parent: 1461493785
+      Children:
+        - 2198244872
+    TransformComponent:
+      Translation: [3.75, 11, 12.2600002]
+      Rotation: [89.9999619, 54.2000084, -56.1000061]
+      Scale: [1, 0.99999994, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 2265151452
+    MeshRendererComponent:
+      MeshActive: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 4057542052
+    RigidbodyComponent:
+      Mass: 1
+      Drag: 0
+      AngularDrag: 0.0500000007
+      AutomaticCentreOfMass: true
+      UseGravity: true
+      IsKinematic: false
+      PositionConstraint: [false, false, false]
+      RotationConstraint: [false, false, false]
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
       MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 1872186740
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-70.8000031, -60, 4.9000001]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 0.800172985, 0.514705896, 1]
+      Intensity: 1
   - Entity: 1886447739
     TagComponent:
       Tag: Floor
@@ -151,121 +248,17 @@ Entities:
       Centre: [0, 0, 0]
       Size: [1, 1, 1]
       MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 1872186740
+  - Entity: 2198244872
     TagComponent:
-      Tag: Directional Light
+      Tag: Sphere
     HierarchyComponent:
-      Parent: 4294967295
+      Parent: 2434563685
       Children:
         []
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [-70.8000031, -60, 4.9000001]
-      Scale: [1, 1, 1]
-    DirectionalLightComponent:
-      Active: true
-      Colour: [1, 0.800172985, 0.514705896, 1]
-      Intensity: 1
-  - Entity: 2434563685
-    TagComponent:
-      Tag: Cube
-    HierarchyComponent:
-      Parent: 1461493785
-      Children:
-        - 2198244872
-    TransformComponent:
-      Translation: [3.75, 11, 12.2600002]
-      Rotation: [89.9999619, 54.2000084, -56.1000061]
-      Scale: [1, 0.99999994, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 2265151452
-    MeshRendererComponent:
-      MeshActive: true
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 4057542052
-    RigidbodyComponent:
-      Mass: 1
-      Drag: 0
-      AngularDrag: 0.0500000007
-      AutomaticCentreOfMass: true
-      UseGravity: true
-      IsKinematic: false
-      PositionConstraint: [false, false, false]
-      RotationConstraint: [false, false, false]
-    BoxColliderComponent:
-      IsTrigger: false
-      Centre: [0, 0, 0]
-      Size: [1, 1, 1]
-      MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 1332520780
-    TagComponent:
-      Tag: Main Camera
-    HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        []
-    TransformComponent:
-      Translation: [-84.8492126, 45.923645, -0.153106675]
-      Rotation: [-90.0190964, -79.6849823, 79.7037888]
-      Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        FOV: 60
-        MovementToggle: true
-        MovementSpeed: 10
-        MovementYDamp: 0.649999976
-        MouseSensitivity: 0.100000001
-        MouseToggledOff: false
-        Position: [-84.8492126, 45.923645, -0.153106675]
-        Yaw: 0.00347961485
-        Pitch: -10.3150005
-      Primary: true
-      ClearFlag: Skybox
-      ClearColour: [0.897058845, 0.909169555, 1, 1]
-    SkyboxComponent:
-      MaterialAssetHandle: 1778786993
-  - Entity: 4233385606
-    TagComponent:
-      Tag: Flickering Light
-    HierarchyComponent:
-      Parent: 1886447739
-      Children:
-        []
-    ScriptComponent:
-      Script_1:
-        Active: true
-        Script Name: SandboxProject.LightFlicker
-        Fields:
-          - Name: minIntensity
-            Type: Float
-            Data: 80
-          - Name: maxIntensity
-            Type: Float
-            Data: 100
-          - Name: flickerSpeed
-            Type: Float
-            Data: 10
-    TransformComponent:
-      Translation: [0, 7, 0]
-      Rotation: [0, -0, 0]
-      Scale: [0.049999997, 1, 0.099999994]
-    PointLightComponent:
-      Active: true
-      Colour: [0, 0.0294120312, 1, 1]
-      Radius: 20
-      Intensity: 100
-  - Entity: 534466640
-    TagComponent:
-      Tag: Physics Sphere
-    HierarchyComponent:
-      Parent: 1461493785
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 22.5, 0]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
+      Translation: [-1.19916391, -1.0734992, 5.74615431]
+      Rotation: [-89.9999542, 56.099968, 54.2000465]
+      Scale: [1.00000012, 0.99999994, 0.99999994]
     MeshFilterComponent:
       MeshAssetHandle: 293103916
     MeshRendererComponent:
@@ -273,23 +266,14 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1375892428
-    RigidbodyComponent:
-      Mass: 1
-      Drag: 0
-      AngularDrag: 0.0500000007
-      AutomaticCentreOfMass: true
-      UseGravity: true
-      IsKinematic: false
-      PositionConstraint: [false, false, false]
-      RotationConstraint: [false, false, false]
     SphereColliderComponent:
       IsTrigger: false
       Radius: 0.5
       Centre: [0, 0, 0]
-      MaterialProperties: [0.600000024, 0.600000024, 1]
-  - Entity: 3523803972
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 1637413652
     TagComponent:
-      Tag: Cube_2
+      Tag: Cube_4
     HierarchyComponent:
       Parent: 1461493785
       Children:
@@ -305,9 +289,51 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
-  - Entity: 2539355436
+  - Entity: 1461493785
     TagComponent:
-      Tag: Cube_3
+      Tag: Physics Objects
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 1886447739
+        - 2434563685
+        - 534466640
+        - 3523803972
+        - 1637413652
+        - 2539355436
+        - 872676277
+        - 822114972
+        - 2808962520
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.RandomiseCubeLocations
+        Fields:
+          - Name: cube1
+            Type: Entity
+            Data: 2808962520
+          - Name: cube2
+            Type: Entity
+            Data: 3523803972
+          - Name: cube3
+            Type: Entity
+            Data: 2539355436
+          - Name: cube4
+            Type: Entity
+            Data: 1637413652
+          - Name: cube5
+            Type: Entity
+            Data: 872676277
+          - Name: cube6
+            Type: Entity
+            Data: 822114972
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 2808962520
+    TagComponent:
+      Tag: Cube_1
     HierarchyComponent:
       Parent: 1461493785
       Children:
@@ -323,39 +349,8 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
-  - Entity: 872676277
-    TagComponent:
-      Tag: Cube_5
-    HierarchyComponent:
-      Parent: 1461493785
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 921801044
-    MeshRendererComponent:
-      MeshActive: true
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 13304964
-  - Entity: 822114972
-    TagComponent:
-      Tag: Cube_6
-    HierarchyComponent:
-      Parent: 1461493785
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 921801044
-    MeshRendererComponent:
-      MeshActive: true
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 13304964
+    SphereColliderComponent:
+      IsTrigger: false
+      Radius: 0.5
+      Centre: [0, 0, 0]
+      MaterialProperties: [0.600000024, 0.600000024, 0]

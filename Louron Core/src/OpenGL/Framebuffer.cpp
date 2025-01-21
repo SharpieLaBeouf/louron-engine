@@ -58,11 +58,11 @@ namespace Louron {
 		glBindTexture(GL_TEXTURE_2D, m_DepthTexture);
 		if (multisample) {
 
-			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Config.Samples, GL_DEPTH_COMPONENT, m_Config.Width, m_Config.Height, GL_FALSE);
+			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Config.Samples, GL_DEPTH24_STENCIL8, m_Config.Width, m_Config.Height, GL_FALSE);
 		}
 		else {
 
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_Config.Width, m_Config.Height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, m_Config.Width, m_Config.Height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -77,7 +77,7 @@ namespace Louron {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColourTexture, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, m_EntityUUIDTexture, 0);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_DepthTexture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_DepthTexture, 0);
 
 		// Set the list of draw buffers
 		GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };

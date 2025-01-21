@@ -21,8 +21,10 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 		if (ImGui::MenuItem("Add Camera Component")) {
 			if (!selected_entity.HasComponent<CameraComponent>()) {
 				auto& component = selected_entity.AddComponent<CameraComponent>();
-				component.CameraInstance = std::make_shared<Camera>(selected_entity.GetComponent<TransformComponent>().GetGlobalPosition());
-				component.CameraInstance->UpdateProjMatrix({ scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
+				component.CameraInstance = std::make_shared<SceneCamera>();
+
+				auto& frame_buffer_config = Project::GetActiveScene()->GetSceneFrameBuffer()->GetConfig();
+				component.CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
 			}
 		}
 
@@ -386,38 +388,72 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##CamerComponentChild", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Camera Component", tree_node_flags)) {
 
-			// Embed a button before the text
-			if (ImGui::Button("B")) {
-				// Button action goes here
-			}
-			ImGui::SameLine(); // Align the following text inline with the button
+		if (ImGui::TreeNodeEx("Camera Component", tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<CameraComponent>();
 
 			ImGui::Columns(2, "camera_columns", false);
 			ImGui::SetColumnWidth(-1, first_coloumn_width);
 
+
+			std::array<const char*, 2> camera_projection_types = { "Perspective", "Orthographic" };
+			uint8_t item_current = static_cast<uint8_t>(component.CameraInstance->GetProjectionType());
+			ImGui::Text("Projection Type");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1.0f);
+			if (ImGui::BeginCombo("##CameraProjectTypes", camera_projection_types[item_current])) {
+
+				for (int n = 0; n < camera_projection_types.size(); n++)
+				{
+					const bool is_selected = (item_current == n);
+					if (ImGui::Selectable(camera_projection_types[n], is_selected))
+					{
+						item_current = n;
+						component.CameraInstance->SetProjectionType(static_cast<SceneCamera::ProjectionType>(item_current));
+					}
+
+					// Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+
+				ImGui::EndCombo();
+			}
+			ImGui::NextColumn();
+
 			ImGui::Text("FOV");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1.0f);
-			if (ImGui::DragFloat("##CameraFOV", &component.CameraInstance->FOV, 0.05f, 0.1f, std::numeric_limits<float>::max(), "%.2f"))
-				component.CameraInstance->UpdateProjMatrix({ scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
+			auto& frame_buffer_config = scene_ref->GetSceneFrameBuffer()->GetConfig();
+			float data = glm::degrees(component.CameraInstance->GetPerspectiveVerticalFOV());
+			if (ImGui::DragFloat("##CameraFOV", &data, 0.05f, 0.1f, std::numeric_limits<float>::max(), "%.2f"))
+			{
+				component.CameraInstance->SetPerspectiveVerticalFOV(glm::radians(data));
+				component.CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
+			}
 			ImGui::NextColumn();
 
 			ImGui::Text("Near");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1.0f);
-			if (ImGui::DragFloat("##CameraNear", &component.CameraInstance->NearDistance, 0.05f, 0.1f, std::numeric_limits<float>::max(), "%.2f"))
-				component.CameraInstance->UpdateProjMatrix({ scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
+			data = component.CameraInstance->GetPerspectiveNearClip();
+			if (ImGui::DragFloat("##CameraNear", &data, 0.05f, 0.1f, std::numeric_limits<float>::max(), "%.2f"))
+			{
+				component.CameraInstance->SetPerspectiveNearClip(data);
+				component.CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
+			}
 			ImGui::NextColumn();
 
 			ImGui::Text("Far");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1.0f);
-			if (ImGui::DragFloat("##CameraFar", &component.CameraInstance->FarDistance, 0.05f, 0.1f, std::numeric_limits<float>::max(), "%.2f"))
-				component.CameraInstance->UpdateProjMatrix({ scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
+			data = component.CameraInstance->GetPerspectiveFarClip();
+			if (ImGui::DragFloat("##CameraFar", &data, 0.05f, 0.1f, std::numeric_limits<float>::max(), "%.2f"))
+			{
+				component.CameraInstance->SetPerspectiveFarClip(data);
+				component.CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
+			}
 			ImGui::NextColumn();
 
 			ImGui::Text("Primary");
@@ -426,7 +462,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 			ImGui::NextColumn();
 
 			std::array<const char*, 2> camera_clear_types = { "Colour Only", "Skybox" };
-			uint8_t item_current = static_cast<uint8_t>(component.ClearFlags);
+			item_current = static_cast<uint8_t>(component.ClearFlags);
 			ImGui::Text("Clear Flag");
 			ImGui::NextColumn();
 			ImGui::SetNextItemWidth(-1.0f);

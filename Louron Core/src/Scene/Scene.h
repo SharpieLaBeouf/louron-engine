@@ -1,11 +1,17 @@
 #pragma once
 
 // Louron Core Headers
-#include "../Core/Logging.h"
-#include "../Asset/Asset.h"
-#include "Components/Physics/CollisionCallback.h"
-#include "Components/Components.h"
 #include "OctreeBounds.h"
+
+#include "../Asset/Asset.h"
+
+#include "../Core/Logging.h"
+
+#include "Components/Components.h"
+#include "Components/Physics/CollisionCallback.h"
+
+#include "../Renderer/Camera.h"
+
 
 // C++ Standard Library Headers
 #include <vector>
@@ -97,7 +103,7 @@ namespace Louron {
 		void OnPhysicsStart();
 		void OnPhysicsStop();
 
-		void OnUpdate();
+		void OnUpdate(EditorCamera* editor_camera = nullptr);
 		void OnUpdateGUI();
 
 		void OnFixedUpdate();

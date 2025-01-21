@@ -22,6 +22,7 @@ namespace Louron {
 
 	class Scene;
 	class Entity;
+	class CameraBase;
 	struct Bounds_AABB;
 	struct Bounds_Sphere;
 
@@ -31,7 +32,7 @@ namespace Louron {
 
 		RenderPipeline() = default;
 
-		virtual void OnUpdate();
+		virtual void OnUpdate(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 		virtual void OnStartPipeline(std::shared_ptr<Louron::Scene> scene);
 		virtual void OnStopPipeline();
 
@@ -39,9 +40,11 @@ namespace Louron {
 
 		virtual void UpdateActiveScene(std::shared_ptr<Louron::Scene> scene);
 
+		virtual void RenderFBOQuad() {}
+
 	private:
 
-		void ConductRenderPass(Camera* camera);
+		void ConductRenderPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 
 	protected:
 
@@ -54,11 +57,13 @@ namespace Louron {
 
 		ForwardPlusPipeline() = default;
 
-		void OnUpdate() override;
+		void OnUpdate(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) override;
 		void OnStartPipeline(std::shared_ptr<Louron::Scene> scene) override;
 		void OnStopPipeline() override;
 
 		void OnViewportResize() override;
+
+		void RenderFBOQuad() override;
 
 	private:
 
@@ -67,11 +72,9 @@ namespace Louron {
 		void UpdateSSBOData();
 		void ConductLightFrustumCull();
 		void ConductRenderableFrustumCull();
-		void ConductDepthPass(Camera* camera);
-		void ConductTiledBasedLightCull(Camera* camera);
-		void ConductRenderPass(Camera* camera);
-
-		void RenderFBOQuad();
+		void ConductDepthPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
+		void ConductTiledBasedLightCull(const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
+		void ConductRenderPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 
 		bool IsSphereInsideFrustum(const Bounds_Sphere& bounds, const Frustum& frustum);
 
@@ -86,7 +89,7 @@ namespace Louron {
 
 			GLuint SL_Buffer = -1;
 			GLuint SL_Indices_Buffer = -1;	// Buffer that holds light indices for each tile
-			
+
 			std::unique_ptr<VertexArray> Screen_Quad_VAO;
 
 			GLuint workGroupsX = -1;
@@ -118,7 +121,7 @@ namespace Louron {
 
 		DeferredPipeline() = default;
 
-		void OnUpdate() override;
+		void OnUpdate(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) override;
 		void OnStartPipeline(std::shared_ptr<Louron::Scene> scene) override;
 		void OnStopPipeline() override;
 

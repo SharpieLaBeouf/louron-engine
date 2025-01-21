@@ -2,7 +2,7 @@
 
 // Louron Core Headers
 #include "UUID.h"
-#include "Camera.h"
+#include "../../Renderer/Camera.h"
 
 // C++ Standard Library Headers
 #include <map>
@@ -197,9 +197,9 @@ namespace Louron {
 
 	struct CameraComponent : public Component {
 
-		std::shared_ptr<Camera> CameraInstance = nullptr;
+		std::shared_ptr<SceneCamera> CameraInstance = nullptr;
 		
-        bool Primary = true;
+        bool Primary = false;
 
         CameraClearFlags ClearFlags = CameraClearFlags::COLOUR_ONLY;
         glm::vec4 ClearColour = { 1.0f, 1.0f, 1.0f, 1.0f };
@@ -211,8 +211,39 @@ namespace Louron {
             this->ClearFlags = other.ClearFlags;
             this->ClearColour = other.ClearColour;
 
-            this->CameraInstance = std::make_shared<Camera>(*other.CameraInstance);
+            this->CameraInstance = std::make_shared<SceneCamera>(*other.CameraInstance);
 
+        }
+        CameraComponent(CameraComponent&& other) noexcept {
+            this->Primary = other.Primary; other.Primary = false;
+            this->ClearFlags = other.ClearFlags; other.ClearFlags = CameraClearFlags::COLOUR_ONLY;
+            this->ClearColour = other.ClearColour; other.ClearColour = { 1.0f, 1.0f, 1.0f, 1.0f };
+            this->CameraInstance = std::move(other.CameraInstance); other.CameraInstance = nullptr;
+        }
+        CameraComponent& operator=(const CameraComponent& other) {
+
+            if (this == &other)
+                return *this;
+
+            this->Primary = other.Primary;
+            this->ClearFlags = other.ClearFlags;
+            this->ClearColour = other.ClearColour;
+
+            this->CameraInstance = std::make_shared<SceneCamera>(*other.CameraInstance);
+
+            return *this;
+        }
+        CameraComponent& operator=(CameraComponent&& other) noexcept {
+
+            if (this == &other)
+                return *this;
+
+            this->Primary = other.Primary; other.Primary = false;
+            this->ClearFlags = other.ClearFlags; other.ClearFlags = CameraClearFlags::COLOUR_ONLY;
+            this->ClearColour = other.ClearColour; other.ClearColour = { 1.0f, 1.0f, 1.0f, 1.0f };
+            this->CameraInstance = std::move(other.CameraInstance); other.CameraInstance = nullptr;
+
+            return *this;
         }
 
         void Serialize(YAML::Emitter& out);

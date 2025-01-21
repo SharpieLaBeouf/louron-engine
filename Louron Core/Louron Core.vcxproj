@@ -116,6 +116,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Renderer\Camera.cpp" />
     <ClCompile Include="include\glm\detail\glm.cpp" />
     <ClCompile Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CompilerIdCXX\CMakeCXXCompilerId.cpp" />
     <ClCompile Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CompilerIdC\CMakeCCompilerId.c" />
@@ -155,7 +156,6 @@
     <ClCompile Include="src\Scene\Components\Physics\Collider.cpp" />
     <ClCompile Include="src\Scene\Components\Components.cpp" />
     <ClCompile Include="src\Scene\Components\Mesh.cpp" />
-    <ClCompile Include="src\Scene\Components\Camera.cpp" />
     <ClCompile Include="src\Scene\Components\Physics\CollisionCallback.cpp" />
     <ClCompile Include="src\Scene\Components\Physics\PhysicsWrappers.cpp" />
     <ClCompile Include="src\Scene\Components\Physics\Rigidbody.cpp" />
@@ -177,6 +177,7 @@
     <ClCompile Include="src\Scripting\Script Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Renderer\Camera.h" />
     <ClInclude Include="include\assimp\aabb.h" />
     <ClInclude Include="include\assimp\ai_assert.h" />
     <ClInclude Include="include\assimp\anim.h" />
@@ -746,7 +747,6 @@
     <ClInclude Include="src\OpenGL\Material.h" />
     <ClInclude Include="src\Scene\Components\Mesh.h" />
     <ClInclude Include="src\OpenGL\Vertex Array.h" />
-    <ClInclude Include="src\Scene\Components\Camera.h" />
     <ClInclude Include="src\Scene\Components\Components.h" />
     <ClInclude Include="src\Scene\Entity.h" />
     <ClInclude Include="src\OpenGL\Texture.h" />

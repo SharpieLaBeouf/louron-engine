@@ -1,8 +1,6 @@
 #include "Skybox.h"
 
 // Louron Core Headers
-#include "Camera.h"
-
 #include "../../Debug/Assert.h"
 
 #include "../../Project/Project.h"
@@ -45,7 +43,7 @@ namespace Louron {
 		ConstructSkyboxCubeMap();
 	}
 
-	void SkyboxMaterial::UpdateUniforms(Camera* camera) {
+	void SkyboxMaterial::UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 		if (m_MaterialShader) {
 
@@ -53,11 +51,9 @@ namespace Louron {
 			glBindTexture(GL_TEXTURE_CUBE_MAP, m_SkyboxID);
 			m_MaterialShader->SetInt("u_Skybox", 0);
 
-			if (&camera) {
-				m_MaterialShader->SetMat4("u_VertexIn.Proj", camera->GetProjMatrix());
-				glm::mat4 view = glm::mat4(glm::mat3(camera->GetViewMatrix()));
-				m_MaterialShader->SetMat4("u_VertexIn.View", view);
-			}
+			m_MaterialShader->SetMat4("u_VertexIn.Proj", projection_matrix);
+			glm::mat4 view = glm::mat4(glm::mat3(view_matrix));
+			m_MaterialShader->SetMat4("u_VertexIn.View", view);
 		}
 		else {
 			L_CORE_ERROR("Error Updating Uniforms - Shader Not Found for Skybox Material.");

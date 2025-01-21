@@ -10,7 +10,6 @@
 
     <OutputPath>Binaries</OutputPath>
     <BaseOutputPath>Binaries</BaseOutputPath>
-    <BaseIntermediateOutputPath>Binaries/obj</BaseIntermediateOutputPath>
 
   </PropertyGroup>
 

@@ -12134,15 +12134,10 @@ Entities:
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
+        Projection Type: Perspective
         FOV: 60
-        MovementToggle: true
-        MovementSpeed: 10
-        MovementYDamp: 0.649999976
-        MouseSensitivity: 0.100000001
-        MouseToggledOff: false
-        Position: [-268.882812, 170.979263, -330.799408]
-        Yaw: -320.369843
-        Pitch: -35.0004616
+        Near: 0.01
+        Far: 1000
       Primary: true
       ClearFlag: Skybox
       ClearColour: [1, 0.774509788, 0.774509788, 1]

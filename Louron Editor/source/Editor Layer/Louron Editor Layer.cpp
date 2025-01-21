@@ -110,6 +110,8 @@ void LouronEditorLayer::OnAttach() {
 	m_HierarchyPanel = {};
 	m_ContentBrowserPanel = {};
 	m_ContentBrowserPanel.SetDirectory(Project::GetActiveProject()->GetProjectDirectory() / "Assets");
+
+	m_EditorCamera = std::make_unique<EditorCamera>();
 }
 
 void LouronEditorLayer::OnDetach() {
@@ -119,29 +121,34 @@ void LouronEditorLayer::OnDetach() {
 
 void LouronEditorLayer::OnUpdate() {
 	
+	if (m_SceneWindowFocused && m_SceneState == SceneState::Play) {
+		glfwSetInputMode((GLFWwindow*)Engine::Get().GetWindow().GetNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NoMouse;
+	}
+	else {
+		glfwSetInputMode((GLFWwindow*)Engine::Get().GetWindow().GetNativeWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		ImGui::GetIO().ConfigFlags &= ~ImGuiConfigFlags_NoMouse;
+	}
+
+
 	if (auto scene_ref = Project::GetActiveScene(); scene_ref) {
 
 		scene_ref->OnViewportResize(m_ViewportWindowSize);
 
-		if(m_SceneWindowFocused) {
+		switch (m_SceneState) {
 
-			// Update Camera Component
-			Entity camera_entity = scene_ref->GetPrimaryCameraEntity();
-
-			if (camera_entity) {
-				camera_entity.GetComponent<CameraComponent>().CameraInstance->Update(Time::Get().GetDeltaTime());
-				camera_entity.GetComponent<TransformComponent>().SetPosition(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetGlobalPosition());
-				camera_entity.GetComponent<TransformComponent>().SetForwardDirection(camera_entity.GetComponent<CameraComponent>().CameraInstance->GetCameraDirection());
+			case SceneState::Simulate:
+			case SceneState::Edit: 
+			{
+				m_EditorCamera->SetViewportSize(m_ViewportWindowSize.x, m_ViewportWindowSize.y);
+				m_EditorCamera->OnUpdate();
+				scene_ref->OnUpdate(m_EditorCamera.get());
+				break;
 			}
-
-			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+			
+			case SceneState::Play: scene_ref->OnUpdate(); break;
 
 		}
-		else {
-			glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		}
-
-		scene_ref->OnUpdate();
 	}
 	else {
 
@@ -704,8 +711,10 @@ void LouronEditorLayer::OnScenePlay()
 
 	L_APP_INFO("Starting Scene");
 
+	m_GizmoType = -1;
 	m_SceneState = SceneState::Play;
 	m_EditorScene = Scene::Copy(Project::GetActiveScene());
+	m_SceneWindowFocused = false;
 
 	Project::GetActiveScene()->OnRuntimeStart();
 }
@@ -720,6 +729,7 @@ void LouronEditorLayer::OnSceneStop()
 		Project::GetActiveScene()->OnSimulationStop();
 
 	m_SceneState = SceneState::Edit;
+	m_SceneWindowFocused = false;
 	
 	Louron::UUID selected_uuid = m_SelectedEntity ? m_SelectedEntity.GetUUID() : (Louron::UUID)NULL_UUID;
 	m_SelectedEntity = {};
@@ -770,11 +780,75 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 			return;
 		}
 
-		if (m_SceneWindowFocused != ImGui::IsWindowFocused()) {
-			m_SceneWindowFocused = ImGui::IsWindowFocused();
+		if (ImGui::IsItemClicked() && m_SceneState == SceneState::Play)
+			m_SceneWindowFocused = true;
 
-			scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->MouseToggledOff = m_SceneWindowFocused;
-			scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->ResetMousePosToCurrentPos();
+		if(m_SceneWindowFocused && m_SceneState == SceneState::Play && Engine::Get().GetInput().GetKeyDown(GLFW_KEY_ESCAPE))
+			m_SceneWindowFocused = false;
+
+		bool scene_image_hovered = !ImGui::IsItemHovered();
+
+		// IM GUIZMO
+		Entity selectedEntity = m_SelectedEntity;
+		if (selectedEntity && m_GizmoType != -1 && m_SceneState != SceneState::Play)
+		{
+			ImGuizmo::SetOrthographic(false);
+			ImGuizmo::SetDrawlist();
+			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y,
+				m_ViewportBounds[1].x - m_ViewportBounds[0].x,
+				m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+			// Editor camera
+			const glm::mat4& cameraProjection = m_EditorCamera->GetProjection();
+			glm::mat4 cameraView = m_EditorCamera->GetViewMatrix();
+
+			// Entity transform
+			auto& transform_component = selectedEntity.GetComponent<TransformComponent>();
+			glm::mat4 transform = transform_component.GetGlobalTransform();
+
+			// Snapping
+			bool snap = Engine::Get().GetInput().GetKey(GLFW_KEY_LEFT_CONTROL);
+			float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+			// Snap to 45 degrees for rotation
+			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
+				snapValue = 45.0f;
+
+			float snapValues[3] = { snapValue, snapValue, snapValue };
+
+			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
+				nullptr, snap ? &snapValue : nullptr);
+
+			static glm::mat4 start_transform{};
+			static bool started_using = false;
+			if (ImGuizmo::IsUsing())
+			{
+				if (!started_using) {
+					start_transform = transform_component.GetGlobalTransform();
+					started_using = true;
+				}
+
+				if (Engine::Get().GetInput().GetKeyDown(GLFW_KEY_ESCAPE)) {
+					transform = start_transform;
+					start_transform = {};
+					started_using = false;
+					ImGuizmo::Enable(false);
+				}
+
+				glm::vec3 position, rotation, scale;
+
+				position = TransformComponent::GetPositionFromMatrix(transform);
+				rotation = TransformComponent::GetRotationFromMatrix(transform);
+				scale = TransformComponent::GetScaleFromMatrix(transform);
+
+				transform_component.SetGlobalPosition(position);
+				transform_component.SetGlobalRotation(rotation);
+				transform_component.SetGlobalScale(scale);
+			}
+			else {
+				started_using = false;
+			}
+			ImGuizmo::Enable(true); // Disable ImGuizmo
 		}
 
 		// ----- Draw Scene Control Buttons -----
@@ -821,6 +895,7 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 						OnSceneStop();
 					}
 				}
+				scene_image_hovered = ImGui::IsItemHovered();
 			}
 			ImGui::End();
 		}
@@ -854,6 +929,7 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 
 			}
 			ImGui::End();
+			scene_image_hovered = ImGui::IsItemHovered();
 
 		}
 
@@ -874,58 +950,15 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
 
-		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		if (mouseX >= 0 && mouseY >= 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y && m_SceneState != SceneState::Play && !ImGuizmo::IsUsing() && scene_image_hovered)
 		{
-
-			if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) {
+			if(ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && !ImGui::IsPopupOpen(nullptr, ImGuiPopupFlags_AnyPopup)) {
+				m_GizmoType = ImGuizmo::OPERATION::TRANSLATE;
 				uint32_t pixelData = Project::GetActiveScene()->GetSceneFrameBuffer()->ReadEntityPixelData({ mouseX, mouseY });
 				m_SelectedEntity = pixelData == NULL_UUID ? Entity() : Project::GetActiveScene()->FindEntityByUUID(pixelData);
 			}
 		}
 
-		Entity selectedEntity = m_SelectedEntity;
-		if (selectedEntity && m_GizmoType != -1)
-		{
-			ImGuizmo::SetOrthographic(false);
-			ImGuizmo::SetDrawlist();
-			ImGuizmo::SetRect(	m_ViewportBounds[0].x,  m_ViewportBounds[0].y,
-								m_ViewportBounds[1].x - m_ViewportBounds[0].x,
-								m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
-			// Editor camera
-			const glm::mat4& cameraProjection = scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->GetProjMatrix();
-			glm::mat4 cameraView = scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->GetViewMatrix();
-
-			// Entity transform
-			auto& transform_component = selectedEntity.GetComponent<TransformComponent>();
-			glm::mat4 transform = transform_component.GetGlobalTransform();
-
-			// Snapping
-			bool snap = Engine::Get().GetInput().GetKey(GLFW_KEY_LEFT_CONTROL);
-			float snapValue = 0.5f; // Snap to 0.5m for translation/scale
-			// Snap to 45 degrees for rotation
-			if (m_GizmoType == ImGuizmo::OPERATION::ROTATE)
-				snapValue = 45.0f;
-
-			float snapValues[3] = { snapValue, snapValue, snapValue };
-
-			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-				(ImGuizmo::OPERATION)m_GizmoType, ImGuizmo::LOCAL, glm::value_ptr(transform),
-				nullptr, snap ? &snapValue : nullptr);
-
-			if (ImGuizmo::IsUsing())
-			{
-				glm::vec3 position, rotation, scale;
-
-				position = TransformComponent::GetPositionFromMatrix(transform);
-				rotation = TransformComponent::GetRotationFromMatrix(transform);
-				scale = TransformComponent::GetScaleFromMatrix(transform);
-
-				transform_component.SetGlobalPosition(position);
-				transform_component.SetGlobalRotation(rotation);
-				transform_component.SetGlobalScale(scale);
-			}
-		}
 	}
 	ImGui::End();
 }

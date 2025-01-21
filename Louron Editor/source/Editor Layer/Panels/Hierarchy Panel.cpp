@@ -96,24 +96,26 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 			selected_entity = entity;
 		}
 
-		// Check for double-click
-		if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-			// Call LookAtGlobalPosition with the entity's global position
+		// TODO: REIMPLEMENT 
+		// Check for double-click 
+		//if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+		//	// Call LookAtGlobalPosition with the entity's global position
 
-			glm::vec3 position_to_look_at{};
+		//	glm::vec3 position_to_look_at{};
 
-			// If it is a mesh I'd like to look at the mesh, some meshes have AABBs that are offset from their true transform
-			if (entity.HasComponent<AssetMeshFilter>() && entity.HasComponent<AssetMeshRenderer>()) {
-				position_to_look_at = entity.GetComponent<AssetMeshFilter>().TransformedAABB.Center();
-				scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->LookAtGlobalPosition(position_to_look_at);
-			}
-			else if (entity.GetUUID() != scene_ref->GetPrimaryCameraEntity().GetUUID()) {
-				// Make sure we don't try to look at ourselves lol
-				position_to_look_at = entity.GetComponent<TransformComponent>().GetGlobalPosition();
-				scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->LookAtGlobalPosition(position_to_look_at);
-			}
+		//	// If it is a mesh I'd like to look at the mesh, some meshes have AABBs that are offset from their true transform
+		//	if (entity.HasComponent<AssetMeshFilter>() && entity.HasComponent<AssetMeshRenderer>()) {
 
-		}
+		//		position_to_look_at = entity.GetComponent<AssetMeshFilter>().TransformedAABB.Center();
+		//		scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->LookAtGlobalPosition(position_to_look_at);
+		//	}
+		//	else if (entity.GetUUID() != scene_ref->GetPrimaryCameraEntity().GetUUID()) {
+		//		// Make sure we don't try to look at ourselves lol
+		//		position_to_look_at = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+		//		scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->LookAtGlobalPosition(position_to_look_at);
+		//	}
+
+		//}
 
 		if (ImGui::BeginPopupContextItem())
 		{

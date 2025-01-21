@@ -93,6 +93,11 @@ namespace Louron
                 EngineCallbacks.TransformComponent_GetFront(ID, ref reference);
                 return reference;
             }
+            set
+            {
+                EngineCallbacks.TransformComponent_SetFront(ID, ref value);
+                _rotation = rotation;
+            }
         }
 
         public Vector3 right

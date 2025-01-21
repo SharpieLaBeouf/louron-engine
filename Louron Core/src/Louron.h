@@ -31,7 +31,6 @@
 #include "Scene/OctreeBounds.h"
 #include "Scene/Scene Serializer.h"
 
-#include "Scene/Components/Camera.h"
 #include "Scene/Components/Components.h"
 #include "Scene/Components/Light.h"
 #include "Scene/Components/Mesh.h"
@@ -44,6 +43,7 @@
 #include "Project/Project.h"
 #include "Project/Project Serializer.h"
 
+#include "Renderer/Camera.h"
 #include "Renderer/Renderer.h"
 #include "Renderer/RendererPipeline.h"
 

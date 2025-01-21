@@ -270,8 +270,7 @@ namespace Louron {
 			};
 
 			auto project = Project::GetActiveProject();
-			std::filesystem::path my_path = std::filesystem::relative(project->GetProjectDirectory() / project->GetConfig().AssetDirectory);
-			importAssets(my_path);
+			importAssets(std::filesystem::relative(project->GetProjectDirectory() / project->GetConfig().AssetDirectory));
 
 			// Remove references from old registry that no longer exist
 			const AssetRegistry& newRegistry = newAssetManager->GetAssetRegistry();

@@ -46,7 +46,7 @@ namespace Louron
 
         public static float GetMouseY()
         {
-            return GetMousePosition().X;
+            return GetMousePosition().Y;
         }
 
         public static Vector2 GetMousePosition() {

@@ -2,8 +2,12 @@
 
 // Louron Core Headers
 #include "Project Serializer.h"
+
 #include "../Core/Logging.h"
+
+#include "../Renderer/Camera.h"
 #include "../Renderer/RendererPipeline.h"
+
 #include "../Scene/OctreeBounds.h"
 #include "../Scene/Entity.h"
 #include "../Scripting/Script Manager.h"
@@ -245,7 +249,7 @@ namespace Louron {
 		
 		Entity camera_entity = m_ActiveScene->CreateEntity("Main Camera");
 		auto& camera_component = camera_entity.AddComponent<CameraComponent>();
-		camera_component.CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
+		camera_component.CameraInstance = std::make_shared<SceneCamera>();
 
 		Entity directional_light = m_ActiveScene->CreateEntity("Directional Light");
 		directional_light.GetComponent<TransformComponent>().SetGlobalRotation({30.0f, 50.0f, 0.0f});

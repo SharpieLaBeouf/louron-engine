@@ -6,7 +6,6 @@
 #include "../Debug/Assert.h"
 
 #include "../Project/Project.h"
-#include "../Scene/Components/Camera.h"
 
 // C++ Standard Library Headers
 
@@ -37,7 +36,7 @@ namespace Louron {
 		glUseProgram(0);
 	}
 
-	void Material::UpdateUniforms(const Camera& camera) {
+	void Material::UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 		if (m_Shader) {
 			m_Shader->SetFloat("u_Material.shine", m_Shine);
@@ -51,11 +50,9 @@ namespace Louron {
 				glBindTexture(GL_TEXTURE_2D, m_Textures[i]->GetID());
 			}
 
-			if (&camera != nullptr) {
-				m_Shader->SetMat4("u_VertexIn.Proj", camera.GetProjMatrix());
-				m_Shader->SetMat4("u_VertexIn.View", camera.GetViewMatrix());
-				m_Shader->SetVec3("u_CameraPos", camera.GetGlobalPosition());
-			}
+			m_Shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+			m_Shader->SetMat4("u_VertexIn.View", view_matrix);
+			m_Shader->SetVec3("u_CameraPos", camera_position);
 		}
 		else {
 			L_CORE_ERROR("Shader Not Found for Material: {0}", GetName());
@@ -180,7 +177,7 @@ namespace Louron {
 		glUseProgram(0);
 	}
 
-	void PBRMaterial::UpdateUniforms(const Camera& camera) {
+	void PBRMaterial::UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 		if (auto shader_ref = m_Shader.lock(); shader_ref) {
 
@@ -208,11 +205,9 @@ namespace Louron {
 				texture_ref->Bind();
 			}
 
-			if (&camera) {
-				shader_ref->SetMat4("u_VertexIn.Proj", camera.GetProjMatrix());
-				shader_ref->SetMat4("u_VertexIn.View", camera.GetViewMatrix());
-				shader_ref->SetVec3("u_CameraPos", camera.GetGlobalPosition());
-			}
+			shader_ref->SetMat4("u_VertexIn.Proj", projection_matrix);
+			shader_ref->SetMat4("u_VertexIn.View", view_matrix);
+			shader_ref->SetVec3("u_CameraPos", camera_position);
 		}
 		else {
 			L_CORE_ERROR("Shader Not Found for PBR Material: {0}", GetName());

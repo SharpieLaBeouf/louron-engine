@@ -39,7 +39,7 @@ namespace Louron {
 
 		void SetSkyboxFaceTexture(const L_SKYBOX_BINDING& binding, const AssetHandle& texture_asset_handle);
 
-		void UpdateUniforms(Camera* camera);
+		void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) override;
 
 		virtual AssetType GetType() const override { return AssetType::Material_Skybox; }
 

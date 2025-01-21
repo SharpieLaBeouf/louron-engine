@@ -204,7 +204,7 @@ vec3 CalcDirLights(vec3 normal, vec3 view_direction, vec3 albedo, float metallic
 vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo, float metallic, float roughness);
 vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo, float metallic, float roughness);
 
-float Attenuation_InverseSquareLawWithFalloff(float light_intensity, float light_radius, float distance_from_light) {
+float Attenuation_InverseSquareLawWithFalloff(float light_radius, float distance_from_light) {
     float attenuation = 1.0 / (distance_from_light * distance_from_light); // Inverse square law
 
     // Normalize the distance to the light radius and create a smooth falloff
@@ -216,11 +216,11 @@ float Attenuation_InverseSquareLawWithFalloff(float light_intensity, float light
         attenuation *= smooth_falloff;
     }
 
-    return light_intensity * attenuation;
+    return attenuation;
 }
 
-float Attenuation_QuadraticWithFalloff(float light_intensity, float light_radius, float distance_from_light) {
-    return light_intensity * pow(max(1.0 - abs(distance_from_light) / light_radius, 0.0), 2.0);
+float Attenuation_QuadraticWithFalloff(float light_radius, float distance_from_light) {
+    return pow(max(1.0 - abs(distance_from_light) / light_radius, 0.0), 2.0);
 }
 
 void main() {
@@ -247,7 +247,8 @@ void main() {
     result += CalcSpotLights(normal, fragment_in.TangentFragPos, view_direction, albedo, metallic, roughness);
     
     // HDR
-    result = result / (result + vec3(1.0));
+    //result = result / (result + vec3(1.0)); // Reinhard Tone Mapping
+    result = vec3(1.0) - exp(-result * 5.0); // Exposure Tone Mapping
 
     // Gamma correction
     result = pow(result, vec3(1.0/2.2)); 
@@ -328,7 +329,7 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo
             vec3 light_direction = normalize(tang_light_pos - fragPos);
            
             vec3 radiance = light.colour.rgb * light.intensity;
-            float attenuation = Attenuation_InverseSquareLawWithFalloff(light.intensity, light.radius, dist);
+            float attenuation = Attenuation_InverseSquareLawWithFalloff(light.radius, dist);
             
             // Cook-Torrance BRDF
             vec3 halfway_direction = normalize(light_direction + view_direction);
@@ -404,7 +405,7 @@ vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo,
                 // Calculate the spotlight intensity based on the angle factor
                 float spot_light_intensity = light.intensity * angle_factor;
 
-                float attenuation = Attenuation_InverseSquareLawWithFalloff(spot_light_intensity, light.range, dist);
+                float attenuation = Attenuation_InverseSquareLawWithFalloff(light.range, dist);
 
                 vec3 radiance = light.colour.rgb * spot_light_intensity;
                 

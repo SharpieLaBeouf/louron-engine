@@ -127,6 +127,7 @@
     <None Include="assets\Shaders\Forward+\FP_Material_Shader.glsl">
       <FileType>Document</FileType>
     </None>
+    <None Include="Sandbox Project\Assets\Shaders\Stencil Outline Shader.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

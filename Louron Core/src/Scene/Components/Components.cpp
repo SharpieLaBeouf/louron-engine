@@ -7,7 +7,6 @@
 
 #include "Physics/Collider.h"
 #include "Physics/Rigidbody.h"
-#include "Camera.h"
 #include "Light.h"
 #include "Mesh.h"
 #include "Skybox.h"
@@ -1347,24 +1346,19 @@ namespace Louron {
                 out << YAML::Key << "Camera" << YAML::Value;
                 out << YAML::BeginMap;
                 {
-
-                    out << YAML::Key << "FOV" << YAML::Value << CameraInstance->FOV;
-                    out << YAML::Key << "MovementToggle" << YAML::Value << CameraInstance->m_Movement;
-                    out << YAML::Key << "MovementSpeed" << YAML::Value << CameraInstance->MovementSpeed;
-                    out << YAML::Key << "MovementYDamp" << YAML::Value << CameraInstance->MovementYDamp;
-                    out << YAML::Key << "MouseSensitivity" << YAML::Value << CameraInstance->MouseSensitivity;
-                    out << YAML::Key << "MouseToggledOff" << YAML::Value << CameraInstance->MouseToggledOff;
-
-                    glm::vec3 v = CameraInstance->GetGlobalPosition();
-                    out << YAML::Key << "Position" << YAML::Value << YAML::Flow
-                        << YAML::BeginSeq
-                        << v.x
-                        << v.y
-                        << v.z
-                        << YAML::EndSeq;
-
-                    out << YAML::Key << "Yaw" << YAML::Value << CameraInstance->GetYaw();
-                    out << YAML::Key << "Pitch" << YAML::Value << CameraInstance->GetPitch();
+                    const char* type_string = (CameraInstance->GetProjectionType() == SceneCamera::ProjectionType::Perspective) ? "Perspective" : "Orthographic";
+                    out << YAML::Key << "Projection Type" << YAML::Value << type_string;
+                    if (type_string == "Perspective")
+                    {
+                        out << YAML::Key << "FOV" << YAML::Value << glm::degrees(CameraInstance->GetPerspectiveVerticalFOV());
+                        out << YAML::Key << "Near" << YAML::Value << CameraInstance->GetPerspectiveNearClip();
+                        out << YAML::Key << "Far" << YAML::Value << CameraInstance->GetPerspectiveFarClip();
+                    }
+                    else {
+                        out << YAML::Key << "FOV" << YAML::Value << CameraInstance->GetOrthographicSize();
+                        out << YAML::Key << "Near" << YAML::Value << CameraInstance->GetOrthographicNearClip();
+                        out << YAML::Key << "Far" << YAML::Value << CameraInstance->GetOrthographicFarClip();
+                    }
                 }
                 out << YAML::EndMap;
             }
@@ -1395,75 +1389,51 @@ namespace Louron {
         if (component["Camera"]) {
             YAML::Node cameraNode = component["Camera"];
 
-            if (cameraNode["FOV"]) {
-                float temp = cameraNode["FOV"].as<float>();
-                CameraInstance->FOV = cameraNode["FOV"].as<float>();
-            }
-            else {
-                return false;
-            }
+            if (cameraNode["Projection Type"] && cameraNode["Projection Type"].as<std::string>() == "Perspective")
+            {
+                CameraInstance->SetProjectionType(SceneCamera::ProjectionType::Perspective);
 
-            if (cameraNode["MovementToggle"]) {
-                CameraInstance->m_Movement = cameraNode["MovementToggle"].as<bool>();
-            }
-            else {
-                return false;
-            }
-
-            if (cameraNode["MovementSpeed"]) {
-                CameraInstance->MovementSpeed = cameraNode["MovementSpeed"].as<float>();
-            }
-            else {
-                return false;
-            }
-
-            if (cameraNode["MovementYDamp"]) {
-                CameraInstance->MovementYDamp = cameraNode["MovementYDamp"].as<float>();
-            }
-            else {
-                return false;
-            }
-
-            if (cameraNode["MouseSensitivity"]) {
-                CameraInstance->MouseSensitivity = cameraNode["MouseSensitivity"].as<float>();
-            }
-            else {
-                return false;
-            }
-
-            if (cameraNode["MouseToggledOff"]) {
-                CameraInstance->MouseToggledOff = cameraNode["MouseToggledOff"].as<bool>();
-            }
-            else {
-                return false;
-            }
-
-            if (cameraNode["Position"]) {
-                auto positionSeq = cameraNode["Position"];
-                if (positionSeq.IsSequence() && positionSeq.size() == 3) {
-                    glm::vec3 position{};
-                    position.x = positionSeq[0].as<float>();
-                    position.y = positionSeq[1].as<float>();
-                    position.z = positionSeq[2].as<float>();
-                    CameraInstance->SetPosition(position);
+                if (cameraNode["FOV"]) {
+                    CameraInstance->SetPerspectiveVerticalFOV(glm::radians(cameraNode["FOV"].as<float>()));
+                }
+                else {
+                    return false;
+                }
+                if (cameraNode["Near"]) {
+                    CameraInstance->SetPerspectiveNearClip(cameraNode["Near"].as<float>());
+                }
+                else {
+                    return false;
+                }
+                if (cameraNode["Far"]) {
+                    CameraInstance->SetPerspectiveFarClip(cameraNode["Far"].as<float>());
                 }
                 else {
                     return false;
                 }
             }
-            else {
-                return false;
-            }
+            else if (cameraNode["Projection Type"] && cameraNode["Projection Type"].as<std::string>() == "Orthographic")
+            {
+                CameraInstance->SetProjectionType(SceneCamera::ProjectionType::Orthographic);
 
-            if (cameraNode["Yaw"]) {
-                CameraInstance->SetYaw(cameraNode["Yaw"].as<float>());
-            }
-            else {
-                return false;
-            }
-
-            if (cameraNode["Pitch"]) {
-                CameraInstance->SetPitch(cameraNode["Pitch"].as<float>());
+                if (cameraNode["FOV"]) {
+                    CameraInstance->SetOrthographicSize(cameraNode["FOV"].as<float>());
+                }
+                else {
+                    return false;
+                }
+                if (cameraNode["Near"]) {
+                    CameraInstance->SetOrthographicNearClip(cameraNode["Near"].as<float>());
+                }
+                else {
+                    return false;
+                }
+                if (cameraNode["Far"]) {
+                    CameraInstance->SetOrthographicFarClip(cameraNode["Far"].as<float>());
+                }
+                else {
+                    return false;
+                }
             }
             else {
                 return false;

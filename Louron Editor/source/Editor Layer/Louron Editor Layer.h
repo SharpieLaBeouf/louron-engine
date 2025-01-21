@@ -35,6 +35,8 @@ private:
 
 	Louron::Entity m_SelectedEntity;
 
+	std::unique_ptr<Louron::EditorCamera> m_EditorCamera = nullptr;
+
 	std::shared_ptr<Louron::Texture> m_IconPlay, m_IconPause, m_IconStep, m_IconSimulate, m_IconStop;
 
 	// This is the scene that is copied before runtime starts

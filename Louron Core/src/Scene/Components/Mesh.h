@@ -1,8 +1,6 @@
 #pragma once
 
 // Louron Core Headers
-#include "Camera.h"
-
 #include "../../Core/Engine.h"
 
 #include "../../OpenGL/Texture.h"

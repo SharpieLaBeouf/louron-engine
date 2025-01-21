@@ -92,6 +92,9 @@ namespace Louron
 
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void TransformComponent_SetFront(uint entityID, ref Vector3 reference);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void TransformComponent_GetFront(uint entityID, ref Vector3 reference);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]

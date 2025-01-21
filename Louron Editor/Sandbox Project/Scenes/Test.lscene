@@ -1,0 +1,39 @@
+Scene Name: Test
+Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
+Scene Pipeline Type: 1
+Entities:
+  - Entity: 64713900
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [30, 50, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Intensity: 1
+  - Entity: 2006140417
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        Projection Type: Perspective
+        FOV: 60
+        Near: 0.01
+        Far: 1000
+      Primary: true
+      ClearFlag: Colour
+      ClearColour: [1, 1, 1, 1]

@@ -155,11 +155,11 @@ namespace Louron {
 		
 #pragma region ForwardPipeline
 
-	void RenderPipeline::OnUpdate() { 
-	
+	void RenderPipeline::OnUpdate(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix)
+	{
 	}
 
-	void RenderPipeline::OnStartPipeline(std::shared_ptr<Louron::Scene> scene) { 
+	void RenderPipeline::OnStartPipeline(std::shared_ptr<Louron::Scene> scene) {
 		m_Scene = scene; 
 	}
 
@@ -184,7 +184,7 @@ namespace Louron {
 
 	}
 
-	void RenderPipeline::ConductRenderPass(Camera* camera) {
+	void RenderPipeline::ConductRenderPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 
 	}
@@ -197,7 +197,7 @@ namespace Louron {
 	/// This is the main loop for rendering logic
 	/// in the Forward+ Pipeline.
 	/// </summary>
-	void ForwardPlusPipeline::OnUpdate() {
+	void ForwardPlusPipeline::OnUpdate(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 		L_PROFILE_SCOPE("Forward Plus");
 
@@ -206,134 +206,116 @@ namespace Louron {
 		if (!scene_ref) {
 			L_CORE_ERROR("Invalid Scene! Please Use ForwardPlusPipeline::OnStartPipeline() Before Updating");
 			Renderer::ClearColour({ 0.0f, 0.0f, 0.0f, 1.0f });
-			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			return;
 		}
 
-		Camera* camera = nullptr;
-		Entity camera_entity = scene_ref->GetPrimaryCameraEntity();
-		if (camera_entity) camera = camera_entity.GetComponent<CameraComponent>().CameraInstance.get();
+		Renderer::ClearRenderStats();
 
-		if (camera) {
+		// 1. SCENE FRUSTUM CULLING
+		{
+			L_PROFILE_SCOPE("Forward Plus - Frustum Culling");
 
-			Renderer::ClearRenderStats();
+			// Recalculate Camera Frustum
+			FP_Data.Camera_Frustum.RecalculateFrustum(projection_matrix * view_matrix);
 
-			// 1. SCENE FRUSTUM CULLING
-			{
-				L_PROFILE_SCOPE("Forward Plus - Frustum Culling");
+			// Wait for Octree Update Thread
+			if (FP_Data.OctreeUpdateThread.joinable()) {
+				L_PROFILE_SCOPE("Forward Plus - Octree Thread Wait");
+				FP_Data.OctreeUpdateThread.join();
+			}
 
-				// Recalculate Camera Frustum
-				FP_Data.Camera_Frustum.RecalculateFrustum(camera->GetProjMatrix() * camera->GetViewMatrix());
+			// Gather All Point and Spot Lights Visible in Camera Frustum
+			FP_Data.PLEntities.clear();
+			FP_Data.SLEntities.clear();
+			ConductLightFrustumCull();
 
-				// Wait for Octree Update Thread
-				if (FP_Data.OctreeUpdateThread.joinable()) {
-					L_PROFILE_SCOPE("Forward Plus - Octree Thread Wait");
-					FP_Data.OctreeUpdateThread.join();
-				}
+			// Gather All Meshes Visible in Camera Frustum
+			ConductRenderableFrustumCull();
 
-				// Gather All Point and Spot Lights Visible in Camera Frustum
-				FP_Data.PLEntities.clear();
-				FP_Data.SLEntities.clear();
-				ConductLightFrustumCull();
+			// Dispatch Thread
+			FP_Data.OctreeUpdateThread = std::thread([&]() -> void {
 
-				// Gather All Meshes Visible in Camera Frustum
-				ConductRenderableFrustumCull();
+				auto oct_scene_ref = m_Scene.lock();
 
-				// Dispatch Thread
-				FP_Data.OctreeUpdateThread = std::thread([&]() -> void {
-
-					auto oct_scene_ref = m_Scene.lock();
-
-					L_PROFILE_SCOPE("Forward Plus - Octree Update");
+				L_PROFILE_SCOPE("Forward Plus - Octree Update");
 					
-					if (auto oct_ref = oct_scene_ref->GetOctree().lock(); oct_ref) {
+				if (auto oct_ref = oct_scene_ref->GetOctree().lock(); oct_ref) {
 
-						std::unique_lock lock(oct_ref->GetOctreeMutex());
+					std::unique_lock lock(oct_ref->GetOctreeMutex());
 						
-						// Check which objects are no longer in the scene
-						const auto& octree_data_sources = oct_ref->GetAllOctreeDataSources();
-						std::vector<Entity> remove_entities{};
-						for (const auto& data_source : octree_data_sources) {
+					// Check which objects are no longer in the scene
+					const auto& octree_data_sources = oct_ref->GetAllOctreeDataSources();
+					std::vector<Entity> remove_entities{};
+					for (const auto& data_source : octree_data_sources) {
 
-							if (oct_scene_ref->HasEntity(data_source->Data)) {
-								Entity entity = data_source->Data;
-								if (!entity.HasComponent<AssetMeshFilter>() || !entity.HasComponent<AssetMeshRenderer>()) {
-									remove_entities.push_back(entity);
-								}
-							}
-							else {
-								remove_entities.push_back(data_source->Data);
+						if (oct_scene_ref->HasEntity(data_source->Data)) {
+							Entity entity = data_source->Data;
+							if (!entity.HasComponent<AssetMeshFilter>() || !entity.HasComponent<AssetMeshRenderer>()) {
+								remove_entities.push_back(entity);
 							}
 						}
+						else {
+							remove_entities.push_back(data_source->Data);
+						}
+					}
 
-						for (const auto& entity : remove_entities) 
-							oct_ref->Remove(entity);
+					for (const auto& entity : remove_entities) 
+						oct_ref->Remove(entity);
 
-						oct_ref->TryShrinkOctree();
-						auto mesh_view = oct_scene_ref->GetAllEntitiesWith<AssetMeshRenderer, AssetMeshFilter>();
-						for (const auto& entity_handle : mesh_view) {
+					oct_ref->TryShrinkOctree();
+					auto mesh_view = oct_scene_ref->GetAllEntitiesWith<AssetMeshRenderer, AssetMeshFilter>();
+					for (const auto& entity_handle : mesh_view) {
 
-							auto& component = mesh_view.get<AssetMeshFilter>(entity_handle);
+						auto& component = mesh_view.get<AssetMeshFilter>(entity_handle);
 
-							if (component.MeshFilterAssetHandle == NULL_UUID)
-								continue;
+						if (component.MeshFilterAssetHandle == NULL_UUID)
+							continue;
 
-							if (component.AABBNeedsUpdate) {
-								component.UpdateTransformedAABB();
-							}
+						if (component.AABBNeedsUpdate) {
+							component.UpdateTransformedAABB();
+						}
 
-							if (component.OctreeNeedsUpdate) {
-								if (oct_ref->Update({ entity_handle, oct_scene_ref.get() }, component.TransformedAABB))
-									component.OctreeNeedsUpdate = false;
-								else {
-									L_CORE_WARN("Could Not Be Inserted Into Octree - Deleting Entity: {0}", component.GetEntity().GetName());
-									oct_scene_ref->DestroyEntity({ entity_handle, oct_scene_ref.get() });
-								}
+						if (component.OctreeNeedsUpdate) {
+							if (oct_ref->Update({ entity_handle, oct_scene_ref.get() }, component.TransformedAABB))
+								component.OctreeNeedsUpdate = false;
+							else {
+								L_CORE_WARN("Could Not Be Inserted Into Octree - Deleting Entity: {0}", component.GetEntity().GetName());
+								oct_scene_ref->DestroyEntity({ entity_handle, oct_scene_ref.get() });
 							}
 						}
 					}
-				});
-			}
-
-			// 2. RENDERING
-			{
-				L_PROFILE_SCOPE("Forward Plus - Rendering");
-				UpdateSSBOData();
-
-				// Bind FBO and clear color and depth buffers for the new frame
-				scene_ref->GetSceneFrameBuffer()->Bind();
-				Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-				
-				glPolygonMode(GL_FRONT_AND_BACK, FP_Data.ShowWireframe ? GL_LINE : GL_FILL);
-
-				ConductDepthPass(camera);
-				ConductTiledBasedLightCull(camera);
-
-				glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
-				Renderer::ClearColour(camera_entity.GetComponent<CameraComponent>().ClearColour);
-				Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT);
-
-				ConductRenderPass(camera);
-
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-				// Unbind FBO to render to the screen
-				scene_ref->GetSceneFrameBuffer()->Unbind();
-
-				// Clear the standard OpenGL back buffer
-				Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-				if (scene_ref->GetSceneFrameBuffer()->GetConfig().RenderToScreen)
-					RenderFBOQuad();
-			}
+				}
+			});
 		}
-		else {
-			L_CORE_WARN("No Primary Camera Found in Scene");
+
+		// 2. RENDERING
+		{
+			L_PROFILE_SCOPE("Forward Plus - Rendering");
+			UpdateSSBOData();
+
+			// Bind FBO and clear color and depth buffers for the new frame
 			scene_ref->GetSceneFrameBuffer()->Bind();
-			Renderer::ClearColour({ 0.0f, 0.0f, 0.0f, 1.0f });
-			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+				
+			glPolygonMode(GL_FRONT_AND_BACK, FP_Data.ShowWireframe ? GL_LINE : GL_FILL);
+
+			ConductDepthPass(camera_position, projection_matrix, view_matrix);
+			ConductTiledBasedLightCull(projection_matrix, view_matrix);
+
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
+
+			Entity camera_entity = scene_ref->GetPrimaryCameraEntity();
+			Renderer::ClearColour(camera_entity ? camera_entity.GetComponent<CameraComponent>().ClearColour : glm::vec4(49.0f, 77.0f, 121.0f, 1.0f));
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT);
+			
+			ConductRenderPass(camera_position, projection_matrix, view_matrix);
+			
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+			// Unbind FBO to render to the screen
 			scene_ref->GetSceneFrameBuffer()->Unbind();
+
 		}
 	}
 
@@ -346,6 +328,7 @@ namespace Louron {
 		// ConductRenderPass, so we use LEQUAL  to ensure that fragments are not discarded because 
 		// the depth values from the depth pass will be EQUAL to the depth values in the render pass
 		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_STENCIL_TEST);
 		glEnable(GL_CULL_FACE);
 		glDepthFunc(GL_LEQUAL); 
 
@@ -374,15 +357,20 @@ namespace Louron {
 
 			auto& camera_component = cameraEntity.GetComponent<CameraComponent>();
 
-			if(!camera_component.CameraInstance)
-				camera_component.CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
+			if (!camera_component.CameraInstance) {
+				cameraEntity.GetComponent<CameraComponent>().CameraInstance = std::make_shared<SceneCamera>();
 
-			camera_component.CameraInstance->UpdateProjMatrix();
+				auto& frame_buffer_config = scene_ref->GetSceneFrameBuffer()->GetConfig();
+				cameraEntity.GetComponent<CameraComponent>().CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
+			}
 		}
 		else {
 			cameraEntity = scene_ref->CreateEntity("Main Camera");
 			cameraEntity.AddComponent<CameraComponent>();
-			cameraEntity.GetComponent<CameraComponent>().CameraInstance = std::make_shared<Louron::Camera>(glm::vec3(0.0f, 10.0f, -10.0f));
+			cameraEntity.GetComponent<CameraComponent>().CameraInstance = std::make_shared<SceneCamera>();
+
+			auto& frame_buffer_config = scene_ref->GetSceneFrameBuffer()->GetConfig();
+			cameraEntity.GetComponent<CameraComponent>().CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
 		}
 
 		// Calculate workgroups and generate SSBOs from screen size
@@ -470,6 +458,7 @@ namespace Louron {
 
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_STENCIL_TEST);
 		
 		glDeleteBuffers(1, &FP_Data.PL_Buffer);
 		glDeleteBuffers(1, &FP_Data.PL_Indices_Buffer);
@@ -497,15 +486,16 @@ namespace Louron {
 		if (!scene_ref) {
 			L_CORE_ERROR("Invalid Scene! Please Use ForwardPlusPipeline::OnStartPipeline() Before Updating Viewport");
 			Renderer::ClearColour({ 1.0f, 1.0f, 1.0f, 1.0f });
-			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 			return;
 		}
 
 		// Update Projection Matrix of All Scene Cameras
 		auto camera_view = scene_ref->GetAllEntitiesWith<CameraComponent>();
+		auto& size = scene_ref->GetSceneFrameBuffer()->GetConfig();
 		for (const auto& entity : camera_view) {
 			if (auto cam_ref = camera_view.get<CameraComponent>(entity).CameraInstance; cam_ref) {
-				cam_ref->UpdateProjMatrix(glm::ivec2(scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height));
+				cam_ref->SetViewportSize(size.Width, size.Height);
 			}
 		}
 
@@ -771,7 +761,7 @@ namespace Louron {
 	/// running at the Hz rate of the monitor. 
 	/// 
 	/// </summary>
-	void ForwardPlusPipeline::ConductDepthPass(Camera* camera) {
+	void ForwardPlusPipeline::ConductDepthPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 		L_PROFILE_SCOPE("Forward Plus - Depth Pass");
 
@@ -787,8 +777,6 @@ namespace Louron {
 		// Key #1 - Distance - Value UUID of Entities that have submeshes
 		std::vector<std::tuple<float, UUID, std::shared_ptr<SubMesh>>> sorted_entities;
 
-		const glm::vec3& cam_position = camera->GetGlobalPosition();
-
 		if (!FP_Data.RenderableEntities.empty()) {
 
 			for (auto& entity : FP_Data.RenderableEntities) {
@@ -801,7 +789,7 @@ namespace Louron {
 					continue;
 
 				const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
-				float distance = glm::length(objectPosition - cam_position);
+				float distance = glm::length(objectPosition - camera_position);
 
 				for (std::shared_ptr<SubMesh> sub_mesh : asset_mesh->SubMeshes) {
 					sorted_entities.emplace_back(distance, entity.GetUUID(), sub_mesh);
@@ -817,8 +805,8 @@ namespace Louron {
 			if (std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth"); shader) {
 
 				shader->Bind();
-				shader->SetMat4("u_Proj", camera->GetProjMatrix());
-				shader->SetMat4("u_View", camera->GetViewMatrix());
+				shader->SetMat4("u_Proj", projection_matrix);
+				shader->SetMat4("u_View", view_matrix);
 
 				for (auto& [distance, entity_uuid, sub_mesh] : sorted_entities) {
 					shader->SetMat4("u_Model", scene_ref->FindEntityByUUID(entity_uuid).GetComponent<TransformComponent>().GetGlobalTransform());
@@ -841,7 +829,7 @@ namespace Louron {
 	/// Conducts main tiled rendering algorithm, split screen into tiles
 	/// and determine which lights impact each tile frustum.
 	/// </summary>
-	void ForwardPlusPipeline::ConductTiledBasedLightCull(Camera* camera) {
+	void ForwardPlusPipeline::ConductTiledBasedLightCull(const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 		auto scene_ref = m_Scene.lock();
 
@@ -854,11 +842,14 @@ namespace Louron {
 		// Conduct Light Cull
 		std::shared_ptr<Shader> lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
 		if (lightCull) {
+
 			lightCull->Bind();
 
-			lightCull->SetMat4("u_View", camera->GetViewMatrix());
-			lightCull->SetMat4("u_Proj", camera->GetProjMatrix());
-			lightCull->SetiVec2("u_ScreenSize", glm::ivec2(scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height));
+			lightCull->SetMat4("u_View", view_matrix);
+			lightCull->SetMat4("u_Proj", projection_matrix);
+			
+			auto& size = scene_ref->GetSceneFrameBuffer()->GetConfig();
+			lightCull->SetiVec2("u_ScreenSize", glm::ivec2(size.Width, size.Height));
 
 			// Bind depth to texture 4 so this does not interfere with any diffuse, normal, or specular textures used 
 			glActiveTexture(GL_TEXTURE4);
@@ -884,7 +875,7 @@ namespace Louron {
 	/// drawn as instances if the meshes are identical using the same
 	/// material.
 	/// </summary>
-	void ForwardPlusPipeline::ConductRenderPass(Camera* camera) {
+	void ForwardPlusPipeline::ConductRenderPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 		L_PROFILE_SCOPE("Forward Plus - Render Pass");
 
@@ -898,6 +889,7 @@ namespace Louron {
 		//// Render All MeshComponents in Scene
 
 		if (!FP_Data.RenderableEntities.empty()) {
+
 
 			// Key #1 = Material Asset ID
 			// Key #2 = SubMesh Pointer
@@ -914,8 +906,8 @@ namespace Louron {
 			{
 				debug_line_shader->Bind();
 				debug_line_shader->SetVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
-				debug_line_shader->SetMat4("u_VertexIn.Proj", camera->GetProjMatrix());
-				debug_line_shader->SetMat4("u_VertexIn.View", camera->GetViewMatrix());
+				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
 				debug_line_shader->SetBool("u_UseInstanceData", false);
 			}
 
@@ -961,7 +953,7 @@ namespace Louron {
 					continue;
 
 				auto shader = material_asset->GetShader();
-				material_asset->UpdateUniforms(*camera);
+				material_asset->UpdateUniforms(camera_position, projection_matrix, view_matrix);
 
 				// Update Specific Forward Plus Uniforms
 				shader->SetInt("u_TilesX", FP_Data.workGroupsX);
@@ -1011,8 +1003,8 @@ namespace Louron {
 
 						skybox.Bind();
 						if (mat_ref->Bind()) {
-
-							mat_ref->UpdateUniforms(camera);
+							CameraBase temp_camera(projection_matrix, view_matrix);
+							mat_ref->UpdateUniforms(camera_position, projection_matrix, view_matrix);
 							Renderer::DrawSkybox(skybox);
 							mat_ref->UnBind();
 						}
@@ -1031,8 +1023,8 @@ namespace Louron {
 			if (debug_line_shader) {
 				debug_line_shader->Bind();
 				debug_line_shader->SetVec4("u_LineColor", { 1.0f, 0.0f, 0.0f, 1.0f });
-				debug_line_shader->SetMat4("u_VertexIn.Proj", camera->GetProjMatrix());
-				debug_line_shader->SetMat4("u_VertexIn.View", camera->GetViewMatrix());
+				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
 				debug_line_shader->SetBool("u_UseInstanceData", true);
 			}
 
@@ -1041,8 +1033,8 @@ namespace Louron {
 			if (debug_line_shader) {
 				debug_line_shader->Bind();
 				debug_line_shader->SetVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
-				debug_line_shader->SetMat4("u_VertexIn.Proj", camera->GetProjMatrix());
-				debug_line_shader->SetMat4("u_VertexIn.View", camera->GetViewMatrix());
+				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
 				debug_line_shader->SetBool("u_UseInstanceData", true);
 			}
 
@@ -1114,11 +1106,104 @@ namespace Louron {
 		return true; // Sphere is inside or intersecting the frustum
 	}
 
+	// POINT LIGHT SHADOW SYSTEM IDEA
+	/* 
+	*	
+	*	Create Cube Map Array
+	*	Allocate a cube map array large enough to hold the shadow maps for all shadow-casting lights.
+	*	
+	*		GLuint cubeMapArray;
+	*		glGenTextures(1, &cubeMapArray);
+	*		glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, cubeMapArray);
+	*	
+	*		// Allocate storage for the cube map array
+	*		int shadowResolution = 1024; // Shadow map resolution
+	*		int numShadowCastingLights = visibleLights.size(); // Number of shadow-casting lights
+	*		glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24, 
+	*					   shadowResolution, shadowResolution, numShadowCastingLights * 6);
+	*	
+	*		// Configure texture parameters
+	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	*	
+	*	---------------------------------------------------------------------------------------------------------------
+	*
+	*	4. Render Shadows for Each Light
+	*	4.1 Loop Through Lights
+	*	For each shadow-casting light:
+	*	
+	*	Gather entities within the light's range by checking if their AABBs intersect with the light's bounds.
+	*	Render shadow maps directly into the cube map array.
+	*	4.2 Render to Cube Map Array
+	*	Bind the cube map array and set up rendering for the specific light:
+	*	
+	*		GLuint framebuffer;
+	*		glGenFramebuffers(1, &framebuffer);
+	*	
+	*		for (int lightIndex = 0; lightIndex < visibleLights.size(); ++lightIndex) {
+	*			auto& light = visibleLights[lightIndex];
+	*	
+	*			// Bind the framebuffer
+	*			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+	*	
+	*			for (int face = 0; face < 6; ++face) {
+	*				int layerIndex = lightIndex * 6 + face; // Cube map array layer
+	*	
+	*				// Attach the cube map array layer as the depth attachment
+	*				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapArray, 0, layerIndex);
+	*	
+	*				// Clear the depth buffer
+	*				glClear(GL_DEPTH_BUFFER_BIT);
+	*	
+	*				// Render all entities in range of the light for this face
+	*				for (const auto& entity : entitiesInRange) {
+	*					// Render entity from the light's perspective for this face
+	*				}
+	*			}
+	*		}
+	*	
+	*	---------------------------------------------------------------------------------------------------------------
+	*	5. Forward Rendering (Color Pass)
+	*	5.1 Sort Meshes
+	*	Sort meshes normally for efficiency.
+	*	
+	*	5.2 Bind Cube Map Array
+	*	Bind the cube map array and set it as a uniform for your forward rendering shader.
+	*	
+	*		glActiveTexture(GL_TEXTURE0);
+	*		glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, cubeMapArray);
+	*	
+	*		glUniform1i(glGetUniformLocation(shaderProgram, "pointLightsCubeMapArray"), 0);
+	*
+	*	5.3 Render with Shadows
+	*	For each point light, check if it casts shadows. If so, calculate shadows using the cube map array.
+	*	
+	*	In GLSL:
+	*	
+	*		uniform samplerCubeArray pointLightsCubeMapArray;
+	*	
+	*		float calculateShadow(vec3 fragPos, vec3 lightPos, int shadowIndex) {
+	*			vec3 lightToFrag = fragPos - lightPos;
+	*			vec3 direction = normalize(lightToFrag);
+	*			float distance = length(lightToFrag);
+	*	
+	*			// Sample shadow map
+	*			float depth = texture(pointLightsCubeMapArray, vec4(direction, shadowIndex)).r;
+	*	
+	*			// Compare depth
+	*			return distance > depth ? 0.0 : 1.0;
+	*		}
+	*
+	*/
+
 #pragma endregion
 
 #pragma region DeferredPipeline
 
-	void DeferredPipeline::OnUpdate() {
+	void DeferredPipeline::OnUpdate(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
 	}
 
