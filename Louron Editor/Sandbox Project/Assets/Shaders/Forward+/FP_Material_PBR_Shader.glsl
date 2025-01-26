@@ -13,6 +13,8 @@ out VS_OUT {
 
     vec3 FragPos;
     vec2 TexCoord;
+	vec3 ViewPos;
+
 	mat3 TBN_Matrix;
 	vec3 TangentViewPos;
 	vec3 TangentFragPos;
@@ -104,9 +106,9 @@ struct PointLight {
     bool lastLight;
 
 	uint shadowCastingType;
+	uint shadowLayerIndex;
     
     // DO NOT USE - this is for SSBO alignment purposes ONLY (12 BYTES)
-	float m_Padding1;
 	float m_Padding2;
 	float m_Padding3;
 };
@@ -165,6 +167,7 @@ in VS_OUT {
 
     vec3 FragPos;
     vec2 TexCoord;
+	vec3 ViewPos;
 	mat3 TBN_Matrix;
 	vec3 TangentViewPos;
 	vec3 TangentFragPos;
@@ -181,6 +184,7 @@ uniform int u_TilesX;
 uniform ivec2 u_ScreenSize;
 uniform sampler2D u_Depth;
 uniform bool u_ShowLightComplexity;
+uniform samplerCubeArray u_PL_ShadowCubeMapArray;
 
 // Forward Plus Local Variables
 uint index;
@@ -206,6 +210,7 @@ vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo,
 
 float Attenuation_InverseSquareLawWithFalloff(float light_radius, float distance_from_light) {
     float attenuation = 1.0 / (distance_from_light * distance_from_light); // Inverse square law
+    attenuation = 2.0 / ((distance_from_light * distance_from_light) + (light_radius * light_radius) + (distance_from_light * sqrt((distance_from_light * distance_from_light) + (light_radius * light_radius))));
 
     // Normalize the distance to the light radius and create a smooth falloff
     float normalised_distance = distance_from_light / light_radius;
@@ -216,11 +221,45 @@ float Attenuation_InverseSquareLawWithFalloff(float light_radius, float distance
         attenuation *= smooth_falloff;
     }
 
-    return attenuation;
+    return attenuation * 100.0;
 }
 
-float Attenuation_QuadraticWithFalloff(float light_radius, float distance_from_light) {
-    return pow(max(1.0 - abs(distance_from_light) / light_radius, 0.0), 2.0);
+vec3 gridSamplingDisk[20] = vec3[]
+(
+   vec3(1, 1,  1), vec3( 1, -1,  1), vec3(-1, -1,  1), vec3(-1, 1,  1), 
+   vec3(1, 1, -1), vec3( 1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+   vec3(1, 1,  0), vec3( 1, -1,  0), vec3(-1, -1,  0), vec3(-1, 1,  0),
+   vec3(1, 0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1, 0, -1),
+   vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
+);
+
+float PointLightShadowCalculation(vec3 light_pos, float point_light_far_plane, uint cubemap_array_index, int samples) {
+    
+    vec3 fragToLight = fragment_in.FragPos - light_pos; 
+    float currentDepth = length(fragToLight);
+    
+    float shadow = 0.0;
+    float bias = 0.15;
+
+    float viewDistance = length(fragment_in.ViewPos - fragment_in.FragPos);
+    float diskRadius = (1.0 + (viewDistance / point_light_far_plane)) / 25.0;
+    
+    for (int i = 0; i < samples; ++i) {
+        vec3 sampleOffset = fragToLight + gridSamplingDisk[i] * diskRadius;
+        vec4 shadowCoord = vec4(sampleOffset, float(cubemap_array_index));
+        
+        // Sample shadow map using array index
+        float closestDepth = float(texture(u_PL_ShadowCubeMapArray, shadowCoord));
+        
+        // Compare depths
+        if (currentDepth - bias > closestDepth * point_light_far_plane) {
+            shadow += 1.0;
+        }
+    }
+
+    shadow /= float(samples);
+    
+    return shadow;
 }
 
 void main() {
@@ -328,9 +367,9 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo
             PointLight light = PL_Buffer_Data.data[lightIndex];
             vec3 light_direction = normalize(tang_light_pos - fragPos);
            
-            vec3 radiance = light.colour.rgb * light.intensity;
             float attenuation = Attenuation_InverseSquareLawWithFalloff(light.radius, dist);
-            
+            vec3 radiance = light.colour.rgb * light.intensity * attenuation;
+
             // Cook-Torrance BRDF
             vec3 halfway_direction = normalize(light_direction + view_direction);
             vec3 F0 = mix(vec3(0.04), albedo, metallic);
@@ -349,7 +388,17 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo
             vec3 kD = vec3(1.0) - kS;
             kD *= 1.0 - metallic;
             
-            point_result += (kD * albedo / PI + specular) * radiance * NdotL * attenuation;
+            float shadow_calculation = 0.0;
+            if(light.shadowCastingType == 1) // HARD Shadows
+                shadow_calculation = PointLightShadowCalculation(PL_Buffer_Data.data[lightIndex].position.xyz, light.radius, light.shadowLayerIndex, 1);
+            if(light.shadowCastingType == 2) // SOFT Shadows
+                shadow_calculation = PointLightShadowCalculation(PL_Buffer_Data.data[lightIndex].position.xyz, light.radius, light.shadowLayerIndex, 20);
+
+            float shadow_factor = 1.0 - shadow_calculation; // Reduce contribution based on shadow
+
+            // Final contribution, reduced by shadow factor
+            point_result += shadow_factor * ((kD * albedo / PI + specular) * radiance * NdotL);
+
         }
     }
     
@@ -406,8 +455,7 @@ vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo,
                 float spot_light_intensity = light.intensity * angle_factor;
 
                 float attenuation = Attenuation_InverseSquareLawWithFalloff(light.range, dist);
-
-                vec3 radiance = light.colour.rgb * spot_light_intensity;
+                vec3 radiance = light.colour.rgb * spot_light_intensity * attenuation;
                 
                 // Cook-Torrance BRDF
                 vec3 halfway_direction = normalize(light_direction + view_direction);
@@ -427,7 +475,7 @@ vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo,
                 vec3 kD = vec3(1.0) - kS;
                 kD *= 1.0 - metallic;
                 
-                spot_result += (kD * albedo / PI + specular) * radiance * NdotL * attenuation;
+                spot_result += (kD * albedo / PI + specular) * radiance * NdotL;
 
             }
         }

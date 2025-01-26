@@ -1048,7 +1048,7 @@ namespace Louron {
 		/// Octree again.
 		/// </summary>
 		/// <param name="frustum">Bounds AABB Range to Query</param>
-		const std::vector<OctreeData>& Query(const Bounds_AABB& bounds) const {
+		const std::vector<OctreeData>& Query(const Bounds_AABB& bounds) {
 
 			if (m_QueryReturnVectors[0].capacity() == 0 || m_QueryReturnVectors[0].capacity() < m_DataSources.size()) {
 				m_QueryReturnVectors[0].reserve(m_DataSources.empty() ? 1024 : m_DataSources.size());
@@ -1076,7 +1076,7 @@ namespace Louron {
 		/// Octree again.
 		/// </summary>
 		/// <param name="frustum">Bounds Sphere Range to Query</param>
-		const std::vector<OctreeData>& Query(const Bounds_Sphere& bounds) const {
+		const std::vector<OctreeData>& Query(const Bounds_Sphere& bounds) {
 
 			if (m_QueryReturnVectors[1].capacity() == 0 || m_QueryReturnVectors[1].capacity() < m_DataSources.size()) {
 				m_QueryReturnVectors[1].reserve(m_DataSources.empty() ? 1024 : m_DataSources.size());

@@ -41,6 +41,7 @@ namespace Louron {
 		out << YAML::BeginMap;
 
 		out << YAML::Key << "MeshActive" << YAML::Value << Active;
+		out << YAML::Key << "CastShadows" << YAML::Value << CastShadows;
 
 		{
 			out << YAML::Key << "MaterialAssetCount" << YAML::Value << (uint32_t)MeshRendererMaterialHandles.size();
@@ -63,8 +64,9 @@ namespace Louron {
 		if (component["MeshActive"]) {
 			Active = component["MeshActive"].as<bool>();
 		}
-		else {
-			return false;
+
+		if (component["CastShadows"]) {
+			CastShadows = component["CastShadows"].as<bool>();
 		}
 
 		if (component["MaterialAssetCount"] && component["MaterialAssetHandles"]) {

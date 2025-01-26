@@ -24,7 +24,11 @@ namespace Louron {
 			<< YAML::EndSeq;
 
 		out << YAML::Key << "Radius" << YAML::Value << Radius;
+
 		out << YAML::Key << "Intensity" << YAML::Value << Intensity;
+
+		std::string type = (ShadowFlag == ShadowTypeFlag::HardShadows) ? "Hard" : (ShadowFlag == ShadowTypeFlag::SoftShadows) ? "Soft" : "None";
+		out << YAML::Key << "Shadow Type" << YAML::Value << type;
 
 		out << YAML::EndMap;
 
@@ -55,6 +59,20 @@ namespace Louron {
 
 		if (data["Intensity"]) {
 			Intensity = data["Intensity"].as<GLfloat>();
+		}
+
+		if (data["Shadow Type"]) {
+			auto type = data["Shadow Type"].as<std::string>();
+
+			if (type == "Hard")
+				ShadowFlag = ShadowTypeFlag::HardShadows;
+			else if (type == "Soft")
+				ShadowFlag = ShadowTypeFlag::SoftShadows;
+			else
+				ShadowFlag = ShadowTypeFlag::NoShadows;
+		}
+		else {
+			ShadowFlag = ShadowTypeFlag::NoShadows;
 		}
 
 		return true;

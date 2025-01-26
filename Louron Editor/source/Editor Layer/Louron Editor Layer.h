@@ -29,6 +29,7 @@ private:
 
 	std::unordered_map<const char*, bool> m_ActiveGUIWindows;
 
+	bool m_SceneWindowHovered = false;
 	bool m_SceneWindowFocused = false;
 	glm::ivec2 m_ViewportWindowSize = { 800, 600 };
 	std::array<glm::vec2, 2> m_ViewportBounds{};

@@ -81,8 +81,10 @@ namespace Louron {
 		glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
 		m_InitialMousePosition = mouse;
 
-		if (input.GetKey(Key::LeftAlt))
-		{
+		if(float scroll_delta = input.GetScrollY() * 0.1f; scroll_delta != 0.0f)
+			MouseZoom(scroll_delta);
+
+		if (input.GetKey(Key::LeftAlt)) {
 
 			if (input.GetMouseButton(GLFW_MOUSE_BUTTON_MIDDLE))
 				MousePan(delta);

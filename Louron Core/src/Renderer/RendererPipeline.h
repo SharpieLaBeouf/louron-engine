@@ -74,6 +74,7 @@ namespace Louron {
 		void ConductRenderableFrustumCull();
 		void ConductDepthPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 		void ConductTiledBasedLightCull(const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
+		void ConductShadowMapping(const glm::vec3& camera_position);
 		void ConductRenderPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 
 		bool IsSphereInsideFrustum(const Bounds_Sphere& bounds, const Frustum& frustum);
@@ -106,6 +107,12 @@ namespace Louron {
 
 			std::thread OctreeUpdateThread;
 			std::vector<std::shared_ptr<OctreeDataSource<Entity>>> OctreeEntitiesInCamera;
+
+			GLuint PL_Shadow_Max_Maps = 5;
+			GLuint PL_Shadow_Map_Res = 1024;
+			GLuint PL_Shadow_FrameBuffer = -1;
+			GLuint PL_Shadow_CubeMap_Array = -1;
+			std::unordered_map<UUID, GLuint> PL_Shadow_LightIndexMap;
 
 		} FP_Data;
 

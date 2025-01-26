@@ -79,10 +79,10 @@ namespace Louron {
 		if (!m_IsComputeShader) {
 
 			enum class ShaderType {
-				NONE = -1, VERTEX = 0, FRAGMENT = 1
+				NONE = -1, VERTEX = 0, FRAGMENT = 1, GEOMETRY = 2
 			};
 
-			std::string line; std::stringstream ss[2];
+			std::string line; std::stringstream ss[3];
 			ShaderType type = ShaderType::NONE;
 			while (getline(file, line))
 			{
@@ -92,6 +92,8 @@ namespace Louron {
 						type = ShaderType::VERTEX;
 					else if (line.find("FRAGMENT") != std::string::npos)
 						type = ShaderType::FRAGMENT;
+					else if (line.find("GEOMETRY") != std::string::npos)
+						type = ShaderType::GEOMETRY;
 				}
 				else
 					ss[(int)type] << line << '\n';
@@ -99,11 +101,13 @@ namespace Louron {
 
 			std::string vString = ss[0].str();
 			std::string fString = ss[1].str();
+			std::string gString = ss[2].str();
 
 			const GLchar* vShaderCode = vString.c_str();
 			const GLchar* fShaderCode = fString.c_str();
+			const GLchar* gShaderCode = gString.c_str();
 
-			unsigned int vertex, fragment;
+			unsigned int vertex, fragment, geometry;
 
 			vertex = glCreateShader(GL_VERTEX_SHADER);
 			glShaderSource(vertex, 1, &vShaderCode, NULL);
@@ -122,14 +126,28 @@ namespace Louron {
 				return;
 			}
 
+			if(!gString.empty()) {
+				geometry = glCreateShader(GL_GEOMETRY_SHADER);
+				glShaderSource(geometry, 1, &gShaderCode, NULL);
+				glCompileShader(geometry);
+				if (!checkCompileErrors(geometry, "GEOMETRY")) {
+					glDeleteShader(vertex);
+					glDeleteShader(fragment);
+					glDeleteShader(geometry);
+					return;
+				}
+			}
+
 			unsigned int program = glCreateProgram();
 			glAttachShader(program, vertex);
 			glAttachShader(program, fragment);
+			if (!gString.empty()) glAttachShader(program, geometry);
 			glLinkProgram(program);
 			
 			if (!checkCompileErrors(program, "PROGRAM")) {
 				glDeleteShader(vertex);
 				glDeleteShader(fragment);
+				if (!gString.empty()) glDeleteShader(geometry);
 				glDeleteProgram(program);
 				return;
 			}
@@ -138,6 +156,7 @@ namespace Louron {
 
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
+			if (!gString.empty()) glDeleteShader(geometry);
 		}
 		else {
 			std::string cShaderCodeSrc;

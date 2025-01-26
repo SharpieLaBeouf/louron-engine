@@ -17,6 +17,7 @@ Entities:
       MeshAssetHandle: 921801044
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
@@ -35,6 +36,7 @@ Entities:
       MeshAssetHandle: 921801044
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
@@ -53,6 +55,7 @@ Entities:
       MeshAssetHandle: 921801044
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
@@ -71,6 +74,7 @@ Entities:
       MeshAssetHandle: 921801044
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
@@ -89,6 +93,7 @@ Entities:
       MeshAssetHandle: 293103916
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1375892428
@@ -136,6 +141,7 @@ Entities:
       Colour: [0, 0.0294120312, 1, 1]
       Radius: 20
       Intensity: 100
+      Shadow Type: Hard
   - Entity: 1332520780
     TagComponent:
       Tag: Main Camera
@@ -145,14 +151,14 @@ Entities:
         []
     TransformComponent:
       Translation: [-84.8492126, 45.923645, -0.153106675]
-      Rotation: [-90.0190964, -79.6849823, 79.7037888]
+      Rotation: [0, -90, 0]
       Scale: [1, 1, 1]
     CameraComponent:
       Camera:
-        Projection Type: Orthographic
-        FOV: 10
-        Near: -1
-        Far: 1
+        Projection Type: Perspective
+        FOV: 60.0000038
+        Near: 0.00999999978
+        Far: 1000
       Primary: true
       ClearFlag: Skybox
       ClearColour: [0.897058845, 0.909169555, 1, 1]
@@ -173,6 +179,7 @@ Entities:
       MeshAssetHandle: 2265151452
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 4057542052
@@ -231,6 +238,7 @@ Entities:
       MeshAssetHandle: 3850464143
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 4057542052
@@ -263,6 +271,7 @@ Entities:
       MeshAssetHandle: 293103916
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: true
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1375892428
@@ -286,6 +295,7 @@ Entities:
       MeshAssetHandle: 921801044
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964
@@ -346,6 +356,7 @@ Entities:
       MeshAssetHandle: 921801044
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 13304964

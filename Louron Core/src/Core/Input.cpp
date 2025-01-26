@@ -7,6 +7,9 @@ namespace Louron {
 	double InputManager::m_MouseX;
 	double InputManager::m_MouseY;
 
+	double InputManager::m_ScrollX;
+	double InputManager::m_ScrollY;
+
 	bool InputManager::mKeys[MAX_KEYS][2];
 	bool InputManager::mButtons[MAX_BUTTONS][2];
 
@@ -25,6 +28,13 @@ namespace Louron {
 		}
 
         ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+	}
+
+	void scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
+		InputManager::m_ScrollX += xoffset; // Accumulate scroll offsets
+		InputManager::m_ScrollY += yoffset;
+
+		ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
 	}
 
 	void cursorCallback(GLFWwindow* window, double xpos, double ypos)
@@ -56,6 +66,7 @@ namespace Louron {
 	{
 		glfwSetKeyCallback(window, keyCallback);
 		glfwSetMouseButtonCallback(window, mouseCallback);
+		glfwSetScrollCallback(window, scrollCallback);
 		glfwSetCursorPosCallback(window, cursorCallback);
 		glfwSetWindowUserPointer(window, this);
 
@@ -128,6 +139,22 @@ namespace Louron {
 	float InputManager::GetMouseY()
 	{
 		return (float)m_MouseY;
+	}
+
+	void InputManager::ResetScroll()
+	{
+		m_ScrollX = 0.0;
+		m_ScrollY = 0.0;
+	}
+
+	float InputManager::GetScrollX()
+	{
+		return (float)m_ScrollX;
+	}
+
+	float InputManager::GetScrollY()
+	{
+		return (float)m_ScrollY;
 	}
 
 }

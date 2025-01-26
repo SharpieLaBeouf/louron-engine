@@ -96,6 +96,8 @@ namespace Louron {
 		bool Active = true;
 		std::vector<AssetHandle> MeshRendererMaterialHandles;
 
+		bool CastShadows = false;
+
 		void Serialize(YAML::Emitter& out);
 		bool Deserialize(const YAML::Node data);
 

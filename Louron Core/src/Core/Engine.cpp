@@ -128,6 +128,7 @@ namespace Louron {
 
             {
                 L_PROFILE_SCOPE("Engine: 4. Update Window (Finish GL Commands)");
+                m_Input->ResetScroll();
                 m_Window->OnUpdate();
             }
         }

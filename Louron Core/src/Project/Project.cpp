@@ -305,6 +305,8 @@ namespace Louron {
 		if (m_ActiveScene)
 			m_ActiveScene->OnStop();
 
+		old_scene_just_in_case = m_ActiveScene;
+
 		m_ActiveScene.reset();
 		m_ActiveScene = nullptr;
 		m_ActiveScene = scene;

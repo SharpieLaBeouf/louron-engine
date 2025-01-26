@@ -39,10 +39,10 @@ namespace Louron {
 			GLint lastLight = false;
 
 			GLuint shadowCastingType = 0;
+			GLuint shadowLayerIndex = -1;
 
 			GLfloat m_Padding1 = 0.0f;
 			GLfloat m_Padding2 = 0.0f;
-			GLfloat m_Padding3 = 0.0f;
 
 			PL_SSBO_DATA_LAYOUT() = default;
 
@@ -292,6 +292,9 @@ namespace Louron {
 		// 2. RENDERING
 		{
 			L_PROFILE_SCOPE("Forward Plus - Rendering");
+
+			ConductShadowMapping(camera_position);
+
 			UpdateSSBOData();
 
 			// Bind FBO and clear color and depth buffers for the new frame
@@ -363,6 +366,10 @@ namespace Louron {
 				auto& frame_buffer_config = scene_ref->GetSceneFrameBuffer()->GetConfig();
 				cameraEntity.GetComponent<CameraComponent>().CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
 			}
+			else {
+				auto& frame_buffer_config = scene_ref->GetSceneFrameBuffer()->GetConfig();
+				cameraEntity.GetComponent<CameraComponent>().CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
+			}
 		}
 		else {
 			cameraEntity = scene_ref->CreateEntity("Main Camera");
@@ -407,6 +414,27 @@ namespace Louron {
 		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, nullptr, GL_STATIC_DRAW); // List of visible lights per tile
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+		// SHADOWS - Cube Map Array
+		glGenTextures(1, &FP_Data.PL_Shadow_CubeMap_Array);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, FP_Data.PL_Shadow_CubeMap_Array);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24, 
+			FP_Data.PL_Shadow_Map_Res, FP_Data.PL_Shadow_Map_Res, FP_Data.PL_Shadow_Max_Maps * 6);
+
+		// SHADOWS - Frame Buffer
+		glGenFramebuffers(1, &FP_Data.PL_Shadow_FrameBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.PL_Shadow_FrameBuffer);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.PL_Shadow_CubeMap_Array, 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
 		if(!FP_Data.Screen_Quad_VAO)
 		{
@@ -467,6 +495,10 @@ namespace Louron {
 		glDeleteBuffers(1, &FP_Data.SL_Indices_Buffer);
 
 		glDeleteBuffers(1, &FP_Data.DL_Buffer);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glDeleteFramebuffers(1, &FP_Data.PL_Shadow_FrameBuffer);
+		glDeleteTextures(1, &FP_Data.PL_Shadow_CubeMap_Array);
 
 		if (FP_Data.Screen_Quad_VAO) {
 			FP_Data.Screen_Quad_VAO.reset();
@@ -573,6 +605,10 @@ namespace Louron {
 					{
 						s_PointLightVector.push_back({ point_light, entity.GetComponent<TransformComponent>() });
 						s_PointLightVector.back().radius *= 2.0f;
+
+						if(FP_Data.PL_Shadow_LightIndexMap.find(entity.GetUUID()) != FP_Data.PL_Shadow_LightIndexMap.end()) {
+							s_PointLightVector.back().shadowLayerIndex = FP_Data.PL_Shadow_LightIndexMap.at(entity.GetUUID());
+						}
 					}
 				}
 
@@ -748,7 +784,14 @@ namespace Louron {
 			FP_Data.RenderableEntities.reserve(FP_Data.RenderableEntities.capacity() * 2);
 
 		for (const auto& data : FP_Data.OctreeEntitiesInCamera) 
-			FP_Data.RenderableEntities.push_back(data->Data);
+		{
+			if (!data->Data)
+				continue;
+
+			auto& component = data->Data.GetComponent<AssetMeshRenderer>();
+			if (component.Active)
+				FP_Data.RenderableEntities.push_back(data->Data);
+		}
 
 		FP_Data.OctreeEntitiesInCamera.clear();
 	}
@@ -779,7 +822,8 @@ namespace Louron {
 
 		if (!FP_Data.RenderableEntities.empty()) {
 
-			for (auto& entity : FP_Data.RenderableEntities) {
+			for (auto& entity : FP_Data.RenderableEntities) 
+			{
 
 				if (!scene_ref->ValidEntity(entity)) continue;
 
@@ -802,13 +846,15 @@ namespace Louron {
 				return std::get<0>(a) < std::get<0>(b);
 			});
 			
-			if (std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth"); shader) {
+			if (std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth"); shader) 
+			{
 
 				shader->Bind();
 				shader->SetMat4("u_Proj", projection_matrix);
 				shader->SetMat4("u_View", view_matrix);
 
-				for (auto& [distance, entity_uuid, sub_mesh] : sorted_entities) {
+				for (auto& [distance, entity_uuid, sub_mesh] : sorted_entities) 
+				{
 					shader->SetMat4("u_Model", scene_ref->FindEntityByUUID(entity_uuid).GetComponent<TransformComponent>().GetGlobalTransform());
 					shader->SetUInt("u_EntityID", entity_uuid);
 
@@ -817,7 +863,8 @@ namespace Louron {
 
 				shader->UnBind();
 			}
-			else {
+			else 
+			{
 				L_CORE_ERROR("FP Depth Shader Not Found");
 			}
 		}
@@ -867,6 +914,150 @@ namespace Louron {
 			L_CORE_ERROR("FP Light Cull Compute Shader Not Found");
 		}
 		
+	}
+
+	void ForwardPlusPipeline::ConductShadowMapping(const glm::vec3& camera_position)
+	{
+		L_PROFILE_SCOPE("Shadow Mapping 1. Total");
+
+		//constexpr int update_per_number_of_frames = 5;
+		//static int frames_passed = update_per_number_of_frames;
+		//if (frames_passed < update_per_number_of_frames) {
+		//	frames_passed++;
+		//	return;
+		//}
+		//frames_passed = 0;
+		
+		auto scene_ref = m_Scene.lock();
+		if (!scene_ref)
+			return;
+
+		FP_Data.PL_Shadow_LightIndexMap.clear();
+
+		std::vector<Entity> pl_shadow_casting_vec;
+		std::unordered_map<UUID, std::vector<Entity>> pl_shadow_casting_meshes_map; // What meshes are inside this point light?
+		constexpr int numShadowCastingLights = 5; // Number of shadow-casting lights
+		{
+			L_PROFILE_SCOPE("Shadow Mapping 2. Sorting");
+			// 1. Gather Point Lights that have shadow mapping enabled
+			pl_shadow_casting_vec.reserve(FP_Data.PLEntities.size());
+			for (auto& entity : FP_Data.PLEntities)
+				if (entity.GetComponent<PointLightComponent>().ShadowFlag != ShadowTypeFlag::NoShadows)
+					pl_shadow_casting_vec.push_back(entity);
+
+			// Sort array based on distance
+			std::sort(pl_shadow_casting_vec.begin(), pl_shadow_casting_vec.end(),
+				[&camera_position](Entity& a, Entity& b) {
+					glm::vec3 posA = a.GetComponent<TransformComponent>().GetGlobalPosition();
+					glm::vec3 posB = b.GetComponent<TransformComponent>().GetGlobalPosition();
+					return glm::length(posA - camera_position) < glm::length(posB - camera_position);
+				});
+
+			// Keep only the closest 5 point lights
+			// TODO: Increase this so there is like a shadow map atlas with lower resolutions? 
+			// E.g., One cube map in the array could hold 4 more point light textures if the resolution is halved?
+			// Maybe we implement an algorithm to determine which are the most important point lights, 
+			//		- Create a cube map array with 25 x 2k textures
+			//		- assign a hard limit of maybe 5 x 2K cube maps for the most important point lights, 
+			//		- then have another 5 cube maps that are made up of 20 1K point lights, and so on
+			if (pl_shadow_casting_vec.size() > numShadowCastingLights)
+				pl_shadow_casting_vec.erase(pl_shadow_casting_vec.begin() + numShadowCastingLights, pl_shadow_casting_vec.end());
+
+			for (auto& point_light : pl_shadow_casting_vec) {
+
+				Bounds_Sphere sphere{};
+				sphere.BoundsCentre = point_light.GetComponent<TransformComponent>().GetGlobalPosition();
+				sphere.BoundsRadius = point_light.GetComponent<PointLightComponent>().Radius;
+
+				if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
+
+					const auto& query_vec = oct_ref->Query(sphere);
+
+					std::vector<Entity>& entities_in_light = pl_shadow_casting_meshes_map[point_light.GetUUID()];
+					entities_in_light.reserve(query_vec.size());
+
+					for (const auto& data : query_vec)
+					{
+						if (!data->Data)
+							continue;
+
+						auto& component = data->Data.GetComponent<AssetMeshRenderer>();
+						if (component.Active && component.CastShadows)
+							entities_in_light.push_back(data->Data);
+					}
+				}
+
+			}
+
+		}
+
+		// 2. Initialise Shadow CubeMap Array
+		{
+			L_PROFILE_SCOPE("Shadow Mapping 4. Drawing");
+
+			glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.PL_Shadow_FrameBuffer);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.PL_Shadow_CubeMap_Array, 0);
+			glDrawBuffer(GL_DEPTH_ATTACHMENT);
+			glReadBuffer(GL_NONE);
+
+			glCullFace(GL_FRONT);
+
+			glViewport(0, 0, FP_Data.PL_Shadow_Map_Res, FP_Data.PL_Shadow_Map_Res);
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+			auto& shader = Engine::Get().GetShaderLibrary().GetShader("FP_Shadow_Point");
+			shader->Bind();
+
+			for (int lightIndex = 0; lightIndex < pl_shadow_casting_vec.size(); ++lightIndex) {
+
+				glm::vec3 light_pos = pl_shadow_casting_vec[lightIndex].GetComponent<TransformComponent>().GetGlobalPosition();
+
+				float near_plane = 1.0f;
+				float far_plane = pl_shadow_casting_vec[lightIndex].GetComponent<PointLightComponent>().Radius * 2.0f;
+				glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1.0f, near_plane, far_plane);
+				std::vector<glm::mat4> shadowTransforms{};
+				shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+				shadowTransforms.push_back(shadowProj * glm::lookAt(light_pos, light_pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+
+				for (unsigned int i = 0; i < 6; ++i)
+					shader->SetMat4(std::string("u_ShadowMatrices[" + std::to_string(i) + "]").c_str(), shadowTransforms[i]);
+
+				int layerOffset = lightIndex * 6;
+				shader->SetInt("u_LayerOffset", layerOffset);
+				shader->SetVec3("u_LightPosition", light_pos);
+				shader->SetFloat("u_FarPlane", far_plane);
+
+				// Link up the offset to the light map so we can 
+				// update the data into the SSBO for shader access
+				FP_Data.PL_Shadow_LightIndexMap.insert({ pl_shadow_casting_vec[lightIndex].GetUUID(), lightIndex });
+
+				// Render all entities THAT ARE IN RANGE of this light in one pass.
+				for (auto& entity : pl_shadow_casting_meshes_map[pl_shadow_casting_vec[lightIndex].GetUUID()]) {
+
+					if (!entity)
+						continue;
+
+					glm::mat4 transform = entity.GetComponent<TransformComponent>().GetGlobalTransform();
+					shader->SetMat4("u_Model", transform);
+
+					std::shared_ptr<AssetMesh> asset_mesh = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
+					for (auto& sub_mesh : asset_mesh->SubMeshes)
+						Renderer::DrawSubMesh(sub_mesh);
+				}
+			}
+
+			if (scene_ref)
+			{
+				glViewport(0, 0, scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height);
+				scene_ref->GetSceneFrameBuffer()->Bind();
+			}
+
+			glCullFace(GL_BACK);
+		}
 	}
 
 	/// <summary>
@@ -959,6 +1150,9 @@ namespace Louron {
 				shader->SetInt("u_TilesX", FP_Data.workGroupsX);
 				shader->SetInt("u_ShowLightComplexity", FP_Data.ShowLightComplexity);
 
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, FP_Data.PL_Shadow_CubeMap_Array);
+				shader->SetInt("u_PL_ShadowCubeMapArray", 4);
 
 				for (const auto& [sub_mesh, entities] : mesh_map) {
 

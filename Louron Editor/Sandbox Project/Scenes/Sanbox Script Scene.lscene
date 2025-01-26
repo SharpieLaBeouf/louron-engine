@@ -39,6 +39,7 @@ Entities:
       MeshAssetHandle: 119614820
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: true
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1180248686
@@ -79,33 +80,35 @@ Entities:
       Rotation: [-90, 1, 1]
       Scale: [0.200000018, 0.200000003, 0.200000018]
     PointLightComponent:
-      Active: true
+      Active: false
       Colour: [1, 0, 0, 1]
       Radius: 50
       Intensity: 5
+      Shadow Type: None
   - Entity: 1678864458
     TagComponent:
       Tag: Ominous Goblin!
     HierarchyComponent:
-      Parent: 2008826555
+      Parent: 4115850506
       Children:
         - 104901465
     ScriptComponent:
       Script_1:
-        Active: true
+        Active: false
         Script Name: SandboxProject.PlayerMoveScript
         Fields:
           - Name: speed
             Type: Float
             Data: 20
     TransformComponent:
-      Translation: [-10.8394928, -8.00000572, -1.87229538]
-      Rotation: [0, 90, 0]
-      Scale: [5, 5, 5]
+      Translation: [2.40127039, -4.96963596, -9.60421753]
+      Rotation: [0, -1.48980081, 0]
+      Scale: [5.00000095, 5, 5.00000095]
     MeshFilterComponent:
       MeshAssetHandle: 1692962371
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 3535300567
@@ -128,13 +131,14 @@ Entities:
             Type: Float
             Data: 100
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [-2.35263944, 0.176588848, -2.19965768]
       Rotation: [0, -0, 0]
       Scale: [1, 1, 1]
     MeshFilterComponent:
       MeshAssetHandle: 293103916
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: true
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1375892428
@@ -168,6 +172,7 @@ Entities:
       Colour: [1, 0.470588207, 0, 1]
       Radius: 10
       Intensity: 25.0499992
+      Shadow Type: Hard
   - Entity: 1332520780
     TagComponent:
       Tag: Main Camera
@@ -190,7 +195,7 @@ Entities:
     CameraComponent:
       Camera:
         Projection Type: Perspective
-        FOV: 60.0000038
+        FOV: 90
         Near: 0.00999999978
         Far: 1000
       Primary: true
@@ -205,6 +210,7 @@ Entities:
       Parent: 4294967295
       Children:
         - 3773169967
+        - 1678864458
     ScriptComponent:
       Script_1:
         Active: true
@@ -225,13 +231,13 @@ Entities:
       Children:
         []
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [-60, 30, 0]
-      Scale: [1, 0.999996305, 0.99999547]
+      Translation: [3.07571244, -0.871847808, -0.0321246386]
+      Rotation: [-60.0000153, 29.9999771, -2.95755817e-05]
+      Scale: [0.999999762, 0.999996126, 0.999995232]
     DirectionalLightComponent:
       Active: true
       Colour: [1, 0.800172985, 0.514705896, 1]
-      Intensity: 1
+      Intensity: 0.100000001
   - Entity: 2158404736
     TagComponent:
       Tag: Wall_03_04
@@ -247,6 +253,7 @@ Entities:
       MeshAssetHandle: 4131126634
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 2
       MaterialAssetHandles:
         - 1328298999
@@ -266,6 +273,7 @@ Entities:
       MeshAssetHandle: 3268216246
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 2
       MaterialAssetHandles:
         - 484623863
@@ -285,6 +293,7 @@ Entities:
       MeshAssetHandle: 165348382
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 2
       MaterialAssetHandles:
         - 3013405583
@@ -313,7 +322,6 @@ Entities:
         - 1769650053
         - 1886447739
         - 2232728946
-        - 1678864458
     TransformComponent:
       Translation: [0, 2.5999999, 0]
       Rotation: [0, 257.399994, 0]
@@ -333,6 +341,7 @@ Entities:
       MeshAssetHandle: 2996879002
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 2
       MaterialAssetHandles:
         - 2337055788
@@ -345,13 +354,14 @@ Entities:
       Children:
         []
     TransformComponent:
-      Translation: [-0.0799999982, 0.899999619, 0.0749999955]
+      Translation: [-0.0799999908, 0.900000095, 0]
       Rotation: [0, -0, 0]
       Scale: [0.199999988, 1, 0.199999988]
     MeshFilterComponent:
       MeshAssetHandle: 2807745834
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 756911316
@@ -370,6 +380,7 @@ Entities:
       MeshAssetHandle: 2217055936
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 566135705
@@ -388,6 +399,7 @@ Entities:
       MeshAssetHandle: 2633474792
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 2
       MaterialAssetHandles:
         - 1692682345
@@ -400,14 +412,15 @@ Entities:
       Children:
         []
     TransformComponent:
-      Translation: [0, 79.6999969, 0]
+      Translation: [8.60353279, -1.50288749, -11.9367762]
       Rotation: [0, -0, 0]
       Scale: [1, 1, 1]
     PointLightComponent:
       Active: true
-      Colour: [1, 0.754181087, 0.240196049, 1]
-      Radius: 322.350006
-      Intensity: 86.1999969
+      Colour: [1, 1, 1, 1]
+      Radius: 34.2999992
+      Intensity: 120.75
+      Shadow Type: Hard
   - Entity: 2089351735
     TagComponent:
       Tag: Floor Collider
@@ -452,6 +465,7 @@ Entities:
       MeshAssetHandle: 653242855
     MeshRendererComponent:
       MeshActive: true
+      CastShadows: false
       MaterialAssetCount: 2
       MaterialAssetHandles:
         - 2377665544
@@ -476,7 +490,7 @@ Entities:
       Rotation: [0.000215578155, 2.2341741e-05, 0.00165808154]
       Scale: [0.999999702, 0.999772429, 1]
     SpotLightComponent:
-      Active: true
+      Active: false
       Colour: [1, 1, 1, 1]
       Range: 100
       Angle: 147.419998

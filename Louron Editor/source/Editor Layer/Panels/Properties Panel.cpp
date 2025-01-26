@@ -718,6 +718,27 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				}
 			}
 
+			ImGui::Columns(2, "mesh_renderer_columns", false);
+			ImGui::SetColumnWidth(-1, first_coloumn_width);
+
+			ImGui::Text("Active");
+
+			ImGui::NextColumn();
+
+			ImGui::Checkbox("##MeshRendererActive", &component.Active);
+
+			ImGui::NextColumn();
+
+			ImGui::Text("Cast Shadows");
+
+			ImGui::NextColumn();
+
+			ImGui::Checkbox("##MeshRendererCastShadows", &component.CastShadows);
+
+			ImGui::NextColumn();
+
+			ImGui::Columns(1);
+
 			if (ImGui::TreeNodeEx("Materials", tree_node_flags)) {
 
 				ImGui::Dummy({ 0.0f, 5.0f });

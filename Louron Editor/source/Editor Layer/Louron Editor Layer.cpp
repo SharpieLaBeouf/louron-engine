@@ -140,8 +140,9 @@ void LouronEditorLayer::OnUpdate() {
 			case SceneState::Simulate:
 			case SceneState::Edit: 
 			{
-				m_EditorCamera->SetViewportSize(m_ViewportWindowSize.x, m_ViewportWindowSize.y);
-				m_EditorCamera->OnUpdate();
+				m_EditorCamera->SetViewportSize((float)m_ViewportWindowSize.x, (float)m_ViewportWindowSize.y);
+				if (m_SceneWindowHovered) 
+					m_EditorCamera->OnUpdate();
 				scene_ref->OnUpdate(m_EditorCamera.get());
 				break;
 			}
@@ -779,6 +780,8 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 			ImGui::End();
 			return;
 		}
+
+		m_SceneWindowHovered = ImGui::IsItemHovered();
 
 		if (ImGui::IsItemClicked() && m_SceneState == SceneState::Play)
 			m_SceneWindowFocused = true;
@@ -1488,7 +1491,7 @@ void LouronEditorLayer::OpenScene(const std::filesystem::path& scene_file_path) 
 	std::string filepath;
 	
 	if (scene_file_path.empty())
-		FileUtils::OpenFile("Louron Scene (*.lscene)\0*.lscene\0", Project::GetActiveProject()->GetProjectDirectory() / "Scenes");
+		filepath = FileUtils::OpenFile("Louron Scene (*.lscene)\0*.lscene\0", Project::GetActiveProject()->GetProjectDirectory() / "Scenes");
 	else
 		filepath = scene_file_path.string();
 
@@ -1517,7 +1520,7 @@ void LouronEditorLayer::OpenScene(const std::filesystem::path& scene_file_path) 
 			scene->CreateSceneFrameBuffer(fbo_config);
 		}
 
-		project->GetActiveScene()->OnStart();
+		project->GetActiveScene()->OnStart(); // New Scene may not load, so we call this to ensure old scene is loaded
 	}
 }
 

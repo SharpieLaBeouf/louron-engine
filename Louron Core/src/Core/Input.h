@@ -38,6 +38,9 @@ namespace Louron {
 
 		glm::vec2 GetMousePosition() { return glm::vec2((float)m_MouseX, (float)m_MouseY); }
 
+		float GetScrollX();
+		float GetScrollY();
+
 	private:
 
 		bool mMouseHidden = true;
@@ -45,9 +48,15 @@ namespace Louron {
 		static bool mKeys[MAX_KEYS][2];
 		static bool mButtons[MAX_BUTTONS][2];
 		static double m_MouseX, m_MouseY;
+		static double m_ScrollX, m_ScrollY;
 
 		friend static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 		friend static void mouseCallback(GLFWwindow* window, int button, int action, int mods);
+		friend static void scrollCallback(GLFWwindow* window, double xpos, double ypos);
 		friend static void cursorCallback(GLFWwindow* window, double xpos, double ypos);
+
+		void ResetScroll();
+
+		friend class Engine;
 	};
 }
