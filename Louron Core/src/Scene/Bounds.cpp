@@ -78,6 +78,11 @@ namespace Louron {
 		return BoundsMax - BoundsMin;
 	}
 
+	float Bounds_AABB::MaxExtent() const {
+		glm::vec3 extent = (BoundsMax - BoundsMin) * 0.5f;
+		return glm::length(extent);
+	}
+
 	glm::mat4 Bounds_AABB::GetGlobalBoundsMat4() const {
 		// Create the transformation matrix
 		glm::mat4 transform = glm::mat4(1.0f);

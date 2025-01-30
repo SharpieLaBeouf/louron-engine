@@ -43,8 +43,8 @@ namespace Louron {
 	};
 
 	struct Bounds_AABB {
-		glm::vec3 BoundsMin = glm::vec3(-1.0f);
-		glm::vec3 BoundsMax = glm::vec3(1.0f);
+		glm::vec3 BoundsMin = glm::vec3(FLT_MAX);
+		glm::vec3 BoundsMax = glm::vec3(-FLT_MAX);
 
 		Bounds_AABB() = default;
 		Bounds_AABB(const glm::vec3& min, const glm::vec3& max) : BoundsMin(min), BoundsMax(max) {}
@@ -90,6 +90,12 @@ namespace Louron {
 		/// Calculate the Size of the AABB
 		/// </summary>
 		glm::vec3 Size() const;
+
+		/// <summary>
+		/// Compute the maximum extent (half the diagonal length)
+		/// </summary>
+		/// <returns></returns>
+		float MaxExtent() const;
 
 		/// <summary>
 		/// Get the transformation matrix for this AABB

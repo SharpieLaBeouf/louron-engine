@@ -343,7 +343,7 @@ namespace Louron {
 					for (int i = 0; i < m_DataSourceSize; i++) {
 						try {
 							const auto& data = m_Octree->m_DataSources.at(m_DataSourceIndex + i);
-							if (query_bounds.Contains(data->Bounds) != BoundsContainResult::DoesNotContain)
+							if (data && query_bounds.Contains(data->Bounds) != BoundsContainResult::DoesNotContain)
 								result.push_back(data);
 						}
 						catch (const std::out_of_range& ex) {

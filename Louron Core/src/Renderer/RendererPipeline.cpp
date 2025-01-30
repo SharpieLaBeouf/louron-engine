@@ -128,7 +128,15 @@ namespace Louron {
 			GLint active = true;
 			GLfloat intensity = 1.0f;
 			GLint lastLight = false;
+
+			std::array<float, 5> shadowCascadePlaneDistances = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
 			GLuint shadowCastingType = 0;
+			GLuint shadowLightIndex = 0;
+
+			// DO NOT USE - this is for SSBO alignment purposes ONLY
+			GLfloat m_Padding1 = 0.0f;
+			GLfloat m_Padding2 = 0.0f;
 
 			DL_SSBO_DATA_LAYOUT() = default;
 
@@ -228,6 +236,7 @@ namespace Louron {
 			// Gather All Point and Spot Lights Visible in Camera Frustum
 			FP_Data.PLEntities.clear();
 			FP_Data.SLEntities.clear();
+			FP_Data.DLEntities.clear();
 			ConductLightFrustumCull();
 
 			// Gather All Meshes Visible in Camera Frustum
@@ -293,7 +302,7 @@ namespace Louron {
 		{
 			L_PROFILE_SCOPE("Forward Plus - Rendering");
 
-			ConductShadowMapping(camera_position);
+			ConductShadowMapping(camera_position, projection_matrix, view_matrix);
 
 			UpdateSSBOData();
 
@@ -388,6 +397,7 @@ namespace Louron {
 		// Setup Light Buffers
 
 		glGenBuffers(1, &FP_Data.DL_Buffer);
+		glGenBuffers(1, &FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
 
 		glGenBuffers(1, &FP_Data.PL_Buffer);
 		glGenBuffers(1, &FP_Data.PL_Indices_Buffer);
@@ -399,19 +409,22 @@ namespace Louron {
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_DIRECTIONAL_LIGHTS * sizeof(SSBOLightStructs::DL_SSBO_DATA_LAYOUT), nullptr, GL_DYNAMIC_DRAW);
 
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, 5 * sizeof(glm::mat4) * 5, nullptr, GL_DYNAMIC_DRAW);
+
 		// Point Lights
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_POINT_LIGHTS * sizeof(SSBOLightStructs::PL_SSBO_DATA_LAYOUT), nullptr, GL_DYNAMIC_DRAW); // All light data
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, nullptr, GL_STATIC_DRAW); // List of visible lights per tile
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, nullptr, GL_DYNAMIC_DRAW); // List of visible lights per tile
 
 		// Spot Lights
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Buffer);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, MAX_SPOT_LIGHTS * sizeof(SSBOLightStructs::SL_SSBO_DATA_LAYOUT), nullptr, GL_DYNAMIC_DRAW); // All light data
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, nullptr, GL_STATIC_DRAW); // List of visible lights per tile
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, nullptr, GL_DYNAMIC_DRAW); // List of visible lights per tile
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
@@ -435,6 +448,23 @@ namespace Louron {
 		glReadBuffer(GL_NONE);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+		// SHADOWS - Directional Depth Texture
+		glGenTextures(1, &FP_Data.DL_Shadow_Texture_Array);
+		glBindTexture(GL_TEXTURE_2D_ARRAY, FP_Data.DL_Shadow_Texture_Array);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_BORDER);
+		glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_DEPTH_COMPONENT24, FP_Data.DL_Shadow_Map_Res, FP_Data.DL_Shadow_Map_Res, FP_Data.DL_Shadow_Max_Maps * 5); // Max 25 shadow maps, 5 cascades per light, max 5 shadow directional lights
+
+		// SHADOWS - Framebuffer
+		glGenFramebuffers(1, &FP_Data.DL_Shadow_FrameBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DL_Shadow_FrameBuffer);
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.DL_Shadow_Texture_Array, 0);
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		if(!FP_Data.Screen_Quad_VAO)
 		{
@@ -471,8 +501,9 @@ namespace Louron {
 		FP_Data.RenderableEntities.reserve(1024);
 		FP_Data.OctreeEntitiesInCamera.reserve(1024);
 
-		FP_Data.PLEntities.reserve(MAX_SPOT_LIGHTS);
+		FP_Data.PLEntities.reserve(MAX_POINT_LIGHTS);
 		FP_Data.SLEntities.reserve(MAX_SPOT_LIGHTS);
+		FP_Data.DLEntities.reserve(MAX_DIRECTIONAL_LIGHTS);
 	}
 
 	/// <summary>
@@ -495,10 +526,14 @@ namespace Louron {
 		glDeleteBuffers(1, &FP_Data.SL_Indices_Buffer);
 
 		glDeleteBuffers(1, &FP_Data.DL_Buffer);
+		glDeleteBuffers(1, &FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glDeleteFramebuffers(1, &FP_Data.PL_Shadow_FrameBuffer);
 		glDeleteTextures(1, &FP_Data.PL_Shadow_CubeMap_Array);
+
+		glDeleteFramebuffers(1, &FP_Data.DL_Shadow_FrameBuffer);
+		glDeleteTextures(1, &FP_Data.DL_Shadow_Texture_Array);
 
 		if (FP_Data.Screen_Quad_VAO) {
 			FP_Data.Screen_Quad_VAO.reset();
@@ -658,22 +693,26 @@ namespace Louron {
 
 			// Directional Lights
 			{
-				// Update Light Objects
-				auto view = scene_ref->GetAllEntitiesWith<TransformComponent, DirectionalLightComponent>();
-
 				static std::vector<SSBOLightStructs::DL_SSBO_DATA_LAYOUT> s_DirectionalLightVector(MAX_DIRECTIONAL_LIGHTS);
 				s_DirectionalLightVector.clear();
 
 				// Add lights to vector that are contained within the scene up to a maximum of 10
-				for (auto entity : view) {
+				for (auto& entity : FP_Data.DLEntities) {
 
 					if (s_DirectionalLightVector.size() >= MAX_DIRECTIONAL_LIGHTS)
 						break;
 
-					auto [transform, directional_light] = view.get<TransformComponent, DirectionalLightComponent>(entity);
-
+					auto& directional_light = entity.GetComponent<DirectionalLightComponent>();
 					if (directional_light.Active)
-						s_DirectionalLightVector.push_back({ directional_light, transform });
+					{
+						s_DirectionalLightVector.push_back({ directional_light, entity.GetComponent<TransformComponent>() });
+
+						if (FP_Data.DL_Shadow_LightSpaceMatrixIndex.find(entity.GetUUID()) != FP_Data.DL_Shadow_LightSpaceMatrixIndex.end())
+							s_DirectionalLightVector.back().shadowLightIndex = FP_Data.DL_Shadow_LightSpaceMatrixIndex.at(entity.GetUUID());
+
+						if (FP_Data.DL_Shadow_LightShadowCascadeDistances.find(entity.GetUUID()) != FP_Data.DL_Shadow_LightShadowCascadeDistances.end())
+							s_DirectionalLightVector.back().shadowCascadePlaneDistances = FP_Data.DL_Shadow_LightShadowCascadeDistances.at(entity.GetUUID());
+					}
 				}
 
 				// Create Buffer Light at End of Vector if not full
@@ -710,6 +749,9 @@ namespace Louron {
 		auto pl_view = scene_ref->GetAllEntitiesWith<PointLightComponent>();
 		for (const auto& entity_handle : pl_view) {
 
+			if (FP_Data.PLEntities.size() >= MAX_POINT_LIGHTS)
+				break;
+
 			if (!pl_view.get<PointLightComponent>(entity_handle).Active)
 				continue;
 
@@ -722,6 +764,9 @@ namespace Louron {
 
 		auto sl_view = scene_ref->GetAllEntitiesWith<SpotLightComponent>();
 		for (const auto& entity_handle : sl_view) {
+
+			if (FP_Data.SLEntities.size() >= MAX_SPOT_LIGHTS)
+				break;
 
 			if (!sl_view.get<SpotLightComponent>(entity_handle).Active)
 				continue;
@@ -750,6 +795,19 @@ namespace Louron {
 			}
 
 		}
+
+		auto dl_view = scene_ref->GetAllEntitiesWith<DirectionalLightComponent>();
+		for (const auto& entity_handle : dl_view) {
+
+			if (FP_Data.DLEntities.size() >= MAX_DIRECTIONAL_LIGHTS)
+				break;
+
+			if (!dl_view.get<DirectionalLightComponent>(entity_handle).Active)
+				continue;
+
+			Entity entity = { entity_handle, scene_ref.get() };
+			FP_Data.DLEntities.push_back(entity);
+		}
 	}
 
 	/// <summary>
@@ -768,6 +826,7 @@ namespace Louron {
 		L_PROFILE_SCOPE("Forward Plus - Frustum Culling Octree Query");
 		if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
 
+			std::unique_lock lock(oct_ref->GetOctreeMutex());
 			const auto& query_vec = oct_ref->Query(FP_Data.Camera_Frustum);
 
 			if (query_vec.size() > FP_Data.OctreeEntitiesInCamera.capacity())
@@ -916,9 +975,9 @@ namespace Louron {
 		
 	}
 
-	void ForwardPlusPipeline::ConductShadowMapping(const glm::vec3& camera_position)
+	void ForwardPlusPipeline::ConductShadowMapping(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix)
 	{
-		L_PROFILE_SCOPE("Shadow Mapping 1. Total");
+		L_PROFILE_SCOPE("Shadow Mapping Total");
 
 		//constexpr int update_per_number_of_frames = 5;
 		//static int frames_passed = update_per_number_of_frames;
@@ -932,14 +991,161 @@ namespace Louron {
 		if (!scene_ref)
 			return;
 
+		const glm::mat4& camera_proj_view = projection_matrix * view_matrix;
+
+		#pragma region Directional Light Shadows
+
+		std::vector<Entity> dl_shadow_casting_vec;
+		std::vector<Entity> dl_shadow_renderable_entities;
+		std::vector<glm::mat4> dl_shadow_light_space_matricies;
+		std::unordered_map<UUID, glm::mat4> dl_light_proj_view_matrix_map; // What meshes are inside this directional light?
+
+		// 1. Gather Directional Lights
+			
+		{
+			L_PROFILE_SCOPE("Directional Shadow Mapping 1. Gathering");
+			dl_shadow_casting_vec.reserve(FP_Data.DLEntities.size());
+			for (auto& entity : FP_Data.DLEntities)
+				if (entity.GetComponent<DirectionalLightComponent>().ShadowFlag != ShadowTypeFlag::NoShadows)
+				{
+					if (dl_shadow_casting_vec.size() >= FP_Data.DL_Shadow_Max_Maps)
+						break;
+
+					dl_shadow_casting_vec.push_back(entity);
+				}
+		}
+
+		// 2. Calculate Light Space World Space AABB - Get Meshes Intersecting with AABB from Octree
+		// TODO: Need to fix this because it is not including objects that are behind camera frustum that 
+		// may cast shadow into frustum. Maybe we do this after generating the cascades and use the 
+		// world space AABB of the light projection to find our meshes?
+		Bounds_AABB world_light_bounds;
+		{
+			L_PROFILE_SCOPE("Directional Shadow Mapping 2a. Calculate Light Space Bounds");
+
+			world_light_bounds = Frustum::GetWorldSpaceTightBoundingBox(camera_proj_view);
+
+		}
+
+		{
+			L_PROFILE_SCOPE("Directional Shadow Mapping 2b. Get Meshes");
+
+			if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
+
+				std::unique_lock lock(oct_ref->GetOctreeMutex());
+
+				const auto& query_vec = oct_ref->Query(world_light_bounds);
+
+				dl_shadow_renderable_entities.reserve(query_vec.size());
+
+				for (const auto& data : query_vec)
+				{
+					if (!data->Data)
+						continue;
+
+					auto& component = data->Data.GetComponent<AssetMeshRenderer>();
+					if (component.Active && component.CastShadows)
+						dl_shadow_renderable_entities.push_back(data->Data);
+				}
+			}
+
+		}
+
+		// 3. Calculate Light Space Matricies Per Light Per Cascade - 40 x glm::mat4's is the max = MAX_DIRECTIONAL_LIGHTS * 4 cascades (per directional light)
+			
+		{
+			L_PROFILE_SCOPE("Directional Shadow Mapping 3. Calculate Cascade Light Matricies");
+			dl_shadow_light_space_matricies.reserve(dl_shadow_casting_vec.size() * 5);
+			FP_Data.DL_Shadow_LightSpaceMatrixIndex.clear();
+			FP_Data.DL_Shadow_LightShadowCascadeDistances.clear();
+
+			for (int light_index = 0; light_index < dl_shadow_casting_vec.size(); light_index++)
+			{
+				Entity entity = dl_shadow_casting_vec[light_index];
+				if (!entity)
+					continue;
+
+				std::array<float, 5>& shadow_cascade_distances = FP_Data.DL_Shadow_LightShadowCascadeDistances[entity.GetUUID()];
+				std::array<glm::mat4, 5> light_space_matrices = Frustum::CalculateCascadeLightSpaceMatrices(projection_matrix, view_matrix, entity.GetComponent<TransformComponent>().GetForwardDirection(), shadow_cascade_distances);
+
+				dl_shadow_light_space_matricies.insert(dl_shadow_light_space_matricies.end(), light_space_matrices.begin(), light_space_matrices.end());
+				FP_Data.DL_Shadow_LightSpaceMatrixIndex[entity.GetUUID()] = light_index;
+			}
+		}
+
+		// 4. Update Light Space Matrix SSBO Data
+			
+		{
+			L_PROFILE_SCOPE("Directional Shadow Mapping 4. Updating Light Matrix SSBO Data");
+			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
+
+			// Update SSBO data with light data
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
+			glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, dl_shadow_light_space_matricies.size() * sizeof(glm::mat4), dl_shadow_light_space_matricies.data());
+			glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+		}
+
+		// 5. Render Shadow Map from Light Space Matrix View & Proj
+
+		{
+			L_PROFILE_SCOPE("Directional Shadow Mapping 5. Rendering Cascaded Shadow Maps");
+			glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DL_Shadow_FrameBuffer);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.DL_Shadow_Texture_Array, 0);
+			glDrawBuffer(GL_NONE);
+			glReadBuffer(GL_NONE);
+
+			glCullFace(GL_FRONT);
+
+			glViewport(0, 0, FP_Data.DL_Shadow_Map_Res, FP_Data.DL_Shadow_Map_Res);
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+			auto& shader = Engine::Get().GetShaderLibrary().GetShader("FP_Shadow_Directional");
+			shader->Bind();
+
+			for (int light_index = 0; light_index < dl_shadow_casting_vec.size(); ++light_index) {
+
+				Entity entity = dl_shadow_casting_vec[light_index];
+				if (!entity)
+					continue;
+
+				shader->SetUInt("u_LightIndex", light_index);
+
+				for (auto& mesh_entity : dl_shadow_renderable_entities) {
+
+					if (!mesh_entity)
+						continue;
+
+					glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
+					shader->SetMat4("u_Model", transform);
+
+					std::shared_ptr<AssetMesh> asset_mesh = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(mesh_entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
+					for (auto& sub_mesh : asset_mesh->SubMeshes)
+						Renderer::DrawSubMesh(sub_mesh);
+				}
+
+			}
+
+			shader->UnBind();
+
+			if (scene_ref)
+				scene_ref->GetSceneFrameBuffer()->Bind();
+
+			glCullFace(GL_BACK);
+		}
+
+		#pragma endregion
+
+		#pragma region Point Light Shadows
+
 		FP_Data.PL_Shadow_LightIndexMap.clear();
 
 		std::vector<Entity> pl_shadow_casting_vec;
 		std::unordered_map<UUID, std::vector<Entity>> pl_shadow_casting_meshes_map; // What meshes are inside this point light?
 		constexpr int numShadowCastingLights = 5; // Number of shadow-casting lights
+			
+		// 1. Gather and Sort Point Lights that have shadow mapping enabled
 		{
-			L_PROFILE_SCOPE("Shadow Mapping 2. Sorting");
-			// 1. Gather Point Lights that have shadow mapping enabled
+			L_PROFILE_SCOPE("Point Shadow Mapping 1. Sorting");
 			pl_shadow_casting_vec.reserve(FP_Data.PLEntities.size());
 			for (auto& entity : FP_Data.PLEntities)
 				if (entity.GetComponent<PointLightComponent>().ShadowFlag != ShadowTypeFlag::NoShadows)
@@ -971,6 +1177,8 @@ namespace Louron {
 
 				if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
 
+					std::unique_lock lock(oct_ref->GetOctreeMutex());
+
 					const auto& query_vec = oct_ref->Query(sphere);
 
 					std::vector<Entity>& entities_in_light = pl_shadow_casting_meshes_map[point_light.GetUUID()];
@@ -991,9 +1199,9 @@ namespace Louron {
 
 		}
 
-		// 2. Initialise Shadow CubeMap Array
+		// 2. Initialise and Draw Shadow CubeMap Array
 		{
-			L_PROFILE_SCOPE("Shadow Mapping 4. Drawing");
+			L_PROFILE_SCOPE("Point Shadow Mapping 2. Drawing");
 
 			glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.PL_Shadow_FrameBuffer);
 			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.PL_Shadow_CubeMap_Array, 0);
@@ -1050,14 +1258,16 @@ namespace Louron {
 				}
 			}
 
+			shader->UnBind();
+
 			if (scene_ref)
-			{
-				glViewport(0, 0, scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height);
 				scene_ref->GetSceneFrameBuffer()->Bind();
-			}
 
 			glCullFace(GL_BACK);
 		}
+
+		#pragma endregion
+
 	}
 
 	/// <summary>
@@ -1154,6 +1364,10 @@ namespace Louron {
 				glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, FP_Data.PL_Shadow_CubeMap_Array);
 				shader->SetInt("u_PL_ShadowCubeMapArray", 4);
 
+				glActiveTexture(GL_TEXTURE5);
+				glBindTexture(GL_TEXTURE_2D_ARRAY, FP_Data.DL_Shadow_Texture_Array);
+				shader->SetInt("u_DL_ShadowMapArray", 5);
+
 				for (const auto& [sub_mesh, entities] : mesh_map) {
 
 					size_t entity_count = entities.size();
@@ -1248,7 +1462,6 @@ namespace Louron {
 			Renderer::DrawInstancedDebugCube(bounds_matricies);
 		}
 
-
 		// Clean Up Scene Render Pass
 		for (int i = 0; i < 4; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
@@ -1299,99 +1512,6 @@ namespace Louron {
 		}
 		return true; // Sphere is inside or intersecting the frustum
 	}
-
-	// POINT LIGHT SHADOW SYSTEM IDEA
-	/* 
-	*	
-	*	Create Cube Map Array
-	*	Allocate a cube map array large enough to hold the shadow maps for all shadow-casting lights.
-	*	
-	*		GLuint cubeMapArray;
-	*		glGenTextures(1, &cubeMapArray);
-	*		glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, cubeMapArray);
-	*	
-	*		// Allocate storage for the cube map array
-	*		int shadowResolution = 1024; // Shadow map resolution
-	*		int numShadowCastingLights = visibleLights.size(); // Number of shadow-casting lights
-	*		glTexStorage3D(GL_TEXTURE_CUBE_MAP_ARRAY, 1, GL_DEPTH_COMPONENT24, 
-	*					   shadowResolution, shadowResolution, numShadowCastingLights * 6);
-	*	
-	*		// Configure texture parameters
-	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	*		glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	*	
-	*	---------------------------------------------------------------------------------------------------------------
-	*
-	*	4. Render Shadows for Each Light
-	*	4.1 Loop Through Lights
-	*	For each shadow-casting light:
-	*	
-	*	Gather entities within the light's range by checking if their AABBs intersect with the light's bounds.
-	*	Render shadow maps directly into the cube map array.
-	*	4.2 Render to Cube Map Array
-	*	Bind the cube map array and set up rendering for the specific light:
-	*	
-	*		GLuint framebuffer;
-	*		glGenFramebuffers(1, &framebuffer);
-	*	
-	*		for (int lightIndex = 0; lightIndex < visibleLights.size(); ++lightIndex) {
-	*			auto& light = visibleLights[lightIndex];
-	*	
-	*			// Bind the framebuffer
-	*			glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-	*	
-	*			for (int face = 0; face < 6; ++face) {
-	*				int layerIndex = lightIndex * 6 + face; // Cube map array layer
-	*	
-	*				// Attach the cube map array layer as the depth attachment
-	*				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, cubeMapArray, 0, layerIndex);
-	*	
-	*				// Clear the depth buffer
-	*				glClear(GL_DEPTH_BUFFER_BIT);
-	*	
-	*				// Render all entities in range of the light for this face
-	*				for (const auto& entity : entitiesInRange) {
-	*					// Render entity from the light's perspective for this face
-	*				}
-	*			}
-	*		}
-	*	
-	*	---------------------------------------------------------------------------------------------------------------
-	*	5. Forward Rendering (Color Pass)
-	*	5.1 Sort Meshes
-	*	Sort meshes normally for efficiency.
-	*	
-	*	5.2 Bind Cube Map Array
-	*	Bind the cube map array and set it as a uniform for your forward rendering shader.
-	*	
-	*		glActiveTexture(GL_TEXTURE0);
-	*		glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, cubeMapArray);
-	*	
-	*		glUniform1i(glGetUniformLocation(shaderProgram, "pointLightsCubeMapArray"), 0);
-	*
-	*	5.3 Render with Shadows
-	*	For each point light, check if it casts shadows. If so, calculate shadows using the cube map array.
-	*	
-	*	In GLSL:
-	*	
-	*		uniform samplerCubeArray pointLightsCubeMapArray;
-	*	
-	*		float calculateShadow(vec3 fragPos, vec3 lightPos, int shadowIndex) {
-	*			vec3 lightToFrag = fragPos - lightPos;
-	*			vec3 direction = normalize(lightToFrag);
-	*			float distance = length(lightToFrag);
-	*	
-	*			// Sample shadow map
-	*			float depth = texture(pointLightsCubeMapArray, vec4(direction, shadowIndex)).r;
-	*	
-	*			// Compare depth
-	*			return distance > depth ? 0.0 : 1.0;
-	*		}
-	*
-	*/
 
 #pragma endregion
 

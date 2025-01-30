@@ -36,6 +36,7 @@ uniform bool u_UseInstanceData = false;
 void main() {
 
 	vertex_out.TexCoord = aTexCoord;
+    vertex_out.ViewPos = u_CameraPos;
 
     mat3 normal_matrix;
 
@@ -90,8 +91,13 @@ struct DirLight {
     float intensity;
     bool lastLight;
     
-    // DO NOT USE - this is for SSBO alignment purposes ONLY
-    float m_Padding1;
+    float[5] shadowCascadePlaneDistances;
+
+    uint shadowCastingType;
+	uint shadowLightIndex;
+
+    uint m_Padding1;
+    uint m_Padding2;
 };
 
 struct PointLight {
@@ -162,17 +168,32 @@ layout(std430, binding = 4) readonly buffer DL_Buffer {
     DirLight data[];
 } DL_Buffer_Data;
 
+layout(std430, binding = 5) readonly buffer DL_Shadow_LightSpaceMatrices_Buffer {
+    mat4 data[];
+} DL_Shadow_LightSpaceMatrices_Buffer_Data;
+
 // Shader In/Out Variables
 in VS_OUT {
 
     vec3 FragPos;
     vec2 TexCoord;
 	vec3 ViewPos;
+
 	mat3 TBN_Matrix;
 	vec3 TangentViewPos;
 	vec3 TangentFragPos;
 
 } fragment_in;
+
+struct VertexData {
+    
+    mat4 Proj;
+    mat4 View;
+    mat4 Model;
+
+};
+
+uniform VertexData u_VertexIn;
 
 layout (location = 0) out vec4 out_FragColour;
 
@@ -184,6 +205,7 @@ uniform int u_TilesX;
 uniform ivec2 u_ScreenSize;
 uniform sampler2D u_Depth;
 uniform bool u_ShowLightComplexity;
+uniform sampler2DArray u_DL_ShadowMapArray;
 uniform samplerCubeArray u_PL_ShadowCubeMapArray;
 
 // Forward Plus Local Variables
@@ -233,6 +255,68 @@ vec3 gridSamplingDisk[20] = vec3[]
    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
+
+float DirectionalLightShadowCalculation(vec3 normal, vec3 light_direction, uint shadow_light_index, float[5] cascade_plane_distances, bool soft_shadow)
+{    
+    // Transform fragment position to view space
+    vec4 frag_pos_view_space = u_VertexIn.View * vec4(fragment_in.FragPos, 1.0);
+    float depth_value = abs(frag_pos_view_space.z);
+
+    // Find the active cascade layer and compute blend factor
+    int cascade_layer = 4; // Default to the last cascade
+    for (int i = 0; i < 5; ++i)
+    {
+        if (depth_value < cascade_plane_distances[i])
+        {
+            cascade_layer = i;
+            break;
+        }
+    }
+    
+    vec4 frag_pos_light_space = DL_Shadow_LightSpaceMatrices_Buffer_Data.data[int(shadow_light_index * 5) + cascade_layer] * vec4(fragment_in.FragPos, 1.0);
+
+    // Perform perspective divide and transform to [0,1] range
+    vec3 projection_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
+    projection_coords = projection_coords * 0.5 + 0.5;
+
+    // Get depth of current fragment from light's perspective
+    float current_depth = projection_coords.z;
+
+    // Prevent gaps by relaxing the out-of-bounds check
+    if (current_depth > 1.00) 
+        return 0.0; 
+
+    // Calculate bias (based on normal and light direction)
+    float bias = max(0.05 * (1.0 - dot(normal, light_direction)), 0.005);
+    const float bias_mod = 0.5;
+    bias *= 1 / (cascade_plane_distances[cascade_layer] * bias_mod);
+
+    // Percentage Closer Filtering (PCF)
+    float shadow = 0.0;
+
+    if (soft_shadow)
+    {
+        vec2 texel_size = 1.0 / vec2(textureSize(u_DL_ShadowMapArray, 0));
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float pcf_depth = texture(u_DL_ShadowMapArray, vec3(projection_coords.xy + vec2(x, y) * texel_size, int(shadow_light_index * 5) + cascade_layer)).r;
+                shadow += (current_depth - bias) > pcf_depth ? 1.0 : 0.0;        
+            }    
+        }
+        shadow /= 9.0; // Average over 3x3 region
+    } 
+    else
+    {
+        // Hard shadow sampling (no softening or filtering)
+        float shadow_depth = texture(u_DL_ShadowMapArray, vec3(projection_coords.xy, int(shadow_light_index * 5) + cascade_layer)).r;
+        shadow = (current_depth - bias) > shadow_depth ? 1.0 : 0.0;  // If current depth is greater than shadow depth, it's in shadow
+    }
+
+    return shadow;
+}
+
 float PointLightShadowCalculation(vec3 light_pos, float point_light_far_plane, uint cubemap_array_index, int samples) {
     
     vec3 fragToLight = fragment_in.FragPos - light_pos; 
@@ -241,11 +325,11 @@ float PointLightShadowCalculation(vec3 light_pos, float point_light_far_plane, u
     float shadow = 0.0;
     float bias = 0.15;
 
-    float viewDistance = length(fragment_in.ViewPos - fragment_in.FragPos);
-    float diskRadius = (1.0 + (viewDistance / point_light_far_plane)) / 25.0;
+    float view_distance = length(fragment_in.ViewPos - fragment_in.FragPos);
+    float disk_radius = (1.0 + (view_distance / point_light_far_plane)) / 25.0;
     
     for (int i = 0; i < samples; ++i) {
-        vec3 sampleOffset = fragToLight + gridSamplingDisk[i] * diskRadius;
+        vec3 sampleOffset = fragToLight + gridSamplingDisk[i] * disk_radius;
         vec4 shadowCoord = vec4(sampleOffset, float(cubemap_array_index));
         
         // Sample shadow map using array index
@@ -334,8 +418,19 @@ vec3 CalcDirLights(vec3 normal, vec3 view_direction, vec3 albedo, float metallic
         vec3 kS = F;
         vec3 kD = vec3(1.0) - kS;
         kD *= 1.0 - metallic;
+        
+        float shadow_factor = 1.0;
 
-        directional_result += (kD * albedo / PI + specular) * radiance * NdotL;
+        if (light.shadowCastingType == 1)
+        {
+            shadow_factor -= DirectionalLightShadowCalculation(normal, -light.direction.xyz, light.shadowLightIndex, light.shadowCascadePlaneDistances, false);
+        } 
+        else if (light.shadowCastingType == 2)
+        {
+            shadow_factor -= DirectionalLightShadowCalculation(normal, -light.direction.xyz, light.shadowLightIndex, light.shadowCascadePlaneDistances, true);
+        }
+
+        directional_result += shadow_factor * ((kD * albedo / PI + specular) * radiance * NdotL);
     }
 
     return directional_result;

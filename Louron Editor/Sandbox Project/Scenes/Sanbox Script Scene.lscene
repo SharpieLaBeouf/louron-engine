@@ -2,9 +2,9 @@ Scene Name: Sanbox Script Scene
 Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
 Scene Pipeline Type: 1
 Entities:
-  - Entity: 2819661692
+  - Entity: 2998490183
     TagComponent:
-      Tag: Shoot
+      Tag: Flash Light
     HierarchyComponent:
       Parent: 2984366409
       Children:
@@ -12,136 +12,320 @@ Entities:
     ScriptComponent:
       Script_1:
         Active: true
-        Script Name: SandboxProject.ShootScript
+        Script Name: SandboxProject.Flashlight
         Fields:
-          - Name: bullet_prefab
-            Type: Prefab
-            Data: 2792494709
-          - Name: speed
-            Type: Float
-            Data: 200
+          - Name: FlashLight
+            Type: SpotLightComponent
+            Data: 2998490183
     TransformComponent:
-      Translation: [0, 4.76837158e-07, -0.5]
-      Rotation: [0, -0, 0]
-      Scale: [0.0199999996, 0.0200000014, 0.0199999996]
-  - Entity: 2232728946
+      Translation: [-0.000152587891, 7.34329224e-05, -0.499603271]
+      Rotation: [0.000215578155, 2.2341741e-05, 0.00165808154]
+      Scale: [0.999999702, 0.999772429, 1]
+    SpotLightComponent:
+      Active: false
+      Colour: [1, 1, 1, 1]
+      Range: 100
+      Angle: 147.419998
+      Intensity: 5
+      Shadow Type: None
+  - Entity: 2984366409
     TagComponent:
-      Tag: Chandelier_Wood_Lit
+      Tag: AK47 (1)
     HierarchyComponent:
-      Parent: 2008826555
+      Parent: 1332520780
       Children:
-        - 4233385606
+        - 2819661692
+        - 2998490183
     TransformComponent:
-      Translation: [0, 7.0999999, 0]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
+      Translation: [1.49118042, -0.654636383, -1.02765799]
+      Rotation: [12.7791243, -2.11770487, -0.0591265075]
+      Scale: [4.99999046, 5.00000858, 4.99997568]
     MeshFilterComponent:
-      MeshAssetHandle: 119614820
+      MeshAssetHandle: 653242855
     MeshRendererComponent:
       MeshActive: true
-      CastShadows: true
-      MaterialAssetCount: 1
+      CastShadows: false
+      MaterialAssetCount: 2
       MaterialAssetHandles:
-        - 1180248686
-  - Entity: 1886447739
+        - 2377665544
+        - 2377665544
+  - Entity: 3170090059
     TagComponent:
-      Tag: Floor
+      Tag: Scene Lights
     HierarchyComponent:
-      Parent: 2008826555
+      Parent: 4294967295
       Children:
-        - 1277664429
+        - 748481149
+        - 1872186740
     TransformComponent:
-      Translation: [0, -8.60000038, 0]
-      Rotation: [0, -0, 0]
-      Scale: [20, 1, 20]
-    RigidbodyComponent:
-      Mass: 10
-      Drag: 0
-      AngularDrag: 0.0500000007
-      AutomaticCentreOfMass: true
-      UseGravity: true
-      IsKinematic: true
-      PositionConstraint: [false, false, false]
-      RotationConstraint: [false, false, false]
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 2089351735
+    TagComponent:
+      Tag: Floor Collider
+    HierarchyComponent:
+      Parent: 1004671762
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, -5.3644186e-08, -0.899999917]
+      Rotation: [89.9999924, -0, 0]
+      Scale: [112, 0.999999881, 111.999985]
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
       Size: [1, 1, 1]
       MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 104901465
+  - Entity: 748481149
     TagComponent:
-      Tag: Ominous Light
+      Tag: Point Light
     HierarchyComponent:
-      Parent: 1678864458
+      Parent: 3170090059
       Children:
         []
     TransformComponent:
-      Translation: [0, 1.20000005, 0.5]
-      Rotation: [-90, 1, 1]
-      Scale: [0.200000018, 0.200000003, 0.200000018]
+      Translation: [8.60353279, -1.50288749, -11.9367762]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
     PointLightComponent:
       Active: false
-      Colour: [1, 0, 0, 1]
-      Radius: 50
-      Intensity: 5
-      Shadow Type: None
-  - Entity: 1678864458
+      Colour: [1, 1, 1, 1]
+      Radius: 34.2999992
+      Intensity: 120.75
+      Shadow Type: Hard
+  - Entity: 1004671762
     TagComponent:
-      Tag: Ominous Goblin!
+      Tag: Dome
     HierarchyComponent:
-      Parent: 4115850506
+      Parent: 4294967295
       Children:
-        - 104901465
-    ScriptComponent:
-      Script_1:
-        Active: false
-        Script Name: SandboxProject.PlayerMoveScript
-        Fields:
-          - Name: speed
-            Type: Float
-            Data: 20
+        - 2089351735
     TransformComponent:
-      Translation: [2.40127039, -4.96963596, -9.60421753]
-      Rotation: [0, -1.48980081, 0]
-      Scale: [5.00000095, 5, 5.00000095]
+      Translation: [0, -15.6000004, 0]
+      Rotation: [-90, 0, 0]
+      Scale: [2, 2, 2]
     MeshFilterComponent:
-      MeshAssetHandle: 1692962371
+      MeshAssetHandle: 2633474792
     MeshRendererComponent:
       MeshActive: true
       CastShadows: false
-      MaterialAssetCount: 1
+      MaterialAssetCount: 2
       MaterialAssetHandles:
-        - 3535300567
-  - Entity: 3773169967
+        - 1692682345
+        - 1692682345
+  - Entity: 4133106915
     TagComponent:
-      Tag: Crazy Sphere!
+      Tag: Arch_01
     HierarchyComponent:
-      Parent: 4115850506
+      Parent: 1769650053
       Children:
         []
-    ScriptComponent:
-      Script_1:
-        Active: true
-        Script Name: SandboxProject.CrazyScript
-        Fields:
-          - Name: MaxRegion
-            Type: Vector3
-            Data: [10, 10, 40]
-          - Name: Speed
-            Type: Float
-            Data: 100
     TransformComponent:
-      Translation: [-2.35263944, 0.176588848, -2.19965768]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
+      Translation: [-19, -6.80000019, 0]
+      Rotation: [0, 89.972023, 0]
+      Scale: [0.99999994, 1, 0.99999994]
     MeshFilterComponent:
-      MeshAssetHandle: 293103916
+      MeshAssetHandle: 2217055936
     MeshRendererComponent:
       MeshActive: true
       CastShadows: true
       MaterialAssetCount: 1
       MaterialAssetHandles:
-        - 1375892428
+        - 566135705
+  - Entity: 1277664429
+    TagComponent:
+      Tag: Tile_01
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [14.8041725, -5.09999943, 23.5494118]
+      Rotation: [0, 0, 0]
+      Scale: [3.99999976, 0.200000003, 3.99999976]
+    MeshFilterComponent:
+      MeshAssetHandle: 2807745834
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 756911316
+  - Entity: 4263374889
+    TagComponent:
+      Tag: Wall_03_01
+    HierarchyComponent:
+      Parent: 1769650053
+      Children:
+        []
+    TransformComponent:
+      Translation: [13.8999996, -14, 20]
+      Rotation: [0, -180, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 2996879002
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 2337055788
+        - 2337055788
+  - Entity: 2008826555
+    TagComponent:
+      Tag: Static Objects
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 1769650053
+        - 1886447739
+        - 2232728946
+    TransformComponent:
+      Translation: [0, 2.5999999, 0]
+      Rotation: [0, 257.399994, 0]
+      Scale: [1, 1, 1]
+  - Entity: 1769650053
+    TagComponent:
+      Tag: Walls
+    HierarchyComponent:
+      Parent: 2008826555
+      Children:
+        - 3830679127
+        - 3567191242
+        - 2158404736
+        - 4263374889
+        - 4133106915
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 3830679127
+    TagComponent:
+      Tag: Wall_03_02
+    HierarchyComponent:
+      Parent: 1769650053
+      Children:
+        []
+    TransformComponent:
+      Translation: [4.5, -14, 20]
+      Rotation: [180, -5.00895612e-06, 180]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 165348382
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 3013405583
+        - 3013405583
+  - Entity: 3567191242
+    TagComponent:
+      Tag: Wall_03_03
+    HierarchyComponent:
+      Parent: 1769650053
+      Children:
+        []
+    TransformComponent:
+      Translation: [-5.5, -14, 20]
+      Rotation: [180, -5.00895612e-06, 180]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 3268216246
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 484623863
+        - 484623863
+  - Entity: 2158404736
+    TagComponent:
+      Tag: Wall_03_04
+    HierarchyComponent:
+      Parent: 1769650053
+      Children:
+        []
+    TransformComponent:
+      Translation: [-15, -14, 20]
+      Rotation: [180, -5.00895612e-06, 180]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 4131126634
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 1328298999
+        - 1328298999
+  - Entity: 1872186740
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 3170090059
+      Children:
+        []
+    TransformComponent:
+      Translation: [3.07571244, -0.871847808, -0.0321246386]
+      Rotation: [-33.5, 7.5999999, -2.95755817e-05]
+      Scale: [0.999999762, 0.999996126, 0.999995232]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 0.800172985, 0.514705896, 1]
+      Intensity: 1
+      Shadow Type: Hard
+  - Entity: 4115850506
+    TagComponent:
+      Tag: Script Objects
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 3773169967
+        - 1678864458
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.TestTypes
+        Fields:
+          - Name: PrefabField
+            Type: Prefab
+            Data: 2153831608
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+  - Entity: 1332520780
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 2984366409
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.CameraMoveScript
+        Fields:
+          - Name: CameraSpeed
+            Type: Float
+            Data: 100
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        Projection Type: Perspective
+        FOV: 90
+        Near: 0.00999999978
+        Far: 1000
+      Primary: true
+      ClearFlag: Skybox
+      ClearColour: [0.897058845, 0.909169555, 1, 1]
+    SkyboxComponent:
+      MaterialAssetHandle: 1778786993
   - Entity: 4233385606
     TagComponent:
       Tag: Flickering Light
@@ -173,306 +357,127 @@ Entities:
       Radius: 10
       Intensity: 25.0499992
       Shadow Type: Hard
-  - Entity: 1332520780
+  - Entity: 3773169967
     TagComponent:
-      Tag: Main Camera
+      Tag: Crazy Sphere!
     HierarchyComponent:
-      Parent: 4294967295
+      Parent: 4115850506
       Children:
-        - 2984366409
+        []
     ScriptComponent:
       Script_1:
         Active: true
-        Script Name: SandboxProject.CameraMoveScript
+        Script Name: SandboxProject.CrazyScript
         Fields:
-          - Name: CameraSpeed
+          - Name: MaxRegion
+            Type: Vector3
+            Data: [10, 10, 40]
+          - Name: Speed
             Type: Float
             Data: 100
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
+      Translation: [-2.35263944, 0.176588848, -2.19965768]
+      Rotation: [0, -0, 0]
       Scale: [1, 1, 1]
-    CameraComponent:
-      Camera:
-        Projection Type: Perspective
-        FOV: 90
-        Near: 0.00999999978
-        Far: 1000
-      Primary: true
-      ClearFlag: Skybox
-      ClearColour: [0.897058845, 0.909169555, 1, 1]
-    SkyboxComponent:
-      MaterialAssetHandle: 1778786993
-  - Entity: 4115850506
+    MeshFilterComponent:
+      MeshAssetHandle: 293103916
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1375892428
+  - Entity: 1678864458
     TagComponent:
-      Tag: Script Objects
+      Tag: Ominous Goblin!
     HierarchyComponent:
-      Parent: 4294967295
+      Parent: 4115850506
       Children:
-        - 3773169967
-        - 1678864458
+        - 104901465
     ScriptComponent:
       Script_1:
-        Active: true
-        Script Name: SandboxProject.TestTypes
+        Active: false
+        Script Name: SandboxProject.PlayerMoveScript
         Fields:
-          - Name: PrefabField
-            Type: Prefab
-            Data: 2153831608
+          - Name: speed
+            Type: Float
+            Data: 20
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-  - Entity: 1872186740
-    TagComponent:
-      Tag: Directional Light
-    HierarchyComponent:
-      Parent: 3170090059
-      Children:
-        []
-    TransformComponent:
-      Translation: [3.07571244, -0.871847808, -0.0321246386]
-      Rotation: [-60.0000153, 29.9999771, -2.95755817e-05]
-      Scale: [0.999999762, 0.999996126, 0.999995232]
-    DirectionalLightComponent:
-      Active: true
-      Colour: [1, 0.800172985, 0.514705896, 1]
-      Intensity: 0.100000001
-  - Entity: 2158404736
-    TagComponent:
-      Tag: Wall_03_04
-    HierarchyComponent:
-      Parent: 1769650053
-      Children:
-        []
-    TransformComponent:
-      Translation: [-15, -14, 20]
-      Rotation: [180, -5.00895612e-06, 180]
-      Scale: [1, 1, 1]
+      Translation: [2.40127039, -4.96963596, -9.60421753]
+      Rotation: [0, -1.48980081, 0]
+      Scale: [5.00000095, 5, 5.00000095]
     MeshFilterComponent:
-      MeshAssetHandle: 4131126634
+      MeshAssetHandle: 1692962371
     MeshRendererComponent:
       MeshActive: true
       CastShadows: false
-      MaterialAssetCount: 2
+      MaterialAssetCount: 1
       MaterialAssetHandles:
-        - 1328298999
-        - 1328298999
-  - Entity: 3567191242
+        - 3535300567
+  - Entity: 104901465
     TagComponent:
-      Tag: Wall_03_03
+      Tag: Ominous Light
     HierarchyComponent:
-      Parent: 1769650053
+      Parent: 1678864458
       Children:
         []
     TransformComponent:
-      Translation: [-5.5, -14, 20]
-      Rotation: [180, -5.00895612e-06, 180]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 3268216246
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 2
-      MaterialAssetHandles:
-        - 484623863
-        - 484623863
-  - Entity: 3830679127
+      Translation: [0, 1.20000005, 0.5]
+      Rotation: [-90, 1, 1]
+      Scale: [0.200000018, 0.200000003, 0.200000018]
+    PointLightComponent:
+      Active: false
+      Colour: [1, 0, 0, 1]
+      Radius: 50
+      Intensity: 5
+      Shadow Type: None
+  - Entity: 1886447739
     TagComponent:
-      Tag: Wall_03_02
-    HierarchyComponent:
-      Parent: 1769650053
-      Children:
-        []
-    TransformComponent:
-      Translation: [4.5, -14, 20]
-      Rotation: [180, -5.00895612e-06, 180]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 165348382
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 2
-      MaterialAssetHandles:
-        - 3013405583
-        - 3013405583
-  - Entity: 1769650053
-    TagComponent:
-      Tag: Walls
+      Tag: Floor
     HierarchyComponent:
       Parent: 2008826555
       Children:
-        - 3830679127
-        - 3567191242
-        - 2158404736
-        - 4263374889
-        - 4133106915
+        []
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [0, -8.60000038, 0]
       Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-  - Entity: 2008826555
-    TagComponent:
-      Tag: Static Objects
-    HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        - 1769650053
-        - 1886447739
-        - 2232728946
-    TransformComponent:
-      Translation: [0, 2.5999999, 0]
-      Rotation: [0, 257.399994, 0]
-      Scale: [1, 1, 1]
-  - Entity: 4263374889
-    TagComponent:
-      Tag: Wall_03_01
-    HierarchyComponent:
-      Parent: 1769650053
-      Children:
-        []
-    TransformComponent:
-      Translation: [13.8999996, -14, 20]
-      Rotation: [0, -180, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 2996879002
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 2
-      MaterialAssetHandles:
-        - 2337055788
-        - 2337055788
-  - Entity: 1277664429
-    TagComponent:
-      Tag: Tile_01
-    HierarchyComponent:
-      Parent: 1886447739
-      Children:
-        []
-    TransformComponent:
-      Translation: [-0.0799999908, 0.900000095, 0]
-      Rotation: [0, -0, 0]
-      Scale: [0.199999988, 1, 0.199999988]
-    MeshFilterComponent:
-      MeshAssetHandle: 2807745834
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 756911316
-  - Entity: 4133106915
-    TagComponent:
-      Tag: Arch_01
-    HierarchyComponent:
-      Parent: 1769650053
-      Children:
-        []
-    TransformComponent:
-      Translation: [-19, -6.80000019, 0]
-      Rotation: [0, 89.972023, 0]
-      Scale: [0.99999994, 1, 0.99999994]
-    MeshFilterComponent:
-      MeshAssetHandle: 2217055936
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 566135705
-  - Entity: 1004671762
-    TagComponent:
-      Tag: Dome
-    HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        - 2089351735
-    TransformComponent:
-      Translation: [0, -15.6000004, 0]
-      Rotation: [-90, 0, 0]
-      Scale: [2, 2, 2]
-    MeshFilterComponent:
-      MeshAssetHandle: 2633474792
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 2
-      MaterialAssetHandles:
-        - 1692682345
-        - 1692682345
-  - Entity: 748481149
-    TagComponent:
-      Tag: Point Light
-    HierarchyComponent:
-      Parent: 3170090059
-      Children:
-        []
-    TransformComponent:
-      Translation: [8.60353279, -1.50288749, -11.9367762]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-    PointLightComponent:
-      Active: true
-      Colour: [1, 1, 1, 1]
-      Radius: 34.2999992
-      Intensity: 120.75
-      Shadow Type: Hard
-  - Entity: 2089351735
-    TagComponent:
-      Tag: Floor Collider
-    HierarchyComponent:
-      Parent: 1004671762
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, -5.3644186e-08, -0.899999917]
-      Rotation: [89.9999924, -0, 0]
-      Scale: [112, 0.999999881, 111.999985]
+      Scale: [20, 1, 20]
+    RigidbodyComponent:
+      Mass: 10
+      Drag: 0
+      AngularDrag: 0.0500000007
+      AutomaticCentreOfMass: true
+      UseGravity: true
+      IsKinematic: true
+      PositionConstraint: [false, false, false]
+      RotationConstraint: [false, false, false]
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
       Size: [1, 1, 1]
       MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 3170090059
+  - Entity: 2232728946
     TagComponent:
-      Tag: Scene Lights
+      Tag: Chandelier_Wood_Lit
     HierarchyComponent:
-      Parent: 4294967295
+      Parent: 2008826555
       Children:
-        - 748481149
-        - 1872186740
+        - 4233385606
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
+      Translation: [0, 7.0999999, 0]
+      Rotation: [0, -0, 0]
       Scale: [1, 1, 1]
-  - Entity: 2984366409
-    TagComponent:
-      Tag: AK47 (1)
-    HierarchyComponent:
-      Parent: 1332520780
-      Children:
-        - 2819661692
-        - 2998490183
-    TransformComponent:
-      Translation: [1.49118042, -0.654636383, -1.02765799]
-      Rotation: [12.7791243, -2.11770487, -0.0591265075]
-      Scale: [4.99999046, 5.00000858, 4.99997568]
     MeshFilterComponent:
-      MeshAssetHandle: 653242855
+      MeshAssetHandle: 119614820
     MeshRendererComponent:
       MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 2
+      CastShadows: true
+      MaterialAssetCount: 1
       MaterialAssetHandles:
-        - 2377665544
-        - 2377665544
-  - Entity: 2998490183
+        - 1180248686
+  - Entity: 2819661692
     TagComponent:
-      Tag: Flash Light
+      Tag: Shoot
     HierarchyComponent:
       Parent: 2984366409
       Children:
@@ -480,18 +485,15 @@ Entities:
     ScriptComponent:
       Script_1:
         Active: true
-        Script Name: SandboxProject.Flashlight
+        Script Name: SandboxProject.ShootScript
         Fields:
-          - Name: FlashLight
-            Type: SpotLightComponent
-            Data: 2998490183
+          - Name: speed
+            Type: Float
+            Data: 200
+          - Name: bullet_prefab
+            Type: Prefab
+            Data: 2792494709
     TransformComponent:
-      Translation: [-0.000152587891, 7.34329224e-05, -0.499603271]
-      Rotation: [0.000215578155, 2.2341741e-05, 0.00165808154]
-      Scale: [0.999999702, 0.999772429, 1]
-    SpotLightComponent:
-      Active: false
-      Colour: [1, 1, 1, 1]
-      Range: 100
-      Angle: 147.419998
-      Intensity: 5
+      Translation: [0, 4.76837158e-07, -0.5]
+      Rotation: [0, -0, 0]
+      Scale: [0.0199999996, 0.0200000014, 0.0199999996]

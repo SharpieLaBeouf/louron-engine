@@ -112,6 +112,7 @@ void LouronEditorLayer::OnAttach() {
 	m_ContentBrowserPanel.SetDirectory(Project::GetActiveProject()->GetProjectDirectory() / "Assets");
 
 	m_EditorCamera = std::make_unique<EditorCamera>();
+	m_EditorCamera->OnUpdate();
 }
 
 void LouronEditorLayer::OnDetach() {
@@ -660,7 +661,7 @@ void LouronEditorLayer::OnGuiRender() {
 		}
 		
 		CheckInput();
-		
+				
 		DisplaySceneViewportWindow();
 		DisplayHierarchyWindow();
 		DisplayPropertiesWindow();

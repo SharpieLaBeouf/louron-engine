@@ -74,7 +74,7 @@ namespace Louron {
 		void ConductRenderableFrustumCull();
 		void ConductDepthPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 		void ConductTiledBasedLightCull(const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
-		void ConductShadowMapping(const glm::vec3& camera_position);
+		void ConductShadowMapping(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 		void ConductRenderPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 
 		bool IsSphereInsideFrustum(const Bounds_Sphere& bounds, const Frustum& frustum);
@@ -99,6 +99,7 @@ namespace Louron {
 			std::vector<Entity> RenderableEntities;
 			std::vector<Entity> PLEntities;
 			std::vector<Entity> SLEntities;
+			std::vector<Entity> DLEntities;
 
 			Frustum Camera_Frustum{};
 
@@ -113,6 +114,15 @@ namespace Louron {
 			GLuint PL_Shadow_FrameBuffer = -1;
 			GLuint PL_Shadow_CubeMap_Array = -1;
 			std::unordered_map<UUID, GLuint> PL_Shadow_LightIndexMap;
+
+			GLuint DL_Shadow_Max_Maps = 5;
+			GLuint DL_Shadow_Map_Res = 1024;
+			GLuint DL_Shadow_FrameBuffer = -1;
+			GLuint DL_Shadow_Texture_Array = -1;
+			GLuint DL_Shadow_LightSpaceMatrix_Buffer = -1;	// Buffer that holds light space matrice for each directional light cascade
+
+			std::unordered_map<UUID, GLuint> DL_Shadow_LightSpaceMatrixIndex;
+			std::unordered_map<UUID, std::array<float, 5>> DL_Shadow_LightShadowCascadeDistances;
 
 		} FP_Data;
 
