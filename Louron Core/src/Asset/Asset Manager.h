@@ -30,6 +30,7 @@ namespace Louron {
 		{ ".mp3",		AssetType::Audio },
 
 		{ ".lmaterial",	AssetType::Material_Standard },
+		{ ".lmat",		AssetType::Material_Standard },
 		{ ".lskybox",	AssetType::Material_Skybox }
 
 	};

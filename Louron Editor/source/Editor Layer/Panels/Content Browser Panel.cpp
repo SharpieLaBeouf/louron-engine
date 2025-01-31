@@ -4,6 +4,11 @@
 #include "../Utils/Editor Script Utils.h"
 
 
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
+#include <yaml-cpp/yaml.h>
+
 using namespace Louron;
 
 static const std::unordered_map<std::string, bool> s_SupportedOpenInEditorFiles = {
@@ -512,6 +517,36 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 								first_focus = true;
 							}
 						}
+
+						if (ImGui::MenuItem("Create New Material")) {
+							std::filesystem::path file_path = m_CurrentDirectory / "New Material.lmat";
+
+							// Ensure unique filename
+							int counter = 1;
+							while (std::filesystem::exists(file_path)) {
+								file_path = m_CurrentDirectory / ("New Material (" + std::to_string(counter) + ").lmat");
+								counter++;
+							}
+
+							std::shared_ptr<PBRMaterial> material = std::make_shared<PBRMaterial>();
+							material->SetName(file_path.stem().string());
+
+							Project::GetStaticEditorAssetManager()->CreateAsset(material, file_path, Project::GetActiveProject()->GetProjectDirectory());
+
+							YAML::Emitter out;
+							out << YAML::BeginMap;
+							material->Serialize(out);
+							out << YAML::EndMap;
+
+							std::ofstream fout(file_path); // Create the file
+							fout << out.c_str();
+
+							is_renaming_path = true;
+							renaming_path = file_path;
+							new_path_file_name = file_path.filename().string();
+							first_focus = true;
+						}
+
 						ImGui::EndPopup();
 					}
 				}

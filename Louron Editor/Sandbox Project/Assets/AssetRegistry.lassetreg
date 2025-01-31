@@ -1809,6 +1809,11 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Floor and Wall/dungeon_set_01_atlas.tga
     Type: AssetType::Texture2D
     ParentAssetHandle: 4294967295
+  - Handle: 516424986
+    Name: New Material
+    FilePath: Materials/New Material.lmat
+    Type: AssetType::Material_Standard
+    ParentAssetHandle: 4294967295
   - Handle: 536257569
     Name: broken_steel_door_col
     FilePath: Models/Dungeon Kit/Door/broken_steel_door_col.png
@@ -2954,6 +2959,11 @@ AssetRegistry:
     FilePath: Models/Dungeon Kit/Door/Door_Wood.fbx
     Type: AssetType::Mesh
     ParentAssetHandle: 1015536818
+  - Handle: 3175972200
+    Name: New Material (1)
+    FilePath: Materials/New Material (1).lmat
+    Type: AssetType::Material_Standard
+    ParentAssetHandle: 4294967295
   - Handle: 3196295046
     Name: Door_Steel
     FilePath: Models/Dungeon Kit/Door/Door_Steel.fbx

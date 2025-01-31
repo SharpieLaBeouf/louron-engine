@@ -85,8 +85,7 @@ namespace Louron {
 
 		static std::shared_ptr<Material> ImportMaterial(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data);
 
-		static std::shared_ptr<BPMaterial> LoadMaterialBP(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path);
-		static std::shared_ptr<PBRMaterial> LoadMaterialPBR(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path);
+		static std::shared_ptr<PBRMaterial> LoadMaterialPBR(const YAML::Node data);
 		static std::shared_ptr<SkyboxMaterial> LoadMaterialSkybox(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path);
 
 	};

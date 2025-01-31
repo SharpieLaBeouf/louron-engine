@@ -96,7 +96,7 @@ namespace Louron {
 
 	std::shared_ptr<Material> MaterialImporter::ImportMaterial(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data) {
 
-		if (meta_data.FilePath.extension() == ".lmaterial" || meta_data.FilePath.extension() == ".lskybox") {
+		if (meta_data.FilePath.extension() == ".lmat" || meta_data.FilePath.extension() == ".lskybox") {
 
 			YAML::Node data;
 
@@ -123,12 +123,8 @@ namespace Louron {
 				return LoadMaterialSkybox(asset_map, asset_reg, meta_data.FilePath);
 			}
 
-			if (data["Material Asset Type"].as<std::string>() == "BPMaterial") {
-				return LoadMaterialBP(asset_map, asset_reg, meta_data.FilePath);
-			}
-
-			if (data["Material Asset Type"].as<std::string>() == "PBRMaterial") {
-				return LoadMaterialPBR(asset_map, asset_reg, meta_data.FilePath);
+			if (data["Material Asset Type"].as<std::string>() == AssetTypeToString(AssetType::Material_Standard)) {
+				return LoadMaterialPBR(data);
 			}
 		}
 
@@ -139,22 +135,13 @@ namespace Louron {
 		return nullptr;
 	}
 
-	std::shared_ptr<BPMaterial> MaterialImporter::LoadMaterialBP(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path) {
-
-		std::shared_ptr<BPMaterial> material = std::make_shared<BPMaterial>();
-
-
-
-		return std::shared_ptr<BPMaterial>();
-	}
-
-	std::shared_ptr<PBRMaterial> MaterialImporter::LoadMaterialPBR(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path) {
+	std::shared_ptr<PBRMaterial> MaterialImporter::LoadMaterialPBR(const YAML::Node data) {
 
 		std::shared_ptr<PBRMaterial> material = std::make_shared<PBRMaterial>();
 
+		material->Deserialize(data);
 
-
-		return std::shared_ptr<PBRMaterial>();
+		return material;
 	}
 
 	std::shared_ptr<SkyboxMaterial> MaterialImporter::LoadMaterialSkybox(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path) {

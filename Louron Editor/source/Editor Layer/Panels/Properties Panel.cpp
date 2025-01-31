@@ -7,6 +7,11 @@
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
 
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
+#include <yaml-cpp/yaml.h>
+
 using namespace Louron;
 
 void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Entity selected_entity)
@@ -797,7 +802,28 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 								asset_handle = dropped_asset_handle;
 							}
 							else {
-								L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+								L_APP_WARN("Invalid Asset Type Dropped on Mesh Renderer Material Target.");
+							}
+						}
+
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+
+							std::string dropped_asset_path_string(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+							std::filesystem::path dropped_asset_path = dropped_asset_path_string;
+
+							if (AssetManager::IsExtensionSupported(dropped_asset_path.extension())) {
+
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_asset_path);
+
+								if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Material_Standard) {
+									asset_handle = dropped_asset_handle;
+								}
+								else {
+									L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
+								}
+							}
+							else {
+								L_APP_WARN("Invalid File Path Dropped on Skybox Material Target.");
 							}
 						}
 						ImGui::EndDragDropTarget();
@@ -1343,7 +1369,8 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 				// TODO: implement serialisation for custom materials, probably need content browser first though lol
 				// Toggle the != to == if you want to edit materials from an imported asset that are not saved to their own file
-				bool immutable_material = metadata_material.FilePath.extension() != ".lmaterial";
+				bool immutable_material = metadata_material.FilePath.extension() != ".lmat";
+				bool material_modified = false;
 
 				if (ImGui::TreeNode(std::string("Material: " + metadata_material.AssetName).c_str())) {
 
@@ -1371,6 +1398,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 							if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(dropped_asset_handle) && Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
 								asset_material->SetAlbedoTexture(dropped_asset_handle);
+								material_modified = true;
 							}
 							else {
 								L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
@@ -1392,14 +1420,16 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 					float padding = (32.0f - context.FontSize) / 2.0f + context.Style.FramePadding.y;
 
 					ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, padding));
-					ImGui::ColorEdit4("##Albedo Colour", glm::value_ptr(colour), ImGuiColorEditFlags_NoInputs);
+					if (ImGui::ColorEdit4("##Albedo Colour", glm::value_ptr(colour), ImGuiColorEditFlags_NoInputs))
+					{
+						asset_material->SetAlbedoTintColour(colour);
+						material_modified = true;
+					}
 					ImGui::PopStyleVar();
 
 					ImGui::SameLine();
 
 					ImGui::Text("Albedo Colour");
-
-					asset_material->SetAlbedoTintColour(colour);
 
 					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetMetallicTextureAssetHandle()) ? Project::GetStaticEditorAssetManager()->GetAsset<Texture>(asset_material->GetMetallicTextureAssetHandle())->GetID() : 0;
 
@@ -1418,6 +1448,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 							if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(dropped_asset_handle) && Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
 								asset_material->SetMetallicTexture(dropped_asset_handle);
+								material_modified = true;
 							}
 							else {
 								L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
@@ -1434,15 +1465,21 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 						ImGui::Text("Metallic");
 						ImGui::SameLine();
 						float metallic_temp = asset_material->GetMetallic();
-						ImGui::SliderFloat("##Metallic", &metallic_temp, 0.0f, 1.0f, "%.2f");
-						asset_material->SetMetallic(metallic_temp);
+						if (ImGui::SliderFloat("##Metallic", &metallic_temp, 0.0f, 1.0f, "%.2f"))
+						{
+							asset_material->SetMetallic(metallic_temp);
+							material_modified = true;
+						}
 					}
 
 					ImGui::Text("Roughness");
 					ImGui::SameLine();
 					float roughness_temp = asset_material->GetRoughness();
-					ImGui::SliderFloat("##Roughness", &roughness_temp, 0.0f, 1.0f, "%.2f");
-					asset_material->SetRoughness(roughness_temp);
+					if (ImGui::SliderFloat("##Roughness", &roughness_temp, 0.0f, 1.0f, "%.2f")) 
+					{
+						asset_material->SetRoughness(roughness_temp);
+						material_modified = true;
+					}
 
 					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetNormalTextureAssetHandle()) ? Project::GetStaticEditorAssetManager()->GetAsset<Texture>(asset_material->GetNormalTextureAssetHandle())->GetID() : 0;
 
@@ -1461,6 +1498,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 							if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(dropped_asset_handle) && Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
 								asset_material->SetNormalTexture(dropped_asset_handle);
+								material_modified = true;
 							}
 							else {
 								L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
@@ -1475,6 +1513,17 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 					if (immutable_material) {
 						ImGui::EndDisabled();
+					}
+
+					if (material_modified)
+					{
+						YAML::Emitter out;
+						out << YAML::BeginMap;
+						asset_material->Serialize(out);
+						out << YAML::EndMap;
+
+						std::ofstream fout(Project::GetActiveProject()->GetProjectDirectory() / "Assets" / metadata_material.FilePath); // Create the file
+						fout << out.c_str();
 					}
 
 					ImGui::TreePop();

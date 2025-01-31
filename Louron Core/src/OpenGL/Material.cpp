@@ -10,6 +10,10 @@
 // C++ Standard Library Headers
 
 // External Vendor Library Headers
+#ifndef YAML_CPP_STATIC_DEFINE
+#define YAML_CPP_STATIC_DEFINE
+#endif
+#include <yaml-cpp/yaml.h>
 
 namespace Louron {
 
@@ -249,6 +253,73 @@ namespace Louron {
 	}
 
 	const std::string& PBRMaterial::GetName() const { return m_MaterialName; }
+
+	void PBRMaterial::Serialize(YAML::Emitter& out)
+	{
+		out << YAML::Key << "Material Asset Name" << YAML::Value << m_MaterialName;
+		out << YAML::Key << "Material Asset Type" << YAML::Value << "AssetType::Material_Standard";
+		out << YAML::Key << "Render Type" << YAML::Value << RenderTypeToString(m_RenderType);
+
+		out << YAML::Key << "Roughness" << YAML::Value << m_Roughness;
+		out << YAML::Key << "Metallic" << YAML::Value << m_MetallicScale;
+
+
+		out << YAML::Key << "Albedo Tint" << YAML::Value << YAML::Flow
+			<< YAML::BeginSeq
+			<< m_AlbedoTint.r
+			<< m_AlbedoTint.g
+			<< m_AlbedoTint.b
+			<< m_AlbedoTint.a
+			<< YAML::EndSeq;
+
+		out << YAML::Key << "AlbedoTextureAsset" << YAML::Value << m_AlbedoTexture;
+		out << YAML::Key << "MetallicTextureAsset" << YAML::Value << m_MetallicTexture;
+		out << YAML::Key << "NormalTextureAsset" << YAML::Value << m_NormalTexture;
+	}
+
+	bool PBRMaterial::Deserialize(const YAML::Node data)
+	{
+		if (!data)
+			return false;
+
+		if (data["Material Asset Name"]) {
+			m_MaterialName = data["Material Asset Name"].as<std::string>();
+		}
+
+		if (data["Render Type"]) {
+			m_RenderType = StringToRenderType(data["Render Type"].as<std::string>());
+		}
+
+		if (data["Roughness"]) {
+			m_Roughness = data["Roughness"].as<float>();
+		}
+
+		if (data["Metallic"]) {
+			m_MetallicScale = data["Metallic"].as<float>();
+		}
+
+		if (data["Albedo Tint"]) {
+			auto positionSeq = data["Albedo Tint"];
+			if (positionSeq.IsSequence() && positionSeq.size() == 4) {
+				m_AlbedoTint.r = positionSeq[0].as<float>();
+				m_AlbedoTint.g = positionSeq[1].as<float>();
+				m_AlbedoTint.b = positionSeq[2].as<float>();
+				m_AlbedoTint.a = positionSeq[3].as<float>();
+			}
+		}
+
+		if (data["AlbedoTextureAsset"]) {
+			m_AlbedoTexture = data["AlbedoTextureAsset"].as<uint32_t>();
+		}
+
+		if (data["MetallicTextureAsset"]) {
+			m_MetallicTexture = data["MetallicTextureAsset"].as<uint32_t>();
+		}
+
+		if (data["NormalTextureAsset"]) {
+			m_NormalTexture = data["NormalTextureAsset"].as<uint32_t>();
+		}
+	}
 
 	#pragma endregion
 

@@ -16,6 +16,12 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
+namespace YAML {
+
+	class Emitter;
+	class Node;
+}
+
 namespace Louron {
 
 	enum TextureMapType {
@@ -27,8 +33,33 @@ namespace Louron {
 
 	enum RenderType {
 		L_MATERIAL_OPAQUE = 0,
-		L_MATERIAL_TRANSPARENT = 1
+		L_MATERIAL_TRANSPARENT = 1,
+		L_MATERIAL_INVALID = 2
 	};
+
+	static std::string RenderTypeToString(RenderType type) {
+
+		switch (type) {
+
+			case RenderType::L_MATERIAL_OPAQUE: return "Opaque";
+			case RenderType::L_MATERIAL_TRANSPARENT: return "Transparent";
+
+		}
+
+		return "Invalid";
+	}
+
+	static RenderType StringToRenderType(const std::string& type_string) {
+
+		if (type_string == "Opaque")
+			return RenderType::L_MATERIAL_OPAQUE;
+
+		if (type_string == "Transparent") 
+			return RenderType::L_MATERIAL_TRANSPARENT;
+
+		return RenderType::L_MATERIAL_INVALID;
+
+	}
 
 	class CameraBase;
 
@@ -202,6 +233,9 @@ namespace Louron {
 
 		Shader* GetShader() override;
 		const std::string& GetName() const;
+
+		void Serialize(YAML::Emitter& out);
+		bool Deserialize(const YAML::Node data);
 
 	};
 
