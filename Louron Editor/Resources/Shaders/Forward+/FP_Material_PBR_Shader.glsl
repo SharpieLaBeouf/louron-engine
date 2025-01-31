@@ -115,8 +115,8 @@ struct PointLight {
 	uint shadowLayerIndex;
     
     // DO NOT USE - this is for SSBO alignment purposes ONLY (12 BYTES)
+	float m_Padding1;
 	float m_Padding2;
-	float m_Padding3;
 };
 
 struct SpotLight {
@@ -134,11 +134,10 @@ struct SpotLight {
     bool lastLight;
     
 	uint shadowCastingType;
+	uint shadowLayerIndex;
 	
     // DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
 	float m_Padding1;
-	float m_Padding2;
-   
 };
 
 struct VisibleIndex {
@@ -171,6 +170,10 @@ layout(std430, binding = 4) readonly buffer DL_Buffer {
 layout(std430, binding = 5) readonly buffer DL_Shadow_LightSpaceMatrices_Buffer {
     mat4 data[];
 } DL_Shadow_LightSpaceMatrices_Buffer_Data;
+
+layout(std430, binding = 6) readonly buffer SL_Shadow_LightSpaceMatrices_Buffer {
+    mat4 data[];
+} SL_Shadow_LightSpaceMatrices_Buffer_Data;
 
 // Shader In/Out Variables
 in VS_OUT {
@@ -206,6 +209,7 @@ uniform ivec2 u_ScreenSize;
 uniform sampler2D u_Depth;
 uniform bool u_ShowLightComplexity;
 uniform sampler2DArray u_DL_ShadowMapArray;
+uniform sampler2DArray u_SL_ShadowMapArray;
 uniform samplerCubeArray u_PL_ShadowCubeMapArray;
 
 // Forward Plus Local Variables
@@ -255,6 +259,46 @@ vec3 gridSamplingDisk[20] = vec3[]
    vec3(0, 1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0, 1, -1)
 );
 
+float SpotLightShadowCalculation(vec3 normal, vec3 light_pos, vec3 light_direction, uint shadow_light_index, bool soft_shadow)
+{
+    // Transform fragment position to light space
+    vec4 frag_pos_light_space = SL_Shadow_LightSpaceMatrices_Buffer_Data.data[int(shadow_light_index)] * vec4(fragment_in.FragPos, 1.0);
+    
+    // Perform perspective divide and transform to [0,1] range
+    vec3 projection_coords = frag_pos_light_space.xyz / frag_pos_light_space.w;
+    projection_coords = projection_coords * 0.5 + 0.5;
+
+    // Get depth of current fragment from light's perspective
+    float current_depth = projection_coords.z;
+
+    // Prevent gaps by relaxing the out-of-bounds check
+    if (current_depth > 1.00)
+        return 0.0;
+    
+    // Percentage Closer Filtering (PCF)
+    float shadow = 0.0;
+    if (soft_shadow)
+    {
+        vec2 texel_size = 1.0 / vec2(textureSize(u_SL_ShadowMapArray, 0));
+        for(int x = -1; x <= 1; ++x)
+        {
+            for(int y = -1; y <= 1; ++y)
+            {
+                float pcf_depth = texture(u_SL_ShadowMapArray, vec3(projection_coords.xy + vec2(x, y) * texel_size, int(shadow_light_index))).r;
+                shadow += current_depth > pcf_depth ? 1.0 : 0.0;
+            }
+        }
+        shadow /= 9.0; // Average over 3x3 region
+    }
+    else
+    {
+        // Hard shadow sampling
+        float shadow_depth = texture(u_SL_ShadowMapArray, vec3(projection_coords.xy, int(shadow_light_index))).r;
+        shadow = current_depth > shadow_depth ? 1.0 : 0.0;
+    }
+
+    return shadow;
+}
 
 float DirectionalLightShadowCalculation(vec3 normal, vec3 light_direction, uint shadow_light_index, float[5] cascade_plane_distances, bool soft_shadow)
 {    
@@ -485,9 +529,9 @@ vec3 CalcPointLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo
             
             float shadow_calculation = 0.0;
             if(light.shadowCastingType == 1) // HARD Shadows
-                shadow_calculation = PointLightShadowCalculation(PL_Buffer_Data.data[lightIndex].position.xyz, light.radius, light.shadowLayerIndex, 1);
+                shadow_calculation = PointLightShadowCalculation(light.position.xyz, light.radius, light.shadowLayerIndex, 1);
             if(light.shadowCastingType == 2) // SOFT Shadows
-                shadow_calculation = PointLightShadowCalculation(PL_Buffer_Data.data[lightIndex].position.xyz, light.radius, light.shadowLayerIndex, 20);
+                shadow_calculation = PointLightShadowCalculation(light.position.xyz, light.radius, light.shadowLayerIndex, 20);
 
             float shadow_factor = 1.0 - shadow_calculation; // Reduce contribution based on shadow
 
@@ -570,7 +614,18 @@ vec3 CalcSpotLights(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo,
                 vec3 kD = vec3(1.0) - kS;
                 kD *= 1.0 - metallic;
                 
-                spot_result += (kD * albedo / PI + specular) * radiance * NdotL;
+                float shadow_factor = 1.0;
+
+                if (light.shadowCastingType == 1)
+                {
+                    shadow_factor -= SpotLightShadowCalculation(normal, light.position.xyz, -light.direction.xyz, light.shadowLayerIndex, false);
+                } 
+                else if (light.shadowCastingType == 2)
+                {
+                    shadow_factor -= SpotLightShadowCalculation(normal, light.position.xyz, -light.direction.xyz, light.shadowLayerIndex, true);
+                }
+
+                spot_result += shadow_factor * ((kD * albedo / PI + specular) * radiance * NdotL);
 
             }
         }

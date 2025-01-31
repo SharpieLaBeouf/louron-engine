@@ -15,8 +15,8 @@ struct PointLight {
 	uint shadowLayerIndex;
     
     // DO NOT USE - this is for SSBO alignment purposes ONLY (12 BYTES)
+	float m_Padding1;
 	float m_Padding2;
-	float m_Padding3;
 };
 
 struct SpotLight {
@@ -34,10 +34,10 @@ struct SpotLight {
     bool lastLight;
     
 	uint shadowCastingType;
+	uint shadowLayerIndex;
 	
     // DO NOT USE - this is for SSBO alignment purposes ONLY (8 BYTES)
 	float m_Padding1;
-	float m_Padding2;
    
 };
 

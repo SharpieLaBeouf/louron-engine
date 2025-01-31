@@ -115,6 +115,13 @@ namespace Louron {
 			GLuint PL_Shadow_CubeMap_Array = -1;
 			std::unordered_map<UUID, GLuint> PL_Shadow_LightIndexMap;
 
+			GLuint SL_Shadow_Max_Maps = 30;
+			GLuint SL_Shadow_Map_Res = 1024;
+			GLuint SL_Shadow_FrameBuffer = -1;
+			GLuint SL_Shadow_Texture_Array = -1;
+			GLuint SL_Shadow_LightSpaceMatrix_Buffer = -1;	// Buffer that holds light space matrice for each directional light cascade
+			std::unordered_map<UUID, GLuint> SL_Shadow_LightIndexMap;
+
 			GLuint DL_Shadow_Max_Maps = 5;
 			GLuint DL_Shadow_Map_Res = 1024;
 			GLuint DL_Shadow_FrameBuffer = -1;

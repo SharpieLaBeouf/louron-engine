@@ -32,7 +32,14 @@ namespace Louron {
 	};
 
 	struct Frustum {
-		std::array<Plane, 6> planes;
+
+		Frustum() = default;
+
+		Frustum(const glm::mat4& view_proj_matrix) {
+			RecalculateFrustum(view_proj_matrix);
+		}
+
+		std::array<Plane, 6> planes{};
 
 		void RecalculateFrustum(const glm::mat4& view_proj_matrix);
 
