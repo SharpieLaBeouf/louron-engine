@@ -10,4 +10,7 @@ public:
 
 	void OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_ref, Louron::Entity& selected_entity);
 
+	Louron::Entity m_NewFocalEntity = {};
+
+	friend class LouronEditorLayer;
 };

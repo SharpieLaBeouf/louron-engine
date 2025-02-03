@@ -56,6 +56,7 @@ namespace Louron {
 		void SetConfig(const ProjectConfig& config) { m_Config = config; }
 
 		const std::filesystem::path& GetProjectDirectory() const { return m_ProjectDirectory; }
+		std::filesystem::path GetAssetDirectory() const { return m_ProjectDirectory / m_Config.AssetDirectory; }
 
 	public: // Scene Functions
 
@@ -69,6 +70,9 @@ namespace Louron {
 
 		static std::shared_ptr<EditorAssetManager> GetStaticEditorAssetManager();
 		std::shared_ptr<EditorAssetManager> GetEditorAssetManager() const;
+
+		static std::shared_ptr<AssetManagerBase> GetStaticAssetManager();
+		std::shared_ptr<AssetManagerBase> GetAssetManager() const;
 
 	private:
 

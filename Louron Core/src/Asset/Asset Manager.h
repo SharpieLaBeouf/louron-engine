@@ -12,165 +12,118 @@
 
 namespace Louron {
 
-	static std::map<std::filesystem::path, AssetType> s_AssetExtensionMap = {
-
-		{ ".lscene",	AssetType::Scene },
-		{ ".lprefab",	AssetType::Prefab },
-
-		{ ".png",		AssetType::Texture2D },
-		{ ".jpg",		AssetType::Texture2D },
-		{ ".jpeg",		AssetType::Texture2D },
-		{ ".psd",		AssetType::Texture2D },
-		{ ".tga",		AssetType::Texture2D },
-		{ ".tif",		AssetType::Texture2D },
-
-		{ ".obj",		AssetType::ModelImport },
-		{ ".fbx",		AssetType::ModelImport },
-
-		{ ".mp3",		AssetType::Audio },
-
-		{ ".lmaterial",	AssetType::Material_Standard },
-		{ ".lmat",		AssetType::Material_Standard },
-		{ ".lskybox",	AssetType::Material_Skybox }
-
-	};
-
 	using AssetMap = std::map<AssetHandle, std::shared_ptr<Asset>>;
 	using AssetRegistry = std::map<AssetHandle, AssetMetaData>;
-
-	/// <summary>
-	/// Static API Class.
-	/// </summary>
-	class AssetManager {
-
-	public:
-
-		static AssetType GetAssetTypeFromFileExtension(const std::filesystem::path& extension);
-		static bool IsExtensionSupported(const std::filesystem::path& extension);
-
-		static std::string NormalisePath(const std::filesystem::path& p) {
-
-			std::filesystem::path temp_path = std::filesystem::weakly_canonical(p);
-
-			std::string path_str = temp_path.string();
-
-			std::replace(path_str.begin(), path_str.end(), '\\', '/');
-
-			return path_str;
-		}
-
-		template <typename AssetType>
-		static AssetHandle CreateAsset(std::shared_ptr<AssetType> asset, const std::filesystem::path& file_path, const std::filesystem::path& project_file_path) {
-
-			return 0;
-		}
-
-		template <typename AssetType>
-		static std::shared_ptr<AssetType> GetAsset(AssetHandle handle) {
-
-			//std::shared_ptr<Asset> asset = Project::GetActiveProject()->GetAssetManager()->GetAsset(handle);
-			//return std::static_pointer_cast<T>(asset);
-
-		}
-
-		static bool IsAssetHandleValid(AssetHandle handle)
-		{
-			//return Project::GetActiveProject()->GetAssetManager()->IsAssetHandleValid(handle);
-		}
-
-		static bool IsAssetLoaded(AssetHandle handle)
-		{
-			//return Project::GetActiveProject()->GetAssetManager()->IsAssetLoaded(handle);
-		}
-
-		static AssetType GetAssetType(AssetHandle handle)
-		{
-			//return Project::GetActiveProject()->GetAssetManager()->GetAssetType(handle);
-		}
-	};
 
 	class AssetManagerBase {
 
 	public:
-		virtual std::shared_ptr<Asset> GetAsset(AssetHandle handle) = 0;
+		virtual std::shared_ptr<Asset> GetAsset(const AssetHandle& handle) = 0;
 
-		virtual bool IsAssetHandleValid(AssetHandle handle) const = 0;
-		virtual bool IsAssetLoaded(AssetHandle handle) const = 0;
-		virtual AssetType GetAssetType(AssetHandle handle) const = 0;
+		virtual bool IsAssetHandleValid(const AssetHandle& handle) const = 0;
+		virtual bool IsAssetLoaded(const AssetHandle& handle) const = 0;
+		virtual AssetType GetAssetType(const AssetHandle& handle) const = 0;
 
 	};
 
-	class Texture;
 	struct AssetMesh;
+	class Texture;
 	class Prefab;
 	class Material;
 	class SkyboxMaterial;
 
 	class EditorAssetManager : public AssetManagerBase {
 
-	public:
+	public: // Primary Methods
 
-		EditorAssetManager();
+		/// <summary>
+		/// This will refresh the entire asset registry. This will unload all assets, clear 
+		/// the current registry, then recurse through the provided asset directory for all 
+		/// .meta files, and compatible files that do not have .meta file created.
+		/// </summary>
+		/// <param name="project_asset_directory">File path must be absolute file location on disk.</param>
+		void RefreshAssetRegistry(const std::filesystem::path& project_asset_directory);
 
+		/// <summary>
+		/// This updates the metadata of a particular Asset Handle, for instance, if the file path changes.
+		/// </summary>
+		/// <param name="asset_handle">The Asset Handle we want to update the meta data for.</param>
+		/// <param name="asset_meta_data">The new meta data to replace the old meta data.</param>
+		void UpdateAssetMetaData(const AssetHandle& asset_handle, const AssetMetaData& asset_meta_data);
+
+		/// <summary>
+		/// This will add an asset to the registry that is not in the Project Asset Directory. 
+		/// 
+		/// Please Note: This will require a valid ABSOLUTE file path in the meta data provided.
+		/// 
+		/// For Example: Default editor resources such as a default particle sprite, or a checkered 
+		/// invalid texture, etc.
+		/// </summary>
+		/// <param name="asset">The Asset to store.</param>
+		/// <param name="asset_handle">The handle of the Asset.</param>
+		/// <param name="asset_meta_data">The meta data of the Asset.</param>
+		void AddCustomAsset(std::shared_ptr<Asset> asset, const AssetHandle& asset_handle, const AssetMetaData& asset_meta_data);
+
+		/// <summary>
+		/// This will import the custom asset to the registry that is not in the Project Asset Directory.
+		/// 
+		/// Please Note: This will require a valid ABSOLUTE file path in the meta data provided.
+		/// 
+		/// This is particularly useful for if we want to load a custom asset that is composite and has
+		/// child assets that should be loaded into the asset manager alongside the primary composite asset.
+		/// 
+		/// For Example: A default cube that can be instantiated through the editor has an internal material
+		/// that should be loaded into the asset registry aswell for runtime rendering, or a default skybox
+		/// material that references textures that need to be loaded too.
+		/// </summary>
+		/// <param name="asset_handle">The handle of the Asset.</param>
+		/// <param name="asset_meta_data">The meta data of the Asset.</param>
+		void ImportCustomAsset(const AssetHandle& asset_handle, const AssetMetaData& asset_meta_data);
+
+		/// <summary>
+		/// Imports the appropriate asset located at the file path.
+		/// </summary>
+		/// <param name="asset_file_path">File path must be absolute file location on disk.</param>
+		/// <param name="project_asset_directory">The absolute file path of the Project Asset Directory.</param>
+		/// <returns>The Asset Handle of the loaded asset, or NULL_UUID.</returns>
+		AssetHandle ImportAsset(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory);
+
+		/// <summary>
+		/// This will force reimport a particular Asset. For instance, an FBX file is modified and has
+		/// more composite assets that will need to be reflected in the new Meta Data.
+		/// </summary>
+		/// <param name="asset_file_path">File path must be absolute file location on disk.</param>
+		/// <param name="project_asset_directory">The absolute file path of the Project Asset Directory.</param>
+		/// <returns>The Asset Handle of the loaded asset, or NULL_UUID.</returns>
+		AssetHandle ReImportAsset(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory);
+
+		/// <summary>
+		/// This will load the asset by a given handle.
+		/// </summary>
+		/// <param name="asset_handle">The handle of the Asset you wish to load.</param>
+		/// <returns>A pointer to the loaded Asset or nullptr.</returns>
+		std::shared_ptr<Asset> LoadAsset(const AssetHandle& asset_handle);
+
+		/// <summary>
+		/// This will unload the memory associated with an asset.
+		/// </summary>
+		/// <param name="asset_handle">The Asset Handle of the Asset you are trying to unload.</param>
+		void UnLoadAsset(const AssetHandle& asset_handle);
+
+		/// <summary>
+		/// This will remove the asset and all associated Meta Data from the Asset Manager.
+		/// </summary>
+		/// <param name="asset_handle">The handle of the Asset you wish to remove.</param>
+		void RemoveAsset(const AssetHandle& asset_handle);
+
+		/// <summary>
+		/// Get an asset of a particular type.
+		/// </summary>
+		/// <typeparam name="TAssetType">The Type of the Asset you are trying to get.</typeparam>
+		/// <param name="handle">The Asset Handle of the Asset you are trying to get.</param>
+		/// <returns>A pointer to the asset, or nullptr if does not exist, or type does not match.</returns>
 		template <typename TAssetType>
-		AssetHandle CreateAsset(std::shared_ptr<TAssetType> asset, const std::filesystem::path& file_path, const std::filesystem::path& project_directory) {
-
-			if (!asset)
-				return NULL_UUID;
-
-			// Determine the expected AssetType based on TAssetType
-			AssetType asset_type = AssetType::None;
-			if constexpr (std::is_same_v<TAssetType, Texture>) {
-				asset_type = AssetType::Texture2D;
-			}
-			else if constexpr (std::is_same_v<TAssetType, AssetMesh>) {
-				asset_type = AssetType::Mesh;
-			}
-			else if constexpr (std::is_same_v<TAssetType, Prefab>) {
-				asset_type = AssetType::Prefab;
-			}
-			else if constexpr (std::is_same_v<TAssetType, SkyboxMaterial>) {
-				asset_type = AssetType::Material_Skybox; // Check this first so we can return Material_Skybox opposed to Material_Standard
-			}
-			else if constexpr (std::is_base_of_v<Material, TAssetType>) {
-				asset_type = AssetType::Material_Standard; // Material is a base class that may have derived classes
-			}
-			else {
-				// If TAssetType does not match any known type, return
-				return;
-			}
-
-			AssetMetaData meta_data;
-			meta_data.FilePath = AssetManager::NormalisePath(std::filesystem::relative(file_path, project_directory / "Assets"));
-			meta_data.Type = asset_type;
-			meta_data.AssetName = file_path.stem().string();
-
-			AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
-				std::string(AssetTypeToString(meta_data.Type)) + meta_data.FilePath.string()
-			));
-
-			if (m_LoadedAssets.count(handle) == 0) {
-				if (asset) {
-					asset->Handle = handle;
-					m_LoadedAssets[handle] = asset;
-					m_AssetRegistry[handle] = meta_data;
-					SerializeAssetRegistry();
-				}
-				else {
-					handle = NULL_UUID;
-				}
-			}
-			else {
-				L_CORE_INFO("Asset Already Registered: {0}", meta_data.FilePath.string());
-			}
-
-			return handle;
-
-
-		}
-
-		template <typename TAssetType>
-		std::shared_ptr<TAssetType> GetAsset(AssetHandle handle) {
+		std::shared_ptr<TAssetType> GetAsset(const AssetHandle& asset_handle) {
 			// Determine the expected AssetType based on TAssetType
 			AssetType expectedType;
 			if constexpr (std::is_same_v<TAssetType, Texture>) {
@@ -196,47 +149,67 @@ namespace Louron {
 			if constexpr (std::is_same_v<TAssetType, Prefab>) {
 				// Model Imports are prefabs but there is no dedicated type 
 				// for a model import, so we check both 
-				if (m_AssetRegistry[handle].Type == AssetType::ModelImport || m_AssetRegistry[handle].Type == AssetType::Prefab)
-					return std::static_pointer_cast<TAssetType>(GetAsset(handle));
-				
+				if (m_AssetRegistry[asset_handle].Type == AssetType::ModelImport || m_AssetRegistry[asset_handle].Type == AssetType::Prefab)
+					return std::static_pointer_cast<TAssetType>(GetAsset(asset_handle));
+
 			}
 			else {
 
 				// Check if the type matches
-				if (m_AssetRegistry[handle].Type == expectedType)
-					return std::static_pointer_cast<TAssetType>(GetAsset(handle));
-				
+				if (m_AssetRegistry[asset_handle].Type == expectedType)
+					return std::static_pointer_cast<TAssetType>(GetAsset(asset_handle));
+
 			}
 
 			return nullptr;
 		}
 
-		virtual std::shared_ptr<Asset> GetAsset(AssetHandle handle) override;
-
-		virtual bool IsAssetHandleValid(AssetHandle handle) const override;
-		virtual bool IsAssetLoaded(AssetHandle handle) const override;
-		virtual AssetType GetAssetType(AssetHandle handle) const override;
-
 		/// <summary>
-		/// This will Import an Asset give a file path.
+		/// Get an asset of no particular type. This will need to be static_pointer_cast'd to 
+		/// the applicable Asset Type for use.
 		/// </summary>
-		AssetHandle ImportAsset(const std::filesystem::path& filepath);
+		/// <param name="handle">The Asset Handle of the Asset you are trying to get.</param>
+		/// <returns>A pointer to the asset base class, or nullptr if does not exist, or type does not match.</returns>
+		virtual std::shared_ptr<Asset> GetAsset(const AssetHandle& asset_handle) override;
 
-		const AssetMetaData& GetMetadata(AssetHandle handle) const;
-		const std::filesystem::path& GetFilePath(AssetHandle handle) const;
+	public: // Helper Methods
 
+		EditorAssetManager() = default;
+
+		// Virtual Override
+		virtual bool IsAssetHandleValid(const AssetHandle& asset_handle) const override;
+		virtual bool IsAssetLoaded(const AssetHandle& asset_handle) const override;
+		virtual AssetType GetAssetType(const AssetHandle& asset_handle) const override;
+
+		// General
+		const AssetMap& GetAssetMap() const { return m_LoadedAssets; }
 		const AssetRegistry& GetAssetRegistry() const { return m_AssetRegistry; }
 
-		void RefreshAssetRegistry();
-
-		void SerializeAssetRegistry(const std::filesystem::path& asset_registry_path = "");
-		bool DeserializeAssetRegistry();
-
-		AssetHandle GetHandleFromFilePath(const std::filesystem::path& path);
+		const AssetMetaData& GetMetadata(const AssetHandle& asset_handle) const;
+		AssetHandle GetHandleFromFilePath(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory);
+		const std::filesystem::path& GetFilePathFromHandle(const AssetHandle& asset_handle) const;
 
 	private:
-		AssetRegistry m_AssetRegistry;
-		AssetMap m_LoadedAssets;
+
+		/// <summary>
+		/// Generate a New Unique Asset Handle.
+		/// </summary>
+		/// <param name="asset_type">The Type of Asset.</param>
+		/// <param name="asset_file_path">The Relative Path to the Project Asset Directory.</param>
+		/// <returns>New Asset Handle.</returns>
+		AssetHandle GenerateNewAssetHandle(const AssetType& asset_type, const std::filesystem::path& asset_file_path);
+
+		/// <summary>
+		/// This will serialise the Asset's Meta Data path to the path provided.
+		/// </summary>
+		/// <param name="asset_handle">The Handle of the Asset.</param>
+		/// <param name="asset_meta_data">The Meta Data of the Asset.</param>
+		/// <param name="meta_data_file_path">This must be passed as the (filepath + ".meta") at the end.</param>
+		void SerialiseMetaDataFile(const AssetHandle& asset_handle, const AssetMetaData& asset_meta_data, const std::filesystem::path& meta_data_file_path);
+
+	private:
+		AssetRegistry m_AssetRegistry{};
+		AssetMap m_LoadedAssets{};
 	};
 
 }

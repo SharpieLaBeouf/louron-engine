@@ -107,7 +107,7 @@ namespace Louron {
 		// Additionally, as this is a new project, we will serialise the empty AssetManager to
 		// ensure the file is created in the AssetDirectory.
 		project->m_AssetManager = std::make_shared<EditorAssetManager>();
-		project->GetEditorAssetManager()->SerializeAssetRegistry(project->m_ProjectDirectory / project->m_Config.AssetDirectory / project->m_Config.AssetRegistry);
+		project->GetEditorAssetManager()->RefreshAssetRegistry(project->GetAssetDirectory());
 
 		// We now want to create a new empty scene that is attached to this Project automatically.
 		project->m_ActiveScene = project->NewScene(project->m_ProjectDirectory / project->m_Config.StartScene);
@@ -176,7 +176,7 @@ namespace Louron {
 		project->m_ProjectDirectory = abs_project_file_path.parent_path();
 
 		project->m_AssetManager = std::make_shared<EditorAssetManager>();
-		std::static_pointer_cast<EditorAssetManager>(project->m_AssetManager)->DeserializeAssetRegistry();
+		project->GetEditorAssetManager()->RefreshAssetRegistry(project->GetAssetDirectory());
 
 		L_CORE_INFO("Project Loaded: {0}", project->m_Config.Name);
 		return project;
@@ -392,5 +392,17 @@ namespace Louron {
 	/// </summary>
 	std::shared_ptr<EditorAssetManager> Project::GetEditorAssetManager() const {
 		return std::static_pointer_cast<EditorAssetManager>(m_AssetManager);
+	}
+
+	std::shared_ptr<AssetManagerBase> Project::GetStaticAssetManager()
+	{
+		if (auto project_ref = Project::GetActiveProject(); project_ref)
+			return project_ref->GetAssetManager();
+		return nullptr;
+	}
+
+	std::shared_ptr<AssetManagerBase> Project::GetAssetManager() const
+	{
+		return m_AssetManager;
 	}
 }

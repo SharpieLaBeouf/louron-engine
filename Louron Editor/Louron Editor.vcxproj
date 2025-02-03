@@ -46,13 +46,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include\imgui;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(SolutionDir)\Louron Core\libs\mono;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\Louron Core\libs\esfw;$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(SolutionDir)\Louron Core\libs\mono;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)\Louron Core\include\physx;$(ProjectDir)\include\imgui;$(ProjectDir)\include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(SolutionDir)\Louron Core\libs\mono;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <LibraryPath>$(SolutionDir)\Louron Core\libs\esfw;$(SolutionDir)\Louron Core\libs\assimp;$(SolutionDir)\Louron Core\libs\glad;$(SolutionDir)\Louron Core\libs\glfw;$(SolutionDir)\Louron Core\libs\physx;$(SolutionDir)\Louron Core\libs\spdlog;$(SolutionDir)\Louron Core\libs\yaml-cpp;$(SolutionDir)\Louron Core\libs\mono;$(ProjectDir)\libs;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
     <OutDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(ProjectDir)\bin\$(Configuration)\$(Platform)\Intermediaries\</IntDir>
   </PropertyGroup>
@@ -72,7 +72,7 @@
     <Link>
       <SubSystem>NotSet</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;yaml-cppd.lib;spdlogd.lib;Debug\libmono-static-sgen.lib;debug\PhysX_static_64.lib;debug\PhysXCharacterKinematic_static_64.lib;debug\PhysXCommon_static_64.lib;debug\PhysXCooking_static_64.lib;debug\PhysXExtensions_static_64.lib;debug\PhysXFoundation_static_64.lib;debug\PhysXPvdSDK_static_64.lib;debug\PhysXVehicle_static_64.lib;debug\PhysXVehicle2_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>efsw-static-debug.lib;assimp-vc143-mtd.lib;glfw3.lib;opengl32.lib;yaml-cppd.lib;spdlogd.lib;Debug\libmono-static-sgen.lib;debug\PhysX_static_64.lib;debug\PhysXCharacterKinematic_static_64.lib;debug\PhysXCommon_static_64.lib;debug\PhysXCooking_static_64.lib;debug\PhysXExtensions_static_64.lib;debug\PhysXFoundation_static_64.lib;debug\PhysXPvdSDK_static_64.lib;debug\PhysXVehicle_static_64.lib;debug\PhysXVehicle2_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>
       </Profile>
       <IgnoreSpecificDefaultLibraries>MSVCRT</IgnoreSpecificDefaultLibraries>
@@ -98,7 +98,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;yaml-cpp.lib;spdlog.lib;Release\libmono-static-sgen.lib;release\PhysX_static_64.lib;release\PhysXCharacterKinematic_static_64.lib;release\PhysXCommon_static_64.lib;release\PhysXCooking_static_64.lib;release\PhysXExtensions_static_64.lib;release\PhysXFoundation_static_64.lib;release\PhysXPvdSDK_static_64.lib;release\PhysXVehicle_static_64.lib;release\PhysXVehicle2_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>efsw-static-release.lib;assimp-vc143-mt.lib;glfw3.lib;opengl32.lib;yaml-cpp.lib;spdlog.lib;Release\libmono-static-sgen.lib;release\PhysX_static_64.lib;release\PhysXCharacterKinematic_static_64.lib;release\PhysXCommon_static_64.lib;release\PhysXCooking_static_64.lib;release\PhysXExtensions_static_64.lib;release\PhysXFoundation_static_64.lib;release\PhysXPvdSDK_static_64.lib;release\PhysXVehicle_static_64.lib;release\PhysXVehicle2_static_64.lib;Ws2_32.lib;Winmm.lib;Version.lib;Bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>
       </Profile>
       <AdditionalOptions>/ignore:4006,4099</AdditionalOptions>

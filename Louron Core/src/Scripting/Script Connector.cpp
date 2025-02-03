@@ -1,6 +1,7 @@
 #include "Script Connector.h"
 
 // Louron Core Headers
+#include "../Asset/Asset Manager API.h"
 
 // C++ Standard Library Headers
 
@@ -272,7 +273,7 @@ namespace Louron {
 		if (!entity)
 			return;
 
-		auto prefab_asset = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(*handle);
+		auto prefab_asset = AssetManager::GetAsset<Prefab>(*handle);
 
 		Entity prefab_clone = scene->InstantiatePrefab(prefab_asset);
 		if (prefab_clone) {

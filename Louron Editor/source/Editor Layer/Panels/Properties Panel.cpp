@@ -668,7 +668,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 						component.MeshFilterAssetHandle = dropped_asset_handle;
 						component.AABBNeedsUpdate = true;
 						component.OctreeNeedsUpdate = true;
-						Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(component.MeshFilterAssetHandle); // Force load the Asset on the main thread/GL context
+						AssetManager::GetAsset<AssetMesh>(component.MeshFilterAssetHandle); // Force load the Asset on the main thread/GL context
 					}
 					else {
 						L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
@@ -751,12 +751,13 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				int i = 0;
 				ImGui::Columns(2, "mesh_renderer_material_columns", false);
 				ImGui::SetColumnWidth(-1, first_coloumn_width);
+
 				for (auto& asset_handle : component.MeshRendererMaterialHandles) {
 
 					std::string material_name;
 					ImVec4 text_colour = ImGui::GetStyleColorVec4(ImGuiCol_Text);
 
-					if (asset_handle != NULL_UUID && Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_handle)) {
+					if (asset_handle != NULL_UUID && AssetManager::IsAssetHandleValid(asset_handle)) {
 						material_name = Project::GetStaticEditorAssetManager()->GetMetadata(asset_handle).AssetName;
 					}
 					else if (asset_handle != NULL_UUID) {
@@ -813,7 +814,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 							if (AssetManager::IsExtensionSupported(dropped_asset_path.extension())) {
 
-								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_asset_path);
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_asset_path, Project::GetActiveProject()->GetAssetDirectory());
 
 								if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Material_Standard) {
 									asset_handle = dropped_asset_handle;
@@ -1360,10 +1361,10 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 			case AssetType::Material_Standard:
 			{
-				if (!Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_handle))
+				if (!AssetManager::IsAssetHandleValid(asset_handle))
 					continue;
 
-				auto asset_material = Project::GetStaticEditorAssetManager()->GetAsset<PBRMaterial>(asset_handle);
+				auto asset_material = AssetManager::GetAsset<PBRMaterial>(asset_handle);
 				if (!asset_material)
 					continue;
 
@@ -1380,7 +1381,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 						ImGui::BeginDisabled();
 					}
 
-					GLuint texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetAlbedoTextureAssetHandle()) ? Project::GetStaticEditorAssetManager()->GetAsset<Texture>(asset_material->GetAlbedoTextureAssetHandle())->GetID() : 0;
+					GLuint texture_id = AssetManager::IsAssetHandleValid(asset_material->GetAlbedoTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(asset_material->GetAlbedoTextureAssetHandle())->GetID() : 0;
 
 					// Texture and text alignment
 					ImGui::ImageButton("##Albedo Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
@@ -1431,7 +1432,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 					ImGui::Text("Albedo Colour");
 
-					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetMetallicTextureAssetHandle()) ? Project::GetStaticEditorAssetManager()->GetAsset<Texture>(asset_material->GetMetallicTextureAssetHandle())->GetID() : 0;
+					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetMetallicTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(asset_material->GetMetallicTextureAssetHandle())->GetID() : 0;
 
 					ImGui::ImageButton("##Metallic Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
 
@@ -1481,7 +1482,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 						material_modified = true;
 					}
 
-					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetNormalTextureAssetHandle()) ? Project::GetStaticEditorAssetManager()->GetAsset<Texture>(asset_material->GetNormalTextureAssetHandle())->GetID() : 0;
+					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetNormalTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(asset_material->GetNormalTextureAssetHandle())->GetID() : 0;
 
 					ImGui::ImageButton("##Normal Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
 
@@ -1537,7 +1538,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				if (!Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_handle))
 					continue;
 
-				auto asset_material = Project::GetStaticEditorAssetManager()->GetAsset<SkyboxMaterial>(asset_handle);
+				auto asset_material = AssetManager::GetAsset<SkyboxMaterial>(asset_handle);
 
 				if (ImGui::TreeNode(std::string("Skybox Material: " + metadata_material.AssetName).c_str())) {
 
@@ -1548,7 +1549,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 					for (int i = 0; i < sb_texture_asset_handles.size(); i++) {
 
 
-						GLuint texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(sb_texture_asset_handles[i]) ? Project::GetStaticEditorAssetManager()->GetAsset<Texture>(sb_texture_asset_handles[i])->GetID() : 0;
+						GLuint texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(sb_texture_asset_handles[i]) ? AssetManager::GetAsset<Texture>(sb_texture_asset_handles[i])->GetID() : 0;
 
 						static std::array<std::string, 6> skybox_binding_names = {
 							"Right",
@@ -1590,7 +1591,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 								if (AssetManager::IsExtensionSupported(dropped_asset_path.extension())) {
 
-									AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_asset_path);
+									AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_asset_path, Project::GetActiveProject()->GetAssetDirectory());
 
 									if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
 										asset_material->SetSkyboxFaceTexture(static_cast<L_SKYBOX_BINDING>(i), dropped_asset_handle);
@@ -1685,7 +1686,7 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 
 							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
 
-								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path, Project::GetActiveProject()->GetAssetDirectory());
 
 								switch (asset_type) {
 
@@ -2009,7 +2010,7 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 
 							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
 
-								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path, Project::GetActiveProject()->GetAssetDirectory());
 
 								switch (asset_type) {
 
@@ -2301,7 +2302,7 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 
 							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
 
-								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path, Project::GetActiveProject()->GetAssetDirectory());
 
 								switch (asset_type) {
 

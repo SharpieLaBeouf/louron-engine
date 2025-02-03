@@ -3,7 +3,7 @@
 // Louron Core Headers
 #include "Components.h"
 #include "../../Renderer/Renderer.h"
-#include "../../Project/Project.h"
+#include "../../Asset/Asset Manager API.h"
 
 // C++ Standard Library Headers
 #include <iomanip>
@@ -99,7 +99,7 @@ namespace Louron {
 		if (MeshFilterAssetHandle == NULL_UUID)
 			return;
 		
-		if (auto mesh_asset = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(MeshFilterAssetHandle); mesh_asset) {
+		if (auto mesh_asset = AssetManager::GetAsset<AssetMesh>(MeshFilterAssetHandle); mesh_asset) {
 
 			// Define the 8 corner points of the AABB
 			std::array<glm::vec3, 8> corners = {

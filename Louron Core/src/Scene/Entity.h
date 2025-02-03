@@ -3,6 +3,8 @@
 // Louron Core Headers
 #include "Scene.h"
 
+#include "../Asset/Asset Manager API.h"
+
 #include "Components/Light.h"
 #include "Components/UUID.h"
 #include "Components/Mesh.h"
@@ -22,6 +24,7 @@
 
 // External Vendor Library Headers
 #include <entt/entt.hpp>
+#include <glm/glm.hpp>
 
 namespace Louron {
 
@@ -72,16 +75,64 @@ namespace Louron {
 				}
 			}
 
-			if constexpr (std::is_same_v<T, BoxColliderComponent> || std::is_same_v<T, SphereColliderComponent>) {
+			if constexpr (std::is_same_v<T, SphereColliderComponent>) {
 				if ((m_Scene->IsRunning() || m_Scene->IsSimulating()) && m_Scene->GetPhysScene())
 					component.Init();
 
 				if (HasComponent<RigidbodyComponent>())
+				{
 					if (auto actor_ref = GetComponent<RigidbodyComponent>().GetActor(); actor_ref && *actor_ref)
 					{
 						actor_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
 						actor_ref->AddFlag(RigidbodyFlag_TransformUpdated);
 					}
+				}
+
+			}
+
+			if constexpr (std::is_same_v<T, BoxColliderComponent>)
+			{
+				if ((m_Scene->IsRunning() || m_Scene->IsSimulating()) && m_Scene->GetPhysScene())
+					component.Init();
+
+				if (HasComponent<RigidbodyComponent>())
+				{
+					if (auto actor_ref = GetComponent<RigidbodyComponent>().GetActor(); actor_ref && *actor_ref)
+					{
+						actor_ref->AddFlag(RigidbodyFlag_ShapesUpdated);
+						actor_ref->AddFlag(RigidbodyFlag_TransformUpdated);
+					}
+				}
+
+				// Get the Optimal Size and Center for Box Collider Based on MeshFilter
+				if (HasComponent<AssetMeshFilter>())
+				{
+					glm::mat4 global_transform = GetComponent<TransformComponent>().GetGlobalTransform();
+					Bounds_AABB mesh_bounds = AssetManager::GetAsset<AssetMesh>(GetComponent<AssetMeshFilter>().MeshFilterAssetHandle)->MeshBounds;
+
+					// Create OBB transformation matrix
+					glm::mat4 obb_transform = glm::mat4(1.0f);
+					obb_transform = glm::translate(obb_transform, mesh_bounds.Center());
+					obb_transform = glm::scale(obb_transform, mesh_bounds.Size());
+
+					// Apply OBB to Global Transform
+					global_transform *= obb_transform;
+
+					// Inverse Global so Center and Size are local
+					glm::mat4 inv_global = glm::inverse(global_transform);
+
+					// Extract Center
+					glm::vec3 center = (inv_global * global_transform)[3];
+
+					// Extract Local Half Extents
+					glm::vec3 right = glm::vec3(inv_global * global_transform[0]);		// X basis vector
+					glm::vec3 up = glm::vec3(inv_global * global_transform[1]);			// Y basis vector
+					glm::vec3 forward = glm::vec3(inv_global * global_transform[2]);	// Z basis vector
+					glm::vec3 size = glm::vec3(glm::length(right), glm::length(up), glm::length(forward)) * 0.5f;
+
+					component.SetCentre(center);
+					component.SetSize(size);
+				}
 			}
 
 			return component;

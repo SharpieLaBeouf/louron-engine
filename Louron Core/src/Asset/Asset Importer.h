@@ -26,7 +26,7 @@ namespace Louron {
 	
 	public:
 
-		static std::shared_ptr<Asset> ImportAsset(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& metadata);
+		static std::shared_ptr<Asset> ImportAsset(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& metadata, const std::filesystem::path& project_asset_directory);
 
 	};
 
@@ -34,9 +34,8 @@ namespace Louron {
 
 	public:
 
-		static std::shared_ptr<Scene> ImportScene(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data);
+		static std::shared_ptr<Scene> ImportScene(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory);
 		static std::shared_ptr<Scene> LoadScene(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path);
-		static void SaveScene(std::shared_ptr<Scene> scene, const std::filesystem::path& path);
 
 	};
 
@@ -44,7 +43,7 @@ namespace Louron {
 
 	public:
 
-		static std::shared_ptr<Prefab> ImportPrefab(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& metadata);
+		static std::shared_ptr<Prefab> ImportPrefab(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& metadata, const std::filesystem::path& project_asset_directory);
 		static std::shared_ptr<Prefab> LoadPrefab(const std::filesystem::path& path);
 
 	};
@@ -53,7 +52,7 @@ namespace Louron {
 
 	public:
 
-		static std::shared_ptr<Texture> ImportTexture2D(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data);
+		static std::shared_ptr<Texture> ImportTexture2D(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory);
 		static std::shared_ptr<Texture> LoadTexture2D(const std::filesystem::path& path);
 	};
 
@@ -61,7 +60,7 @@ namespace Louron {
 
 	public:
 
-		static std::shared_ptr<Prefab> ImportModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data);
+		static std::shared_ptr<Prefab> ImportModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory);
 		static std::shared_ptr<Prefab> LoadModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const std::filesystem::path& path);
 
 	private:
@@ -83,10 +82,10 @@ namespace Louron {
 
 	public:
 
-		static std::shared_ptr<Material> ImportMaterial(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data);
+		static std::shared_ptr<Material> ImportMaterial(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory);
 
-		static std::shared_ptr<PBRMaterial> LoadMaterialPBR(const YAML::Node data);
-		static std::shared_ptr<SkyboxMaterial> LoadMaterialSkybox(AssetMap* asset_map, AssetRegistry* asset_reg, const std::filesystem::path& path);
+		static std::shared_ptr<PBRMaterial> LoadMaterialPBR(const std::filesystem::path& path);
+		static std::shared_ptr<SkyboxMaterial> LoadMaterialSkybox(const std::filesystem::path& path);
 
 	};
 

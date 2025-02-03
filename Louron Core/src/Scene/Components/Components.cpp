@@ -628,7 +628,33 @@ namespace Louron {
     }
 
     void TransformComponent::SetTransform(const glm::mat4& transform)
-    {
+    {    
+        // Decompose Position
+        glm::vec3 position = glm::vec3(transform[3]); // Extract translation (last column)
+
+        // Extract Scale
+        glm::vec3 scale;
+        scale.x = glm::length(glm::vec3(transform[0])); // Length of X column
+        scale.y = glm::length(glm::vec3(transform[1])); // Length of Y column
+        scale.z = glm::length(glm::vec3(transform[2])); // Length of Z column
+
+        // Normalize rotation matrix (remove scale)
+        glm::mat3 rotationMatrix = glm::mat3(transform);
+        rotationMatrix[0] /= scale.x;
+        rotationMatrix[1] /= scale.y;
+        rotationMatrix[2] /= scale.z;
+
+        // Convert to quaternion
+        glm::quat rotationQuat = glm::quat_cast(rotationMatrix);
+
+        // Convert quaternion to Euler angles (in degrees)
+        glm::vec3 rotationEuler = glm::degrees(glm::eulerAngles(rotationQuat));
+
+        // Set internal values
+        m_Position = position;
+        m_Scale = scale;
+        m_Rotation = rotationEuler;
+
         m_LocalTransform = transform;
     }
 

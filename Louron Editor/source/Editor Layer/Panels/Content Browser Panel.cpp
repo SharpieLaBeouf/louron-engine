@@ -15,12 +15,18 @@ static const std::unordered_map<std::string, bool> s_SupportedOpenInEditorFiles 
 	{ ".lscene", true }
 };
 
-
 ContentBrowserPanel::ContentBrowserPanel() {
 
 	m_DirectoryTexture = TextureImporter::LoadTexture2D("Resources/Icons/DirectoryIcon.png");
 	m_FileTexture = TextureImporter::LoadTexture2D("Resources/Icons/FileIcon.png");
+}
 
+static efsw::WatchID m_AssetFileWatchID;
+
+void ContentBrowserPanel::StartFileWatcher()
+{
+	m_AssetFileWatchID = m_AssetFileWatcher->addWatch(Project::GetActiveProject()->GetAssetDirectory().string(), m_AssetFileListener, true);
+	m_AssetFileWatcher->watch();
 }
 
 void ContentBrowserPanel::SetDirectory(const std::filesystem::path& directory_path) {
@@ -129,8 +135,9 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 						if (prefab) 
 						{
 							std::filesystem::path file_path = m_CurrentDirectory / (droppedEntity.GetName() + ".lprefab");
-							AssetHandle handle = Project::GetStaticEditorAssetManager()->CreateAsset(prefab, file_path, Project::GetActiveProject()->GetProjectDirectory());
-							prefab->Serialize(file_path, Project::GetStaticEditorAssetManager()->GetMetadata(handle));
+							prefab->Serialize(file_path);
+
+							Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory());
 						}
 					}
 				}
@@ -322,7 +329,9 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 						directories.push_back(entry);
 					}
 					else {
-						files.push_back(entry);
+
+						if(entry.path().extension() != ".meta")
+							files.push_back(entry);
 					}
 				}
 
@@ -371,7 +380,16 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
-						ImGui::ImageButton(entry.path().string().c_str(), (ImTextureID)(uintptr_t)m_FileTexture->GetID(), {64.0f, 64.0f}, {0, 1}, {1, 0});
+						GLuint texture_id = m_FileTexture->GetID();
+
+						if (AssetManager::IsExtensionSupported(entry.path().extension()) && AssetManager::GetAssetTypeFromFileExtension(entry.path().extension()) == AssetType::Texture2D)
+						{
+							auto texture_asset = AssetManager::GetAsset<Texture>(Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(entry.path(), Project::GetActiveProject()->GetAssetDirectory()));
+							if (texture_asset)
+								texture_id = texture_asset->GetID();
+						}
+
+						ImGui::ImageButton(entry.path().string().c_str(), (ImTextureID)(uintptr_t)texture_id, {64.0f, 64.0f}, {0, 1}, {1, 0});
 
 						if (ImGui::BeginDragDropSource())
 						{
@@ -531,8 +549,6 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 							std::shared_ptr<PBRMaterial> material = std::make_shared<PBRMaterial>();
 							material->SetName(file_path.stem().string());
 
-							Project::GetStaticEditorAssetManager()->CreateAsset(material, file_path, Project::GetActiveProject()->GetProjectDirectory());
-
 							YAML::Emitter out;
 							out << YAML::BeginMap;
 							material->Serialize(out);
@@ -545,6 +561,8 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 							renaming_path = file_path;
 							new_path_file_name = file_path.filename().string();
 							first_focus = true;
+
+							Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory());
 						}
 
 						ImGui::EndPopup();
@@ -631,5 +649,114 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 
 		// End the table
 		ImGui::EndTable();
+	}
+}
+
+void ContentBrowserPanel::AssetFileListener::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
+{
+
+	if (!Louron::AssetManager::IsExtensionSupported(std::filesystem::path(filename).extension()))
+		return;
+
+	if (action == efsw::Actions::Add) // ADDEDD OR MOVED INTO
+	{
+		std::filesystem::path new_path = dir + filename;
+		if (m_AssetFileChanges.find(filename) != m_AssetFileChanges.end()) // Existing Asset Moved
+		{
+			std::filesystem::path& old_path = m_AssetFileChanges[filename];
+			std::filesystem::path meta_old_path = m_AssetFileChanges[filename].string() + ".meta";
+
+			if (std::filesystem::exists(meta_old_path)) // Rename old Meta Data File and Update Asset Manager Registry
+			{
+				AssetHandle handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(old_path, Project::GetActiveProject()->GetAssetDirectory());
+
+				if (handle != NULL_UUID)
+				{
+					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(handle);
+					std::filesystem::rename(meta_old_path, new_path.string() + ".meta");
+
+					meta_data.FilePath = std::filesystem::relative(new_path, Project::GetActiveProject()->GetAssetDirectory());
+
+					Engine::Get().SubmitToMainThread([this, handle, meta_data]() {
+						Project::GetStaticEditorAssetManager()->UpdateAssetMetaData(handle, meta_data);
+					});
+
+				}
+				else // Reimport
+				{
+					Engine::Get().SubmitToMainThread([this, new_path]() {
+						Project::GetStaticEditorAssetManager()->ReImportAsset(new_path, Project::GetActiveProject()->GetAssetDirectory());
+					});
+				}
+
+			}
+			else // Reimport
+			{
+				Engine::Get().SubmitToMainThread([this, new_path]() {
+					Project::GetStaticEditorAssetManager()->ReImportAsset(new_path, Project::GetActiveProject()->GetAssetDirectory());
+				});
+			}
+
+			m_AssetFileChanges.erase(filename);
+		}
+		else // New Import
+		{
+			Engine::Get().SubmitToMainThread([this, new_path]() {
+				Project::GetStaticEditorAssetManager()->ReImportAsset(new_path, Project::GetActiveProject()->GetAssetDirectory());
+			});
+		}
+	}
+
+	if (action == efsw::Actions::Delete) // MOVED OR DELETED - cannot determine if deleted at this stage as it could either be moved or deleted
+	{
+		m_AssetFileChanges[filename] = std::filesystem::path(dir + filename);
+	}
+
+
+	if (action == efsw::Actions::Modified) // MODIFIED
+	{
+		Engine::Get().SubmitToMainThread([this, dir, filename]() {
+			Project::GetStaticEditorAssetManager()->ReImportAsset(dir + filename, Project::GetActiveProject()->GetAssetDirectory());
+		});
+
+	}
+
+
+	if (action == efsw::Actions::Moved) // RENAMED
+	{
+		std::filesystem::path new_path = dir + filename;
+		std::filesystem::path old_path = dir + oldFilename;
+		std::filesystem::path meta_old_path = old_path.string() + ".meta";
+
+		if (std::filesystem::exists(meta_old_path)) // Rename old Meta Data File and Update Asset Manager Registry
+		{
+			AssetHandle handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(old_path, Project::GetActiveProject()->GetAssetDirectory());
+
+			if (handle != NULL_UUID)
+			{
+				AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(handle);
+				std::filesystem::rename(meta_old_path, new_path.string() + ".meta");
+
+				meta_data.FilePath = std::filesystem::relative(new_path, Project::GetActiveProject()->GetAssetDirectory());
+
+				Engine::Get().SubmitToMainThread([this, handle, meta_data]() {
+					Project::GetStaticEditorAssetManager()->UpdateAssetMetaData(handle, meta_data);
+				});
+
+			}
+			else // Reimport
+			{
+				Engine::Get().SubmitToMainThread([this, new_path]() {
+					Project::GetStaticEditorAssetManager()->ReImportAsset(new_path, Project::GetActiveProject()->GetAssetDirectory());
+				});
+			}
+
+		}
+		else // Reimport
+		{
+			Engine::Get().SubmitToMainThread([this, new_path]() {
+				Project::GetStaticEditorAssetManager()->ReImportAsset(new_path, Project::GetActiveProject()->GetAssetDirectory());
+			});
+		}
 	}
 }

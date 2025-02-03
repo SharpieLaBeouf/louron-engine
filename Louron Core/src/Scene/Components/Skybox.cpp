@@ -3,6 +3,7 @@
 // Louron Core Headers
 #include "../../Debug/Assert.h"
 
+#include "../../Asset/Asset Manager API.h"
 #include "../../Project/Project.h"
 
 // C++ Standard Library Headers
@@ -71,15 +72,15 @@ namespace Louron {
 		const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(Handle);
 
 		if (path.empty())
-			out_path = Project::GetActiveProject()->GetProjectDirectory() / Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath;
+			out_path = Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath;
 		else
-			out_path = Project::GetActiveProject()->GetProjectDirectory() / Project::GetActiveProject()->GetConfig().AssetDirectory / path;
+			out_path = path;
 
 		YAML::Emitter out_file;
 		out_file << YAML::BeginMap;
 		std::string asset_name = (meta_data.AssetName.empty()) ? path.filename().replace_extension().string() : meta_data.AssetName;
 		out_file << YAML::Key << "Material Asset Name" << YAML::Value << asset_name;
-		out_file << YAML::Key << "Material Asset Type" << YAML::Value << AssetTypeToString(AssetType::Material_Skybox);
+		out_file << YAML::Key << "Material Asset Type" << YAML::Value << AssetUtils::AssetTypeToString(AssetType::Material_Skybox);
 		out_file << YAML::Key << "Skybox Asset Handles" << YAML::Value;
 
 		{
@@ -102,35 +103,39 @@ namespace Louron {
 	{
 		std::filesystem::path in_path;
 
-		const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(Handle);
-
 		if (path.empty()) {
-			in_path = Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath;
+			const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(Handle);
+			in_path = Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath;
 		}
-		else {
-			in_path = Project::GetActiveProject()->GetConfig().AssetDirectory / path;
+		else 
+		{
+			in_path = path;
 		}
 
 		std::ifstream fin(in_path);
-		if (!fin.is_open()) {
+		if (!fin.is_open()) 
+		{
 			L_CORE_ERROR("Failed to Open File for Reading: {0}", in_path.string().c_str());
 			return false;
 		}
 
 		YAML::Node node = YAML::Load(fin);
 
-		if (!node["Material Asset Name"]) {
+		if (!node["Material Asset Name"]) 
+		{
 			L_CORE_ERROR("Invalid YAML Format: Missing 'Material Asset Name'");
 			return false;
 		}
 
-		if (node["Material Asset Type"].as<std::string>() != AssetTypeToString(AssetType::Material_Skybox)) {
-			L_CORE_ERROR("Invalid Material Type: Expected '{0}'", AssetTypeToString(AssetType::Material_Skybox));
+		if (node["Material Asset Type"].as<std::string>() != AssetUtils::AssetTypeToString(AssetType::Material_Skybox)) 
+		{
+			L_CORE_ERROR("Invalid Material Type: Expected '{0}'", AssetUtils::AssetTypeToString(AssetType::Material_Skybox));
 			return false;
 		}
 
 		int i = 0;
-		for (const auto& handleNode : node["Skybox Asset Handles"]) {
+		for (const auto& handleNode : node["Skybox Asset Handles"]) 
+		{
 			m_TextureAssetHandles[i] = handleNode.as<uint32_t>();
 			i++;
 		}
@@ -179,9 +184,9 @@ namespace Louron {
 		for (int i = 0; i < m_TextureAssetHandles.size(); i++) {
 			bool texture_valid = false; // Use this to check if the texture has been successfully loaded this iteration of the cube_map build
 
-			if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(m_TextureAssetHandles[i])) {
+			if (AssetManager::IsAssetHandleValid(m_TextureAssetHandles[i])) {
 				int width, height, nrChannels;
-				const std::filesystem::path& texture_file_path = Project::GetActiveProject()->GetProjectDirectory() / asset_directory / Project::GetStaticEditorAssetManager()->GetMetadata(m_TextureAssetHandles[i]).FilePath;
+				const std::filesystem::path& texture_file_path = Project::GetActiveProject()->GetAssetDirectory() / Project::GetStaticEditorAssetManager()->GetMetadata(m_TextureAssetHandles[i]).FilePath;
 				unsigned char* data = stbi_load(texture_file_path.string().c_str(), &width, &height, &nrChannels, 0);
 
 				if (data) {
@@ -290,12 +295,12 @@ namespace Louron {
 
 		out << YAML::Key << "MaterialAssetHandle" << YAML::Value << (uint32_t)SkyboxMaterialAssetHandle;
 
-		if (auto material_ref = Project::GetStaticEditorAssetManager()->GetAsset<SkyboxMaterial>(SkyboxMaterialAssetHandle); material_ref) {
+		if (auto material_ref = AssetManager::GetAsset<SkyboxMaterial>(SkyboxMaterialAssetHandle); material_ref) {
 
 			const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(SkyboxMaterialAssetHandle);
-			material_ref->Serialize(meta_data.FilePath);
+			material_ref->Serialize(Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
 
-			L_CORE_INFO("Skybox Material ({0}) Saved At: {1}", meta_data.FilePath.filename().replace_extension().string().c_str(), meta_data.FilePath.string().c_str());
+			L_CORE_INFO("Skybox Material ({0}) Saved At: {1}", meta_data.FilePath.stem().string().c_str(), meta_data.FilePath.string().c_str());
 
 		}
 		out << YAML::EndMap;
@@ -306,22 +311,26 @@ namespace Louron {
 
 		YAML::Node component = data;
 
-		if (component["MaterialAssetHandle"]) {
+		if (component["MaterialAssetHandle"]) 
+		{
 			SkyboxMaterialAssetHandle = component["MaterialAssetHandle"].as<uint32_t>();
 		}
-		else {
+		else 
+		{
 			return false;
 		}
 
-		auto material_ref = Project::GetStaticEditorAssetManager()->GetAsset<SkyboxMaterial>(SkyboxMaterialAssetHandle);
+		auto material_ref = AssetManager::GetAsset<SkyboxMaterial>(SkyboxMaterialAssetHandle);
 		if (material_ref) {
 			const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(SkyboxMaterialAssetHandle);
-			std::filesystem::path material_path = Project::GetActiveProject()->GetConfig().AssetDirectory / meta_data.FilePath;
+			std::filesystem::path material_path = Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath;
 
-			try {
-				material_ref->Deserialize(Project::GetActiveProject()->GetProjectDirectory() / "Assets" / meta_data.FilePath);
+			try 
+			{
+				material_ref->Deserialize(material_path);
 			}
-			catch (const std::exception& e) {
+			catch (const std::exception& e) 
+			{
 				L_CORE_ERROR("Failed to deserialize Skybox Material from {0}: {1}", material_path.string(), e.what());
 				return false;
 			}

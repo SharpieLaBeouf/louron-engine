@@ -15,7 +15,7 @@
 using namespace Louron;
 
 std::atomic_bool LouronEditorLayer::m_ScriptsNeedCompiling = false;
-std::unique_ptr<filewatch::FileWatch<std::string>> LouronEditorLayer::m_ScriptFileWatcher = nullptr;
+static efsw::WatchID m_ScriptFileWatchID;
 
 LouronEditorLayer::LouronEditorLayer() {
 	L_APP_INFO("Opening Main Menu");
@@ -24,8 +24,6 @@ LouronEditorLayer::LouronEditorLayer() {
 void LouronEditorLayer::OnAttach() {
 
 	Engine::Get().GetWindow().SetVSync(false);
-	
-	Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
 	
 	const EngineConfig& engine_config = Engine::Get().GetSpecification();
 
@@ -44,6 +42,35 @@ void LouronEditorLayer::OnAttach() {
 		Project::LoadProject("Sandbox Project/Sandbox Project.lproj");
 	else
 		Project::LoadProject(lprojFilePath);
+
+	AssetMetaData meta_data;
+	meta_data.IsComposite = true;
+	meta_data.IsCustomAsset = true;
+
+	meta_data.AssetName = "Cube";
+	meta_data.Type = AssetType::ModelImport;
+	meta_data.FilePath = std::filesystem::absolute("Resources/Models/Cube.fbx");
+	Project::GetStaticEditorAssetManager()->ImportCustomAsset(1, meta_data);
+
+	meta_data.AssetName = "Sphere";
+	meta_data.Type = AssetType::ModelImport;
+	meta_data.FilePath = std::filesystem::absolute("Resources/Models/Sphere.fbx");
+	Project::GetStaticEditorAssetManager()->ImportCustomAsset(2, meta_data);
+
+	meta_data.AssetName = "Plane";
+	meta_data.Type = AssetType::ModelImport;
+	meta_data.FilePath = std::filesystem::absolute("Resources/Models/Plane.fbx");
+	Project::GetStaticEditorAssetManager()->ImportCustomAsset(3, meta_data);
+
+	meta_data.AssetName = "Capsule";
+	meta_data.Type = AssetType::ModelImport;
+	meta_data.FilePath = std::filesystem::absolute("Resources/Models/Capsule.fbx");
+	Project::GetStaticEditorAssetManager()->ImportCustomAsset(4, meta_data);
+
+	meta_data.AssetName = "Suzanne";
+	meta_data.Type = AssetType::ModelImport;
+	meta_data.FilePath = std::filesystem::absolute("Resources/Models/Suzanne.fbx");
+	Project::GetStaticEditorAssetManager()->ImportCustomAsset(5, meta_data);
 
 	// 2. Then we have to load ScriptManager -> Script Manager needs a current project instance to be running
 	ScriptManager::Init();
@@ -104,11 +131,14 @@ void LouronEditorLayer::OnAttach() {
 	m_IconStop = TextureImporter::LoadTexture2D("Resources/Icons/StopButton.png");
 
 	m_ScriptsNeedCompiling.store(false, std::memory_order_relaxed);
-	m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), ScriptsModifiedEvent);
+
+	m_ScriptFileWatchID = m_ScriptFileWatcher->addWatch((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), m_ScriptFileListener, true);
+	m_ScriptFileWatcher->watch();
 
 	m_PropertiesPanel = {};
 	m_HierarchyPanel = {};
 	m_ContentBrowserPanel = {};
+	m_ContentBrowserPanel.StartFileWatcher();
 	m_ContentBrowserPanel.SetDirectory(Project::GetActiveProject()->GetProjectDirectory() / "Assets");
 
 	m_EditorCamera = std::make_unique<EditorCamera>();
@@ -145,12 +175,75 @@ void LouronEditorLayer::OnUpdate() {
 				if (m_SceneWindowHovered) 
 					m_EditorCamera->OnUpdate();
 				scene_ref->OnUpdate(m_EditorCamera.get());
+
+				if (m_SelectedEntity && m_SelectedEntity.HasComponent<BoxColliderComponent>())
+				{
+
+					auto& debug_line_shader = Engine::Get().GetShaderLibrary().GetShader("Debug_Line_Draw");
+
+					if (debug_line_shader)
+					{
+						scene_ref->GetSceneFrameBuffer()->Bind();
+						debug_line_shader->Bind();
+						debug_line_shader->SetVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
+						debug_line_shader->SetMat4("u_VertexIn.Proj", m_EditorCamera->GetProjection());
+						debug_line_shader->SetMat4("u_VertexIn.View", m_EditorCamera->GetViewMatrix());
+						debug_line_shader->SetBool("u_UseInstanceData", false);
+
+						auto& component = m_SelectedEntity.GetComponent<BoxColliderComponent>();
+
+						// Start with the entity's global transform
+						glm::mat4 collider_cube_transform = m_SelectedEntity.GetComponent<TransformComponent>().GetGlobalTransform();
+
+						// Apply the collider's center offset (local space to world space)
+						glm::vec3 collider_center = component.GetCentre();
+						collider_cube_transform = glm::translate(collider_cube_transform, collider_center);
+
+						// Scale the cube to match the collider's size
+						glm::vec3 box_half_extents = component.GetSize();
+						collider_cube_transform = glm::scale(collider_cube_transform, box_half_extents * 2.0f);
+
+						debug_line_shader->SetMat4("u_VertexIn.Model", collider_cube_transform);
+						Renderer::DrawDebugCube();
+						scene_ref->GetSceneFrameBuffer()->Unbind();
+					}
+
+
+				}
+
 				break;
 			}
 			
 			case SceneState::Play: scene_ref->OnUpdate(); break;
 
 		}
+
+		//auto& debug_line_shader = Engine::Get().GetShaderLibrary().GetShader("Debug_Line_Draw");
+
+		//if (debug_line_shader)
+		//{
+		//	scene_ref->GetSceneFrameBuffer()->Bind();
+		//	debug_line_shader->Bind();
+
+		//	// Set the line color
+		//	debug_line_shader->SetVec4("u_LineColor", { 1.0f, 1.0f, 0.0f, 1.0f });
+
+		//	// Set the orthographic projection matrix
+		//	debug_line_shader->SetMat4("u_VertexIn.Proj", m_EditorCamera->GetProjection());
+
+		//	// Set the view matrix from the editor camera
+		//	debug_line_shader->SetMat4("u_VertexIn.View", m_EditorCamera->GetViewMatrix());
+
+		//	// Set the model matrix with any necessary transformations (e.g., scaling)
+		//	debug_line_shader->SetMat4("u_VertexIn.Model", glm::scale(glm::mat4(1.0f), glm::vec3(5.0f)));
+
+		//	// Draw the debug sphere
+		//	Renderer::DrawDebugSphere();
+
+		//	debug_line_shader->UnBind();
+		//	scene_ref->GetSceneFrameBuffer()->Unbind();
+		//}
+
 	}
 	else {
 
@@ -269,6 +362,35 @@ void LouronEditorLayer::OnGuiRender() {
 							// 1. same as before, load project
 							Project::LoadProject(filepath);
 
+							AssetMetaData meta_data;
+							meta_data.IsComposite = true;
+							meta_data.IsCustomAsset = true;
+
+							meta_data.AssetName = "Cube";
+							meta_data.Type = AssetType::ModelImport;
+							meta_data.FilePath = std::filesystem::absolute("Resources/Models/Cube.fbx");
+							Project::GetStaticEditorAssetManager()->ImportCustomAsset(1, meta_data);
+
+							meta_data.AssetName = "Sphere";
+							meta_data.Type = AssetType::ModelImport;
+							meta_data.FilePath = std::filesystem::absolute("Resources/Models/Sphere.fbx");
+							Project::GetStaticEditorAssetManager()->ImportCustomAsset(2, meta_data);
+
+							meta_data.AssetName = "Plane";
+							meta_data.Type = AssetType::ModelImport;
+							meta_data.FilePath = std::filesystem::absolute("Resources/Models/Plane.fbx");
+							Project::GetStaticEditorAssetManager()->ImportCustomAsset(3, meta_data);
+
+							meta_data.AssetName = "Capsule";
+							meta_data.Type = AssetType::ModelImport;
+							meta_data.FilePath = std::filesystem::absolute("Resources/Models/Capsule.fbx");
+							Project::GetStaticEditorAssetManager()->ImportCustomAsset(4, meta_data);
+
+							meta_data.AssetName = "Suzanne";
+							meta_data.Type = AssetType::ModelImport;
+							meta_data.FilePath = std::filesystem::absolute("Resources/Models/Suzanne.fbx");
+							Project::GetStaticEditorAssetManager()->ImportCustomAsset(5, meta_data);
+
 							// 2. then ensure script manager has the correct assembly
 							ScriptManager::SetAppAssemblyPath(Project::GetActiveProject()->GetProjectDirectory() / Project::GetActiveProject()->GetConfig().AppScriptAssemblyPath);
 
@@ -283,8 +405,9 @@ void LouronEditorLayer::OnGuiRender() {
 							// 3. then load startupscene 
 							Project::GetActiveProject()->LoadStartupScene();
 
-							m_ScriptFileWatcher.reset();
-							m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), ScriptsModifiedEvent);
+							m_ScriptFileWatcher->removeWatch(m_ScriptFileWatchID);
+							m_ScriptFileWatchID = m_ScriptFileWatcher->addWatch((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), m_ScriptFileListener, true);
+							m_ScriptFileWatcher->watch();
 
 							auto scene = Project::GetActiveScene();
 
@@ -489,6 +612,35 @@ void LouronEditorLayer::OnGuiRender() {
 
 					auto project = Project::NewProject(s_NewProjectName, s_NewFolderPath);
 
+					AssetMetaData meta_data;
+					meta_data.IsComposite = true;
+					meta_data.IsCustomAsset = true;
+
+					meta_data.AssetName = "Cube";
+					meta_data.Type = AssetType::ModelImport;
+					meta_data.FilePath = std::filesystem::absolute("Resources/Models/Cube.fbx");
+					Project::GetStaticEditorAssetManager()->ImportCustomAsset(1, meta_data);
+
+					meta_data.AssetName = "Sphere";
+					meta_data.Type = AssetType::ModelImport;
+					meta_data.FilePath = std::filesystem::absolute("Resources/Models/Sphere.fbx");
+					Project::GetStaticEditorAssetManager()->ImportCustomAsset(2, meta_data);
+
+					meta_data.AssetName = "Plane";
+					meta_data.Type = AssetType::ModelImport;
+					meta_data.FilePath = std::filesystem::absolute("Resources/Models/Plane.fbx");
+					Project::GetStaticEditorAssetManager()->ImportCustomAsset(3, meta_data);
+
+					meta_data.AssetName = "Capsule";
+					meta_data.Type = AssetType::ModelImport;
+					meta_data.FilePath = std::filesystem::absolute("Resources/Models/Capsule.fbx");
+					Project::GetStaticEditorAssetManager()->ImportCustomAsset(4, meta_data);
+
+					meta_data.AssetName = "Suzanne";
+					meta_data.Type = AssetType::ModelImport;
+					meta_data.FilePath = std::filesystem::absolute("Resources/Models/Suzanne.fbx");
+					Project::GetStaticEditorAssetManager()->ImportCustomAsset(5, meta_data);
+
 					// Generate C# Scripting MSVC Solution - TODO: idk use some form of project build tools?
 					Utils::GenerateScriptingProject(project->GetConfig().Name, project->GetProjectDirectory() / "Scripts");
 
@@ -503,8 +655,9 @@ void LouronEditorLayer::OnGuiRender() {
 						}
 					}
 
-					m_ScriptFileWatcher.reset();
-					m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), ScriptsModifiedEvent);
+					m_ScriptFileWatcher->removeWatch(m_ScriptFileWatchID);
+					m_ScriptFileWatchID = m_ScriptFileWatcher->addWatch((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), m_ScriptFileListener, true);
+					m_ScriptFileWatcher->watch();
 
 					auto scene = Project::GetActiveScene();
 
@@ -680,8 +833,6 @@ void LouronEditorLayer::OnGuiRender() {
 
 		if (m_ScriptsNeedCompiling.load(std::memory_order_relaxed))
 		{
-			m_ScriptFileWatcher.reset();
-
 			// Handle script recompilation logic
 			for (const auto& entry : std::filesystem::directory_iterator(Project::GetActiveProject()->GetProjectDirectory() / "Scripts/")) {
 				if (entry.path().extension() == ".csproj") {
@@ -694,7 +845,9 @@ void LouronEditorLayer::OnGuiRender() {
 				}
 			}
 
-			m_ScriptFileWatcher = std::make_unique<filewatch::FileWatch<std::string>>((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), ScriptsModifiedEvent);
+			m_ScriptFileWatcher->removeWatch(m_ScriptFileWatchID);
+			m_ScriptFileWatchID = m_ScriptFileWatcher->addWatch((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), m_ScriptFileListener, true);
+			m_ScriptFileWatcher->watch(); 
 			m_ScriptsNeedCompiling.store(false, std::memory_order_relaxed); // Reset the flag
 		}
 	}
@@ -780,6 +933,10 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 			ImGui::Image(0, ImGui::GetContentRegionAvail());
 			ImGui::End();
 			return;
+		}
+
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			m_EditorCamera->FocusOnEntity(m_SelectedEntity);
 		}
 
 		m_SceneWindowHovered = ImGui::IsItemHovered();
@@ -981,6 +1138,12 @@ void LouronEditorLayer::DisplayHierarchyWindow() {
 	if (!scene_ref) {
 		ImGui::End();
 		return;
+	}
+
+	if (m_HierarchyPanel.m_NewFocalEntity)
+	{
+		m_EditorCamera->FocusOnEntity(m_HierarchyPanel.m_NewFocalEntity);
+		m_HierarchyPanel.m_NewFocalEntity = {};
 	}
 
 	m_HierarchyPanel.OnImGuiRender(scene_ref, m_SelectedEntity);
@@ -1189,7 +1352,7 @@ void LouronEditorLayer::DisplayAssetRegistryWindow() {
 		ImGui::Text("Total Assets: %i", asset_manager->GetAssetRegistry().size());
 		ImGui::SameLine();
 		if(ImGui::Button("Refresh Asset Registry")) {
-			Project::GetStaticEditorAssetManager()->RefreshAssetRegistry();
+			asset_manager->RefreshAssetRegistry(Project::GetActiveProject()->GetAssetDirectory());
 		}
 
 		// Filter and collect assets that match the filter
@@ -1291,7 +1454,7 @@ void LouronEditorLayer::DisplayAssetRegistryWindow() {
 			ImGui::InputText("##AssetName", buf, sizeof(buf), ImGuiInputTextFlags_ReadOnly);
 
 			std::memset(buf, 0, sizeof(buf));
-			AssetTypeToString(meta_data.Type).copy(buf, sizeof(buf), 0);
+			AssetUtils::AssetTypeToString(meta_data.Type).copy(buf, sizeof(buf), 0);
 
 			ImGui::Text("Asset Type:");
 			ImGui::SameLine();

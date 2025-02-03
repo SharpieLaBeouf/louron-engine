@@ -5,7 +5,7 @@
 
 #include "../Debug/Assert.h"
 
-#include "../Project/Project.h"
+#include "../Asset/Asset Manager API.h"
 
 // C++ Standard Library Headers
 
@@ -194,17 +194,17 @@ namespace Louron {
 			shader_ref->SetInt	("u_Material.metallicTexture",	1);
 			shader_ref->SetInt	("u_Material.normalTexture",	2);
 
-			if (auto texture_ref = (m_AlbedoTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : Project::GetStaticEditorAssetManager()->GetAsset<Texture>(m_AlbedoTexture); texture_ref && *texture_ref) {
+			if (auto texture_ref = (m_AlbedoTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : AssetManager::GetAsset<Texture>(m_AlbedoTexture); texture_ref && *texture_ref) {
 				glActiveTexture(GL_TEXTURE0);
 				texture_ref->Bind();
 			}
 
-			if (auto texture_ref = (m_MetallicTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : Project::GetStaticEditorAssetManager()->GetAsset<Texture>(m_MetallicTexture); texture_ref && *texture_ref) {
+			if (auto texture_ref = (m_MetallicTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : AssetManager::GetAsset<Texture>(m_MetallicTexture); texture_ref && *texture_ref) {
 				glActiveTexture(GL_TEXTURE1);
 				texture_ref->Bind();
 			}
 
-			if (auto texture_ref = (m_NormalTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultNormalTexture() : Project::GetStaticEditorAssetManager()->GetAsset<Texture>(m_NormalTexture); texture_ref && *texture_ref) {
+			if (auto texture_ref = (m_NormalTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultNormalTexture() : AssetManager::GetAsset<Texture>(m_NormalTexture); texture_ref && *texture_ref) {
 				glActiveTexture(GL_TEXTURE2);
 				texture_ref->Bind();
 			}
@@ -277,8 +277,21 @@ namespace Louron {
 		out << YAML::Key << "NormalTextureAsset" << YAML::Value << m_NormalTexture;
 	}
 
-	bool PBRMaterial::Deserialize(const YAML::Node data)
+	bool PBRMaterial::Deserialize(const std::filesystem::path& path)
 	{
+		YAML::Node data;
+
+		if (!std::filesystem::exists(path))
+			return false;
+
+		try {
+			data = YAML::LoadFile(path.string());
+		}
+		catch (YAML::ParserException e) {
+			L_CORE_ERROR("YAML-CPP Failed to Load Scene File: '{0}', {1}", path.string(), e.what());
+			return false;
+		}
+
 		if (!data)
 			return false;
 
@@ -319,6 +332,8 @@ namespace Louron {
 		if (data["NormalTextureAsset"]) {
 			m_NormalTexture = data["NormalTextureAsset"].as<uint32_t>();
 		}
+
+		return true;
 	}
 
 	#pragma endregion

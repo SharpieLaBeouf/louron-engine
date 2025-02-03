@@ -61,11 +61,15 @@ namespace Louron {
 
 		const EngineConfig& GetSpecification() const { return m_Specification; }
 
+		void SubmitToMainThread(const std::function<void()>& function);
+
 	private:
 
 		void Run();
 		bool OnWindowClose();
 		bool OnWindowResize();
+
+		void ExecuteMainThreadQueue();
 
 		std::vector<std::string> FindFilePaths(const std::string& extension);
 
@@ -85,6 +89,9 @@ namespace Louron {
 		std::unique_ptr<InputManager> m_Input;
 		std::unique_ptr<ShaderLibrary> m_ShaderLibrary;
 		std::unique_ptr<TextureLibrary> m_TextureLibrary;
+
+		std::vector<std::function<void()>> m_MainThreadQueue;
+		std::mutex m_MainThreadQueueMutex;
 
 	private:
 		static Engine* s_Instance;

@@ -2,7 +2,7 @@
 
 namespace Louron {
 
-	std::string Louron::AssetTypeToString(AssetType type)
+	std::string AssetUtils::AssetTypeToString(AssetType type)
 	{
 		std::string type_string = "AssetType::<Invalid>";
 		switch (type) {
@@ -27,7 +27,7 @@ namespace Louron {
 		return type_string;
 	}
 
-	AssetType AssetTypeFromString(const std::string& assetType)
+	AssetType AssetUtils::AssetTypeFromString(const std::string& assetType)
 	{
 		if (assetType == "AssetType::None")					return AssetType::None;
 

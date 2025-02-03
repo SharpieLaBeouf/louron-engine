@@ -1,6 +1,6 @@
 Project Name: Sandbox Project
 Project Config:
-  StartScene: Scenes\Shadow Test Scene.lscene
+  StartScene: Scenes\Start Scene.lscene
   AssetDirectory: Assets\
   AssetRegistry: AssetRegistry.lassetreg
   CoreScriptModulePath: Scripts\Binaries\Louron Script Core.dll

@@ -8,7 +8,7 @@
 #include "Panels/Content Browser Panel.h"
 
 // External
-#include "filewatch/FileWatch.hpp"
+#include <efsw/efsw.hpp>
 
 class LouronEditorLayer : public Louron::Layer {
 public:
@@ -57,20 +57,27 @@ private:
 
 	int m_GizmoType = -1;
 	bool m_WindowWasUnfocused = false;
-	bool m_ScriptsCompiledSuccess = false;
-	static std::atomic_bool m_ScriptsNeedCompiling;
-	static std::unique_ptr<filewatch::FileWatch<std::string>> m_ScriptFileWatcher;
 
 private:
 
-	static void ScriptsModifiedEvent(const std::string& path, const filewatch::Event change_type)
-	{
-		// Set atomic bool
-		if(std::filesystem::path(path).extension() == ".cs")
-		{
-			m_ScriptsNeedCompiling.store(true, std::memory_order_relaxed);
+	class ScriptFileListener : public efsw::FileWatchListener {
+
+	public:
+		void handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename) override {
+
+			// Set atomic bool
+			if (std::filesystem::path(dir + filename).extension() == ".cs")
+			{
+				m_ScriptsNeedCompiling.store(true, std::memory_order_relaxed);
+			}
 		}
-	}
+	};
+
+	bool m_ScriptsCompiledSuccess = false;
+	static std::atomic_bool m_ScriptsNeedCompiling;
+
+	efsw::FileWatcher* m_ScriptFileWatcher = new efsw::FileWatcher();
+	ScriptFileListener* m_ScriptFileListener = new ScriptFileListener();
 
 	void CheckInput();
 

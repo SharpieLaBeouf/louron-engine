@@ -24,20 +24,20 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 
 			if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
 
-				AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path);
+				AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path, Project::GetActiveProject()->GetAssetDirectory());
 
 				switch (asset_type) {
 
 					case AssetType::ModelImport:
 					case AssetType::Prefab:
 					{
-						auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(dropped_asset_handle);
+						auto prefab = AssetManager::GetAsset<Prefab>(dropped_asset_handle);
 
 						if (!prefab) {
 							L_APP_INFO("Attempting to Import New Asset.");
 
-							AssetHandle asset_handle = Project::GetStaticEditorAssetManager()->ImportAsset(dropped_path);
-							prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(asset_handle);
+							AssetHandle asset_handle = Project::GetStaticEditorAssetManager()->ImportAsset(dropped_path, Project::GetActiveProject()->GetAssetDirectory());
+							prefab = AssetManager::GetAsset<Prefab>(asset_handle);
 						}
 
 						if (prefab) {
@@ -54,7 +54,6 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 								auto& transform = entity.GetComponent<TransformComponent>();
 								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
 								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
-								transform.SetScale({ 1.0f, 1.0f, 1.0f });
 							}
 							else
 								L_APP_WARN("Could Not Instantiate Model Into Scene.");
@@ -98,24 +97,11 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 
 		// TODO: REIMPLEMENT 
 		// Check for double-click 
-		//if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-		//	// Call LookAtGlobalPosition with the entity's global position
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
+			// Call LookAtGlobalPosition with the entity's global position
 
-		//	glm::vec3 position_to_look_at{};
-
-		//	// If it is a mesh I'd like to look at the mesh, some meshes have AABBs that are offset from their true transform
-		//	if (entity.HasComponent<AssetMeshFilter>() && entity.HasComponent<AssetMeshRenderer>()) {
-
-		//		position_to_look_at = entity.GetComponent<AssetMeshFilter>().TransformedAABB.Center();
-		//		scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->LookAtGlobalPosition(position_to_look_at);
-		//	}
-		//	else if (entity.GetUUID() != scene_ref->GetPrimaryCameraEntity().GetUUID()) {
-		//		// Make sure we don't try to look at ourselves lol
-		//		position_to_look_at = entity.GetComponent<TransformComponent>().GetGlobalPosition();
-		//		scene_ref->GetPrimaryCameraEntity().GetComponent<CameraComponent>().CameraInstance->LookAtGlobalPosition(position_to_look_at);
-		//	}
-
-		//}
+			m_NewFocalEntity = entity;
+		}
 
 		if (ImGui::BeginPopupContextItem())
 		{
@@ -208,23 +194,82 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 		if (ImGui::MenuItem("Create Empty Entity"))
 			selected_entity = scene_ref->CreateEntity();
 
-		if (ImGui::MenuItem("Create Cube"))
+		ImGui::Separator();
+
+		if (ImGui::BeginMenu("Meshes"))
 		{
-			if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(3119409521))
+			if (ImGui::MenuItem("Create Cube"))
 			{
-				auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(3119409521);
-				selected_entity = scene_ref->InstantiatePrefab(prefab);
+				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(1))
+				{
+					auto prefab = AssetManager::GetAsset<Prefab>(1);
+					selected_entity = scene_ref->InstantiatePrefab(prefab);
+				}
 			}
+
+			if (ImGui::MenuItem("Create Sphere"))
+			{
+				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(2))
+				{
+					auto prefab = AssetManager::GetAsset<Prefab>(2);
+					selected_entity = scene_ref->InstantiatePrefab(prefab);
+				}
+			}
+
+			if (ImGui::MenuItem("Create Plane"))
+			{
+				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(3))
+				{
+					auto prefab = AssetManager::GetAsset<Prefab>(3);
+					selected_entity = scene_ref->InstantiatePrefab(prefab);
+				}
+			}
+
+			if (ImGui::MenuItem("Create Capsule"))
+			{
+				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(4))
+				{
+					auto prefab = AssetManager::GetAsset<Prefab>(4);
+					selected_entity = scene_ref->InstantiatePrefab(prefab);
+				}
+			}
+
+			if (ImGui::MenuItem("Create Suzanne"))
+			{
+				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(5))
+				{
+					auto prefab = AssetManager::GetAsset<Prefab>(5);
+					selected_entity = scene_ref->InstantiatePrefab(prefab);
+				}
+			}
+
+			ImGui::EndMenu();
 		}
 
-		if (ImGui::MenuItem("Create Sphere"))
+		if (ImGui::BeginMenu("Lights"))
 		{
-			if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(1835682225))
+
+			if (ImGui::MenuItem("Create Directional Light"))
 			{
-				auto prefab = Project::GetStaticEditorAssetManager()->GetAsset<Prefab>(1835682225);
-				selected_entity = scene_ref->InstantiatePrefab(prefab);
+				Entity entity = scene_ref->CreateEntity("Directional Light");
+				entity.AddComponent<DirectionalLightComponent>();
 			}
+
+			if (ImGui::MenuItem("Create Point Light"))
+			{
+				Entity entity = scene_ref->CreateEntity("Point Light");
+				entity.AddComponent<PointLightComponent>();
+			}
+
+			if (ImGui::MenuItem("Create Spot Light"))
+			{
+				Entity entity = scene_ref->CreateEntity("Spot Light");
+				entity.AddComponent<SpotLightComponent>();
+			}
+
+			ImGui::EndMenu();
 		}
+
 
 		ImGui::EndPopup();
 	}

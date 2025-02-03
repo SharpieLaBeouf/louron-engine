@@ -870,26 +870,37 @@ namespace Louron {
 	}
 
 	std::shared_ptr<ScriptClass> ScriptManager::GetEntityClass(const std::string& name) {
+
+		if (!s_Data) return nullptr;
+
 		auto result = s_Data->EntityClasses.find(name);
 		return result != s_Data->EntityClasses.end() ? result->second : nullptr;
 	}
 
 	const std::unordered_map<std::string, std::shared_ptr<ScriptClass>>& ScriptManager::GetEntityClasses() {
+		if (!s_Data) return {};
+
 		return s_Data->EntityClasses;
 	}
 
 	void ScriptManager::AddEntityClass(const std::string& entity_class_full_name, std::shared_ptr<ScriptClass> script_class)
 	{
+		if (!s_Data) return;
+
 		s_Data->EntityClasses[entity_class_full_name] = script_class;
 	}
 
 	MonoImage* ScriptManager::GetCoreAssemblyImage()
 	{
+		if (!s_Data) return nullptr;
+
 		return s_Data->CoreAssemblyImage;
 	}
 
 	std::shared_ptr<ScriptInstance> ScriptManager::GetEntityScriptInstance(UUID entityID, const std::string& script_name)
 	{
+		if (!s_Data) return nullptr;
+
 		std::string script_map_key = std::to_string(entityID) + script_name;
 		auto it = s_Data->EntityInstances.find(script_map_key);
 		if (it == s_Data->EntityInstances.end())
@@ -900,6 +911,8 @@ namespace Louron {
 
 	void ScriptManager::SetAppAssemblyPath(const std::filesystem::path& file_path)
 	{
+		if (!s_Data) return;
+
 		s_Data->AppAssemblyFilepath = file_path;
 	}
 

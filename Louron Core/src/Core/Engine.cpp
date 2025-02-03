@@ -84,6 +84,13 @@ namespace Louron {
         m_Running = false;
     }
 
+    void Engine::SubmitToMainThread(const std::function<void()>& function)
+    {
+        std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
+
+        m_MainThreadQueue.emplace_back(function);
+    }
+
     void Engine::Run() {
 
         while (m_Running) {
@@ -92,6 +99,8 @@ namespace Louron {
             Profiler::Get().NewFrame();
 
             Time::Get().UpdateTime();
+
+            ExecuteMainThreadQueue();
 
             {
                 L_PROFILE_SCOPE("Engine: 1. Standard Update Loop");
@@ -154,6 +163,16 @@ namespace Louron {
 
     bool Engine::OnWindowResize() {
         return false;
+    }
+
+    void Engine::ExecuteMainThreadQueue()
+    {
+        std::scoped_lock<std::mutex> lock(m_MainThreadQueueMutex);
+
+        for (auto& func : m_MainThreadQueue)
+            func();
+
+        m_MainThreadQueue.clear();
     }
 
     std::vector<std::string> Engine::FindFilePaths(const std::string& extension) {

@@ -235,7 +235,7 @@ namespace Louron {
 		const std::string& GetName() const;
 
 		void Serialize(YAML::Emitter& out);
-		bool Deserialize(const YAML::Node data);
+		bool Deserialize(const std::filesystem::path& path);
 
 	};
 

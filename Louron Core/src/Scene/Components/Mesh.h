@@ -78,6 +78,12 @@ namespace Louron {
 		AssetMeshFilter() = default;
 		~AssetMeshFilter() = default;
 
+		AssetMeshFilter(const AssetMeshFilter& other) = default;
+		AssetMeshFilter(AssetMeshFilter&& other) noexcept = default;
+
+		AssetMeshFilter& operator=(const AssetMeshFilter& other) = default;
+		AssetMeshFilter& operator=(AssetMeshFilter&& other) = default;
+
 		void Serialize(YAML::Emitter& out) const;
 		bool Deserialize(const YAML::Node data);
 

@@ -72,7 +72,7 @@ namespace Louron {
 		Entity InstantiatePrefab(std::shared_ptr<Prefab> prefab, std::optional<TransformComponent> transform = std::nullopt, const UUID& parent_uuid = NULL_UUID);
 
 		Entity DuplicateEntity(Entity entity);
-		void DestroyEntity(Entity entity);
+		void DestroyEntity(Entity entity, std::unique_lock<std::mutex>* parent_lock = nullptr);
 		
 		Entity FindEntityByName(std::string_view name);
 		Entity FindEntityByUUID(UUID uuid);

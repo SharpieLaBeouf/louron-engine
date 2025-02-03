@@ -126,7 +126,7 @@ namespace Louron {
 		/// Will Serialise the Prefab into a file.
 		/// </summary>
 		/// <param name="file_path">Needs to be valid file path with .lprefab extension.</param>
-		bool Serialize(const std::filesystem::path& file_path, const AssetMetaData& asset_meta_data);
+		bool Serialize(const std::filesystem::path& file_path);
 		bool Deserialize(const std::filesystem::path& file_path);
 
 		virtual AssetType GetType() const override { return AssetType::Prefab; }

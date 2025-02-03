@@ -29,8 +29,12 @@ namespace Louron {
 
 	};
 
-	std::string AssetTypeToString(AssetType type);
-	AssetType AssetTypeFromString(const std::string& assetType);
+	namespace AssetUtils {
+
+		std::string AssetTypeToString(AssetType type);
+		AssetType AssetTypeFromString(const std::string& assetType);
+	}
+
 
 	class Asset : public std::enable_shared_from_this<Asset> {
 
@@ -40,21 +44,39 @@ namespace Louron {
 		virtual AssetType GetType() const = 0;
 	};
 
-	class AssetMetaData {
+	struct AssetMetaData {
 
-	public:
-
+		/// <summary>
+		/// The Asset Type.
+		/// </summary>
 		AssetType Type = AssetType::None;
-		std::filesystem::path FilePath;
-		std::string AssetName;
 
-		// This is a pre-requisite Asset that needs to be loaded for this asset to be retrieved.
-		// For Example, a Model will create Mesh Assets and Material Assets, thus the Model needs
-		// to be loaded first before we can get the Asset that this metadata points to.
+		/// <summary>
+		/// The Relative file path of the Asset to the Project Asset Directory.
+		/// </summary>
+		std::filesystem::path FilePath = "";
+
+		/// <summary>
+		/// The name of the Asset.
+		/// </summary>
+		std::string AssetName = "";
+
+		/// <summary>
+		/// If the Asset is a child to a composite asset, e.g., this could be a material embedded in a Model File such as FBX.
+		/// </summary>
 		AssetHandle ParentAssetHandle = NULL_UUID;
 
-		operator bool() const { return Type != AssetType::None; }
+		/// <summary>
+		/// If the Asset has children dependencies, e.g., materials, textures, animations, etc.
+		/// </summary>
+		bool IsComposite = false;
 
+		/// <summary>
+		/// If the Asset is a Custom Asset that is added to the registry at runtime.
+		/// </summary>
+		bool IsCustomAsset = false;
+
+		operator bool() const { return Type != AssetType::None; }
 	};
 
 }

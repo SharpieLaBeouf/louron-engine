@@ -548,7 +548,7 @@ namespace Louron {
 	}
 
 	// TODO: IMPLEMENT
-	bool Prefab::Serialize(const std::filesystem::path& file_path, const AssetMetaData& asset_meta_data) {
+	bool Prefab::Serialize(const std::filesystem::path& file_path) {
 
 		// Is path a file or directory?
 		if (std::filesystem::is_directory(file_path)) {

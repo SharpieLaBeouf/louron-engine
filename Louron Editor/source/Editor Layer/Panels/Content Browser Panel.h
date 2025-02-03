@@ -2,7 +2,9 @@
 
 #include "Louron.h"
 
-#include <filewatch/FileWatch.hpp>
+#include <filesystem>
+
+#include <efsw/efsw.hpp>
 
 class LouronEditorLayer;
 
@@ -19,15 +21,30 @@ public:
 
 	void OnImGuiRender(LouronEditorLayer& editor_layer);
 
+	void StartFileWatcher();
+
 private:
 
 	std::filesystem::path m_CurrentDirectory;
 	std::filesystem::path m_AssetDirectory;
 	std::filesystem::path m_SceneDirectory;
 
-	std::unique_ptr<filewatch::FileWatch<std::string>> m_FileWatcher = nullptr;
+	class AssetFileListener : public efsw::FileWatchListener {
+
+        std::unordered_map<std::string, std::filesystem::path> m_AssetFileChanges;
+
+	public:
+		void handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename) override;
+	};
+
+    efsw::FileWatcher* m_AssetFileWatcher = new efsw::FileWatcher();
+    AssetFileListener* m_AssetFileListener = new AssetFileListener();
 
 	std::shared_ptr<Louron::Texture> m_DirectoryTexture = nullptr;
 	std::shared_ptr<Louron::Texture> m_FileTexture = nullptr;
+
+	Louron::Entity m_NewFocalEntity = {};
+
+	friend class LouronEditorLayer;
 
 };

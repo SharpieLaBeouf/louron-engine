@@ -92,6 +92,8 @@ namespace Louron {
 		float m_AspectRatio = 0.0f;
 	};
 
+	class Entity;
+
 	class EditorCamera : CameraBase {
 
 
@@ -106,6 +108,9 @@ namespace Louron {
 		inline void SetDistance(float distance) { m_Distance = distance; }
 
 		inline void SetViewportSize(float width, float height) { m_ViewportWidth = width; m_ViewportHeight = height; UpdateProjection(); }
+
+		void FocusOnEntity(Entity entity);
+		void SetFocalPoint(const glm::vec3& focal_point);
 
 		glm::vec3 GetUpDirection() const;
 		glm::vec3 GetRightDirection() const;

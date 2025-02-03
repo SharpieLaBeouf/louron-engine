@@ -353,13 +353,12 @@ namespace Louron {
 	}
 
 	// Destroys Entity in Scene
-	void Scene::DestroyEntity(Entity entity) {
+	void Scene::DestroyEntity(Entity entity, std::unique_lock<std::mutex>* parent_lock) {
 
 		// Need to lock the octree because it may be trying to 
 		// get things from scene as it's being deleted!
 		std::unique_lock<std::mutex> octree_lock;
-
-		if (m_Octree)
+		if (!parent_lock && m_Octree)
 			octree_lock = std::unique_lock<std::mutex>(m_Octree->GetOctreeMutex());
 
 		// 1. Check if entity is valid
@@ -410,7 +409,7 @@ namespace Louron {
 			// the iterator whilst destroying children
 			std::vector<UUID> children_vec = component.GetChildren();
 			for (const auto& children_uuid : children_vec) 
-				DestroyEntity(FindEntityByUUID(children_uuid));
+				DestroyEntity(FindEntityByUUID(children_uuid), &octree_lock);
 		}
 
 		// 5. Remove the Entity from the Scene Entity Map

@@ -3,6 +3,8 @@
 // Louron Core Headers
 #include "Renderer.h"
 
+#include "../Asset/Asset Manager API.h"
+
 #include "../Project/Project.h"
 
 #include "../Scene/Entity.h"
@@ -919,7 +921,7 @@ namespace Louron {
 
 				if (!scene_ref->ValidEntity(entity)) continue;
 
-				auto asset_mesh = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
+				auto asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
 
 				if (!asset_mesh)
 					continue;
@@ -1050,11 +1052,12 @@ namespace Louron {
 		// TODO: Need to fix this because it is not including objects that are behind camera frustum that 
 		// may cast shadow into frustum. Maybe we do this after generating the cascades and use the 
 		// world space AABB of the light projection to find our meshes?
-		Bounds_AABB world_light_bounds;
+		Bounds_Sphere world_light_bounds;
 		{
 			L_PROFILE_SCOPE("Directional Shadow Mapping 2a. Calculate Light Space Bounds");
 
-			world_light_bounds = Frustum::GetWorldSpaceTightBoundingBox(camera_proj_view);
+			world_light_bounds.BoundsCentre = camera_position;
+			world_light_bounds.BoundsRadius = 250.0f; // 500 diameter
 
 		}
 
@@ -1149,9 +1152,13 @@ namespace Louron {
 					glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
 					shader->SetMat4("u_Model", transform);
 
-					std::shared_ptr<AssetMesh> asset_mesh = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(mesh_entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
-					for (auto& sub_mesh : asset_mesh->SubMeshes)
-						Renderer::DrawSubMesh(sub_mesh);
+					std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
+
+					if (asset_mesh) 
+					{
+						for (auto& sub_mesh : asset_mesh->SubMeshes)
+							Renderer::DrawSubMesh(sub_mesh);
+					}
 				}
 
 			}
@@ -1280,7 +1287,7 @@ namespace Louron {
 					glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
 					shader->SetMat4("u_Model", transform);
 
-					std::shared_ptr<AssetMesh> asset_mesh = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(mesh_entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
+					std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
 					for (auto& sub_mesh : asset_mesh->SubMeshes)
 						Renderer::DrawSubMesh(sub_mesh);
 				}
@@ -1414,7 +1421,7 @@ namespace Louron {
 					glm::mat4 transform = entity.GetComponent<TransformComponent>().GetGlobalTransform();
 					shader->SetMat4("u_Model", transform);
 
-					std::shared_ptr<AssetMesh> asset_mesh = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
+					std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
 					for (auto& sub_mesh : asset_mesh->SubMeshes)
 						Renderer::DrawSubMesh(sub_mesh);
 				}
@@ -1483,7 +1490,7 @@ namespace Louron {
 				auto& mesh_asset = fast_loaded_asset_references[component.MeshFilterAssetHandle];
 
 				if (!mesh_asset) {
-					mesh_asset = Project::GetStaticEditorAssetManager()->GetAsset<AssetMesh>(component.MeshFilterAssetHandle);
+					mesh_asset = AssetManager::GetAsset<AssetMesh>(component.MeshFilterAssetHandle);
 					if (!mesh_asset) continue;
 				}
 
@@ -1507,7 +1514,7 @@ namespace Louron {
 			// Lets colour in some triangles!
 			for (const auto& [material_asset_handle, mesh_map] : renderables) {
 
-				auto material_asset = Project::GetStaticEditorAssetManager()->GetAsset<PBRMaterial>(material_asset_handle);
+				auto material_asset = AssetManager::GetAsset<PBRMaterial>(material_asset_handle);
 
 				if (!material_asset)
 					continue;
@@ -1574,7 +1581,7 @@ namespace Louron {
 				// Only draw the skybox for the primary camera
 				if (scene_camera.Primary && scene_camera.ClearFlags == CameraClearFlags::SKYBOX) {
 
-					if (auto mat_ref = Project::GetStaticEditorAssetManager()->GetAsset<SkyboxMaterial>(skybox.SkyboxMaterialAssetHandle); mat_ref){
+					if (auto mat_ref = AssetManager::GetAsset<SkyboxMaterial>(skybox.SkyboxMaterialAssetHandle); mat_ref){
 
 						skybox.Bind();
 						if (mat_ref->Bind()) {

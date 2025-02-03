@@ -431,11 +431,11 @@ namespace Louron {
             // If the collider does not refer to a Rigidbody Component, we simply
             // apply the custom collider centre, and multiply the transforms
             // largest absolute scale value by the m_Radius modifier.
-            position = m_Centre;
             scale = collider_transform.GetGlobalScale();
+            position = m_Centre * glm::abs(scale);
 
             m_Shape->SetLocalPose(PxTransform(position.x, position.y, position.z));
-            m_Shape->SetGeometry(PxSphereGeometry(glm::compMax(glm::abs(scale)) * (m_Radius * 2.0f)));
+            m_Shape->SetGeometry(PxSphereGeometry(glm::compMax(glm::abs(scale)) * m_Radius));
 
             if (auto rb_ref = m_Shape->GetRigidbody(); rb_ref && *rb_ref) {
 
@@ -449,7 +449,7 @@ namespace Louron {
             // the local pose of the collider relative to the rigidbody, then 
             // add the m_Centre offset to the local position, and multiply the
             // largest absolute scale value by the m_Radius modifier.
-            m_Shape->SetGeometry(PxSphereGeometry(glm::compMax(glm::abs(collider_transform.GetGlobalScale())) * (m_Radius * 2.0f)));
+            m_Shape->SetGeometry(PxSphereGeometry(glm::compMax(glm::abs(collider_transform.GetGlobalScale())) * m_Radius));
 
             collider_matrix = glm::inverse(rigidbody_matrix) * collider_matrix;
 
@@ -879,7 +879,6 @@ namespace Louron {
         return true;
     }
 
-
     void BoxColliderComponent::UpdateTransform(TransformComponent& collider_transform, TransformComponent& rigidbody_transform) {
 
         glm::vec3 position = glm::vec3(0.0f);
@@ -893,8 +892,8 @@ namespace Louron {
             // If the collider does not refer to a Rigidbody Component, we simply
             // apply the custom collider centre, and multiply the transforms
             // largest absolute scale value by the m_Radius modifier.
-            position = m_Centre; // <- this is the offset of the shape to the rigidbody's origin
             scale = collider_transform.GetGlobalScale();
+            position = m_Centre * glm::abs(scale);
 
             m_Shape->SetLocalPose(PxTransform(position.x, position.y, position.z));
 
@@ -915,8 +914,8 @@ namespace Louron {
             // largest absolute scale value by the m_Radius modifier.
             collider_matrix = glm::inverse(rigidbody_matrix) * collider_matrix;
 
-            position = glm::vec3(collider_matrix[3]) + m_Centre;
             scale = glm::vec3(glm::length(collider_matrix[0]), glm::length(collider_matrix[1]), glm::length(collider_matrix[2]));
+            position = glm::vec3(collider_matrix[3]) + (m_Centre * glm::abs(scale));
             glm::quat quaternion = glm::quat_cast(collider_matrix);
 
             m_Shape->SetLocalPose(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));

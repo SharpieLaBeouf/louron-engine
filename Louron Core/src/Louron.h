@@ -3,6 +3,7 @@
 #include "Asset/Asset.h"
 #include "Asset/Asset Importer.h"
 #include "Asset/Asset Manager.h"
+#include "Asset/Asset Manager API.h"
 
 #include "Core/Audio.h"
 #include "Core/Engine.h"
