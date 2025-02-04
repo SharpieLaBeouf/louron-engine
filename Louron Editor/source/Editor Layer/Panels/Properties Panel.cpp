@@ -1661,6 +1661,63 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 			{
 				switch (field.Type) {
 
+				case ScriptFieldType::ComputeShader:
+				{
+
+					ImGui::Text(name.c_str());
+					ImGui::NextColumn();
+
+					AssetHandle data = instance->GetFieldComputeShaderValue(name);
+					std::string label = "##" + name + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type));
+
+					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + " (Compute Shader)" : "None (Compute Shader)";
+
+					char buffer[256];
+					strcpy_s(buffer, sizeof(buffer), text.c_str());
+					ImGui::InputText(label.c_str(), buffer, sizeof(buffer), ImGuiInputTextFlags_ReadOnly);
+
+					if (ImGui::BeginDragDropTarget()) {
+
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+							// Convert the payload data (string) back into a filesystem path
+							std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+							std::filesystem::path dropped_path = dropped_path_str; // Convert to path
+
+							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
+
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path, Project::GetActiveProject()->GetAssetDirectory());
+
+								switch (asset_type) {
+
+								case AssetType::Compute_Shader:
+								{
+									instance->SetFieldComputeShaderValue(ScriptManager::GetScriptFieldMap(selected_entity.GetUUID(), script_name).at(name), dropped_asset_handle);
+
+									break;
+								}
+								default: {
+
+									L_APP_WARN("Cannot Set Asset Type {} to Script Compute Shader Field.", dropped_path.extension().string());
+									break;
+								}
+
+								}
+
+							}
+							else {
+								L_APP_WARN("Cannot Set Compute Shader {} to Script.", dropped_path.filename().string());
+							}
+
+						}
+						ImGui::EndDragDropTarget();
+					}
+
+					ImGui::NextColumn();
+
+
+					break;
+				}
 				case ScriptFieldType::Prefab:
 				{
 
@@ -1671,7 +1728,7 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 					std::string label = "##" + name + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type));
 
 					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
-					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + (" (Prefab)") : ("None (Prefab)");
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + " (Prefab)" : "None (Prefab)";
 
 					char buffer[256];
 					strcpy_s(buffer, sizeof(buffer), text.c_str());
@@ -1983,7 +2040,66 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 			{
 				ScriptFieldInstance& scriptField = entityFields.at(name);
 				switch (field.Type) {
+					
+				case ScriptFieldType::ComputeShader:
+				{
 
+					ImGui::Text(name.c_str());
+					ImGui::NextColumn();
+
+					AssetHandle data = scriptField.GetValue<AssetHandle>();
+					std::string label = "##" + name + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type));
+
+					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
+
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + " (Compute Shader)" : "None (Compute Shader)";
+
+					char buffer[256];
+					strcpy_s(buffer, sizeof(buffer), text.c_str());
+					ImGui::InputText(label.c_str(), buffer, sizeof(buffer), ImGuiInputTextFlags_ReadOnly);
+
+					if (ImGui::BeginDragDropTarget()) {
+
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+							// Convert the payload data (string) back into a filesystem path
+							std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+							std::filesystem::path dropped_path = dropped_path_str; // Convert to path
+
+							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
+
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path, Project::GetActiveProject()->GetAssetDirectory());
+
+								switch (asset_type) {
+
+									case AssetType::Compute_Shader:
+									{
+										ScriptFieldInstance& scriptField = entityFields.at(name);
+										scriptField.SetValue<AssetHandle>(dropped_asset_handle);
+
+										break;
+									}
+									default: {
+
+										L_APP_WARN("Cannot Set Asset Type {} to Script Compute Shader Field.", dropped_path.extension().string());
+										break;
+									}
+
+								}
+
+							}
+							else {
+								L_APP_WARN("Cannot Set Compute Shader {} to Script.", dropped_path.filename().string());
+							}
+
+						}
+						ImGui::EndDragDropTarget();
+					}
+
+					ImGui::NextColumn();
+
+
+					break;
+				}
 				case ScriptFieldType::Prefab:
 				{
 
@@ -1995,7 +2111,7 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 
 					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
 
-					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + (" (Prefab)") : ("None (Prefab)");
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + " (Prefab)" : "None (Prefab)";
 
 					char buffer[256];
 					strcpy_s(buffer, sizeof(buffer), text.c_str());
@@ -2276,6 +2392,68 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 				switch (field.Type)
 				{
 
+				case ScriptFieldType::ComputeShader:
+				{
+
+					ImGui::Text(name.c_str());
+					ImGui::NextColumn();
+
+					AssetHandle data = field.GetInitialValue<AssetHandle>();
+					std::string label = "##" + name + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type));
+
+					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
+
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + " (Compute Shader)" : "None (Compute Shader)";
+
+					char buffer[256];
+					strcpy_s(buffer, sizeof(buffer), text.c_str());
+					ImGui::InputText(label.c_str(), buffer, sizeof(buffer), ImGuiInputTextFlags_ReadOnly);
+
+					if (ImGui::BeginDragDropTarget()) {
+
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM_FILE")) {
+							
+							// Convert the payload data (string) back into a filesystem path
+							std::string dropped_path_str(static_cast<const char*>(payload->Data), payload->DataSize - 1);
+							std::filesystem::path dropped_path = dropped_path_str; // Convert to path
+
+							if (AssetType asset_type = AssetManager::GetAssetTypeFromFileExtension(dropped_path.extension()); asset_type != AssetType::None) {
+
+								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_path, Project::GetActiveProject()->GetAssetDirectory());
+
+								switch (asset_type) {
+
+									case AssetType::Compute_Shader:
+									{
+
+										ScriptFieldInstance& scriptField = entityFields[name];
+										scriptField.Field = fields.at(name);
+										scriptField.SetValue<AssetHandle>(dropped_asset_handle);
+
+										break;
+									}
+									default: {
+
+										L_APP_WARN("Cannot Set Asset Type {} to Script Compute Shader Field.", dropped_path.extension().string());
+										break;
+									}
+
+								}
+
+							}
+							else {
+								L_APP_WARN("Cannot Set Compute Shader {} to Script.", dropped_path.filename().string());
+							}
+
+						}
+						ImGui::EndDragDropTarget();
+					}
+
+					ImGui::NextColumn();
+
+
+					break;
+				}
 				case ScriptFieldType::Prefab:
 				{
 
@@ -2287,7 +2465,7 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 
 					AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(data);
 
-					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + (" (Prefab)") : ("None (Prefab)");
+					std::string text = (meta_data.AssetName != "") ? meta_data.AssetName + " (Prefab)" : "None (Prefab)";
 
 					char buffer[256];
 					strcpy_s(buffer, sizeof(buffer), text.c_str());

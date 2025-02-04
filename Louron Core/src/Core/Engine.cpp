@@ -61,6 +61,10 @@ namespace Louron {
             for (const auto& path : FindFilePaths(".comp")) {
                 m_ShaderLibrary->LoadShader(path, true);
             }
+
+            for (const auto& path : FindFilePaths(".compute")) {
+                m_ShaderLibrary->LoadShader(path, true);
+            }
         }
 
         m_TextureLibrary = std::make_unique<TextureLibrary>();

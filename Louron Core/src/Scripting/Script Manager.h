@@ -47,7 +47,8 @@ namespace Louron {
 		BoxColliderComponent,
 		SphereColliderComponent,
 		Component,
-		Prefab
+		Prefab,
+		ComputeShader
 	};
 
 	struct ScriptField
@@ -224,6 +225,9 @@ namespace Louron {
 		void SetFieldPrefabValue(const ScriptFieldInstance& field_instance, AssetHandle value);
 		AssetHandle GetFieldPrefabValue(const std::string& field_name);
 
+		void SetFieldComputeShaderValue(const ScriptFieldInstance& field_instance, AssetHandle value);
+		AssetHandle GetFieldComputeShaderValue(const std::string& field_name);
+
 	private:
 
 		bool GetFieldValueInternal(const std::string& name, void* buffer);
@@ -350,11 +354,12 @@ namespace Louron {
 				case ScriptFieldType::PointLightComponent:			return "PointLightComponent";
 				case ScriptFieldType::SpotLightComponent:			return "SpotLightComponent";
 				case ScriptFieldType::DirectionalLightComponent:	return "DirectionalLightComponent";
-				case ScriptFieldType::RigidbodyComponent:					return "RigidbodyComponent";
-				case ScriptFieldType::BoxColliderComponent:					return "BoxColliderComponent";
-				case ScriptFieldType::SphereColliderComponent:				return "SphereColliderComponent";
+				case ScriptFieldType::RigidbodyComponent:			return "RigidbodyComponent";
+				case ScriptFieldType::BoxColliderComponent:			return "BoxColliderComponent";
+				case ScriptFieldType::SphereColliderComponent:		return "SphereColliderComponent";
 				case ScriptFieldType::Component:					return "Component";
 				case ScriptFieldType::Prefab:						return "Prefab";
+				case ScriptFieldType::ComputeShader:				return "ComputeShader";
 			}
 			L_CORE_ASSERT(false, "Unknown ScriptFieldType");
 			return "None";
@@ -388,11 +393,12 @@ namespace Louron {
 			if (fieldType == "PointLightComponent")			return ScriptFieldType::PointLightComponent;
 			if (fieldType == "SpotLightComponent")			return ScriptFieldType::SpotLightComponent;
 			if (fieldType == "DirectionalLightComponent")	return ScriptFieldType::DirectionalLightComponent;
-			if (fieldType == "RigidbodyComponent")					return ScriptFieldType::RigidbodyComponent;
-			if (fieldType == "BoxColliderComponent")					return ScriptFieldType::BoxColliderComponent;
-			if (fieldType == "SphereColliderComponent")				return ScriptFieldType::SphereColliderComponent;
+			if (fieldType == "RigidbodyComponent")			return ScriptFieldType::RigidbodyComponent;
+			if (fieldType == "BoxColliderComponent")		return ScriptFieldType::BoxColliderComponent;
+			if (fieldType == "SphereColliderComponent")		return ScriptFieldType::SphereColliderComponent;
 			if (fieldType == "Component")					return ScriptFieldType::Component;
 			if (fieldType == "Prefab")						return ScriptFieldType::Prefab;
+			if (fieldType == "ComputeShader")				return ScriptFieldType::ComputeShader;
 
 			L_CORE_ASSERT(false, "Unknown ScriptFieldType");
 			return ScriptFieldType::None;

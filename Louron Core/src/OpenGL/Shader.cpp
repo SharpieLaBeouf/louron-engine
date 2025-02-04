@@ -17,8 +17,8 @@ namespace Louron {
 
 	Shader::Shader(const GLchar* shaderFile, bool isComputeShader = false) {
 		
-		m_Name = m_ShaderFilePath.filename().replace_extension().string();
 		m_ShaderFilePath = shaderFile;
+		m_Name = m_ShaderFilePath.stem().string();
 		m_IsComputeShader = isComputeShader;
 
 		LoadShader();
@@ -154,6 +154,8 @@ namespace Louron {
 
 			m_Program = program;
 
+			L_CORE_INFO("Shader Compiled Successfully: {}", m_Name);
+
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
 			if (!gString.empty()) glDeleteShader(geometry);
@@ -181,6 +183,8 @@ namespace Louron {
 			checkCompileErrors(program, "PROGRAM");
 
 			m_Program = program;
+
+			L_CORE_INFO("Shader Compiled Successfully: {}", m_Name);
 
 			glDeleteShader(compute);
 		}
@@ -230,9 +234,9 @@ namespace Louron {
 	/// <param name="shaderFile">File Path to Shader</param>
 	/// <param name="isComputeShader">Set to true if it is a Compute Shader</param>
 	/// <returns></returns>
-	std::shared_ptr<Shader>& ShaderLibrary::LoadShader(const std::string& shaderFile, bool isComputeShader) {
+	std::shared_ptr<Shader>& ShaderLibrary::LoadShader(const std::filesystem::path& shader_file_path, bool isComputeShader) {
 
-		std::string shaderName = FilePathToShaderName(shaderFile);
+		std::string shaderName = shader_file_path.stem().string();
 
 		// Check if Shader Already Exists
 		if (ShaderExists(shaderName)) {
@@ -240,7 +244,7 @@ namespace Louron {
 			return m_Shaders[shaderName];
 		}
 
-		std::shared_ptr<Shader> shader = std::make_shared<Shader>(shaderFile.c_str(), isComputeShader);
+		std::shared_ptr<Shader> shader = std::make_shared<Shader>(shader_file_path.string().c_str(), isComputeShader);
 
 		// Check if Shader Linked Successfully
 		GLint success;
@@ -253,6 +257,7 @@ namespace Louron {
 
 		L_CORE_INFO("Shader Loaded: {0}", shaderName);
 		m_Shaders[shaderName] = std::move(shader);
+		m_Shaders[shaderName]->SetName(shaderName);
 		return m_Shaders[shaderName];
 	}
 
@@ -276,21 +281,5 @@ namespace Louron {
 	/// <returns></returns>
 	bool ShaderLibrary::ShaderExists(const std::string& name) const {
 		return m_Shaders.find(name) != m_Shaders.end();
-	}
-
-	/// <summary>
-	/// Decodes the filepath to determine the name of the shader.
-	/// </summary>
-	/// <param name="shaderFile"></param>
-	/// <returns></returns>
-	std::string ShaderLibrary::FilePathToShaderName(const std::string& shaderFile)
-	{
-		std::string name = shaderFile;
-		auto lastSlash = name.find_last_of("/\\");
-		lastSlash = lastSlash == std::string::npos ? 0 : lastSlash + 1;
-		auto lastDot = name.rfind('.');
-		auto count = lastDot == std::string::npos ? name.size() - lastSlash : lastDot - lastSlash;
-		name = name.substr(lastSlash, count);
-		return name.c_str();
 	}
 }

@@ -1587,6 +1587,7 @@ namespace Louron {
                         case ScriptFieldType::BoxColliderComponent:
                         case ScriptFieldType::SphereColliderComponent:
                         case ScriptFieldType::Component:
+                        case ScriptFieldType::ComputeShader:
                         case ScriptFieldType::Prefab:   out << YAML::Key << "Data" << YAML::Value << entity_fields.at(name).GetValue<UUID>();           break;
 
                         case ScriptFieldType::Bool:     out << YAML::Key << "Data" << YAML::Value << entity_fields.at(name).GetValue<bool>();           break;
@@ -1705,6 +1706,7 @@ namespace Louron {
                                 case ScriptFieldType::RigidbodyComponent:
                                 case ScriptFieldType::BoxColliderComponent:
                                 case ScriptFieldType::SphereColliderComponent:
+                                case ScriptFieldType::ComputeShader:
                                 case ScriptFieldType::Component:
                                 case ScriptFieldType::Prefab:   { Louron::UUID data = script_field["Data"].as<uint32_t>(); field_instance.SetValue(data); break; }
                                                                                                                                                                     

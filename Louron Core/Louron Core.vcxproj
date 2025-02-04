@@ -116,6 +116,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\OpenGL\Compute Shader Asset.cpp" />
     <ClCompile Include="src\Renderer\Camera.cpp" />
     <ClCompile Include="include\glm\detail\glm.cpp" />
     <ClCompile Include="include\glm\out\build\x64-Debug (default)\CMakeFiles\3.18.20081302-MSVC_2\CompilerIdCXX\CMakeCXXCompilerId.cpp" />
@@ -178,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Asset\Asset Manager API.h" />
+    <ClInclude Include="src\OpenGL\Compute Shader Asset.h" />
     <ClInclude Include="src\Renderer\Camera.h" />
     <ClInclude Include="include\assimp\aabb.h" />
     <ClInclude Include="include\assimp\ai_assert.h" />

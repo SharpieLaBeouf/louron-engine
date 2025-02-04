@@ -25,7 +25,9 @@ namespace Louron {
 		Audio,
 
 		Material_Standard,
-		Material_Skybox
+		Material_Skybox,
+
+		Compute_Shader
 
 	};
 

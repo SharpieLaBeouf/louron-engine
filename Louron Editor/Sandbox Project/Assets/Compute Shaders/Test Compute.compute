@@ -1,0 +1,33 @@
+#version 450 core
+
+struct MyData
+{
+	float myFloat;
+	uint myBool;
+	vec2 myVec;
+};
+
+// Define buffer for input and output
+layout(std430, binding = 0) buffer ComputeBuffer 
+{
+    MyData data[];
+} ComputeBufferData;
+
+uniform int u_Iterations;
+uniform vec2 u_Addition;
+
+layout(local_size_x = 1024, local_size_y = 1, local_size_z = 1) in;
+void main() 
+{
+	uint index = gl_GlobalInvocationID.x;
+
+	if (index >= ComputeBufferData.data.length())
+		return;
+
+	for (int i = 0; i < u_Iterations; i++)
+	{
+		ComputeBufferData.data[index].myFloat = ComputeBufferData.data[index].myFloat + 1.0; // Simple operation: multiply each element by 2
+		ComputeBufferData.data[index].myBool = ComputeBufferData.data[index].myBool == 1 ? 0 : 1; // Toggle uint value
+		ComputeBufferData.data[index].myVec = ComputeBufferData.data[index].myVec + u_Addition;
+	}
+}

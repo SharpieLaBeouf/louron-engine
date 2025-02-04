@@ -18,6 +18,7 @@
 #include "Core/Platform.h"
 
 #include "OpenGL/Buffer.h"
+#include "OpenGL/Compute Shader Asset.h"
 #include "OpenGL/Material.h"
 #include "OpenGL/Shader.h"
 #include "OpenGL/Texture.h"

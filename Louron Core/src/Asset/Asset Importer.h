@@ -3,6 +3,8 @@
 #include "Asset.h"
 #include "Asset Manager.h"
 
+#include "../OpenGL/Compute Shader Asset.h"
+
 #include "../OpenGL/Texture.h"
 #include "../OpenGL/Material.h"
 
@@ -17,7 +19,6 @@ namespace Louron {
 	class Scene;
 	class Prefab;
 	class Texture;
-
 
 	using AssetMap = std::map<AssetHandle, std::shared_ptr<Asset>>;
 	using AssetRegistry = std::map<AssetHandle, AssetMetaData>;
@@ -86,6 +87,16 @@ namespace Louron {
 
 		static std::shared_ptr<PBRMaterial> LoadMaterialPBR(const std::filesystem::path& path);
 		static std::shared_ptr<SkyboxMaterial> LoadMaterialSkybox(const std::filesystem::path& path);
+
+	};
+
+	class ComputeShaderImporter
+	{
+
+	public:
+
+		static std::shared_ptr<ComputeShaderAsset> ImportComputeShader(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory);
+		static std::shared_ptr<ComputeShaderAsset> LoadComputeShader(const std::filesystem::path& path);
 
 	};
 

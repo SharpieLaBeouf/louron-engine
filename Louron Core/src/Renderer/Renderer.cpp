@@ -10,79 +10,6 @@ namespace Louron {
 
 	RenderPassStats Renderer::s_RenderStats = {};
 
-	static GLuint debug_VAO = -1;
-
-	// Function to compute spherical interpolation between two points
-	glm::vec3 sphericalInterp(glm::vec3 start, glm::vec3 end, float t) {
-		// Normalize vectors to ensure they lie on the surface of the sphere
-		glm::vec3 startDir = normalize(start);
-		glm::vec3 endDir = normalize(end);
-
-		// Spherical interpolation
-		float dotProd = dot(startDir, endDir);
-		float theta = acos(dotProd);
-		if (abs(theta) < 0.001) {
-			return normalize(mix(startDir, endDir, t)); // Normalize after mix
-		}
-
-		float sinTheta = sin(theta);
-		float scaleStart = sin((1.0 - t) * theta) / sinTheta;
-		float scaleEnd = sin(t * theta) / sinTheta;
-
-		// Return the interpolated point, clamped to the unit sphere (radius = 1)
-		glm::vec3 result = scaleStart * startDir + scaleEnd * endDir;
-		return normalize(result); // Normalize to clamp to unit sphere
-	}
-
-	void generateOctahedronSphereData(std::vector<GLfloat>& vertices, std::vector<GLuint>& indices) {
-		// Vertices of the octahedron (normalized to form a unit sphere)
-		glm::vec3 octahedronVertices[] = {
-			glm::vec3(1.0f, 0.0f, 0.0f),  // +X
-			glm::vec3(-1.0f, 0.0f, 0.0f), // -X
-			glm::vec3(0.0f, 1.0f, 0.0f),  // +Y
-			glm::vec3(0.0f, -1.0f, 0.0f), // -Y
-			glm::vec3(0.0f, 0.0f, 1.0f),  // +Z
-			glm::vec3(0.0f, 0.0f, -1.0f)  // -Z
-		};
-
-		// Edges between the octahedron vertices (each pair of indices forms a line)
-		GLuint octahedronEdges[] = {
-			0, 2, 0, 3, 0, 4, 0, 5,  // +X connections
-			1, 2, 1, 3, 1, 4, 1, 5,  // -X connections
-			2, 4, 2, 5, 3, 4, 3, 5   // Top-bottom connections
-		};
-
-		// Step 1: Generate vertices using spherical interpolation
-		int edgeCount = sizeof(octahedronEdges) / sizeof(GLuint);
-		for (int i = 0; i < edgeCount; i += 2) {
-			glm::vec3 start = octahedronVertices[octahedronEdges[i]];
-			glm::vec3 end = octahedronVertices[octahedronEdges[i + 1]];
-
-			// Interpolate between the start and end vertices
-			for (int t = 0; t <= 10; ++t) {  // Divide each edge into 10 parts
-				float interpFactor = float(t) / 10.0f;
-				glm::vec3 point = sphericalInterp(start, end, interpFactor);
-
-				// Add the spherical point to the vertices list
-				vertices.push_back(point.x);
-				vertices.push_back(point.y);
-				vertices.push_back(point.z);
-			}
-		}
-
-		// Step 2: Generate indices to connect the interpolated points (forming the sphere's edges)
-		for (int i = 0; i < edgeCount; i += 2) {
-			int startIdx = (i / 2) * 11;  // 11 points per edge
-			int endIdx = startIdx + 10;
-
-			// Connect the points of the current edge
-			for (int j = startIdx; j < endIdx; ++j) {
-				indices.push_back(j);
-				indices.push_back(j + 1);
-			}
-		}
-	}
-
 	void Renderer::Init() 
 	{
 
@@ -123,35 +50,6 @@ namespace Louron {
 			s_DebugCubeVAO->SetIndexBuffer(ebo);
 
 			s_DebugCubeVAO->UnBind();
-		}
-
-		if (!s_DebugSphereVAO)
-		{
-			std::vector<GLfloat> vertices;
-			std::vector<GLuint> indices;
-
-			generateOctahedronSphereData(vertices, indices);
-
-			s_DebugSphereVAO = std::make_unique<VertexArray>();
-			s_DebugSphereVAO->Bind();
-
-			// Create a Vertex Buffer Object (VBO)
-			VertexBuffer* vbo = new VertexBuffer(vertices.data(), vertices.size() * sizeof(GLfloat));
-			BufferLayout layout = {
-				{ ShaderDataType::Float3, "aPos" }
-			};
-			vbo->SetLayout(layout);
-
-			// Create an Index Buffer Object (IBO)
-			IndexBuffer* ebo = new IndexBuffer(indices.data(), indices.size());
-
-			// Add buffers to VAO
-			s_DebugSphereVAO->AddVertexBuffer(vbo);
-			s_DebugSphereVAO->SetIndexBuffer(ebo);
-
-			// Unbind VAO (good practice)
-			s_DebugSphereVAO->UnBind();
-
 		}
 	}
 

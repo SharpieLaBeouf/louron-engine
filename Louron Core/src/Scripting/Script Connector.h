@@ -1,10 +1,17 @@
 #pragma once
 
 // Louron Core Headers
+
 #include "../Core/Logging.h"
-#include "../Debug/Assert.h"
 #include "../Core/Time.h"
 #include "../Core/Input.h"
+
+#include "../Debug/Assert.h"
+
+#include "../OpenGL/Compute Shader Asset.h"
+
+#include "../Project/Project.h"
+
 #include "../Scene/Scene.h"
 #include "../Scene/Entity.h"
 #include "../Scene/Prefab.h"
@@ -12,7 +19,6 @@
 #include "../Scene/Components/Light.h"
 #include "../Scene/Components/Skybox.h"
 
-#include "../Project/Project.h"
 
 #include "Script Manager.h"
 
@@ -233,6 +239,30 @@ namespace Louron {
 		static void SphereColliderComponent_SetMaterial(UUID entityID, _PhysicsMaterial* reference);
 
 #pragma endregion
+
+#pragma endregion
+
+
+#pragma region Compute Shader
+
+		static void ComputeShader_SetBuffer(AssetHandle asset_handle, ComputeBuffer* buffer, uint32_t binding_index);
+		static void ComputeShader_Dispatch(AssetHandle asset_handle, uint32_t x, uint32_t y, uint32_t z);
+		static void ComputeShader_SetBool(AssetHandle asset_handle, MonoString* name, bool value);
+		static void ComputeShader_SetInt(AssetHandle asset_handle, MonoString* name, int32_t value);
+		static void ComputeShader_SetUInt(AssetHandle asset_handle, MonoString* name, uint32_t value);
+		static void ComputeShader_SetFloat(AssetHandle asset_handle, MonoString* name, float value);
+		static void ComputeShader_SetVector2(AssetHandle asset_handle, MonoString* name, glm::vec2 value);
+		static void ComputeShader_SetVector3(AssetHandle asset_handle, MonoString* name, glm::vec3 value);
+		static void ComputeShader_SetVector4(AssetHandle asset_handle, MonoString* name, glm::vec4 value);
+
+#pragma endregion
+
+#pragma region Compute Buffer
+
+		static ComputeBuffer* ComputeBuffer_Create(int element_count, int element_size);
+		static void ComputeBuffer_SetData(ComputeBuffer* buffer, void* data, int element_count, int element_size);
+		static void ComputeBuffer_GetData(ComputeBuffer* buffer, void* output, int element_count, int element_size);
+		static void ComputeBuffer_Release(ComputeBuffer* buffer);
 
 #pragma endregion
 

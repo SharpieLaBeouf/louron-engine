@@ -9,6 +9,8 @@
 
 // Credit to Cherno for this system design!
 // www.github.com/TheCherno/Hazel/tree/asset-manager/Hazel/src/Hazel/Asset
+//  
+// P.s., changed dramatically to my own style, but still relevant
 
 namespace Louron {
 
@@ -27,10 +29,12 @@ namespace Louron {
 	};
 
 	struct AssetMesh;
-	class Texture;
+
 	class Prefab;
+	class Texture;
 	class Material;
 	class SkyboxMaterial;
+	class ComputeShaderAsset;
 
 	class EditorAssetManager : public AssetManagerBase {
 

@@ -2,6 +2,7 @@
 
 #include "Asset.h"
 #include "../Project/Project.h"
+#include "../OpenGL/Compute Shader Asset.h"
 
 namespace Louron {
 
@@ -24,7 +25,9 @@ namespace Louron {
 
 		{ ".lmaterial",	AssetType::Material_Standard },
 		{ ".lmat",		AssetType::Material_Standard },
-		{ ".lskybox",	AssetType::Material_Skybox }
+		{ ".lskybox",	AssetType::Material_Skybox },
+
+		{ ".compute",	AssetType::Compute_Shader }
 
 	};
 

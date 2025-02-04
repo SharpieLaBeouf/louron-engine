@@ -207,6 +207,9 @@
     <ClCompile Include="src\Renderer\Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\OpenGL\Compute Shader Asset.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\OpenGL\Buffer.h">
@@ -1959,6 +1962,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Asset\Asset Manager API.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\OpenGL\Compute Shader Asset.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

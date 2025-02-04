@@ -122,27 +122,41 @@ namespace Louron {
 		mono_add_internal_call("Louron.EngineCallbacks::RigidbodyComponent_SetPositionConstraint",		Rigidbody_SetPositionConstraint);
 		mono_add_internal_call("Louron.EngineCallbacks::RigidbodyComponent_GetRotationConstraint",		Rigidbody_GetRotationConstraint);
 		mono_add_internal_call("Louron.EngineCallbacks::RigidbodyComponent_SetRotationConstraint",		Rigidbody_SetRotationConstraint);
-		mono_add_internal_call("Louron.EngineCallbacks::RigidbodyComponent_ApplyForce", Rigidbody_ApplyForce);
-		mono_add_internal_call("Louron.EngineCallbacks::RigidbodyComponent_ApplyTorque", Rigidbody_ApplyTorque);
+		mono_add_internal_call("Louron.EngineCallbacks::RigidbodyComponent_ApplyForce",					Rigidbody_ApplyForce);
+		mono_add_internal_call("Louron.EngineCallbacks::RigidbodyComponent_ApplyTorque",				Rigidbody_ApplyTorque);
 
-		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_GetIsTrigger", BoxColliderComponent_GetIsTrigger);
-		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_SetIsTrigger", BoxColliderComponent_SetIsTrigger);
-		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_GetCentre", BoxColliderComponent_GetCentre);
-		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_SetCentre", BoxColliderComponent_SetCentre);
-		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_GetSize", BoxColliderComponent_GetSize);
-		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_SetSize", BoxColliderComponent_SetSize);
-		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_GetMaterial", BoxColliderComponent_GetMaterial);
-		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_SetMaterial", BoxColliderComponent_SetMaterial);
+		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_GetIsTrigger",		BoxColliderComponent_GetIsTrigger);
+		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_SetIsTrigger",		BoxColliderComponent_SetIsTrigger);
+		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_GetCentre",		BoxColliderComponent_GetCentre);
+		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_SetCentre",		BoxColliderComponent_SetCentre);
+		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_GetSize",			BoxColliderComponent_GetSize);
+		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_SetSize",			BoxColliderComponent_SetSize);
+		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_GetMaterial",		BoxColliderComponent_GetMaterial);
+		mono_add_internal_call("Louron.EngineCallbacks::BoxColliderComponent_SetMaterial",		BoxColliderComponent_SetMaterial);
 
-		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_GetIsTrigger", SphereColliderComponent_GetIsTrigger);
-		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_SetIsTrigger", SphereColliderComponent_SetIsTrigger);
-		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_GetCentre", SphereColliderComponent_GetCentre);
-		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_SetCentre", SphereColliderComponent_SetCentre);
-		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_GetRadius", SphereColliderComponent_GetRadius);
-		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_SetRadius", SphereColliderComponent_SetRadius);
-		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_GetMaterial", SphereColliderComponent_GetMaterial);
-		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_SetMaterial", SphereColliderComponent_SetMaterial);
+		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_GetIsTrigger",	SphereColliderComponent_GetIsTrigger);
+		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_SetIsTrigger",	SphereColliderComponent_SetIsTrigger);
+		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_GetCentre",		SphereColliderComponent_GetCentre);
+		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_SetCentre",		SphereColliderComponent_SetCentre);
+		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_GetRadius",		SphereColliderComponent_GetRadius);
+		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_SetRadius",		SphereColliderComponent_SetRadius);
+		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_GetMaterial",	SphereColliderComponent_GetMaterial);
+		mono_add_internal_call("Louron.EngineCallbacks::SphereColliderComponent_SetMaterial",	SphereColliderComponent_SetMaterial);
 
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_Dispatch",	ComputeShader_Dispatch);	
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_SetBuffer",	ComputeShader_SetBuffer);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_SetBool",		ComputeShader_SetBool);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_SetInt",		ComputeShader_SetInt);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_SetUInt",		ComputeShader_SetUInt);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_SetFloat",	ComputeShader_SetFloat);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_SetVector2",	ComputeShader_SetVector2);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_SetVector3",	ComputeShader_SetVector3);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeShader_SetVector4",	ComputeShader_SetVector4);
+		
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeBuffer_Create",	ComputeBuffer_Create);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeBuffer_SetData", ComputeBuffer_SetData);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeBuffer_GetData", ComputeBuffer_GetData);
+		mono_add_internal_call("Louron.EngineCallbacks::ComputeBuffer_Release", ComputeBuffer_Release);
 
 	}
 
@@ -1479,6 +1493,126 @@ namespace Louron {
 
 #pragma endregion
 
+#pragma region Compute Shader
+
+	void ScriptConnector::ComputeShader_SetBuffer(AssetHandle asset_handle, ComputeBuffer* buffer, uint32_t binding_index)
+	{
+		if (!buffer)
+			return;
+
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+			shader->SetBuffer(buffer, binding_index);
+	}
+
+	void ScriptConnector::ComputeShader_Dispatch(AssetHandle asset_handle, uint32_t x, uint32_t y, uint32_t z)
+	{
+		if (x <= 0) x = 1;
+		if (y <= 0) y = 1;
+		if (z <= 0) z = 1;
+
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+			shader->Dispatch(x, y, z);
+	}
+
+	void ScriptConnector::ComputeShader_SetBool(AssetHandle asset_handle, MonoString* name, bool value)
+	{
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+		{
+			shader->GetShader()->Bind();
+			shader->GetShader()->SetBool(ScriptingUtils::MonoStringToString(name).c_str(), value);
+		}
+	}
+
+	void ScriptConnector::ComputeShader_SetInt(AssetHandle asset_handle, MonoString* name, int32_t value)
+	{
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+		{
+			shader->GetShader()->Bind();
+			shader->GetShader()->SetInt(ScriptingUtils::MonoStringToString(name).c_str(), value);
+		}
+	}
+
+	void ScriptConnector::ComputeShader_SetUInt(AssetHandle asset_handle, MonoString* name, uint32_t value)
+	{
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+		{
+			shader->GetShader()->Bind();
+			shader->GetShader()->SetUInt(ScriptingUtils::MonoStringToString(name).c_str(), value);
+		}
+	}
+
+	void ScriptConnector::ComputeShader_SetFloat(AssetHandle asset_handle, MonoString* name, float value)
+	{
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+		{
+			shader->GetShader()->Bind();
+			shader->GetShader()->SetFloat(ScriptingUtils::MonoStringToString(name).c_str(), value);
+		}
+	}
+
+	void ScriptConnector::ComputeShader_SetVector2(AssetHandle asset_handle, MonoString* name, glm::vec2 value)
+	{
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+		{
+			shader->GetShader()->Bind();
+			shader->GetShader()->SetVec2(ScriptingUtils::MonoStringToString(name).c_str(), value);
+		}
+	}
+
+	void ScriptConnector::ComputeShader_SetVector3(AssetHandle asset_handle, MonoString* name, glm::vec3 value)
+	{
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+		{
+			shader->GetShader()->Bind();
+			shader->GetShader()->SetVec3(ScriptingUtils::MonoStringToString(name).c_str(), value);
+		}
+	}
+
+	void ScriptConnector::ComputeShader_SetVector4(AssetHandle asset_handle, MonoString* name, glm::vec4 value)
+	{
+		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
+		{
+			shader->GetShader()->Bind();
+			shader->GetShader()->SetVec4(ScriptingUtils::MonoStringToString(name).c_str(), value);
+		}
+	}
+
+#pragma endregion
+
+#pragma region Compute Buffer
+
+	ComputeBuffer* ScriptConnector::ComputeBuffer_Create(int element_count, int element_size)
+	{
+		return new ComputeBuffer(element_count, element_size);
+	}
+
+	void ScriptConnector::ComputeBuffer_SetData(ComputeBuffer* buffer, void* data, int element_count, int element_size) 
+	{
+		if (!buffer)
+			return;
+
+		buffer->SetData(data, element_count, element_size);
+	}
+
+	void ScriptConnector::ComputeBuffer_GetData(ComputeBuffer* buffer, void* output, int element_count, int element_size)
+	{
+		if (!buffer)
+			return;
+
+		buffer->GetData(output, element_count, element_size);
+	}
+
+	void ScriptConnector::ComputeBuffer_Release(ComputeBuffer* buffer) 
+	{
+		if (!buffer)
+			return;
+
+		buffer->Release();
+		delete buffer;  // Delete the buffer object
+	}
+
+#pragma endregion
+
 #pragma region Component Register
 
 	template<typename... Component>
@@ -1515,6 +1649,7 @@ namespace Louron {
 	}
 
 #pragma endregion
+
 
 }
 

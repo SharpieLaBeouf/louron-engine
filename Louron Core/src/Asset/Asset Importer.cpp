@@ -24,6 +24,9 @@
 
 namespace Louron {
 
+
+#pragma region Asset Import
+
 	using AssetImportFunction = std::function<std::shared_ptr<Asset>(AssetMap*, AssetRegistry*, AssetHandle, const AssetMetaData&, const std::filesystem::path&)>;
 	static std::map<AssetType, AssetImportFunction> s_AssetImportFunctions = {
 
@@ -36,7 +39,9 @@ namespace Louron {
 		{ AssetType::Material_Standard,			MaterialImporter::ImportMaterial },
 		{ AssetType::Material_Skybox,			MaterialImporter::ImportMaterial },
 
-		{ AssetType::ModelImport,				ModelImporter::ImportModel }
+		{ AssetType::ModelImport,				ModelImporter::ImportModel },
+
+		{ AssetType::Compute_Shader,			ComputeShaderImporter::ImportComputeShader }
 	};
 
 	std::shared_ptr<Asset> AssetImporter::ImportAsset(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& metadata, const std::filesystem::path& project_asset_directory)
@@ -49,6 +54,8 @@ namespace Louron {
 
 		return s_AssetImportFunctions.at(metadata.Type)(asset_map, asset_reg, handle, metadata, project_asset_directory);
 	}
+
+#pragma endregion
 
 #pragma region Scene Import
 
@@ -563,6 +570,20 @@ namespace Louron {
 		for (unsigned int i = 0; i < node->mNumChildren; i++) {
 			ProcessNode(scene, node->mChildren[i], model_prefab, current_entity_handle, asset_map, asset_reg, parent_asset_handle, path);
 		}
+	}
+
+#pragma endregion
+
+#pragma region Compute Shader Import
+
+	std::shared_ptr<ComputeShaderAsset> ComputeShaderImporter::ImportComputeShader(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory)
+	{
+		return LoadComputeShader(meta_data.IsCustomAsset ? meta_data.FilePath : Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
+	}
+
+	std::shared_ptr<ComputeShaderAsset> ComputeShaderImporter::LoadComputeShader(const std::filesystem::path& path) 
+	{
+		return std::make_shared<ComputeShaderAsset>(path);
 	}
 
 #pragma endregion

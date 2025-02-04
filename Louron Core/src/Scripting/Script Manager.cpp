@@ -5,6 +5,7 @@
 #include "Script Connector.h"
 #include "../Core/Logging.h"
 #include "../Debug/Assert.h"
+#include "../OpenGL/Compute Shader Asset.h"
 #include "../Project/Project.h"
 #include "../Scene/Entity.h"
 
@@ -54,7 +55,9 @@ namespace Louron {
 		{ "Louron.BoxColliderComponent",		ScriptFieldType::BoxColliderComponent },
 		{ "Louron.SphereColliderComponent",		ScriptFieldType::SphereColliderComponent },
 		{ "Louron.Component",					ScriptFieldType::Component },
-		{ "Louron.Prefab",						ScriptFieldType::Prefab }
+		{ "Louron.Prefab",						ScriptFieldType::Prefab },
+		{ "Louron.ComputeShader",				ScriptFieldType::ComputeShader }
+
 	};
 
 	struct ScriptManagerData {
@@ -74,6 +77,7 @@ namespace Louron {
 
 		ScriptClass EntityClass;
 		ScriptClass PrefabClass;
+		ScriptClass ComputeShaderClass;
 		// Key is {Namespace}.{ClassName} - Value is shared_ptr to ScriptClass
 		std::unordered_map<std::string, std::shared_ptr<ScriptClass>> EntityClasses;
 
@@ -317,6 +321,7 @@ namespace Louron {
 		// 6. Setup EntityClass ScriptClass
 		s_Data->EntityClass = ScriptClass("Louron", "Entity", true);
 		s_Data->PrefabClass = ScriptClass("Louron", "Prefab", true);
+		s_Data->ComputeShaderClass = ScriptClass("Louron", "ComputeShader", true);
 
 	}
 
@@ -483,6 +488,7 @@ namespace Louron {
 		// Retrieve and instantiate class
 		s_Data->EntityClass = ScriptClass("Louron", "Entity", true);
 		s_Data->PrefabClass = ScriptClass("Louron", "Prefab", true);
+		s_Data->ComputeShaderClass = ScriptClass("Louron", "ComputeShader", true);
 	}
 
 	void ScriptManager::OnRuntimeStart(std::shared_ptr<Scene> scene)
@@ -567,6 +573,9 @@ namespace Louron {
 						else if (fieldInstance.Field.Type == ScriptFieldType::Prefab) { // Set Prefab value
 							instance->SetFieldPrefabValue(fieldInstance, *(AssetHandle*)fieldInstance.m_Buffer);
 						}
+						else if (fieldInstance.Field.Type == ScriptFieldType::ComputeShader) { // Set Prefab value
+							instance->SetFieldComputeShaderValue(fieldInstance, *(AssetHandle*)fieldInstance.m_Buffer);
+						}
 						else { // Set values for other fields that are not components
 							instance->SetFieldValueInternal(name, fieldInstance.m_Buffer);
 						}
@@ -614,6 +623,9 @@ namespace Louron {
 						}
 						else if (fieldInstance.Field.Type == ScriptFieldType::Prefab) { // Set Prefab value
 							instance->SetFieldPrefabValue(fieldInstance, *(AssetHandle*)fieldInstance.m_Buffer);
+						}
+						else if (fieldInstance.Field.Type == ScriptFieldType::ComputeShader) { // Set Prefab value
+							instance->SetFieldComputeShaderValue(fieldInstance, *(AssetHandle*)fieldInstance.m_Buffer);
 						}
 						else { // Set values for other fields that are not components
 							instance->SetFieldValueInternal(name, fieldInstance.m_Buffer);
@@ -1049,6 +1061,59 @@ namespace Louron {
 
 		// Retrieve the value of the AssetHandle field
 		mono_field_get_value(prefab_instance, handle_field_in_prefab_class, s_FieldValueBuffer);
+
+		return *(AssetHandle*)s_FieldValueBuffer;
+	}
+
+	void ScriptInstance::SetFieldComputeShaderValue(const ScriptFieldInstance& field_instance, AssetHandle value)
+	{
+		ScriptClass& compute_class = s_Data->ComputeShaderClass;
+
+		MonoClassField* compute_field_in_script = mono_class_get_field_from_name(m_ScriptClass->GetMonoClass(), field_instance.Field.Name.c_str());
+
+		if (!compute_field_in_script)
+			return;
+
+		MonoObject* compute_instance = mono_object_new(s_Data->AppDomain, compute_class.GetMonoClass()); // CREATE - create a new object
+
+		if (!compute_instance)
+			return;
+
+		MonoMethod* compute_constructor = compute_class.GetMethod(".ctor", 1);
+
+		if (!compute_constructor)
+			return;
+
+		void* param = &value;
+		compute_class.InvokeMethod(compute_instance, compute_constructor, &param); // INITIALISE - Call the parametered constructor to pass the Asset Handle
+
+		mono_field_set_value(m_Instance, compute_field_in_script, (void*)compute_instance); // ASSIGN - set the object to the field in our Script Instance
+	}
+
+	AssetHandle ScriptInstance::GetFieldComputeShaderValue(const std::string& field_name)
+	{
+		// Get the MonoClassField corresponding to the field_name
+		MonoClassField* compute_field_in_script = mono_class_get_field_from_name(m_ScriptClass->GetMonoClass(), field_name.c_str());
+
+		if (!compute_field_in_script)
+			return NULL_UUID; // Return a default UUID if the field is not found
+
+		// Retrieve the MonoObject stored in the field
+		MonoObject* compute_instance = nullptr;
+		mono_field_get_value(m_Instance, compute_field_in_script, &compute_instance);
+
+		if (!compute_instance)
+			return NULL_UUID; // Return a default UUID if the field has no value
+
+		// Get the ComputeShader::Asset_Handle field from the ComputeShader class
+		ScriptClass& compute_class = s_Data->ComputeShaderClass;
+		MonoClassField* handle_field_in_compute_class = mono_class_get_field_from_name(compute_class.GetMonoClass(), "Asset_Handle");
+
+		if (!handle_field_in_compute_class)
+			return NULL_UUID; // Return a default UUID if the handle field is not found
+
+		// Retrieve the value of the AssetHandle field
+		mono_field_get_value(compute_instance, handle_field_in_compute_class, s_FieldValueBuffer);
 
 		return *(AssetHandle*)s_FieldValueBuffer;
 	}

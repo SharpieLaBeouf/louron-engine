@@ -36,14 +36,14 @@ namespace Louron {
 
 		switch (asset_type) {
 
-		case AssetType::Scene:
-		case AssetType::Prefab:
-		case AssetType::ModelImport:
-		case AssetType::Material_Skybox:
-		case AssetType::Material_Standard:
-		{
-			return true;
-		}
+			case AssetType::Scene:
+			case AssetType::Prefab:
+			case AssetType::ModelImport:
+			case AssetType::Material_Skybox:
+			case AssetType::Material_Standard:
+			{
+				return true;
+			}
 
 		}
 
@@ -317,15 +317,47 @@ namespace Louron {
 			return NULL_UUID;
 		}
 
-		// Generate New Meta Data
 		AssetMetaData meta_data;
-		meta_data.AssetName = asset_file_path.stem().string();
-		meta_data.FilePath = std::filesystem::relative(asset_file_path, project_asset_directory);
-		meta_data.Type = AssetManager::GetAssetTypeFromFileExtension(asset_file_path.extension());
-		meta_data.IsComposite = AssetManager::IsAssetTypeComposite(meta_data.Type);
+		AssetHandle handle;
+		
+		if (std::filesystem::exists(asset_file_path.string() + ".meta"))
+		{
+			YAML::Node data;
+			try
+			{
+				data = YAML::LoadFile(asset_file_path.string() + ".meta");
 
-		// Generate New Unique Handle
-		AssetHandle handle = GenerateNewAssetHandle(meta_data.Type, meta_data.FilePath);
+				if (data["Asset Name"])
+					meta_data.AssetName = data["Asset Name"].as<std::string>();
+
+				if (data["Asset Handle"])
+					handle = data["Asset Handle"].as<uint32_t>();
+
+				if (data["Asset Type"])
+					meta_data.Type = AssetUtils::AssetTypeFromString(data["Asset Type"].as<std::string>());
+
+				if (data["Asset Is Composite"])
+					meta_data.IsComposite = data["Asset Is Composite"].as<bool>();
+
+				meta_data.FilePath = std::filesystem::relative(asset_file_path, project_asset_directory);
+			}
+			catch (YAML::ParserException e)
+			{
+				meta_data.AssetName = asset_file_path.stem().string();
+				meta_data.FilePath = std::filesystem::relative(asset_file_path, project_asset_directory);
+				meta_data.Type = AssetManager::GetAssetTypeFromFileExtension(asset_file_path.extension());
+				meta_data.IsComposite = AssetManager::IsAssetTypeComposite(meta_data.Type);
+				handle = GenerateNewAssetHandle(meta_data.Type, meta_data.FilePath);
+			}
+		}
+		else
+		{
+			meta_data.AssetName = asset_file_path.stem().string();
+			meta_data.FilePath = std::filesystem::relative(asset_file_path, project_asset_directory);
+			meta_data.Type = AssetManager::GetAssetTypeFromFileExtension(asset_file_path.extension());
+			meta_data.IsComposite = AssetManager::IsAssetTypeComposite(meta_data.Type);
+			handle = GenerateNewAssetHandle(meta_data.Type, meta_data.FilePath);
+		}
 
 		L_CORE_ASSERT(meta_data.Type != AssetType::None, "Cannot Load Asset as MetaData Type Is NULL.");
 

@@ -33,6 +33,63 @@ namespace Louron
 
         #endregion
 
+        #region Compute Shaders
+
+        // Compute Shader
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_Dispatch(uint shader_asset, uint x, uint y, uint z);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_SetBuffer(uint shader_asset, IntPtr buffer, uint binding_index);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_SetBool(uint shader_asset, string name, bool value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_SetInt(uint shader_asset, string name, int value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_SetUInt(uint shader_asset, string name, uint value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_SetFloat(uint shader_asset, string name, float value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_SetVector2(uint shader_asset, string name, Vector2 value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_SetVector3(uint shader_asset, string name, Vector3 value);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeShader_SetVector4(uint shader_asset, string name, Vector4 value);
+
+        // TODO: Implement Matrix data type into Louron Script Core
+        //[MethodImpl(MethodImplOptions.InternalCall)]
+        //internal extern static void ComputeShader_SetMat2(uint shader_asset, string name, ref Matrix2x2 value);
+
+        //[MethodImpl(MethodImplOptions.InternalCall)]
+        //internal extern static void ComputeShader_SetMat3(uint shader_asset, string name, ref Matrix3x3 value);
+
+        //[MethodImpl(MethodImplOptions.InternalCall)]
+        //internal extern static void ComputeShader_SetMat4(uint shader_asset, string name, ref Matrix4x4 value);
+
+        // Compute Buffer
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static IntPtr ComputeBuffer_Create(int element_count, int element_size);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeBuffer_SetData(IntPtr buffer, IntPtr data, int element_count, int element_size);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeBuffer_GetData(IntPtr buffer, IntPtr output, int element_count, int element_size);
+
+        [MethodImpl(MethodImplOptions.InternalCall)]
+        internal extern static void ComputeBuffer_Release(IntPtr buffer);
+
+
+        #endregion
+
         #region Input
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]

@@ -2,54 +2,22 @@ Scene Name: Start Scene
 Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
 Scene Pipeline Type: 1
 Entities:
-  - Entity: 2418869427
+  - Entity: 3077619168
     TagComponent:
-      Tag: Cube
-    HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, -0.136312246, 1.21787153e-07]
-      Rotation: [0, -0, 0]
-      Scale: [5, 0.100000001, 5]
-    MeshFilterComponent:
-      MeshAssetHandle: 2903028380
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 2785031260
-    BoxColliderComponent:
-      IsTrigger: false
-      Centre: [0, 0, 0]
-      Size: [1, 1, 1]
-      MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 1117920478
-    TagComponent:
-      Tag: Crazy Goblin! (1) (1)
+      Tag: Directional Light
     HierarchyComponent:
       Parent: 4294967295
       Children:
         []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
+      Rotation: [-50, 30, 0]
       Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 2480071558
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: true
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 3876886402
-    BoxColliderComponent:
-      IsTrigger: false
-      Centre: [0, 0.550000012, 0.0599999987]
-      Size: [0.280000001, 0.569999993, 0.219999999]
-      MaterialProperties: [0.600000024, 0.600000024, 0]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Intensity: 1
+      Shadow Type: Soft
   - Entity: 2006140417
     TagComponent:
       Tag: Main Camera
@@ -78,19 +46,65 @@ Entities:
       ClearColour: [1, 1, 1, 1]
     SkyboxComponent:
       MaterialAssetHandle: 4158978962
-  - Entity: 3077619168
+  - Entity: 1117920478
     TagComponent:
-      Tag: Directional Light
+      Tag: Crazy Goblin! (1) (1)
     HierarchyComponent:
       Parent: 4294967295
       Children:
         []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [-50, 30, 0]
+      Rotation: [0, 0, 0]
       Scale: [1, 1, 1]
-    DirectionalLightComponent:
-      Active: true
-      Colour: [1, 1, 1, 1]
-      Intensity: 1
-      Shadow Type: Soft
+    MeshFilterComponent:
+      MeshAssetHandle: 2480071558
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3876886402
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0.550000012, 0.0599999987]
+      Size: [0.280000001, 0.569999993, 0.219999999]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
+  - Entity: 2418869427
+    TagComponent:
+      Tag: Cube
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.ComputeShaderTest
+        Fields:
+          - Name: CompShader
+            Type: ComputeShader
+            Data: 3300982327
+          - Name: Iterations
+            Type: Int
+            Data: 100
+          - Name: Addition
+            Type: Vector2
+            Data: [5, 5]
+    TransformComponent:
+      Translation: [0, -0.136312246, 1.21787153e-07]
+      Rotation: [0, -0, 0]
+      Scale: [5, 0.100000001, 5]
+    MeshFilterComponent:
+      MeshAssetHandle: 2903028380
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2785031260
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]

@@ -76,7 +76,7 @@ namespace Louron {
 		void ReloadAllShaders();
 
 		std::shared_ptr<Shader>& GetShader(const std::string& shaderName);
-		std::shared_ptr<Shader>& LoadShader(const std::string& shaderFile, bool isComputeShader = false);
+		std::shared_ptr<Shader>& LoadShader(const std::filesystem::path& shader_file_path, bool isComputeShader = false);
 
 		const std::shared_ptr<Shader>& GetDefault() { return m_DefaultShader; }
 
@@ -86,8 +86,5 @@ namespace Louron {
 
 		std::unordered_map<std::string, std::shared_ptr<Shader>> m_Shaders;
 		std::shared_ptr<Shader> m_DefaultShader;
-
-	private:
-		std::string FilePathToShaderName(const std::string& shaderFile);
 	};
 }
