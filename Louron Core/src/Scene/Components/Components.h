@@ -261,6 +261,54 @@ namespace Louron {
 
     };
 
+    struct LODMeshComponent : public Component
+    {
+
+        struct LODElement
+        {
+            /// <summary>
+            /// Percentage of Distance from Camera or Max Distance E.g., 0 = near plane, 1 = far plane, if this is set to .5, this will pop to the next LOD when the distance is in the middle of the view frustum
+            /// </summary>
+            float DistanceThresholdNormalised;
+
+            /// <summary>
+            /// Vector of Entity UUID w/ MeshRenderers
+            /// </summary>
+            std::vector<Louron::UUID> MeshRendererEntities; 
+        };
+
+    public:
+
+        LODMeshComponent() = default;
+        LODMeshComponent(const LODMeshComponent&) = default;
+        LODMeshComponent(LODMeshComponent&&) = default;
+        LODMeshComponent& operator=(const LODMeshComponent& other) = default;
+        LODMeshComponent& operator=(LODMeshComponent&& other) = default;
+
+        void Serialize(YAML::Emitter& out);
+        bool Deserialize(const YAML::Node data);
+
+        /// <summary>
+        /// Use a custom max distance instead of the far plane.
+        /// </summary>
+        bool MaxDistanceOverFarPlane = false;
+
+        /// <summary>
+        /// Custom Max Distance if using over far plane of camera.
+        /// </summary>
+        float MaxDistance = 500.0f;
+
+        std::vector<LODElement> LOD_Elements = {
+            LODElement{ 0.25f, {} },
+            LODElement{ 0.50f, {} },
+            LODElement{ 0.75f, {} }
+        };
+
+    private:
+
+
+    };
+
 	struct TransformComponent : public Component {
 
 	private:
@@ -403,6 +451,8 @@ namespace Louron {
 
         AssetMeshFilter,
         AssetMeshRenderer,
+
+        LODMeshComponent,
 
         SkyboxComponent,
         PointLightComponent, 

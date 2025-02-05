@@ -7,6 +7,8 @@
 #include "Panels/Hierarchy Panel.h"
 #include "Panels/Content Browser Panel.h"
 
+#include "Utils/Editor GUI Utils.h"
+
 // External
 #include <efsw/efsw.hpp>
 

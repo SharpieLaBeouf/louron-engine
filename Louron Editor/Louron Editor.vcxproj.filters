@@ -47,6 +47,9 @@
     <ClInclude Include="source\Editor Layer\Panels\Content Browser Panel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="source\Editor Layer\Utils\Editor GUI Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\Shaders\Forward+\FP_Material_Shader.glsl" />

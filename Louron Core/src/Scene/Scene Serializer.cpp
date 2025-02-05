@@ -169,6 +169,10 @@ namespace Louron {
 			entity.GetComponent<AssetMeshRenderer>().Serialize(out);
 		}
 
+		if (entity.HasComponent<LODMeshComponent>()) {
+			entity.GetComponent<LODMeshComponent>().Serialize(out);
+		}
+
 		if (entity.HasComponent<SkyboxComponent>()) {
 			entity.GetComponent<SkyboxComponent>().Serialize(out);
 		}
@@ -372,6 +376,16 @@ namespace Louron {
 
 						if (!entityMeshRenderer.Deserialize(meshRenderer))
 							L_CORE_WARN("Deserialisation of Mesh Renderer Not Complete.");
+					}
+
+					// LOD Mesh Component
+					auto lodMeshComponent = entity["LODMeshComponent"];
+					if (lodMeshComponent) {
+
+						auto& entityLODMesh = deserializedEntity.AddComponent<LODMeshComponent>();
+
+						if (!entityLODMesh.Deserialize(lodMeshComponent))
+							L_CORE_WARN("Deserialisation of LOD Mesh Component Not Complete.");
 					}
 
 					// Skybox Component and Skybox Material

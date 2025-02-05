@@ -91,15 +91,16 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 
 		bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 
-		if (ImGui::IsItemClicked()) {
-			selected_entity = entity;
+		static Entity clicked_entity = {};
+		
+		if (ImGui::IsItemClicked()) 
+		{
+			clicked_entity = entity;
 		}
 
-		// TODO: REIMPLEMENT 
 		// Check for double-click 
-		if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
-			// Call LookAtGlobalPosition with the entity's global position
-
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) 
+		{
 			m_NewFocalEntity = entity;
 		}
 
@@ -117,12 +118,15 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 			ImGui::EndPopup();
 		}
 
-		if (opened && !entity.GetComponent<HierarchyComponent>().GetChildren().empty()) {
+		if (opened && !entity.GetComponent<HierarchyComponent>().GetChildren().empty()) 
+		{
 
 			// Drag source
-			if (!isDraggingEntity && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+			if (!isDraggingEntity && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) 
+			{
 
 				isDraggingEntity = true;
+				clicked_entity = {};
 
 				// Set the payload to carry the entity UUID
 				auto uuid = entity.GetUUID();
@@ -130,11 +134,18 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 				ImGui::SetDragDropPayload("ENTITY_UUID", &uuid, sizeof(uuid));
 				ImGui::EndDragDropSource();
 			}
+			else if(!ImGui::IsMouseDown(ImGuiMouseButton_Left) && clicked_entity)
+			{
+				selected_entity = clicked_entity;
+				clicked_entity = {};
+			}
 
 			// Drag target
-			if (ImGui::BeginDragDropTarget()) {
+			if (ImGui::BeginDragDropTarget()) 
+			{
 				
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_UUID")) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_UUID")) 
+				{
 					Louron::UUID droppedEntityUUID = *(const Louron::UUID*)payload->Data;
 					Entity droppedEntity = scene_ref->FindEntityByUUID(droppedEntityUUID);
 
@@ -157,9 +168,11 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 		}
 
 		// Drag source
-		if (!isDraggingEntity && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+		if (!isDraggingEntity && ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) 
+		{
 
 			isDraggingEntity = true;
+			clicked_entity = {};
 
 			// Set the payload to carry the entity UUID
 			auto uuid = entity.GetUUID();
@@ -167,11 +180,18 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 			ImGui::SetDragDropPayload("ENTITY_UUID", &uuid, sizeof(uuid));
 			ImGui::EndDragDropSource();
 		}
+		else if (!ImGui::IsMouseDown(ImGuiMouseButton_Left) && clicked_entity)
+		{
+			selected_entity = clicked_entity;
+			clicked_entity = {};
+		}
 
 		// Drag target
-		if (ImGui::BeginDragDropTarget()) {
+		if (ImGui::BeginDragDropTarget()) 
+		{
 			
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_UUID")) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_UUID")) 
+			{
 				Louron::UUID droppedEntityUUID = *(const Louron::UUID*)payload->Data;
 				Entity droppedEntity = scene_ref->FindEntityByUUID(droppedEntityUUID);
 
@@ -274,7 +294,8 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 		ImGui::EndPopup();
 	}
 
-	scene_ref->GetRegistry()->each([&](auto entityID) {
+	scene_ref->GetRegistry()->each([&](auto entityID) 
+	{
 		Entity root_entity = { entityID , scene_ref.get() };
 
 		if (root_entity.HasComponent<HierarchyComponent>()) {
@@ -283,9 +304,10 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 				DrawEntity(root_entity);
 			}
 		}
-		});
+	});
 
-	if (createChildOnCurrentEntity) {
+	if (createChildOnCurrentEntity) 
+	{
 		selected_entity = scene_ref->CreateEntity();
 		selected_entity.GetComponent<HierarchyComponent>().AttachParent(parent_UUID);
 
@@ -293,7 +315,8 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 		createChildOnCurrentEntity = false;
 	}
 
-	if (entityToDelete) {
+	if (entityToDelete) 
+	{
 		scene_ref->DestroyEntity(entityToDelete);
 		entityToDelete = {};
 	}
@@ -301,18 +324,21 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 	ImGui::EndChild();
 
 	// Check if no item was clicked and we clicked in the child window
-	if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered()) {
+	if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered()) 
+	{
 		// Clicked on blank space
 		selected_entity = {}; // Deselect entity or handle click as needed
 	}
 
-	if (ImGui::IsKeyDown(ImGuiKey_Delete) && selected_entity) {
+	if (ImGui::IsKeyDown(ImGuiKey_Delete) && selected_entity) 
+	{
 		scene_ref->DestroyEntity(selected_entity);
 		selected_entity = {};
 	}
 
 	// Detect dropping on empty space
-	if (ImGui::BeginDragDropTarget()) {
+	if (ImGui::BeginDragDropTarget()) 
+	{
 
 		// Temporarily change the highlight color
 		//ImVec4 prevColor = ImGui::GetStyle().Colors[ImGuiCol_DragDropTarget];

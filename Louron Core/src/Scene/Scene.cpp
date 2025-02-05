@@ -491,9 +491,14 @@ namespace Louron {
 		entt::entity prefab_root_entity = prefab->m_RootEntity;
 		std::string prefab_name = prefab->m_PrefabName;
 
+		std::vector<Entity> LODMeshEntities; // So we can easily resolve the prefab handles to entity UUIDs
+		std::unordered_map<Louron::UUID, Louron::UUID> PrefabUUID_To_EntityUUID{}; // Key == Prefab entt::entity, Value == instantiated_entity.GetUUID()
+
 		std::function<Entity(entt::entity, const UUID&)> copy_prefab_entity = [&](entt::entity start_prefab_entity, const UUID& parent_uuid) -> Entity {
 
 			Entity instantiated_entity = this->CreateEntity("");
+
+			PrefabUUID_To_EntityUUID[(uint32_t)start_prefab_entity] = instantiated_entity.GetUUID();
 
 			// 1. Copy Data in All Components
 			{
@@ -632,6 +637,13 @@ namespace Louron {
 					// to this new entity! easy peasy...
 
 				}
+
+				// 1.q. LOD Component
+				if (prefab_registry->has<LODMeshComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<LODMeshComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<LODMeshComponent>(component);
+					LODMeshEntities.push_back(instantiated_entity);
+				}
 			}
 
 			// 2. Recurse Children
@@ -650,6 +662,22 @@ namespace Louron {
 		};
 
 		Entity instantiated_entity = copy_prefab_entity(prefab_root_entity, parent_uuid);
+
+		// Resolve prefab handles to scene uuids
+		for (auto& entity : LODMeshEntities)
+		{
+			if (!entity || !entity.HasComponent<LODMeshComponent>())
+				continue;
+
+			auto& component = entity.GetComponent<LODMeshComponent>();
+			for (auto& element : component.LOD_Elements)
+			{
+				for (auto& entity_handle : element.MeshRendererEntities)
+				{
+					entity_handle = PrefabUUID_To_EntityUUID[entity_handle];
+				}
+			}
+		}
 
 		return instantiated_entity;
 	}

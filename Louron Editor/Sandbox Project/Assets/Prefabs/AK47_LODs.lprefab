@@ -1,0 +1,66 @@
+Prefab Name: AK47_LODs
+PrefabEntities:
+  - Entity: 2
+    TagComponent:
+      Tag: AK47_LOD02
+    HierarchyComponent:
+      Parent: 0
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [89.9999847, -0, -180]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 4265155961
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 232925268
+        - 232925268
+  - Entity: 1
+    TagComponent:
+      Tag: AK47_LOD01
+    HierarchyComponent:
+      Parent: 0
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [89.9999847, -0, -180]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 4265154656
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 232925268
+        - 232925268
+  - Entity: 0
+    TagComponent:
+      Tag: AK47_LODs (1)
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 1
+        - 2
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [5, 5, 5]
+    LODMeshComponent:
+      MaxDistanceOverFarPlane: true
+      MaxDistance: 100
+      LOD Elements:
+        Element 0:
+          Distance Threshold: 0.291784704
+          Entities:
+            - 1
+        Element 1:
+          Distance Threshold: 0.679886699
+          Entities:
+            - 2

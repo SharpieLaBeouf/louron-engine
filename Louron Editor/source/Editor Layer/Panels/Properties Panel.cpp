@@ -18,23 +18,23 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 {
 	std::vector<AssetHandle> material_list;
 
-	ImGuiTreeNodeFlags tree_node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_DefaultOpen;
+	ImGuiTreeNodeFlags tree_node_flags = ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_FramePadding;
 
 	// Right-click on blank space
 	if (ImGui::BeginPopupContextWindow())
 	{
-		if (ImGui::MenuItem("Add Camera Component")) {
-			if (!selected_entity.HasComponent<CameraComponent>()) {
-				auto& component = selected_entity.AddComponent<CameraComponent>();
-				component.CameraInstance = std::make_shared<SceneCamera>();
-
-				auto& frame_buffer_config = Project::GetActiveScene()->GetSceneFrameBuffer()->GetConfig();
-				component.CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
-			}
-		}
 
 		// Add Component Section
 		{
+			if (ImGui::MenuItem("Add Camera Component")) {
+				if (!selected_entity.HasComponent<CameraComponent>()) {
+					auto& component = selected_entity.AddComponent<CameraComponent>();
+					component.CameraInstance = std::make_shared<SceneCamera>();
+
+					auto& frame_buffer_config = Project::GetActiveScene()->GetSceneFrameBuffer()->GetConfig();
+					component.CameraInstance->SetViewportSize(frame_buffer_config.Width, frame_buffer_config.Height);
+				}
+			}
 
 			if (ImGui::MenuItem("Add Script Component")) {
 				if (!selected_entity.HasComponent<ScriptComponent>())
@@ -54,6 +54,11 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 			if (ImGui::MenuItem("Add MeshRenderer")) {
 				if (!selected_entity.HasComponent<AssetMeshRenderer>())
 					selected_entity.AddComponent<AssetMeshRenderer>();
+			}
+
+			if (ImGui::MenuItem("Add LOD Mesh Component")) {
+				if (!selected_entity.HasComponent<LODMeshComponent>())
+					selected_entity.AddComponent<LODMeshComponent>();
 			}
 
 			if (ImGui::MenuItem("Add Rigidbody")) {
@@ -248,7 +253,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##ScriptComponentChild", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Script Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Script Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<ScriptComponent>();
 			std::vector<std::pair<std::string, bool>>& component_script_vector = component.Scripts;
@@ -394,7 +399,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 		ImGui::BeginChild("##CamerComponentChild", {}, ImGuiChildFlags_AutoResizeY);
 
 
-		if (ImGui::TreeNodeEx("Camera Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Camera Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<CameraComponent>();
 
@@ -516,7 +521,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##Skybox Child", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Skybox Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Skybox Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<SkyboxComponent>();
 			material_list.push_back(component.SkyboxMaterialAssetHandle);
@@ -609,13 +614,180 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 		ImGui::Separator();
 	}
 
+	if (selected_entity.HasComponent<LODMeshComponent>())
+	{
+		ImGui::Dummy({ 0.0f, 5.0f });
+
+		ImGui::BeginChild("##LODMeshComponent Child", {}, ImGuiChildFlags_AutoResizeY);
+
+		if (ImGui::TreeNodeEx(("LOD Mesh Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
+
+			auto& component = selected_entity.GetComponent<LODMeshComponent>();
+
+			std::vector<float> lod_ranges;
+
+			for (const auto& element : component.LOD_Elements)
+				lod_ranges.push_back(element.DistanceThresholdNormalised);
+
+			ImGui::Dummy({ 0.0f, 5.0f });
+			Utils::GUI::MultiRangeLODSliderFloat("LODMeshComponentSlider", lod_ranges, 0.0f, 1.0f, 0.01f);
+
+			ImGui::Checkbox("Prefer Max Distance Over Far Plane", &component.MaxDistanceOverFarPlane);
+
+			if(component.MaxDistanceOverFarPlane)
+			{
+				ImGui::Text("Max Distance");
+				ImGui::SameLine();
+
+				float value = component.MaxDistance;
+				if (ImGui::InputFloat("##LODMeshComponentMaxDistance", &value, 1.0f, 0.0f, "%0.2f") && value > 0.0f)
+					component.MaxDistance = value;
+			}
+
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::SeparatorText("LOD Levels");
+			ImGui::Dummy({ 0.0f, 2.5f });
+
+			for (int i = 0; i < component.LOD_Elements.size(); i++)
+			{
+				component.LOD_Elements[i].DistanceThresholdNormalised = lod_ranges[i];
+
+				std::string label = "LOD Level " + std::to_string(i+1);
+				if (ImGui::TreeNodeEx(label.c_str(), ImGuiTreeNodeFlags_OpenOnArrow))
+				{
+
+					ImGui::Text("Threshold Distance: %.4f", component.LOD_Elements[i].DistanceThresholdNormalised);
+					if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
+						ImGui::SetTooltip("This is the normalised threshold distance between the camera position to the far plane. \n\nFor Example: If the far plane of the camera is 1000, and the threshold is 0.10, this LOD level will pop when the distance to the camera is 100 units away.", ImGui::GetStyle().HoverDelayNormal);
+
+					ImGui::SeparatorText("Entities");
+
+					for (int j = 0; j < component.LOD_Elements[i].MeshRendererEntities.size(); j++)
+					{
+						Entity entity = scene_ref->HasEntityByUUID(component.LOD_Elements[i].MeshRendererEntities[j]) ? scene_ref->FindEntityByUUID(component.LOD_Elements[i].MeshRendererEntities[j]) : Entity{};
+						std::string entity_name = entity ? entity.GetName() + " (Mesh Renderer)" : component.LOD_Elements[i].MeshRendererEntities[j] == NULL_UUID ? "(None)" : std::to_string(component.LOD_Elements[i].MeshRendererEntities[j]) + " (Invalid Entity Handle)";
+
+						char buffer[256];
+						strcpy_s(buffer, sizeof(buffer), entity_name.c_str());
+						ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+						ImGui::InputText(("##" + entity_name + std::to_string(j)).c_str(), buffer, sizeof(buffer), ImGuiInputTextFlags_ReadOnly);
+
+						// Drag target
+						if (ImGui::BeginDragDropTarget()) {
+
+							if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_UUID")) {
+								Louron::UUID droppedEntityUUID = *(const Louron::UUID*)payload->Data;
+								Entity droppedEntity = component.GetComponent<HierarchyComponent>()->FindChild(droppedEntityUUID);
+
+								if (droppedEntity)
+								{
+									if (droppedEntity.HasComponent<AssetMeshFilter>() && droppedEntity.HasComponent<AssetMeshRenderer>())
+									{
+										component.LOD_Elements[i].MeshRendererEntities[j] = droppedEntity.GetUUID();
+									}
+									else
+									{
+										L_APP_INFO("Cannot Assign Entity to LOD Element that does not have MeshFilter and MeshRenderer!");
+									}
+
+								}
+								else
+								{
+									L_APP_INFO("Cannot Assign Entity to LOD Element that is not a child!");
+								}
+							}
+
+							ImGui::EndDragDropTarget();
+						}
+
+					}
+
+					ImGui::Text("Add/Remove Entity");
+					ImGui::SameLine();
+					ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x * 0.5f - (ImGui::CalcTextSize(" + ").x + ImGui::GetStyle().ItemSpacing.x) * 1.5f);
+
+					if (ImGui::SmallButton(" + "))
+					{
+						// Add a new entity (NULL_UUID by default)
+						component.LOD_Elements[i].MeshRendererEntities.push_back(NULL_UUID);
+					}
+
+					ImGui::SameLine();
+
+					if (ImGui::SmallButton(" - "))
+					{
+						if(component.LOD_Elements[i].MeshRendererEntities.size() > 1)
+							component.LOD_Elements[i].MeshRendererEntities.pop_back();
+					}
+
+					ImGui::TreePop();
+				}
+
+			}
+
+			ImGui::Dummy({ 0.0f, 5.0f });
+
+			ImGui::Separator();
+
+			ImGui::Dummy({ 0.0f, 2.5f });
+
+			// Centered Button Row
+			ImGui::Text("Add/Remove Level");
+			ImGui::SameLine();
+
+			// Centered Button Row
+			ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x * 0.5f - (ImGui::CalcTextSize(" + ").x + ImGui::GetStyle().ItemSpacing.x) * 1.5f);
+
+			if (ImGui::SmallButton(" + "))
+			{
+				float distance = 1.0f;
+
+				// Ensure distance values shift down if necessary
+				for (int k = (int)component.LOD_Elements.size() - 1; k >= 0; k--)
+				{
+					if (component.LOD_Elements[k].DistanceThresholdNormalised >= distance)
+					{
+						distance -= 0.01f;
+						component.LOD_Elements[k].DistanceThresholdNormalised = distance;
+					}
+					else
+					{
+						break;
+					}
+				}
+
+				component.LOD_Elements.push_back({ 1.0f, {} });
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::SmallButton(" - "))
+			{
+				if (component.LOD_Elements.size() > 1)
+					component.LOD_Elements.pop_back();
+			}
+
+			ImGui::TreePop();
+		}
+
+
+
+		ImGui::EndChild();
+
+		ShowComponentContextPopup<LODMeshComponent>("LOD Mesh Component Options", selected_entity);
+
+		ImGui::Dummy({ 0.0f, 5.0f });
+		ImGui::Separator();
+
+	}
+
 	if (selected_entity.HasComponent<AssetMeshFilter>()) {
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 
 		ImGui::BeginChild("##Mesh Filter Child", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Mesh Filter Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Mesh Filter Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 			auto& component = selected_entity.GetComponent<AssetMeshFilter>();
 
 			std::string mesh_filter_name;
@@ -709,7 +881,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##Mesh Renderer Child", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Mesh Renderer Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Mesh Renderer Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<AssetMeshRenderer>();
 
@@ -841,6 +1013,23 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 				ImGui::Columns(1);
 
+				// Centered Button Row
+				ImGui::SetCursorPosX(ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x * 0.5f - (ImGui::CalcTextSize(" + ").x + ImGui::GetStyle().ItemSpacing.x) * 1.5f);
+
+				if (ImGui::SmallButton(" + "))
+				{
+					// Add a new entity (NULL_UUID by default)
+					component.MeshRendererMaterialHandles.push_back(NULL_UUID);
+				}
+
+				ImGui::SameLine();
+
+				if (ImGui::SmallButton(" - "))
+				{
+					if (component.MeshRendererMaterialHandles.size() > 1)
+						component.MeshRendererMaterialHandles.pop_back();
+				}
+
 				ImGui::TreePop();
 			}
 
@@ -861,7 +1050,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##Rigidbody Child", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Rigidbody Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Rigidbody Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<RigidbodyComponent>();
 
@@ -974,7 +1163,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##Sphere Collider Child", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Sphere Collider Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Sphere Collider Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<SphereColliderComponent>();
 
@@ -1043,7 +1232,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##Box Collider Child", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Box Collider Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Box Collider Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<BoxColliderComponent>();
 
@@ -1130,7 +1319,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##Point Light Child", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Point Light Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Point Light Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<PointLightComponent>();
 
@@ -1204,7 +1393,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::BeginChild("##Spot Light Child", {}, ImGuiChildFlags_AutoResizeY);
 
-		if (ImGui::TreeNodeEx("Spot Light Component", tree_node_flags)) {
+		if (ImGui::TreeNodeEx(("Spot Light Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
 			auto& component = selected_entity.GetComponent<SpotLightComponent>();
 
@@ -1282,7 +1471,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 
-		ImGui::BeginChild("##Directional Light Child", {}, ImGuiChildFlags_AutoResizeY);
+		ImGui::BeginChild(("##Directional Light Child##" + selected_entity.GetName()).c_str(), {}, ImGuiChildFlags_AutoResizeY);
 
 		if (ImGui::TreeNodeEx("Directional Light Component", tree_node_flags)) {
 
@@ -1347,7 +1536,24 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 	}
 
 	// Material Inspector
-	if (!material_list.empty()) {
+	if (selected_entity.HasComponent<AssetMeshRenderer>() || selected_entity.HasComponent<SkyboxComponent>()) {
+
+		if (material_list.empty())
+		{
+			if (selected_entity.HasComponent<AssetMeshRenderer>())
+			{
+				auto& component = selected_entity.GetComponent<AssetMeshRenderer>();
+				for (const auto& asset_handle : component.MeshRendererMaterialHandles) {
+					if (asset_handle != NULL_UUID) {
+						material_list.push_back(asset_handle);
+					}
+				}
+			}
+
+			if (selected_entity.HasComponent<SkyboxComponent>())
+				material_list.push_back(selected_entity.GetComponent<SkyboxComponent>().SkyboxMaterialAssetHandle);
+
+		}
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 		ImGui::Text("Materials Inspector");

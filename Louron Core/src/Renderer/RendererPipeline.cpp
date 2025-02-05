@@ -242,7 +242,7 @@ namespace Louron {
 			ConductLightFrustumCull();
 
 			// Gather All Meshes Visible in Camera Frustum
-			ConductRenderableFrustumCull();
+			ConductRenderableFrustumCull(camera_position, projection_matrix);
 
 			// Dispatch Thread
 			FP_Data.OctreeUpdateThread = std::thread([&]() -> void {
@@ -849,7 +849,7 @@ namespace Louron {
 	/// This will cull all scene geometry outside camera frustum and 
 	/// update the renderables vector in FP_Data.
 	/// </summary>
-	void ForwardPlusPipeline::ConductRenderableFrustumCull() {
+	void ForwardPlusPipeline::ConductRenderableFrustumCull(const glm::vec3& camera_position, const glm::mat4& projection_matrix) {
 
 		auto scene_ref = m_Scene.lock();
 
@@ -885,6 +885,54 @@ namespace Louron {
 			auto& component = data->Data.GetComponent<AssetMeshRenderer>();
 			if (component.Active)
 				FP_Data.RenderableEntities.push_back(data->Data);
+		}
+
+		{
+			L_PROFILE_SCOPE("Forward Plus - LOD Sorting");
+
+			float A = projection_matrix[2][2];
+			float B = projection_matrix[3][2];
+			float far_plane = B / (A + 1.0f);
+
+			auto view = scene_ref->GetAllEntitiesWith<LODMeshComponent>();
+			for (auto& entity_handle : view)
+			{
+				Entity lod_entity = { entity_handle, scene_ref.get() };
+				auto& lod_component = lod_entity.GetComponent<LODMeshComponent>();
+
+				glm::vec3 position = lod_entity.GetComponent<TransformComponent>().GetGlobalPosition();
+				float distance_to_lod_entity = glm::distance(camera_position, position);
+
+				// Normalise the distance within the frustum (0.0 = near plane, 1.0 = far plane)
+				float max_distance = (lod_component.MaxDistanceOverFarPlane) ? lod_component.MaxDistance : far_plane;
+				float normalised_distance = distance_to_lod_entity / max_distance;
+
+				// Find the correct LOD level to keep based on normalised distance
+				int keep_lod_index = -1;
+				for (int i = 0; i < lod_component.LOD_Elements.size(); i++)
+				{
+					if (normalised_distance <= lod_component.LOD_Elements[i].DistanceThresholdNormalised)
+					{
+						keep_lod_index = i;
+						break;
+					}
+				}
+
+				for (int i = 0; i < lod_component.LOD_Elements.size(); i++)
+				{
+					if (i == keep_lod_index)
+						continue;
+
+					for (const auto& entity_handle : lod_component.LOD_Elements[i].MeshRendererEntities)
+					{
+						if (entity_handle == NULL_UUID)
+							continue;
+
+						FP_Data.RenderableEntities.erase(std::remove(FP_Data.RenderableEntities.begin(), FP_Data.RenderableEntities.end(), scene_ref->FindEntityByUUID(entity_handle)), FP_Data.RenderableEntities.end());
+					}
+				}
+
+			}
 		}
 
 		FP_Data.OctreeEntitiesInCamera.clear();

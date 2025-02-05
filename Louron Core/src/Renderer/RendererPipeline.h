@@ -71,7 +71,7 @@ namespace Louron {
 
 		void UpdateSSBOData();
 		void ConductLightFrustumCull();
-		void ConductRenderableFrustumCull();
+		void ConductRenderableFrustumCull(const glm::vec3& camera_position, const glm::mat4& projection_matrix);
 		void ConductDepthPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 		void ConductTiledBasedLightCull(const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 		void ConductShadowMapping(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);

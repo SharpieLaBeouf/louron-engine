@@ -750,6 +750,21 @@ namespace Louron {
 
 #pragma region ComponentBase
 
+    Entity Component::GetEntity() const {
+
+        if (!scene) {
+            L_CORE_ERROR("Cannot Get Entity - Current Entity Has Invalid Scene Reference!");
+            return {};
+        }
+
+        if (!scene->HasEntity(entity_uuid)) {
+            L_CORE_ERROR("Cannot Get Entity - Current Entity Is Invalid!");
+            return {};
+        }
+
+        return scene->FindEntityByUUID(entity_uuid);
+    }
+
     template<typename T>
     T* Component::GetComponent() {
         Entity entity = GetEntity();
@@ -770,13 +785,14 @@ namespace Louron {
     template TransformComponent*            Component::GetComponent<TransformComponent>();
     template AssetMeshFilter*               Component::GetComponent<AssetMeshFilter>();
     template AssetMeshRenderer*             Component::GetComponent<AssetMeshRenderer>();
+    template LODMeshComponent*              Component::GetComponent<LODMeshComponent>();
     template PointLightComponent*           Component::GetComponent<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponent<SpotLightComponent>();
     template DirectionalLightComponent*     Component::GetComponent<DirectionalLightComponent>();
     template SkyboxComponent*               Component::GetComponent<SkyboxComponent>();
-    template RigidbodyComponent*                     Component::GetComponent<RigidbodyComponent>();
-    template SphereColliderComponent*                Component::GetComponent<SphereColliderComponent>();
-    template BoxColliderComponent*                   Component::GetComponent<BoxColliderComponent>();
+    template RigidbodyComponent*            Component::GetComponent<RigidbodyComponent>();
+    template SphereColliderComponent*       Component::GetComponent<SphereColliderComponent>();
+    template BoxColliderComponent*          Component::GetComponent<BoxColliderComponent>();
 
     template<typename T>
     T* Component::GetComponentInParent() {
@@ -816,13 +832,14 @@ namespace Louron {
     template TransformComponent*            Component::GetComponentInParent<TransformComponent>();
     template AssetMeshFilter*               Component::GetComponentInParent<AssetMeshFilter>();
     template AssetMeshRenderer*             Component::GetComponentInParent<AssetMeshRenderer>();
+    template LODMeshComponent*              Component::GetComponentInParent<LODMeshComponent>();
     template PointLightComponent*           Component::GetComponentInParent<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponentInParent<SpotLightComponent>();
     template DirectionalLightComponent*     Component::GetComponentInParent<DirectionalLightComponent>();
     template SkyboxComponent*               Component::GetComponentInParent<SkyboxComponent>();
-    template RigidbodyComponent*                     Component::GetComponentInParent<RigidbodyComponent>();
-    template SphereColliderComponent*                Component::GetComponentInParent<SphereColliderComponent>();
-    template BoxColliderComponent*                   Component::GetComponentInParent<BoxColliderComponent>();
+    template RigidbodyComponent*            Component::GetComponentInParent<RigidbodyComponent>();
+    template SphereColliderComponent*       Component::GetComponentInParent<SphereColliderComponent>();
+    template BoxColliderComponent*          Component::GetComponentInParent<BoxColliderComponent>();
 
     template<typename T>
     std::vector<T*> Component::GetComponentsInParent() {
@@ -869,13 +886,14 @@ namespace Louron {
     template std::vector<TransformComponent*>           Component::GetComponentsInParent<TransformComponent>();
     template std::vector<AssetMeshFilter*>              Component::GetComponentsInParent<AssetMeshFilter>();
     template std::vector<AssetMeshRenderer*>            Component::GetComponentsInParent<AssetMeshRenderer>();
+    template std::vector<LODMeshComponent*>             Component::GetComponentsInParent<LODMeshComponent>();
     template std::vector<PointLightComponent*>          Component::GetComponentsInParent<PointLightComponent>();
     template std::vector<SpotLightComponent*>           Component::GetComponentsInParent<SpotLightComponent>();
     template std::vector<DirectionalLightComponent*>    Component::GetComponentsInParent<DirectionalLightComponent>();
     template std::vector<SkyboxComponent*>              Component::GetComponentsInParent<SkyboxComponent>();
-    template std::vector<RigidbodyComponent*>                    Component::GetComponentsInParent<RigidbodyComponent>();
-    template std::vector<SphereColliderComponent*>               Component::GetComponentsInParent<SphereColliderComponent>();
-    template std::vector<BoxColliderComponent*>                  Component::GetComponentsInParent<BoxColliderComponent>();
+    template std::vector<RigidbodyComponent*>           Component::GetComponentsInParent<RigidbodyComponent>();
+    template std::vector<SphereColliderComponent*>      Component::GetComponentsInParent<SphereColliderComponent>();
+    template std::vector<BoxColliderComponent*>         Component::GetComponentsInParent<BoxColliderComponent>();
 
     template<typename T>
     T* Component::GetComponentInChildren() {
@@ -924,13 +942,14 @@ namespace Louron {
     template TransformComponent*            Component::GetComponentInChildren<TransformComponent>();
     template AssetMeshFilter*               Component::GetComponentInChildren<AssetMeshFilter>();
     template AssetMeshRenderer*             Component::GetComponentInChildren<AssetMeshRenderer>();
+    template LODMeshComponent*              Component::GetComponentInChildren<LODMeshComponent>();
     template PointLightComponent*           Component::GetComponentInChildren<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponentInChildren<SpotLightComponent>();
     template DirectionalLightComponent*     Component::GetComponentInChildren<DirectionalLightComponent>();
     template SkyboxComponent*               Component::GetComponentInChildren<SkyboxComponent>();
-    template RigidbodyComponent*                     Component::GetComponentInChildren<RigidbodyComponent>();
-    template SphereColliderComponent*                Component::GetComponentInChildren<SphereColliderComponent>();
-    template BoxColliderComponent*                   Component::GetComponentInChildren<BoxColliderComponent>();
+    template RigidbodyComponent*            Component::GetComponentInChildren<RigidbodyComponent>();
+    template SphereColliderComponent*       Component::GetComponentInChildren<SphereColliderComponent>();
+    template BoxColliderComponent*          Component::GetComponentInChildren<BoxColliderComponent>();
 
     template<typename T>
     std::vector<T*> Component::GetComponentsInChildren()
@@ -972,13 +991,14 @@ namespace Louron {
     template std::vector<TransformComponent*>           Component::GetComponentsInChildren<TransformComponent>();
     template std::vector<AssetMeshFilter*>              Component::GetComponentsInChildren<AssetMeshFilter>();
     template std::vector<AssetMeshRenderer*>            Component::GetComponentsInChildren<AssetMeshRenderer>();
+    template std::vector<LODMeshComponent*>             Component::GetComponentsInChildren<LODMeshComponent>();
     template std::vector<PointLightComponent*>          Component::GetComponentsInChildren<PointLightComponent>();
     template std::vector<SpotLightComponent*>           Component::GetComponentsInChildren<SpotLightComponent>();
     template std::vector<DirectionalLightComponent*>    Component::GetComponentsInChildren<DirectionalLightComponent>();
     template std::vector<SkyboxComponent*>              Component::GetComponentsInChildren<SkyboxComponent>();
-    template std::vector<RigidbodyComponent*>                    Component::GetComponentsInChildren<RigidbodyComponent>();
-    template std::vector<SphereColliderComponent*>               Component::GetComponentsInChildren<SphereColliderComponent>();
-    template std::vector<BoxColliderComponent*>                  Component::GetComponentsInChildren<BoxColliderComponent>();
+    template std::vector<RigidbodyComponent*>           Component::GetComponentsInChildren<RigidbodyComponent>();
+    template std::vector<SphereColliderComponent*>      Component::GetComponentsInChildren<SphereColliderComponent>();
+    template std::vector<BoxColliderComponent*>         Component::GetComponentsInChildren<BoxColliderComponent>();
 
 #pragma endregion
 
@@ -1205,8 +1225,23 @@ namespace Louron {
             return {};
         }
 
+        if (GetEntity().GetUUID() == childUUID)
+        {
+            L_CORE_WARN("Cannot Pass Child UUID to Self.");
+            return {};
+        }
+
         if (scene->HasEntity(childUUID)) {
-            return scene->FindEntityByUUID(childUUID);
+
+            // First check current children
+            for (const auto& child : m_Children)
+                if (child && child == childUUID)
+                    return scene->FindEntityByUUID(child);
+
+            // If still not found, recurse to next level
+            for (const auto& child : m_Children)
+                if(child)
+                    return scene->FindEntityByUUID(childUUID).GetComponent<HierarchyComponent>().FindChild(childUUID);
         }
 
         return {};
@@ -1219,8 +1254,23 @@ namespace Louron {
             return {};
         }
 
+        if (GetEntity().GetName() == childName)
+        {
+            L_CORE_WARN("Cannot Pass Child UUID to Self.");
+            return {};
+        }
+
         if (scene->HasEntity(childName)) {
-            return scene->FindEntityByName(childName);
+
+            // First check current children
+            for (const auto& child : m_Children)
+                if (Entity child_entity = scene->FindEntityByUUID(child); child_entity && child_entity.GetName() == childName)
+                    return child_entity;
+
+            // If still not found, recurse to next level
+            for (const auto& child : m_Children)
+                if (Entity child_entity = scene->FindEntityByUUID(child); child_entity)
+                    return child_entity.GetComponent<HierarchyComponent>().FindChild(childName);
         }
 
         return {};
@@ -1519,19 +1569,75 @@ namespace Louron {
 
         return true;
     }
-    Entity Component::GetEntity() const {
 
-        if (!scene) {
-            L_CORE_ERROR("Cannot Get Entity - Current Entity Has Invalid Scene Reference!");
-            return {};
-        }
-        
-        if (!scene->HasEntity(entity_uuid)) {
-            L_CORE_ERROR("Cannot Get Entity - Current Entity Is Invalid!");
-            return {};
+    void LODMeshComponent::Serialize(YAML::Emitter& out)
+    {
+        out << YAML::Key << "LODMeshComponent";
+        out << YAML::BeginMap;
+
+        if (LOD_Elements.empty())
+        {
+            out << YAML::EndMap;
+            return;
         }
 
-        return scene->FindEntityByUUID(entity_uuid);
+        out << YAML::Key << "MaxDistanceOverFarPlane" << MaxDistanceOverFarPlane;
+        out << YAML::Key << "MaxDistance" << MaxDistance;
+
+        out << YAML::Key << "LOD Elements" << YAML::BeginMap;
+        for (int i = 0; i < LOD_Elements.size(); i++)
+        {
+            out << YAML::Key << "Element " + std::to_string(i) << YAML::Value;
+            out << YAML::BeginMap;
+            {
+                out << YAML::Key << "Distance Threshold" << YAML::Value << LOD_Elements[i].DistanceThresholdNormalised;
+
+                out << YAML::Key << "Entities" << YAML::Value;
+                out << YAML::BeginSeq;
+                for (const auto& entity_uuid : LOD_Elements[i].MeshRendererEntities) {
+                    out << (uint32_t)entity_uuid;
+                }
+                out << YAML::EndSeq;
+            }
+            out << YAML::EndMap;
+        }
+        out << YAML::EndMap;
+
+        out << YAML::EndMap;
+    }
+
+    bool LODMeshComponent::Deserialize(const YAML::Node data)
+    {
+        if (data["MaxDistanceOverFarPlane"])
+            MaxDistanceOverFarPlane = data["MaxDistanceOverFarPlane"].as<bool>();
+
+        if (data["MaxDistance"])
+            MaxDistance = data["MaxDistance"].as<float>();
+
+        if (YAML::Node elements = data["LOD Elements"]; elements && elements.size() > 0)
+        {
+            LOD_Elements.clear();
+
+            for (auto it = elements.begin(); it != elements.end();)
+            {
+                LOD_Elements.push_back({});
+
+                LOD_Elements.back().DistanceThresholdNormalised = it->second["Distance Threshold"].as<float>();
+
+                auto entitiesSeq = it->second["Entities"];
+                if (entitiesSeq.IsSequence() && entitiesSeq.size() > 0) {
+
+                    for (int i = 0; i < entitiesSeq.size(); i++)
+                    {
+                        LOD_Elements.back().MeshRendererEntities.push_back(entitiesSeq[i].as<uint32_t>());
+                    }
+                }
+
+                ++it;
+            }
+        }
+
+        return true;
     }
 
     void ScriptComponent::Serialize(YAML::Emitter& out) const

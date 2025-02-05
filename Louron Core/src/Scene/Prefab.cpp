@@ -114,10 +114,13 @@ namespace YAML {
 
 namespace Louron {
 
+	/// <summary>
+	/// During Copy from Entity -> Prefab, needed to convert internal entity uuid references to internal prefab references
+	/// </summary>
+	static std::unordered_map<Louron::UUID, entt::entity> s_EntityUUID_To_PrefabUUID{};
+
 	Prefab::Prefab() {
-
 		m_RootEntity = CreateEntity("Prefab Root Entity");
-
 	}
 
 	Prefab::Prefab(Entity scene_entity) {
@@ -127,8 +130,8 @@ namespace Louron {
 			return;
 		}
 
+		s_EntityUUID_To_PrefabUUID.clear();
 		CopyEntity(scene_entity, NULL_UUID);
-
 	}
 
 	entt::entity Prefab::CreateEntity(const std::string& name) {
@@ -211,13 +214,16 @@ namespace Louron {
 
 		entt::entity prefab_entity_handle = entt::null;
 
-		if (parent_uuid == NULL_UUID) {
+		bool first_iteration = parent_uuid == NULL_UUID;
+		if (first_iteration) {
 			prefab_entity_handle = CreateEntity("Prefab Root Entity");
 			m_RootEntity = prefab_entity_handle;
 		}
 		else {
 			prefab_entity_handle = CreateEntity();
 		}
+
+		s_EntityUUID_To_PrefabUUID[start_entity.GetUUID()] = prefab_entity_handle;
 
 		// 1. Copy Data in All Components
 		{
@@ -314,10 +320,16 @@ namespace Louron {
 				m_PrefabRegistry.emplace_or_replace<BoxColliderComponent>(prefab_entity_handle, component);
 			}
 
-			// 1.o. Script Component
+			// 1.p. Script Component
 			if (start_entity.HasComponent<ScriptComponent>()) {
 				auto& component = start_entity.GetComponent<ScriptComponent>();
 				m_PrefabRegistry.emplace_or_replace<ScriptComponent>(prefab_entity_handle, component);
+			}
+
+			// 1.q. LOD Mesh Component
+			if (start_entity.HasComponent<LODMeshComponent>()) {
+				auto& component = start_entity.GetComponent<LODMeshComponent>();
+				component = m_PrefabRegistry.emplace_or_replace<LODMeshComponent>(prefab_entity_handle, component);
 			}
 		}
 
@@ -330,6 +342,23 @@ namespace Louron {
 
 				if (m_PrefabRegistry.has<HierarchyComponent>(prefab_entity_handle)) {
 					m_PrefabRegistry.get<HierarchyComponent>(prefab_entity_handle).m_Children.push_back((uint32_t)child_entity);
+				}
+			}
+		}
+
+		// 3. Resolve Handles to Internal Prefab Handles
+		if (first_iteration)
+		{
+			auto view = m_PrefabRegistry.view<LODMeshComponent>();
+			for (auto& prefab_handle : view)
+			{
+				auto& component = view.get<LODMeshComponent>(prefab_handle);
+				for (auto& element : component.LOD_Elements)
+				{
+					for (auto& entity_handle : element.MeshRendererEntities)
+					{
+						entity_handle = (uint32_t)s_EntityUUID_To_PrefabUUID[entity_handle];
+					}
 				}
 			}
 		}
@@ -372,6 +401,10 @@ namespace Louron {
 
 		if (HasComponent<AssetMeshRenderer>(entity)) {
 			GetComponent<AssetMeshRenderer>(entity).Serialize(out);
+		}
+
+		if (HasComponent<LODMeshComponent>(entity)) {
+			GetComponent<LODMeshComponent>(entity).Serialize(out);
 		}
 
 		if (HasComponent<SkyboxComponent>(entity)) {
@@ -467,6 +500,16 @@ namespace Louron {
 				L_CORE_WARN("Deserialisation of Mesh Renderer Not Complete.");
 		}
 
+		// LOD Mesh Component
+		auto lodComponent = entity_node["LODMeshComponent"];
+		if (lodComponent) {
+
+			auto& entityLODComponent = AddComponent<LODMeshComponent>(entity);
+
+			if (!entityLODComponent.Deserialize(lodComponent))
+				L_CORE_WARN("Deserialisation of Mesh Renderer Not Complete.");
+		}
+
 		// Skybox Component and Skybox Material
 		auto skybox = entity_node["SkyboxComponent"];
 		if (skybox) {
@@ -544,10 +587,8 @@ namespace Louron {
 			entt::entity child_entity = CreateEntity("To Deserialise");
 			DeserializeSubEntity(child_entity, entity, entity_node_map, child);
 		}
-		children = GetComponent<HierarchyComponent>(entity).GetChildren();
 	}
 
-	// TODO: IMPLEMENT
 	bool Prefab::Serialize(const std::filesystem::path& file_path) {
 
 		// Is path a file or directory?
@@ -590,7 +631,6 @@ namespace Louron {
 		return true;
 	}
 
-	// TODO: IMPLEMENT
 	bool Prefab::Deserialize(const std::filesystem::path& file_path) {
 
 		if (file_path.extension() != ".lprefab") {
@@ -627,15 +667,12 @@ namespace Louron {
 		if (entities.size() < 1)
 			return false; // No Actual Entities
 		
-		// We won't need this as we will get all ROOT entities and their children through the following
-		//DestroyEntity(m_RootEntity);
-
 		std::unordered_map<UUID, YAML::Node> node_map; // Store the node by value
 		for (int i = 0; i < entities.size(); i++) {
 			UUID uuid = entities[i]["Entity"].as<uint32_t>();
 			node_map[uuid] = entities[i];
 		}
-		
+
 		// Find All ROOT entities and create them (they will create their own children)
 		for (auto entity : entities) {
 

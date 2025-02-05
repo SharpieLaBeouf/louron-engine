@@ -118,6 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="source\Editor Layer\Panels\Content Browser Panel.h" />
+    <ClInclude Include="source\Editor Layer\Utils\Editor GUI Utils.h" />
     <ClInclude Include="source\Editor Layer\Utils\Editor Script Utils.h" />
     <ClInclude Include="source\Editor Layer\Panels\Hierarchy Panel.h" />
     <ClInclude Include="source\Editor Layer\Louron Editor Layer.h" />
