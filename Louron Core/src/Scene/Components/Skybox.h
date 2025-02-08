@@ -1,6 +1,7 @@
 #pragma once
 
 // Louron Core Headers
+#include "../../Asset/Asset Manager API.h"
 #include "../../OpenGL/Material.h"
 #include "../../OpenGL/Vertex Array.h"
 		  
@@ -39,7 +40,7 @@ namespace Louron {
 
 		void SetSkyboxFaceTexture(const L_SKYBOX_BINDING& binding, const AssetHandle& texture_asset_handle);
 
-		void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) override;
+		void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr) override;
 
 		virtual AssetType GetType() const override { return AssetType::Material_Skybox; }
 
@@ -60,7 +61,7 @@ namespace Louron {
 
 		std::array<AssetHandle, 6> m_TextureAssetHandles{ NULL_UUID };
 
-		std::shared_ptr<Shader> m_MaterialShader = Engine::Get().GetShaderLibrary().GetShader("Skybox");
+		std::shared_ptr<Shader> m_MaterialShader = AssetManager::GetInbuiltShader("Skybox");
 
 	};
 

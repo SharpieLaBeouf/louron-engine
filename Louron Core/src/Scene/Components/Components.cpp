@@ -416,9 +416,9 @@ namespace Louron {
 
         Entity entity = GetEntity();
 
-        if (entity.HasComponent<AssetMeshFilter>()) {
+        if (entity.HasComponent<MeshFilterComponent>()) {
 
-            auto& component = entity.GetComponent<AssetMeshFilter>();
+            auto& component = entity.GetComponent<MeshFilterComponent>();
             component.AABBNeedsUpdate = true;
             component.OctreeNeedsUpdate = true;
         }
@@ -783,8 +783,8 @@ namespace Louron {
     template AudioListener*                 Component::GetComponent<AudioListener>();
     template AudioEmitter*                  Component::GetComponent<AudioEmitter>();
     template TransformComponent*            Component::GetComponent<TransformComponent>();
-    template AssetMeshFilter*               Component::GetComponent<AssetMeshFilter>();
-    template AssetMeshRenderer*             Component::GetComponent<AssetMeshRenderer>();
+    template MeshFilterComponent*               Component::GetComponent<MeshFilterComponent>();
+    template MeshRendererComponent*             Component::GetComponent<MeshRendererComponent>();
     template LODMeshComponent*              Component::GetComponent<LODMeshComponent>();
     template PointLightComponent*           Component::GetComponent<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponent<SpotLightComponent>();
@@ -830,8 +830,8 @@ namespace Louron {
     template AudioListener*                 Component::GetComponentInParent<AudioListener>();
     template AudioEmitter*                  Component::GetComponentInParent<AudioEmitter>();
     template TransformComponent*            Component::GetComponentInParent<TransformComponent>();
-    template AssetMeshFilter*               Component::GetComponentInParent<AssetMeshFilter>();
-    template AssetMeshRenderer*             Component::GetComponentInParent<AssetMeshRenderer>();
+    template MeshFilterComponent*               Component::GetComponentInParent<MeshFilterComponent>();
+    template MeshRendererComponent*             Component::GetComponentInParent<MeshRendererComponent>();
     template LODMeshComponent*              Component::GetComponentInParent<LODMeshComponent>();
     template PointLightComponent*           Component::GetComponentInParent<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponentInParent<SpotLightComponent>();
@@ -884,8 +884,8 @@ namespace Louron {
     template std::vector<AudioListener*>                Component::GetComponentsInParent<AudioListener>();
     template std::vector<AudioEmitter*>                 Component::GetComponentsInParent<AudioEmitter>();
     template std::vector<TransformComponent*>           Component::GetComponentsInParent<TransformComponent>();
-    template std::vector<AssetMeshFilter*>              Component::GetComponentsInParent<AssetMeshFilter>();
-    template std::vector<AssetMeshRenderer*>            Component::GetComponentsInParent<AssetMeshRenderer>();
+    template std::vector<MeshFilterComponent*>              Component::GetComponentsInParent<MeshFilterComponent>();
+    template std::vector<MeshRendererComponent*>            Component::GetComponentsInParent<MeshRendererComponent>();
     template std::vector<LODMeshComponent*>             Component::GetComponentsInParent<LODMeshComponent>();
     template std::vector<PointLightComponent*>          Component::GetComponentsInParent<PointLightComponent>();
     template std::vector<SpotLightComponent*>           Component::GetComponentsInParent<SpotLightComponent>();
@@ -940,8 +940,8 @@ namespace Louron {
     template AudioListener*                 Component::GetComponentInChildren<AudioListener>();
     template AudioEmitter*                  Component::GetComponentInChildren<AudioEmitter>();
     template TransformComponent*            Component::GetComponentInChildren<TransformComponent>();
-    template AssetMeshFilter*               Component::GetComponentInChildren<AssetMeshFilter>();
-    template AssetMeshRenderer*             Component::GetComponentInChildren<AssetMeshRenderer>();
+    template MeshFilterComponent*               Component::GetComponentInChildren<MeshFilterComponent>();
+    template MeshRendererComponent*             Component::GetComponentInChildren<MeshRendererComponent>();
     template LODMeshComponent*              Component::GetComponentInChildren<LODMeshComponent>();
     template PointLightComponent*           Component::GetComponentInChildren<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponentInChildren<SpotLightComponent>();
@@ -989,8 +989,8 @@ namespace Louron {
     template std::vector<AudioListener*>                Component::GetComponentsInChildren<AudioListener>();
     template std::vector<AudioEmitter*>                 Component::GetComponentsInChildren<AudioEmitter>();
     template std::vector<TransformComponent*>           Component::GetComponentsInChildren<TransformComponent>();
-    template std::vector<AssetMeshFilter*>              Component::GetComponentsInChildren<AssetMeshFilter>();
-    template std::vector<AssetMeshRenderer*>            Component::GetComponentsInChildren<AssetMeshRenderer>();
+    template std::vector<MeshFilterComponent*>              Component::GetComponentsInChildren<MeshFilterComponent>();
+    template std::vector<MeshRendererComponent*>            Component::GetComponentsInChildren<MeshRendererComponent>();
     template std::vector<LODMeshComponent*>             Component::GetComponentsInChildren<LODMeshComponent>();
     template std::vector<PointLightComponent*>          Component::GetComponentsInChildren<PointLightComponent>();
     template std::vector<SpotLightComponent*>           Component::GetComponentsInChildren<SpotLightComponent>();

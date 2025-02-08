@@ -44,7 +44,7 @@ namespace Louron {
 		ConstructSkyboxCubeMap();
 	}
 
-	void SkyboxMaterial::UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
+	void SkyboxMaterial::UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block) {
 
 		if (m_MaterialShader) {
 

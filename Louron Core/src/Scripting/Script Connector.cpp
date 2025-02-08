@@ -158,6 +158,23 @@ namespace Louron {
 		mono_add_internal_call("Louron.EngineCallbacks::ComputeBuffer_GetData", ComputeBuffer_GetData);
 		mono_add_internal_call("Louron.EngineCallbacks::ComputeBuffer_Release", ComputeBuffer_Release);
 
+		mono_add_internal_call("Louron.EngineCallbacks::Material_Create", Material_Create);
+		mono_add_internal_call("Louron.EngineCallbacks::Material_SetShader", Material_SetShader);
+		mono_add_internal_call("Louron.EngineCallbacks::Material_Destroy", Material_Destroy);
+		
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRendererComponent_GetMaterial", MeshRendererComponent_GetMaterial);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRendererComponent_SetMaterial", MeshRendererComponent_SetMaterial);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRendererComponent_GetMaterials", MeshRendererComponent_GetMaterials);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRendererComponent_SetMaterials", MeshRendererComponent_SetMaterials);
+		
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRenderer_EnableUniformBlock", MeshRenderer_EnableUniformBlock);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRenderer_GetUniformBlock", MeshRenderer_GetUniformBlock);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRenderer_DisableUniformBlock", MeshRenderer_DisableUniformBlock);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRenderer_EnableAllUniformBlocks", MeshRenderer_EnableAllUniformBlocks);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshRenderer_DisableAllUniformBlocks", MeshRenderer_DisableAllUniformBlocks);
+
+		mono_add_internal_call("Louron.EngineCallbacks::MaterialUniformBlock_SetUniform", MaterialUniformBlock_SetUniform);
+
 	}
 
 #pragma endregion
@@ -1555,7 +1572,7 @@ namespace Louron {
 		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
 		{
 			shader->GetShader()->Bind();
-			shader->GetShader()->SetVec2(ScriptingUtils::MonoStringToString(name).c_str(), value);
+			shader->GetShader()->SetFloatVec2(ScriptingUtils::MonoStringToString(name).c_str(), value);
 		}
 	}
 
@@ -1564,7 +1581,7 @@ namespace Louron {
 		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
 		{
 			shader->GetShader()->Bind();
-			shader->GetShader()->SetVec3(ScriptingUtils::MonoStringToString(name).c_str(), value);
+			shader->GetShader()->SetFloatVec3(ScriptingUtils::MonoStringToString(name).c_str(), value);
 		}
 	}
 
@@ -1573,7 +1590,7 @@ namespace Louron {
 		if (auto shader = AssetManager::GetAsset<ComputeShaderAsset>(asset_handle); shader)
 		{
 			shader->GetShader()->Bind();
-			shader->GetShader()->SetVec4(ScriptingUtils::MonoStringToString(name).c_str(), value);
+			shader->GetShader()->SetFloatVec4(ScriptingUtils::MonoStringToString(name).c_str(), value);
 		}
 	}
 
@@ -1609,6 +1626,319 @@ namespace Louron {
 
 		buffer->Release();
 		delete buffer;  // Delete the buffer object
+	}
+
+#pragma endregion
+
+#pragma region Material
+
+	AssetHandle ScriptConnector::Material_Create(MonoString* name)
+	{
+		std::shared_ptr<PBRMaterial> material = std::make_shared<PBRMaterial>();
+		return AssetManager::AddRuntimeAsset<PBRMaterial>(material, ScriptingUtils::MonoStringToString(name));
+	}
+
+	void ScriptConnector::Material_SetShader(AssetHandle asset_handle, AssetHandle shader_handle)
+	{
+		AssetManager::GetAsset<PBRMaterial>(asset_handle)->SetShader(shader_handle);
+	}
+
+	void ScriptConnector::Material_Destroy(AssetHandle asset_handle)
+	{
+		AssetManager::RemoveRuntimeAsset(asset_handle);
+	}
+
+#pragma endregion
+
+#pragma region MeshRendererComponent
+
+
+	AssetHandle ScriptConnector::MeshRendererComponent_GetMaterial(UUID entityID)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return NULL_UUID;
+
+		if (!entity.HasComponent<MeshRendererComponent>())
+			return NULL_UUID;
+
+		return entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles.back().first;
+	}
+
+	void ScriptConnector::MeshRendererComponent_SetMaterial(UUID entityID, AssetHandle material_handle)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<MeshRendererComponent>() || // If No Component
+			 entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles.back().first == material_handle) // If Material Handle Already Set
+			return;
+
+		if (AssetManager::IsAssetHandleValid(material_handle)) // Check validity of asset
+		{
+			auto& material_pair = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles.back();
+
+			material_pair.first = material_handle;
+
+			material_pair.second.reset();   // Clear Material Uniform Block
+			material_pair.second = nullptr; // Clear Material Uniform Block
+		}
+
+		return;
+	}
+
+	uint32_t* ScriptConnector::MeshRendererComponent_GetMaterials(UUID entityID)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return new uint32_t[1](NULL_UUID);
+
+		if (!entity.HasComponent<MeshRendererComponent>())
+			return new uint32_t[1](NULL_UUID);
+
+		auto& component = entity.GetComponent<MeshRendererComponent>();
+
+		const size_t size = component.MeshRendererMaterialHandles.size();
+		uint32_t* material_array = new uint32_t[size](NULL_UUID);
+		for (int i = 0; i < size; i++)
+			material_array[i] = (uint32_t)component.MeshRendererMaterialHandles[i].first;
+
+		return material_array;
+	}
+
+	void ScriptConnector::MeshRendererComponent_SetMaterials(UUID entityID, uint32_t* material_handles, uint32_t num_elements)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<MeshRendererComponent>())
+			return;
+
+		auto& component = entity.GetComponent<MeshRendererComponent>();
+
+		std::vector<std::pair<AssetHandle, std::shared_ptr<MaterialUniformBlock>>> new_handle_vector;
+		
+		for (uint32_t i = 0; i < num_elements; i++)
+		{
+			// Default to nullptr
+			std::shared_ptr<MaterialUniformBlock> uniform_block = nullptr;
+
+			// Find existing material uniform block if it exists
+			auto it = std::find_if(component.MeshRendererMaterialHandles.begin(),
+				component.MeshRendererMaterialHandles.end(),
+				[&](const std::pair<AssetHandle, std::shared_ptr<MaterialUniformBlock>>& pair)
+				{ return pair.first == material_handles[i]; });
+
+			if (it != component.MeshRendererMaterialHandles.end())
+				uniform_block = it->second;
+
+			// Add to new vector
+			new_handle_vector.emplace_back(material_handles[i], uniform_block);
+		}
+
+		component.MeshRendererMaterialHandles = std::move(new_handle_vector);
+	}
+
+	void ScriptConnector::MeshRenderer_EnableUniformBlock(UUID entityID, uint32_t material_index)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<MeshRendererComponent>())
+			return;
+
+		auto& material_handle_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+
+		if (material_index == -1)
+			material_index = (uint32_t)material_handle_vector.size() - 1;
+
+		if (material_index >= material_handle_vector.size())
+			return;
+
+		auto material_asset = AssetManager::GetAsset<PBRMaterial>(material_handle_vector[material_index].first);
+
+		if (!material_asset)
+			return;
+
+		if (!material_handle_vector[material_index].second)
+			material_handle_vector[material_index].second = std::make_shared<MaterialUniformBlock>(*material_asset->GetUniformBlock());
+
+		return;
+	}
+
+	MaterialUniformBlock* ScriptConnector::MeshRenderer_GetUniformBlock(UUID entityID, uint32_t material_index)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return nullptr;
+
+		if (!entity.HasComponent<MeshRendererComponent>())
+			return nullptr;
+
+		auto& material_handle_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+
+		if (material_index == -1)
+			material_index = (uint32_t)material_handle_vector.size() - 1;
+
+		if (material_index >= material_handle_vector.size())
+			return nullptr;
+
+		return material_handle_vector[material_index].second.get();
+	}
+
+	void ScriptConnector::MeshRenderer_DisableUniformBlock(UUID entityID, uint32_t material_index)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<MeshRendererComponent>())
+			return;
+
+		auto& material_handle_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+
+		if (material_index == -1)
+			material_index = (uint32_t)material_handle_vector.size() - 1;
+
+		if (material_index >= material_handle_vector.size())
+			return;
+		
+		material_handle_vector[material_index].second.reset();
+		material_handle_vector[material_index].second = nullptr;
+	}
+
+	void ScriptConnector::MeshRenderer_EnableAllUniformBlocks(UUID entityID)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<MeshRendererComponent>())
+			return;
+
+		auto& material_handle_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+
+		for(auto& [material_handle, uniform_block] : material_handle_vector)
+		{
+			auto material_asset = AssetManager::GetAsset<PBRMaterial>(material_handle);
+
+			if (!material_asset)
+				continue;
+
+			if (!uniform_block)
+				uniform_block = std::make_shared<MaterialUniformBlock>(*material_asset->GetUniformBlock());
+		}
+
+		return;
+	}
+
+	void ScriptConnector::MeshRenderer_DisableAllUniformBlocks(UUID entityID)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<MeshRendererComponent>())
+			return;
+
+		auto& material_handle_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+
+		for (auto& [material_handle, uniform_block] : material_handle_vector)
+		{
+			uniform_block.reset();
+			uniform_block = nullptr;
+		}
+
+		return;
+	}
+
+#pragma endregion
+
+
+#pragma region MaterialUniformBlock
+
+	void ScriptConnector::MaterialUniformBlock_SetUniform(MaterialUniformBlock* uniform_block, MonoString* uniform_name, uint32_t type, void* value)
+	{
+		if (!uniform_block || !value)
+			return;
+
+		switch (type)
+		{
+			// Bool
+			case (uint32_t)GLSLType::Bool:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Bool,			*static_cast<bool*>(value)); return;
+			case (uint32_t)GLSLType::BVec2:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::BVec2,		*static_cast<glm::bvec2*>(value)); return;
+			case (uint32_t)GLSLType::BVec3:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::BVec3,		*static_cast<glm::bvec3*>(value)); return;
+			case (uint32_t)GLSLType::BVec4:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::BVec4,		*static_cast<glm::bvec4*>(value)); return;
+
+			// Int
+			case (uint32_t)GLSLType::Int:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Int,			*static_cast<int*>(value)); return;
+			case (uint32_t)GLSLType::IVec2:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::IVec2,		*static_cast<glm::ivec2*>(value)); return;
+			case (uint32_t)GLSLType::IVec3:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::IVec3,		*static_cast<glm::ivec3*>(value)); return;
+			case (uint32_t)GLSLType::IVec4:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::IVec4,		*static_cast<glm::ivec4*>(value)); return;
+
+			// Int
+			case (uint32_t)GLSLType::Uint:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Uint,			*static_cast<unsigned int*>(value)); return;
+			case (uint32_t)GLSLType::UVec2:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::UVec2,		*static_cast<glm::uvec2*>(value)); return;
+			case (uint32_t)GLSLType::UVec3:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::UVec3,		*static_cast<glm::uvec3*>(value)); return;
+			case (uint32_t)GLSLType::UVec4:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::UVec4,		*static_cast<glm::uvec4*>(value)); return;
+
+			// Float
+			case (uint32_t)GLSLType::Float:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Float,		*static_cast<float*>(value)); return;
+			case (uint32_t)GLSLType::Vec2:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Vec2,			*static_cast<glm::vec2*>(value)); return;
+			case (uint32_t)GLSLType::Vec3:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Vec3,			*static_cast<glm::vec3*>(value)); return;
+			case (uint32_t)GLSLType::Vec4:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Vec4,			*static_cast<glm::vec4*>(value)); return;
+
+			// Double
+			case (uint32_t)GLSLType::Double:	uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Double,		*static_cast<double*>(value)); return;
+			case (uint32_t)GLSLType::DVec2:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::DVec2,		*static_cast<glm::dvec2*>(value)); return;
+			case (uint32_t)GLSLType::DVec3:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::DVec3,		*static_cast<glm::dvec3*>(value)); return;
+			case (uint32_t)GLSLType::DVec4:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::DVec4,		*static_cast<glm::dvec4*>(value)); return;
+
+
+			case (uint32_t)GLSLType::Mat2:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Mat2,			*static_cast<glm::mat2*>(value)); return;
+			case (uint32_t)GLSLType::Mat3:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Mat3,			*static_cast<glm::mat3*>(value)); return;
+			case (uint32_t)GLSLType::Mat4:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Mat4,			*static_cast<glm::mat4*>(value)); return;
+
+			case (uint32_t)GLSLType::Sampler1D:					uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler1D,				*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::Sampler1DArray:			uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler1DArray,			*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::Sampler1DShadow:			uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler1DShadow,			*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::Sampler1DArrayShadow:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler1DArrayShadow,		*static_cast<AssetHandle*>(value)); return;
+
+			case (uint32_t)GLSLType::Sampler2D:					uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler2D,				*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::Sampler2DArray:			uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler2DArray,			*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::Sampler2DShadow:			uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler2DShadow,			*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::Sampler2DArrayShadow:		uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler2DArrayShadow,		*static_cast<AssetHandle*>(value)); return;
+
+			case (uint32_t)GLSLType::Sampler3D:					uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::Sampler3D,				*static_cast<AssetHandle*>(value)); return;
+
+			case (uint32_t)GLSLType::SamplerCube:				uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::SamplerCube,				*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::SamplerCubeArray:			uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::SamplerCubeArray,			*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::SamplerCubeShadow:			uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::SamplerCubeShadow,		*static_cast<AssetHandle*>(value)); return;
+			case (uint32_t)GLSLType::SamplerCubeArrayShadow:	uniform_block->SetUniform(ScriptingUtils::MonoStringToString(uniform_name), GLSLType::SamplerCubeArrayShadow,	*static_cast<AssetHandle*>(value)); return;
+
+		}
+		return;
 	}
 
 #pragma endregion

@@ -16,12 +16,24 @@ void main() {
 
 #version 450 core
 
-layout (location = 0) out uint FragEntityID;
+struct Entity
+{
+    uint entity_id;
+    float depth;
+};
+
+layout(std430, binding = 0) buffer EntityBuffer { Entity data[]; } EntityBuffer_Data;
 
 uniform uint u_EntityID;
+uniform ivec2 u_ScreenSize;
 
-void main() {
-
-    FragEntityID = u_EntityID;
-
+void main() 
+{
+    uint index = uint(gl_FragCoord.y) * uint(u_ScreenSize.x) + uint(gl_FragCoord.x);
+    
+    float existingDepth = EntityBuffer_Data.data[index].depth;
+    if (gl_FragCoord.z < existingDepth) {
+        EntityBuffer_Data.data[index].entity_id = u_EntityID;
+        EntityBuffer_Data.data[index].depth = gl_FragCoord.z;
+    }
 }

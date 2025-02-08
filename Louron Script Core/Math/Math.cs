@@ -5,6 +5,12 @@ namespace Louron
     public struct LMath
     {
 
+        public static float PingPong(float value, float max)
+        {
+            float modValue = value % (max * 2);
+            return modValue < max ? modValue : (max * 2) - modValue;
+        }
+
         // Helper function to convert degrees to radians
         public static float DegreesToRadians(float degrees)
         {

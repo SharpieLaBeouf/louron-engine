@@ -1,0 +1,23 @@
+Material Asset Name: BackPack Material
+Material Asset Type: AssetType::Material_Standard
+Shader Handle: 1679242868
+Render Type: Opaque
+Roughness: 0.709999979
+Metallic: 0.209999993
+Albedo Tint: [1, 1, 1, 1]
+AlbedoTextureAsset: 2675128306
+MetallicTextureAsset: 4294967295
+NormalTextureAsset: 1684900941
+Material Uniform Block:
+  - Name: NoiseMap
+    Type: sampler2D
+    Value: 3250776506
+  - Name: Time
+    Type: float
+    Value: 0.899999976
+  - Name: GlowColour
+    Type: vec3
+    Value: [1, 0, 0]
+  - Name: DissolveWidth
+    Type: float
+    Value: 0.800000012

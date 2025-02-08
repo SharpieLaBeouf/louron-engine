@@ -110,9 +110,9 @@ namespace Louron {
 		glm::vec3 position_to_look_at{};
 
 		// If it is a mesh I'd like to look at the mesh, some meshes have AABBs that are offset from their true transform
-		if (entity.HasComponent<AssetMeshFilter>() && entity.HasComponent<AssetMeshRenderer>()) 
+		if (entity.HasComponent<MeshFilterComponent>() && entity.HasComponent<MeshRendererComponent>()) 
 		{
-			position_to_look_at = entity.GetComponent<AssetMeshFilter>().TransformedAABB.Center();
+			position_to_look_at = entity.GetComponent<MeshFilterComponent>().TransformedAABB.Center();
 		}
 		else 
 		{

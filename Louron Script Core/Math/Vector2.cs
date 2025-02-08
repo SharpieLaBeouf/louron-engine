@@ -162,7 +162,7 @@ namespace Louron
         }
 
         // Override Equals method
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             if (obj is Vector2 other)
             {
@@ -207,17 +207,382 @@ namespace Louron
         #endregion
     }
 
+    public struct IVector2
+    {
+        public int X, Y;
+
+        public static IVector2 Zero => new IVector2(0);
+
+        public IVector2(int scalar)
+        {
+            X = scalar;
+            Y = scalar;
+        }
+
+        public IVector2(int x, int y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        #region Operators
+
+        // Add
+        public static IVector2 operator +(IVector2 a, IVector2 b)
+        {
+            return new IVector2(a.X + b.X, a.Y + b.Y);
+        }
+
+        public static IVector2 operator +(IVector2 a, int scalar)
+        {
+            return new IVector2(a.X + scalar, a.Y + scalar);
+        }
+
+        public static IVector2 operator +(int scalar, IVector2 a)
+        {
+            return new IVector2(a.X + scalar, a.Y + scalar);
+        }
+
+        // Subtract
+        public static IVector2 operator -(IVector2 a, IVector2 b)
+        {
+            return new IVector2(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static IVector2 operator -(IVector2 a, int scalar)
+        {
+            return new IVector2(a.X - scalar, a.Y - scalar);
+        }
+
+        public static IVector2 operator -(int scalar, IVector2 a)
+        {
+            return new IVector2(a.X - scalar, a.Y - scalar);
+        }
+
+        // Multiply
+        public static IVector2 operator *(IVector2 a, IVector2 b)
+        {
+            return new IVector2(a.X * b.X, a.Y * b.Y);
+        }
+
+        public static IVector2 operator *(IVector2 vector, int scalar)
+        {
+            return new IVector2(vector.X * scalar, vector.Y * scalar);
+        }
+
+        public static IVector2 operator *(int scalar, IVector2 vector)
+        {
+            return new IVector2(vector.X * scalar, vector.Y * scalar);
+        }
+
+        // Divide
+        public static IVector2 operator /(IVector2 a, IVector2 b)
+        {
+            return new IVector2(a.X / b.X, a.Y / b.Y);
+        }
+
+        public static IVector2 operator /(IVector2 vector, int scalar)
+        {
+            return new IVector2(vector.X / scalar, vector.Y / scalar);
+        }
+
+        public static IVector2 operator /(int scalar, IVector2 vector)
+        {
+            return new IVector2(vector.X / scalar, vector.Y / scalar);
+        }
+
+        public static bool operator ==(IVector2 a, IVector2 b)
+        {
+            return a.X == b.X && a.Y == b.Y;
+        }
+
+        public static bool operator !=(IVector2 a, IVector2 b)
+        {
+            return !(a == b);
+        }
+
+        #endregion
+
+        #region Methods
+
+        // Override Equals method
+        public override readonly bool Equals(object? obj)
+        {
+            if (obj is IVector2 other)
+            {
+                return this == other;
+            }
+            return false;
+        }
+
+        // Override GetHashCode
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
+
+        // Overriding the ToString method
+        public override readonly string ToString()
+        {
+            return $"IVector2({X}, {Y})";
+        }
+        #endregion
+    }
+
+    public struct  UVector2
+    {
+        public uint X, Y;
+
+        public static  UVector2 Zero => new  UVector2(0);
+
+        public  UVector2(uint scalar)
+        {
+            X = scalar;
+            Y = scalar;
+        }
+
+        public  UVector2(uint x, uint y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        #region Operators
+
+        // Add
+        public static  UVector2 operator +( UVector2 a,  UVector2 b)
+        {
+            return new  UVector2(a.X + b.X, a.Y + b.Y);
+        }
+
+        public static  UVector2 operator +( UVector2 a, uint scalar)
+        {
+            return new  UVector2(a.X + scalar, a.Y + scalar);
+        }
+
+        public static  UVector2 operator +(uint scalar,  UVector2 a)
+        {
+            return new  UVector2(a.X + scalar, a.Y + scalar);
+        }
+
+        // Subtract
+        public static  UVector2 operator -( UVector2 a,  UVector2 b)
+        {
+            return new  UVector2(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static  UVector2 operator -( UVector2 a, uint scalar)
+        {
+            return new  UVector2(a.X - scalar, a.Y - scalar);
+        }
+
+        public static  UVector2 operator -(uint scalar,  UVector2 a)
+        {
+            return new  UVector2(a.X - scalar, a.Y - scalar);
+        }
+
+        // Multiply
+        public static  UVector2 operator *( UVector2 a,  UVector2 b)
+        {
+            return new  UVector2(a.X * b.X, a.Y * b.Y);
+        }
+
+        public static  UVector2 operator *( UVector2 vector, uint scalar)
+        {
+            return new  UVector2(vector.X * scalar, vector.Y * scalar);
+        }
+
+        public static  UVector2 operator *(uint scalar,  UVector2 vector)
+        {
+            return new  UVector2(vector.X * scalar, vector.Y * scalar);
+        }
+
+        // Divide
+        public static  UVector2 operator /( UVector2 a,  UVector2 b)
+        {
+            return new  UVector2(a.X / b.X, a.Y / b.Y);
+        }
+
+        public static  UVector2 operator /( UVector2 vector, uint scalar)
+        {
+            return new  UVector2(vector.X / scalar, vector.Y / scalar);
+        }
+
+        public static  UVector2 operator /(uint scalar,  UVector2 vector)
+        {
+            return new  UVector2(vector.X / scalar, vector.Y / scalar);
+        }
+
+        public static bool operator ==( UVector2 a,  UVector2 b)
+        {
+            return a.X == b.X && a.Y == b.Y;
+        }
+
+        public static bool operator !=( UVector2 a,  UVector2 b)
+        {
+            return !(a == b);
+        }
+
+        #endregion
+
+        #region Methods
+
+        // Override Equals method
+        public override readonly bool Equals(object? obj)
+        {
+            if (obj is  UVector2 other)
+            {
+                return this == other;
+            }
+            return false;
+        }
+
+        // Override GetHashCode
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
+
+        // Overriding the ToString method
+        public override readonly string ToString()
+        {
+            return $"UVector2({X}, {Y})";
+        }
+        #endregion
+    }
+
+    public struct DVector2
+    {
+        public double X, Y;
+
+        public static DVector2 Zero => new DVector2(0);
+
+        public DVector2(double scalar)
+        {
+            X = scalar;
+            Y = scalar;
+        }
+
+        public DVector2(double x, double y)
+        {
+            X = x;
+            Y = y;
+        }
+
+        #region Operators
+
+        // Add
+        public static DVector2 operator +(DVector2 a, DVector2 b)
+        {
+            return new DVector2(a.X + b.X, a.Y + b.Y);
+        }
+
+        public static DVector2 operator +(DVector2 a, double scalar)
+        {
+            return new DVector2(a.X + scalar, a.Y + scalar);
+        }
+
+        public static DVector2 operator +(double scalar, DVector2 a)
+        {
+            return new DVector2(a.X + scalar, a.Y + scalar);
+        }
+
+        // Subtract
+        public static DVector2 operator -(DVector2 a, DVector2 b)
+        {
+            return new DVector2(a.X - b.X, a.Y - b.Y);
+        }
+
+        public static DVector2 operator -(DVector2 a, double scalar)
+        {
+            return new DVector2(a.X - scalar, a.Y - scalar);
+        }
+
+        public static DVector2 operator -(double scalar, DVector2 a)
+        {
+            return new DVector2(a.X - scalar, a.Y - scalar);
+        }
+
+        // Multiply
+        public static DVector2 operator *(DVector2 a, DVector2 b)
+        {
+            return new DVector2(a.X * b.X, a.Y * b.Y);
+        }
+
+        public static DVector2 operator *(DVector2 vector, double scalar)
+        {
+            return new DVector2(vector.X * scalar, vector.Y * scalar);
+        }
+
+        public static DVector2 operator *(double scalar, DVector2 vector)
+        {
+            return new DVector2(vector.X * scalar, vector.Y * scalar);
+        }
+
+        // Divide
+        public static DVector2 operator /(DVector2 a, DVector2 b)
+        {
+            return new DVector2(a.X / b.X, a.Y / b.Y);
+        }
+
+        public static DVector2 operator /(DVector2 vector, double scalar)
+        {
+            return new DVector2(vector.X / scalar, vector.Y / scalar);
+        }
+
+        public static DVector2 operator /(double scalar, DVector2 vector)
+        {
+            return new DVector2(vector.X / scalar, vector.Y / scalar);
+        }
+
+        public static bool operator ==(DVector2 a, DVector2 b)
+        {
+            return a.X == b.X && a.Y == b.Y;
+        }
+
+        public static bool operator !=(DVector2 a, DVector2 b)
+        {
+            return !(a == b);
+        }
+
+        #endregion
+
+        #region Methods
+
+        // Override Equals method
+        public override readonly bool Equals(object? obj)
+        {
+            if (obj is DVector2 other)
+            {
+                return this == other;
+            }
+            return false;
+        }
+
+        // Override GetHashCode
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
+
+        // Overriding the ToString method
+        public override readonly string ToString()
+        {
+            return $"DVector2({X}, {Y})";
+        }
+        #endregion
+    }
+
     public struct BVector2
     {
         public bool X, Y;
 
-        public static BVector2 False => new BVector2(false);
-        public static BVector2 True => new BVector2(true);
+        public static BVector2 Zero => new BVector2(false);
 
-        public BVector2(bool value)
+        public BVector2(bool scalar)
         {
-            X = value;
-            Y = value;
+            X = scalar;
+            Y = scalar;
         }
 
         public BVector2(bool x, bool y)
@@ -225,5 +590,45 @@ namespace Louron
             X = x;
             Y = y;
         }
+
+        #region Operators
+
+        public static bool operator ==(BVector2 a, BVector2 b)
+        {
+            return a.X == b.X && a.Y == b.Y;
+        }
+
+        public static bool operator !=(BVector2 a, BVector2 b)
+        {
+            return !(a == b);
+        }
+
+        #endregion
+
+        #region Methods
+
+        // Override Equals method
+        public override readonly bool Equals(object? obj)
+        {
+            if (obj is BVector2 other)
+            {
+                return this == other;
+            }
+            return false;
+        }
+
+        // Override GetHashCode
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
+
+        // Overriding the ToString method
+        public override readonly string ToString()
+        {
+            return $"BVector2({X}, {Y})";
+        }
+        #endregion
     }
+
 }

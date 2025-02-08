@@ -8,6 +8,7 @@
 // C++ Standard Library Headers
 #include <string>
 #include <array>
+#include <variant>
 
 // External Vendor Library Headers
 #include <glm/glm.hpp>
@@ -63,16 +64,77 @@ namespace Louron {
 
 	class CameraBase;
 
+	using UniformValue = std::variant<
+
+		bool,
+		glm::bvec2, glm::bvec3, glm::bvec4,
+
+		int,
+		glm::ivec2, glm::ivec3, glm::ivec4,
+
+		unsigned int,
+		glm::uvec2, glm::uvec3, glm::uvec4,
+
+		float,
+		glm::vec2, glm::vec3, glm::vec4,
+
+		double,
+		glm::dvec2, glm::dvec3, glm::dvec4,
+
+		glm::mat2, glm::mat3, glm::mat4,
+
+		AssetHandle
+	>;
+
+	using UniformBlock = std::unordered_map<std::string, std::pair<GLSLType, UniformValue>>;
+
+	class MaterialUniformBlock {
+
+	public:
+
+		MaterialUniformBlock() = default;
+		MaterialUniformBlock(const MaterialUniformBlock& other);
+		MaterialUniformBlock(MaterialUniformBlock&& other);
+
+		void SetUniform(const std::string& name, GLSLType type, UniformValue value) {
+			m_Uniforms[name] = { type, value };
+		}
+
+		const UniformBlock& GetUniforms() const {
+			return m_Uniforms;
+		}
+
+		void SetUniforms(const UniformBlock& uniforms) {
+			m_Uniforms = uniforms;
+		}
+
+		void Clear() {
+			m_Uniforms.clear();
+		}
+
+		void InitialiseFromShader(std::shared_ptr<Shader> shader);
+
+		void Serialize(YAML::Emitter& out);
+		void Deserialize(YAML::Node data);
+
+	private:
+		UniformBlock m_Uniforms;
+
+		friend class Material;
+		friend class PBRMaterial;
+	};
+
+
 	class Material : public Asset {
 
 	public:
 
 		Material();
 		Material(const std::string& name, std::shared_ptr<Shader> shader);
-		Material(std::shared_ptr<Shader> shader);
+		Material(AssetHandle shader);
 		Material(std::shared_ptr<Texture> texture);
-		Material(std::shared_ptr<Shader> shader, std::shared_ptr<Texture> texture);
-		Material(std::shared_ptr<Shader> shader, std::unordered_map<GLint, std::shared_ptr<Texture>>& textures);
+		Material(AssetHandle shader, std::shared_ptr<Texture> texture);
+		Material(AssetHandle shader, std::unordered_map<GLint, std::shared_ptr<Texture>>& textures);
 
 		virtual AssetType GetType() const override { return AssetType::Material_Standard; }
 
@@ -83,14 +145,17 @@ namespace Louron {
 		virtual void UnBind();
 
 		// Update Material Shader Uniforms
-		virtual void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
+		virtual void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr);
+
+		std::shared_ptr<MaterialUniformBlock> GetUniformBlock() { return m_UniformBlock; }
 
 		// Getters and Setters
 
 		void SetTexture(std::shared_ptr<Texture> texture, TextureMapType textureType);
 
-		virtual Shader* GetShader();
-		void SetShader(std::shared_ptr<Shader>& shader);
+		virtual std::shared_ptr<Shader> GetShader();
+		virtual AssetHandle GetShaderHandle();
+		void SetShader(AssetHandle shader);
 
 		float GetShine() const;
 		void SetShine(float shine);
@@ -107,9 +172,10 @@ namespace Louron {
 		std::string GetName() const { return m_Name; }
 		void SetName(const std::string& name) { m_Name = name; }
 
-	private:
+		RenderType GetRenderType() const { return m_RenderType; }
+		void SetRenderType(RenderType type) { m_RenderType = type; }
 
-		RenderType m_RenderType = RenderType::L_MATERIAL_OPAQUE;
+	private:
 
 		std::string m_Name;
 
@@ -117,7 +183,6 @@ namespace Louron {
 		glm::vec4 m_Diffuse = glm::vec4(1.0f);
 		glm::vec4 m_Specular = glm::vec4(0.5f);
 
-		std::shared_ptr<Shader> m_Shader;
 		std::unordered_map<GLint, std::shared_ptr<Texture>> m_Textures;
 
 		std::string m_TextureUniformNames[3] = {
@@ -125,69 +190,28 @@ namespace Louron {
 			"specularMap",
 			"normalMap"
 		};
-	};
 
-	class BPMaterial : public Material {
+	protected:
 
-	public:
-
-		// Constructors and Logic
-
-		BPMaterial() = default;
-		~BPMaterial() = default;
-
-		virtual AssetType GetType() const override { return AssetType::Material_Standard; }
-
-	public:
-
-		// Getters and Setters
-
-		void SetMaterialName(const std::string& name) { m_MaterialName = name; }
-		const std::string& GetMaterialName() const { return m_MaterialName; }
-
-		void SetRenderType(const RenderType& renderType) { m_RenderType = renderType; }
-		const RenderType& GetRenderType() const { return m_RenderType; }
-
-		void SetShine(const GLfloat& shine) { m_Shine = shine; }
-		const GLfloat& GetShine() const { return m_Shine; }
-
-		void SetDiffuse(const glm::vec4& diffuse) { m_Diffuse = diffuse; }
-		const glm::vec4& GetDiffuse() const { return m_Diffuse; }
-
-		void SetSpecular(const glm::vec4& specular) { m_Specular = specular; }
-		const glm::vec4& GetSpecular() const { return m_Specular; }
-
-		void SetShader(std::shared_ptr<Shader> shader) { m_MaterialShader = shader; }
-		std::shared_ptr<Shader> GetShader(std::shared_ptr<Shader> shader) { return m_MaterialShader; }
-
-	private:
-
-		std::string m_MaterialName = "New Blinn Phong Material";
+		AssetHandle m_ShaderAssetHandle;
 		RenderType m_RenderType = RenderType::L_MATERIAL_OPAQUE;
 
-		GLfloat m_Shine = 32.0f;
-		glm::vec4 m_Diffuse = glm::vec4(1.0f);
-		glm::vec4 m_Specular = glm::vec4(0.5f);
-
-		GLuint m_MaterialIndex;
-		std::shared_ptr<Shader> m_MaterialShader;
-		std::array<std::shared_ptr<Texture>, TextureMapType::L20_TOTAL_ELEMENTS> m_MaterialTextures;
-
+		std::shared_ptr<MaterialUniformBlock> m_UniformBlock = nullptr;
 
 	};
 
-	struct PBRMaterial : public Material {
+	class PBRMaterial : public Material {
 
 	public:
 
 		PBRMaterial();
+		PBRMaterial(AssetHandle shader_handle);
 
 		virtual AssetType GetType() const override { return AssetType::Material_Standard; }
 
 	private:
 
 		std::string m_MaterialName = "New PBR Material";
-		RenderType m_RenderType = RenderType::L_MATERIAL_OPAQUE;
 		
 		float m_Roughness = 0.5f;
 		float m_MetallicScale = 0.0f;
@@ -197,8 +221,6 @@ namespace Louron {
 		AssetHandle m_MetallicTexture = NULL_UUID;
 		AssetHandle m_NormalTexture = NULL_UUID;
 
-		std::weak_ptr<Shader> m_Shader;
-
 	public:
 
 		// Bind and Unbing
@@ -206,7 +228,7 @@ namespace Louron {
 		void UnBind() override;
 
 		// Update Material Shader Uniforms
-		void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) override;
+		void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr) override;
 
 		bool IsAlbedoTextureSet() const;
 		bool IsMetallicTextureSet() const;
@@ -220,7 +242,7 @@ namespace Louron {
 		void SetMetallic(float metallic);
 		void SetAlbedoTintColour(const glm::vec4& albedo_colour);
 
-		void SetShader(std::shared_ptr<Shader> shader);
+		void SetShader(AssetHandle shader_handle);
 		void SetName(const std::string& name);
 
 		AssetHandle GetAlbedoTextureAssetHandle() const;
@@ -231,7 +253,8 @@ namespace Louron {
 		float GetMetallic() const;
 		const glm::vec4& GetAlbedoTintColour() const;
 
-		Shader* GetShader() override;
+		std::shared_ptr<Shader> GetShader() override;
+		AssetHandle GetShaderHandle() override;
 		const std::string& GetName() const;
 
 		void Serialize(YAML::Emitter& out);

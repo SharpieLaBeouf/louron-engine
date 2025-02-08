@@ -1,0 +1,14 @@
+Material Asset Name: Rusted Iron
+Material Asset Type: AssetType::Material_Standard
+Shader Handle: 487657122
+Render Type: Opaque
+Roughness: 0.100000001
+Metallic: 1
+Albedo Tint: [1, 1, 1, 1]
+AlbedoTextureAsset: 2187977125
+MetallicTextureAsset: 2321804809
+NormalTextureAsset: 2051702395
+Material Property Block:
+  - Name: MyCustomProperty
+    Type: float
+    Value: 0

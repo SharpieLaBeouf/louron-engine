@@ -56,7 +56,7 @@ namespace Utils::GUI {
 
 	static void MultiRangeLODSliderFloat(const char* label, std::vector<float>& data, float min = 0.0f, float max = 1.0f, float minSpacing = 0.01f)
 	{
-		MultiRangeLODSliderFloat(label, data.data(), data.size(), min, max, minSpacing);
+		MultiRangeLODSliderFloat(label, data.data(), (int)data.size(), min, max, minSpacing);
 	}
 
 

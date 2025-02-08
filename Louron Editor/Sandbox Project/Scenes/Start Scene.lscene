@@ -2,70 +2,136 @@ Scene Name: Start Scene
 Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
 Scene Pipeline Type: 1
 Entities:
-  - Entity: 1282498823
+  - Entity: 3389872355
     TagComponent:
-      Tag: AK47_LOD02
+      Tag: Goblin Mesh.LOD3
     HierarchyComponent:
-      Parent: 1541864074
+      Parent: 331227340
       Children:
         []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [89.9999847, -0, -180]
+      Rotation: [-90.0000076, -0, 0]
       Scale: [1, 1, 1]
     MeshFilterComponent:
-      MeshAssetHandle: 4265155961
+      MeshAssetHandle: 3683807884
     MeshRendererComponent:
       MeshActive: true
       CastShadows: false
-      MaterialAssetCount: 2
+      MaterialAssetCount: 1
       MaterialAssetHandles:
-        - 232925268
-        - 232925268
-  - Entity: 2358720621
+        - 3976985170
+  - Entity: 2436976214
     TagComponent:
-      Tag: AK47_LOD01
+      Tag: Goblin Mesh.LOD1
     HierarchyComponent:
-      Parent: 1541864074
+      Parent: 331227340
       Children:
         []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [89.9999847, -0, -180]
+      Rotation: [-90.0000076, -0, 0]
       Scale: [1, 1, 1]
     MeshFilterComponent:
-      MeshAssetHandle: 4265154656
+      MeshAssetHandle: 3683808754
     MeshRendererComponent:
       MeshActive: true
       CastShadows: false
-      MaterialAssetCount: 2
+      MaterialAssetCount: 1
       MaterialAssetHandles:
-        - 232925268
-        - 232925268
-  - Entity: 1541864074
+        - 1793164658
+  - Entity: 3711093502
     TagComponent:
-      Tag: AK47_LODs (1)
+      Tag: Goblin Mesh.LOD2
+    HierarchyComponent:
+      Parent: 331227340
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-90.0000076, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 3683808319
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3976985170
+  - Entity: 3077619168
+    TagComponent:
+      Tag: Directional Light
     HierarchyComponent:
       Parent: 4294967295
       Children:
-        - 2358720621
-        - 1282498823
+        []
     TransformComponent:
-      Translation: [-0.825707495, -0.600000024, 2.60891795]
-      Rotation: [0, 89.980217, 0]
-      Scale: [4.99999952, 5, 4.99999952]
+      Translation: [0, 0, 0]
+      Rotation: [-50, 30, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Intensity: 1
+      Shadow Type: Soft
+  - Entity: 2006140417
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.CameraMoveScript
+        Fields:
+          []
+    TransformComponent:
+      Translation: [0, 12.7961283, 30.8333855]
+      Rotation: [-10, 0, 0]
+      Scale: [0.999999881, 1, 0.999999881]
+    CameraComponent:
+      Camera:
+        Projection Type: Perspective
+        FOV: 60.0000038
+        Near: 0.00999999978
+        Far: 1000
+      Primary: true
+      ClearFlag: Skybox
+      ClearColour: [1, 1, 1, 1]
+    SkyboxComponent:
+      MaterialAssetHandle: 4158978962
+  - Entity: 331227340
+    TagComponent:
+      Tag: Goblin_Export_LOD (1)
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 3711093502
+        - 2436976214
+        - 3389872355
+    TransformComponent:
+      Translation: [0, 1.10000002, 0]
+      Rotation: [0, -117.699997, 0]
+      Scale: [5, 5, 5]
     LODMeshComponent:
       MaxDistanceOverFarPlane: true
       MaxDistance: 200
       LOD Elements:
         Element 0:
-          Distance Threshold: 0.348441929
+          Distance Threshold: 0.179940999
           Entities:
-            - 2358720621
+            - 2436976214
         Element 1:
-          Distance Threshold: 0.807365417
+          Distance Threshold: 0.407079637
           Entities:
-            - 1282498823
+            - 3711093502
+        Element 2:
+          Distance Threshold: 0.699115038
+          Entities:
+            - 3389872355
   - Entity: 2418869427
     TagComponent:
       Tag: Cube
@@ -98,139 +164,73 @@ Entities:
       CastShadows: false
       MaterialAssetCount: 1
       MaterialAssetHandles:
-        - 2785031260
+        - 1699558496
     BoxColliderComponent:
       IsTrigger: false
       Centre: [0, 0, 0]
       Size: [1, 1, 1]
       MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 331227340
+  - Entity: 1541864074
     TagComponent:
-      Tag: Goblin_Export_LOD (1)
+      Tag: AK47_LODs (1)
     HierarchyComponent:
       Parent: 4294967295
       Children:
-        - 3711093502
-        - 2436976214
-        - 3389872355
+        - 2358720621
+        - 1282498823
     TransformComponent:
-      Translation: [0, 1.10000002, 0]
-      Rotation: [0, -117.699997, 0]
-      Scale: [5, 5, 5]
+      Translation: [-0.825707495, -0.600000024, 2.60891795]
+      Rotation: [0, 89.980217, 0]
+      Scale: [4.99999952, 5, 4.99999952]
     LODMeshComponent:
       MaxDistanceOverFarPlane: true
       MaxDistance: 200
       LOD Elements:
         Element 0:
-          Distance Threshold: 0.179940999
+          Distance Threshold: 0.348441929
           Entities:
-            - 2436976214
+            - 2358720621
         Element 1:
-          Distance Threshold: 0.407079637
+          Distance Threshold: 0.807365417
           Entities:
-            - 3711093502
-        Element 2:
-          Distance Threshold: 0.699115038
-          Entities:
-            - 3389872355
-  - Entity: 2006140417
+            - 1282498823
+  - Entity: 2358720621
     TagComponent:
-      Tag: Main Camera
+      Tag: AK47_LOD01
     HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        []
-    ScriptComponent:
-      Script_1:
-        Active: true
-        Script Name: SandboxProject.CameraMoveScript
-        Fields:
-          []
-    TransformComponent:
-      Translation: [0, 12.7961283, 30.8333855]
-      Rotation: [-10, 0, 0]
-      Scale: [0.999999881, 1, 0.999999881]
-    CameraComponent:
-      Camera:
-        Projection Type: Perspective
-        FOV: 60.0000038
-        Near: 0.00999999978
-        Far: 1000
-      Primary: true
-      ClearFlag: Skybox
-      ClearColour: [1, 1, 1, 1]
-    SkyboxComponent:
-      MaterialAssetHandle: 4158978962
-  - Entity: 3077619168
-    TagComponent:
-      Tag: Directional Light
-    HierarchyComponent:
-      Parent: 4294967295
+      Parent: 1541864074
       Children:
         []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [-50, 30, 0]
-      Scale: [1, 1, 1]
-    DirectionalLightComponent:
-      Active: true
-      Colour: [1, 1, 1, 1]
-      Intensity: 1
-      Shadow Type: Soft
-  - Entity: 3711093502
-    TagComponent:
-      Tag: Goblin Mesh.LOD2
-    HierarchyComponent:
-      Parent: 331227340
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [-90.0000076, -0, 0]
+      Rotation: [89.9999847, -0, -180]
       Scale: [1, 1, 1]
     MeshFilterComponent:
-      MeshAssetHandle: 3683808319
+      MeshAssetHandle: 4265154656
     MeshRendererComponent:
       MeshActive: true
       CastShadows: false
-      MaterialAssetCount: 1
+      MaterialAssetCount: 2
       MaterialAssetHandles:
-        - 3976985170
-  - Entity: 2436976214
+        - 232925268
+        - 232925268
+  - Entity: 1282498823
     TagComponent:
-      Tag: Goblin Mesh.LOD1
+      Tag: AK47_LOD02
     HierarchyComponent:
-      Parent: 331227340
+      Parent: 1541864074
       Children:
         []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [-90.0000076, -0, 0]
+      Rotation: [89.9999847, -0, -180]
       Scale: [1, 1, 1]
     MeshFilterComponent:
-      MeshAssetHandle: 3683808754
+      MeshAssetHandle: 4265155961
     MeshRendererComponent:
       MeshActive: true
       CastShadows: false
-      MaterialAssetCount: 1
+      MaterialAssetCount: 2
       MaterialAssetHandles:
-        - 3976985170
-  - Entity: 3389872355
-    TagComponent:
-      Tag: Goblin Mesh.LOD3
-    HierarchyComponent:
-      Parent: 331227340
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [-90.0000076, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 3683807884
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 3976985170
+        - 232925268
+        - 232925268

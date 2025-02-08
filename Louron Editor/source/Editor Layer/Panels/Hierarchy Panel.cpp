@@ -220,45 +220,40 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 		{
 			if (ImGui::MenuItem("Create Cube"))
 			{
-				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(1))
+				if (auto prefab = AssetManager::GetInbuiltAsset<Prefab>("Cube", AssetType::ModelImport); prefab)
 				{
-					auto prefab = AssetManager::GetAsset<Prefab>(1);
 					selected_entity = scene_ref->InstantiatePrefab(prefab);
 				}
 			}
 
 			if (ImGui::MenuItem("Create Sphere"))
 			{
-				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(2))
+				if (auto prefab = AssetManager::GetInbuiltAsset<Prefab>("Sphere", AssetType::ModelImport); prefab)
 				{
-					auto prefab = AssetManager::GetAsset<Prefab>(2);
 					selected_entity = scene_ref->InstantiatePrefab(prefab);
 				}
 			}
 
 			if (ImGui::MenuItem("Create Plane"))
 			{
-				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(3))
+				if (auto prefab = AssetManager::GetInbuiltAsset<Prefab>("Plane", AssetType::ModelImport); prefab)
 				{
-					auto prefab = AssetManager::GetAsset<Prefab>(3);
 					selected_entity = scene_ref->InstantiatePrefab(prefab);
 				}
 			}
 
 			if (ImGui::MenuItem("Create Capsule"))
 			{
-				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(4))
+				if (auto prefab = AssetManager::GetInbuiltAsset<Prefab>("Capsule", AssetType::ModelImport); prefab)
 				{
-					auto prefab = AssetManager::GetAsset<Prefab>(4);
 					selected_entity = scene_ref->InstantiatePrefab(prefab);
 				}
 			}
 
 			if (ImGui::MenuItem("Create Suzanne"))
 			{
-				if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(5))
+				if (auto prefab = AssetManager::GetInbuiltAsset<Prefab>("Suzanne", AssetType::ModelImport); prefab)
 				{
-					auto prefab = AssetManager::GetAsset<Prefab>(5);
 					selected_entity = scene_ref->InstantiatePrefab(prefab);
 				}
 			}

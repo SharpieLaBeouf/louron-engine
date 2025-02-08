@@ -65,7 +65,7 @@ namespace Louron {
 
 #pragma region Mesh Components
 
-	struct AssetMeshFilter : public Component {
+	struct MeshFilterComponent : public Component {
 
 		AssetHandle MeshFilterAssetHandle = NULL_UUID;
 
@@ -75,14 +75,14 @@ namespace Louron {
 
 		void UpdateTransformedAABB();
 
-		AssetMeshFilter() = default;
-		~AssetMeshFilter() = default;
+		MeshFilterComponent() = default;
+		~MeshFilterComponent() = default;
 
-		AssetMeshFilter(const AssetMeshFilter& other) = default;
-		AssetMeshFilter(AssetMeshFilter&& other) noexcept = default;
+		MeshFilterComponent(const MeshFilterComponent& other) = default;
+		MeshFilterComponent(MeshFilterComponent&& other) noexcept = default;
 
-		AssetMeshFilter& operator=(const AssetMeshFilter& other) = default;
-		AssetMeshFilter& operator=(AssetMeshFilter&& other) = default;
+		MeshFilterComponent& operator=(const MeshFilterComponent& other) = default;
+		MeshFilterComponent& operator=(MeshFilterComponent&& other) = default;
 
 		void Serialize(YAML::Emitter& out) const;
 		bool Deserialize(const YAML::Node data);
@@ -96,11 +96,11 @@ namespace Louron {
 
 	};
 
-	struct AssetMeshRenderer : public Component {
+	struct MeshRendererComponent : public Component {
 
 	public:
 		bool Active = true;
-		std::vector<AssetHandle> MeshRendererMaterialHandles;
+		std::vector<std::pair<AssetHandle, std::shared_ptr<MaterialUniformBlock>>> MeshRendererMaterialHandles;
 
 		bool CastShadows = false;
 

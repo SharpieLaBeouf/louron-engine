@@ -47,13 +47,13 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 			}
 
 			if (ImGui::MenuItem("Add MeshFilter")) {
-				if (!selected_entity.HasComponent<AssetMeshFilter>())
-					selected_entity.AddComponent<AssetMeshFilter>();
+				if (!selected_entity.HasComponent<MeshFilterComponent>())
+					selected_entity.AddComponent<MeshFilterComponent>();
 			}
 
 			if (ImGui::MenuItem("Add MeshRenderer")) {
-				if (!selected_entity.HasComponent<AssetMeshRenderer>())
-					selected_entity.AddComponent<AssetMeshRenderer>();
+				if (!selected_entity.HasComponent<MeshRendererComponent>())
+					selected_entity.AddComponent<MeshRendererComponent>();
 			}
 
 			if (ImGui::MenuItem("Add LOD Mesh Component")) {
@@ -375,7 +375,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 			ImGui::Columns(1);
 
-			auto script_full_name = Utils::OnCreateNewScriptGUI(&script_create);
+			auto script_full_name = ::Utils::OnCreateNewScriptGUI(&script_create);
 			if (!script_full_name.empty())
 				component_script_vector.push_back({ script_full_name, true });
 
@@ -630,7 +630,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				lod_ranges.push_back(element.DistanceThresholdNormalised);
 
 			ImGui::Dummy({ 0.0f, 5.0f });
-			Utils::GUI::MultiRangeLODSliderFloat("LODMeshComponentSlider", lod_ranges, 0.0f, 1.0f, 0.01f);
+			::Utils::GUI::MultiRangeLODSliderFloat("LODMeshComponentSlider", lod_ranges, 0.0f, 1.0f, 0.01f);
 
 			ImGui::Checkbox("Prefer Max Distance Over Far Plane", &component.MaxDistanceOverFarPlane);
 
@@ -681,7 +681,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 								if (droppedEntity)
 								{
-									if (droppedEntity.HasComponent<AssetMeshFilter>() && droppedEntity.HasComponent<AssetMeshRenderer>())
+									if (droppedEntity.HasComponent<MeshFilterComponent>() && droppedEntity.HasComponent<MeshRendererComponent>())
 									{
 										component.LOD_Elements[i].MeshRendererEntities[j] = droppedEntity.GetUUID();
 									}
@@ -781,14 +781,14 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 	}
 
-	if (selected_entity.HasComponent<AssetMeshFilter>()) {
+	if (selected_entity.HasComponent<MeshFilterComponent>()) {
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 
 		ImGui::BeginChild("##Mesh Filter Child", {}, ImGuiChildFlags_AutoResizeY);
 
 		if (ImGui::TreeNodeEx(("Mesh Filter Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
-			auto& component = selected_entity.GetComponent<AssetMeshFilter>();
+			auto& component = selected_entity.GetComponent<MeshFilterComponent>();
 
 			std::string mesh_filter_name;
 			ImVec4 text_colour = ImGui::GetStyleColorVec4(ImGuiCol_Text);
@@ -869,13 +869,13 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::EndChild();
 
-		ShowComponentContextPopup<AssetMeshFilter>("Mesh Filter Component Options", selected_entity);
+		ShowComponentContextPopup<MeshFilterComponent>("Mesh Filter Component Options", selected_entity);
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 		ImGui::Separator();
 	}
 
-	if (selected_entity.HasComponent<AssetMeshRenderer>()) {
+	if (selected_entity.HasComponent<MeshRendererComponent>()) {
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 
@@ -883,15 +883,15 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		if (ImGui::TreeNodeEx(("Mesh Renderer Component##" + selected_entity.GetName()).c_str(), tree_node_flags)) {
 
-			auto& component = selected_entity.GetComponent<AssetMeshRenderer>();
+			auto& component = selected_entity.GetComponent<MeshRendererComponent>();
 
 			if (component.MeshRendererMaterialHandles.empty()) {
-				component.MeshRendererMaterialHandles.push_back(NULL_UUID);
+				component.MeshRendererMaterialHandles.push_back({ NULL_UUID, nullptr });
 			}
 
-			for (const auto& asset_handle : component.MeshRendererMaterialHandles) {
-				if (asset_handle != NULL_UUID) {
-					material_list.push_back(asset_handle);
+			for (const auto& pair : component.MeshRendererMaterialHandles) {
+				if (pair.first != NULL_UUID) {
+					material_list.push_back(pair.first);
 				}
 			}
 
@@ -924,16 +924,16 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				ImGui::Columns(2, "mesh_renderer_material_columns", false);
 				ImGui::SetColumnWidth(-1, first_coloumn_width);
 
-				for (auto& asset_handle : component.MeshRendererMaterialHandles) {
+				for (auto& pair : component.MeshRendererMaterialHandles) {
 
 					std::string material_name;
 					ImVec4 text_colour = ImGui::GetStyleColorVec4(ImGuiCol_Text);
 
-					if (asset_handle != NULL_UUID && AssetManager::IsAssetHandleValid(asset_handle)) {
-						material_name = Project::GetStaticEditorAssetManager()->GetMetadata(asset_handle).AssetName;
+					if (pair.first != NULL_UUID && AssetManager::IsAssetHandleValid(pair.first)) {
+						material_name = Project::GetStaticEditorAssetManager()->GetMetadata(pair.first).AssetName;
 					}
-					else if (asset_handle != NULL_UUID) {
-						material_name = "Invalid Asset: " + std::to_string(asset_handle);
+					else if (pair.first != NULL_UUID) {
+						material_name = "Invalid Asset: " + std::to_string(pair.first);
 						text_colour = { 1.0f, 0.35f, 0.35f, 1.0f };
 					}
 					else {
@@ -972,7 +972,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 							AssetHandle dropped_asset_handle = *(const AssetHandle*)payload->Data;
 
 							if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(dropped_asset_handle) && Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Material_Standard) {
-								asset_handle = dropped_asset_handle;
+								pair.first = dropped_asset_handle;
 							}
 							else {
 								L_APP_WARN("Invalid Asset Type Dropped on Mesh Renderer Material Target.");
@@ -989,7 +989,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 								AssetHandle dropped_asset_handle = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(dropped_asset_path, Project::GetActiveProject()->GetAssetDirectory());
 
 								if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Material_Standard) {
-									asset_handle = dropped_asset_handle;
+									pair.first = dropped_asset_handle;
 								}
 								else {
 									L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
@@ -1019,7 +1019,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				if (ImGui::SmallButton(" + "))
 				{
 					// Add a new entity (NULL_UUID by default)
-					component.MeshRendererMaterialHandles.push_back(NULL_UUID);
+					component.MeshRendererMaterialHandles.push_back({ NULL_UUID, nullptr });
 				}
 
 				ImGui::SameLine();
@@ -1038,7 +1038,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 		ImGui::EndChild();
 
-		ShowComponentContextPopup<AssetMeshRenderer>("Mesh Renderer Component Options", selected_entity);
+		ShowComponentContextPopup<MeshRendererComponent>("Mesh Renderer Component Options", selected_entity);
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 		ImGui::Separator();
@@ -1536,16 +1536,16 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 	}
 
 	// Material Inspector
-	if (selected_entity.HasComponent<AssetMeshRenderer>() || selected_entity.HasComponent<SkyboxComponent>()) {
+	if (selected_entity.HasComponent<MeshRendererComponent>() || selected_entity.HasComponent<SkyboxComponent>()) {
 
 		if (material_list.empty())
 		{
-			if (selected_entity.HasComponent<AssetMeshRenderer>())
+			if (selected_entity.HasComponent<MeshRendererComponent>())
 			{
-				auto& component = selected_entity.GetComponent<AssetMeshRenderer>();
-				for (const auto& asset_handle : component.MeshRendererMaterialHandles) {
-					if (asset_handle != NULL_UUID) {
-						material_list.push_back(asset_handle);
+				auto& component = selected_entity.GetComponent<MeshRendererComponent>();
+				for (const auto& pair : component.MeshRendererMaterialHandles) {
+					if (pair.first != NULL_UUID) {
+						material_list.push_back(pair.first);
 					}
 				}
 			}
@@ -1574,9 +1574,8 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				if (!asset_material)
 					continue;
 
-				// TODO: implement serialisation for custom materials, probably need content browser first though lol
-				// Toggle the != to == if you want to edit materials from an imported asset that are not saved to their own file
-				bool immutable_material = metadata_material.FilePath.extension() != ".lmat";
+				AssetType file_type = AssetManager::GetAssetTypeFromFileExtension(metadata_material.FilePath.extension());
+				bool immutable_material =  file_type != AssetType::Material_Standard && file_type != AssetType::Material_Skybox;
 				bool material_modified = false;
 
 				if (ImGui::TreeNode(std::string("Material: " + metadata_material.AssetName).c_str())) {
@@ -1669,7 +1668,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 					ImGui::Text("Metallic Texture");
 
 					if (texture_id == 0) {
-						ImGui::Text("Metallic");
+						ImGui::Text("Metallic Factor");
 						ImGui::SameLine();
 						float metallic_temp = asset_material->GetMetallic();
 						if (ImGui::SliderFloat("##Metallic", &metallic_temp, 0.0f, 1.0f, "%.2f"))
@@ -1992,12 +1991,13 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 				case ScriptFieldType::RigidbodyComponent:
 				case ScriptFieldType::BoxColliderComponent:
 				case ScriptFieldType::SphereColliderComponent:
+				case ScriptFieldType::MeshRendererComponent:
 				case ScriptFieldType::Component:
 				{
 					ImGui::Text(name.c_str());
 					ImGui::NextColumn();
 
-					Louron::UUID data = (field.Type == ScriptFieldType::Entity) ? instance->GetFieldEntityValue(name) : instance->GetComponentPropertyValue(name);
+					Louron::UUID data = (field.Type == ScriptFieldType::Entity) ? instance->GetFieldEntityValue(name) : instance->GetFieldComponentPropertyValue(name);
 					std::string label = "##" + name + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type));
 					std::string text = (scene_ref->HasEntityByUUID(data)) ? scene_ref->FindEntityByUUID(data).GetName().c_str() : ("None (" + std::string(ScriptingUtils::ScriptFieldTypeToString(field.Type)) + ")");
 
@@ -2198,8 +2198,24 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 					ImGui::NextColumn();
 
 					glm::vec3 data = instance->GetFieldValue<glm::vec3>(name);
-					if (ImGui::DragFloat3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f")) {
-						instance->SetFieldValue(name, data);
+
+					std::string lower_name = name;
+					std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+
+					if (lower_name.find("rgb") != std::string::npos || lower_name.find("colour") != std::string::npos ||
+						lower_name.find("color") != std::string::npos || lower_name.find("col") != std::string::npos)
+					{
+						if (ImGui::ColorEdit3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data)))
+						{
+							instance->SetFieldValue(name, data);
+						}
+					}
+					else
+					{
+						if (ImGui::DragFloat3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f"))
+						{
+							instance->SetFieldValue(name, data);
+						}
 					}
 
 					ImGui::NextColumn();
@@ -2210,8 +2226,24 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 					ImGui::NextColumn();
 
 					glm::vec4 data = instance->GetFieldValue<glm::vec4>(name);
-					if (ImGui::DragFloat4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f")) {
-						instance->SetFieldValue(name, data);
+
+					std::string lower_name = name;
+					std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+
+					if (lower_name.find("rgb") != std::string::npos || lower_name.find("colour") != std::string::npos ||
+						lower_name.find("color") != std::string::npos || lower_name.find("col") != std::string::npos)
+					{
+						if (ImGui::ColorEdit4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data)))
+						{
+							instance->SetFieldValue(name, data);
+						}
+					}
+					else
+					{
+						if (ImGui::DragFloat4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f"))
+						{
+							instance->SetFieldValue(name, data);
+						}
 					}
 
 					ImGui::NextColumn();
@@ -2376,6 +2408,7 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 				case ScriptFieldType::RigidbodyComponent:
 				case ScriptFieldType::BoxColliderComponent:
 				case ScriptFieldType::SphereColliderComponent:
+				case ScriptFieldType::MeshRendererComponent:
 				case ScriptFieldType::Component:
 				{
 					ImGui::Text(name.c_str());
@@ -2568,9 +2601,26 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 					ImGui::NextColumn();
 
 					glm::vec3 data = scriptField.GetValue<glm::vec3>();
-					if (ImGui::DragFloat3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f")) {
-						scriptField.SetValue(data);
+
+					std::string lower_name = name;
+					std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+
+					if (lower_name.find("rgb") != std::string::npos || lower_name.find("colour") != std::string::npos ||
+						lower_name.find("color") != std::string::npos || lower_name.find("col") != std::string::npos)
+					{
+						if (ImGui::ColorEdit3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data)))
+						{
+							scriptField.SetValue(data);
+						}
 					}
+					else
+					{
+						if (ImGui::DragFloat3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f"))
+						{
+							scriptField.SetValue(data);
+						}
+					}
+
 					ImGui::NextColumn();
 					break;
 				}
@@ -2579,8 +2629,24 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 					ImGui::NextColumn();
 
 					glm::vec4 data = scriptField.GetValue<glm::vec4>();
-					if (ImGui::DragFloat4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f")) {
-						scriptField.SetValue(data);
+
+					std::string lower_name = name;
+					std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+
+					if (lower_name.find("rgb") != std::string::npos || lower_name.find("colour") != std::string::npos ||
+						lower_name.find("color") != std::string::npos || lower_name.find("col") != std::string::npos)
+					{
+						if (ImGui::ColorEdit4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data)))
+						{
+							scriptField.SetValue(data);
+						}
+					}
+					else
+					{
+						if (ImGui::DragFloat4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f"))
+						{
+							scriptField.SetValue(data);
+						}
 					}
 					ImGui::NextColumn();
 					break;
@@ -2732,6 +2798,7 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 				case ScriptFieldType::RigidbodyComponent:
 				case ScriptFieldType::BoxColliderComponent:
 				case ScriptFieldType::SphereColliderComponent:
+				case ScriptFieldType::MeshRendererComponent:
 				case ScriptFieldType::Component:
 				{
 					ImGui::Text(name.c_str());
@@ -2982,11 +3049,28 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 					ImGui::NextColumn();
 
 					glm::vec3 data = field.GetInitialValue<glm::vec3>();
-					if (ImGui::DragFloat3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f"))
+
+					std::string lower_name = name;
+					std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+
+					if (lower_name.find("rgb") != std::string::npos || lower_name.find("colour") != std::string::npos ||
+						lower_name.find("color") != std::string::npos || lower_name.find("col") != std::string::npos)
 					{
-						ScriptFieldInstance& fieldInstance = entityFields[name];
-						fieldInstance.Field = field;
-						fieldInstance.SetValue<glm::vec3>(data);
+						if (ImGui::ColorEdit3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data)))
+						{
+							ScriptFieldInstance& fieldInstance = entityFields[name];
+							fieldInstance.Field = field;
+							fieldInstance.SetValue<glm::vec3>(data);
+						}
+					}
+					else
+					{
+						if (ImGui::DragFloat3(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f"))
+						{
+							ScriptFieldInstance& fieldInstance = entityFields[name];
+							fieldInstance.Field = field;
+							fieldInstance.SetValue<glm::vec3>(data);
+						}
 					}
 
 					ImGui::NextColumn();
@@ -2998,11 +3082,28 @@ void PropertiesPanel::DisplayScriptFields(const std::string& script_name, Entity
 					ImGui::NextColumn();
 
 					glm::vec4 data = field.GetInitialValue<glm::vec4>();
-					if (ImGui::DragFloat4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f"))
+
+					std::string lower_name = name;
+					std::transform(lower_name.begin(), lower_name.end(), lower_name.begin(), ::tolower);
+
+					if (lower_name.find("rgb") != std::string::npos || lower_name.find("colour") != std::string::npos ||
+						lower_name.find("color") != std::string::npos || lower_name.find("col") != std::string::npos)
 					{
-						ScriptFieldInstance& fieldInstance = entityFields[name];
-						fieldInstance.Field = field;
-						fieldInstance.SetValue<glm::vec4>(data);
+						if (ImGui::ColorEdit4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data)))
+						{
+							ScriptFieldInstance& fieldInstance = entityFields[name];
+							fieldInstance.Field = field;
+							fieldInstance.SetValue<glm::vec3>(data);
+						}
+					}
+					else
+					{
+						if (ImGui::DragFloat4(std::string("##" + name + ScriptingUtils::ScriptFieldTypeToString(field.Type)).c_str(), glm::value_ptr(data), 0.02f, 0.0f, 0.0f, "%.2f"))
+						{
+							ScriptFieldInstance& fieldInstance = entityFields[name];
+							fieldInstance.Field = field;
+							fieldInstance.SetValue<glm::vec3>(data);
+						}
 					}
 
 					ImGui::NextColumn();
@@ -3096,88 +3197,98 @@ void PropertiesPanel::DisplayEntitySelectionModal(Entity& selected_entity)
 		std::vector<Entity> available_entities{};
 		switch (modal_box_field_type) {
 
-		case ScriptFieldType::TagComponent:
-		case ScriptFieldType::TransformComponent:
-		case ScriptFieldType::Entity: {
+			case ScriptFieldType::TagComponent:
+			case ScriptFieldType::TransformComponent:
+			case ScriptFieldType::Entity: {
 
-			auto view = scene_ref->GetAllEntitiesWith<TransformComponent, TagComponent>();
+				auto view = scene_ref->GetAllEntitiesWith<TransformComponent, TagComponent>();
 
-			for (auto entity_handle : view) {
-				available_entities.push_back({ entity_handle, scene_ref.get() });
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
+
+				break;
 			}
+			case ScriptFieldType::ScriptComponent: {
 
-			break;
-		}
-		case ScriptFieldType::ScriptComponent: {
+				auto view = scene_ref->GetAllEntitiesWith<ScriptComponent>();
 
-			auto view = scene_ref->GetAllEntitiesWith<ScriptComponent>();
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
 
-			for (auto entity_handle : view) {
-				available_entities.push_back({ entity_handle, scene_ref.get() });
+				break;
 			}
+			case ScriptFieldType::PointLightComponent: {
 
-			break;
-		}
-		case ScriptFieldType::PointLightComponent: {
+				auto view = scene_ref->GetAllEntitiesWith<PointLightComponent>();
 
-			auto view = scene_ref->GetAllEntitiesWith<PointLightComponent>();
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
 
-			for (auto entity_handle : view) {
-				available_entities.push_back({ entity_handle, scene_ref.get() });
+				break;
 			}
+			case ScriptFieldType::SpotLightComponent: {
 
-			break;
-		}
-		case ScriptFieldType::SpotLightComponent: {
+				auto view = scene_ref->GetAllEntitiesWith<SpotLightComponent>();
 
-			auto view = scene_ref->GetAllEntitiesWith<SpotLightComponent>();
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
 
-			for (auto entity_handle : view) {
-				available_entities.push_back({ entity_handle, scene_ref.get() });
+				break;
 			}
+			case ScriptFieldType::DirectionalLightComponent: {
 
-			break;
-		}
-		case ScriptFieldType::DirectionalLightComponent: {
+				auto view = scene_ref->GetAllEntitiesWith<DirectionalLightComponent>();
 
-			auto view = scene_ref->GetAllEntitiesWith<DirectionalLightComponent>();
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
 
-			for (auto entity_handle : view) {
-				available_entities.push_back({ entity_handle, scene_ref.get() });
+				break;
 			}
+			case ScriptFieldType::RigidbodyComponent: {
 
-			break;
-		}
-		case ScriptFieldType::RigidbodyComponent: {
+				auto view = scene_ref->GetAllEntitiesWith<RigidbodyComponent>();
 
-			auto view = scene_ref->GetAllEntitiesWith<RigidbodyComponent>();
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
 
-			for (auto entity_handle : view) {
-				available_entities.push_back({ entity_handle, scene_ref.get() });
+				break;
 			}
+			case ScriptFieldType::BoxColliderComponent: {
 
-			break;
-		}
-		case ScriptFieldType::BoxColliderComponent: {
+				auto view = scene_ref->GetAllEntitiesWith<BoxColliderComponent>();
 
-			auto view = scene_ref->GetAllEntitiesWith<BoxColliderComponent>();
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
 
-			for (auto entity_handle : view) {
-				available_entities.push_back({ entity_handle, scene_ref.get() });
+				break;
 			}
+			case ScriptFieldType::SphereColliderComponent: {
 
-			break;
-		}
-		case ScriptFieldType::SphereColliderComponent: {
+				auto view = scene_ref->GetAllEntitiesWith<SphereColliderComponent>();
 
-			auto view = scene_ref->GetAllEntitiesWith<SphereColliderComponent>();
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
 
-			for (auto entity_handle : view) {
-				available_entities.push_back({ entity_handle, scene_ref.get() });
+				break;
 			}
+			case ScriptFieldType::MeshRendererComponent: {
 
-			break;
-		}
+				auto view = scene_ref->GetAllEntitiesWith<MeshRendererComponent>();
+
+				for (auto entity_handle : view) {
+					available_entities.push_back({ entity_handle, scene_ref.get() });
+				}
+
+				break;
+			}
 
 		}
 
@@ -3227,7 +3338,7 @@ void PropertiesPanel::DisplayEntitySelectionModal(Entity& selected_entity)
 				set_entity_value(modal_box_selected_entity);
 			}
 			else if (!modal_box_selected_entity)
-					ImGui::EndDisabled();
+				ImGui::EndDisabled();
 		}
 
 		ImGui::EndChild();

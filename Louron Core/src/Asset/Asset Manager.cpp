@@ -239,6 +239,8 @@ namespace Louron {
 	{
 		m_AssetRegistry[asset_handle] = asset_meta_data;
 
+		SerialiseMetaDataFile(asset_handle, asset_meta_data, Project::GetActiveProject()->GetAssetDirectory() / (asset_meta_data.FilePath.string() + ".meta"));
+
 		if (!asset_meta_data.IsComposite)
 			return;
 
@@ -301,6 +303,20 @@ namespace Louron {
 				m_AssetRegistry[asset_handle] = meta_data;
 			}
 		}
+	}
+
+	void EditorAssetManager::ReImportCustomAsset(const std::filesystem::path& asset_file_path)
+	{
+		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+			AssetUtils::AssetTypeToString(AssetManager::GetAssetTypeFromFileExtension(asset_file_path.extension())) + "InBuiltAsset" + asset_file_path.stem().string()
+		));
+
+		AssetMetaData meta_data = GetMetadata(handle);
+
+		if (handle != NULL_UUID && IsAssetHandleValid(handle)) // If handle is valid, then we remove the asset
+			RemoveAsset(handle);
+
+		ImportCustomAsset(handle, meta_data);
 	}
 
 	AssetHandle EditorAssetManager::ImportAsset(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory)
@@ -387,12 +403,35 @@ namespace Louron {
 
 	AssetHandle EditorAssetManager::ReImportAsset(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory)
 	{
-		AssetHandle handle = GetHandleFromFilePath(asset_file_path, project_asset_directory); // Get the handle
+		AssetHandle asset_handle = GetHandleFromFilePath(asset_file_path, project_asset_directory); // Get the handle
 
-		if(handle != NULL_UUID && IsAssetHandleValid(handle)) // If handle is valid, then we remove the asset
-			RemoveAsset(handle);
+		if(IsAssetHandleValid(asset_handle)) // If handle is valid, then we remove the asset
+			RemoveAsset(asset_handle);
 
-		return ImportAsset(asset_file_path, project_asset_directory);
+		// TODO: Think About If We Should Try Loading First, then Removing, 
+		// e.g., keep the current asset loaded if new import fails - Throw message if fails?
+		auto asset = ImportAsset(asset_file_path, project_asset_directory);
+
+		if (GetAssetType(asset_handle) != AssetType::Shader)
+			return asset;
+
+		// Launch a detached thread to update all PBR Materials
+		std::thread([this, project_asset_directory]() {
+
+			AssetRegistry registry_copy = m_AssetRegistry;
+			for (auto& [handle, meta_data] : registry_copy)
+			{
+				if (meta_data.ParentAssetHandle == NULL_UUID && meta_data.Type == AssetType::Material_Standard)
+				{
+					Engine::Get().SubmitToMainThread([this, meta_data, project_asset_directory]() {
+						ReImportAsset(project_asset_directory / meta_data.FilePath, project_asset_directory);
+					});
+				}
+			}
+
+		}).detach();
+
+		return asset;
 	}
 
 	std::shared_ptr<Asset> EditorAssetManager::LoadAsset(const AssetHandle& asset_handle)
@@ -532,6 +571,102 @@ namespace Louron {
 
 		// 2. GET LOADED ASSET OR LOAD
 		return LoadAsset(asset_handle);
+	}
+
+	void EditorAssetManager::AddRuntimeAsset(std::shared_ptr<Asset> asset, AssetHandle asset_handle, AssetMetaData asset_meta_data)
+	{
+		asset->Handle = asset_handle;
+		m_LoadedAssets[asset_handle] = asset;
+		m_AssetRegistry[asset_handle] = asset_meta_data;
+		m_RuntimeCreatedAssetRegistry.push_back(asset_handle);
+	}
+
+	void EditorAssetManager::RemoveRuntimeAsset(AssetHandle asset_handle)
+	{
+		if (std::find(m_RuntimeCreatedAssetRegistry.begin(), m_RuntimeCreatedAssetRegistry.end(), asset_handle) == m_RuntimeCreatedAssetRegistry.end())
+			return; // Only delete if it is a runtime asset, we do not want to delete any other assets not created during runtime!
+
+		m_LoadedAssets.erase(asset_handle);
+		m_AssetRegistry.erase(asset_handle);
+		m_RuntimeCreatedAssetRegistry.erase(std::remove(m_RuntimeCreatedAssetRegistry.begin(), m_RuntimeCreatedAssetRegistry.end(), asset_handle), m_RuntimeCreatedAssetRegistry.end());
+	}
+
+	std::shared_ptr<Shader> EditorAssetManager::GetInbuiltShader(const std::string& default_shader_name, bool is_compute)
+	{
+		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+			AssetUtils::AssetTypeToString(AssetType::Shader) + "InBuiltAsset" + default_shader_name
+		));
+
+		return static_pointer_cast<Shader>(LoadAsset(handle));
+	}
+
+	void EditorAssetManager::InitDefaultResources()
+	{
+		AssetMetaData meta_data;
+		meta_data.IsCustomAsset = true;
+
+		for (const auto& entry : std::filesystem::recursive_directory_iterator("Resources/Shaders/"))
+		{
+			if (!AssetManager::IsExtensionSupported(entry.path().extension()))
+				continue;
+
+			AssetType type = AssetManager::GetAssetTypeFromFileExtension(entry.path().extension());
+			if (type != AssetType::Shader && type != AssetType::Compute_Shader)
+				continue;
+
+			meta_data.AssetName = entry.path().stem().string();
+			meta_data.Type = AssetType::Shader;
+			meta_data.FilePath = entry.path();
+			meta_data.IsComposite = false;
+
+			AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+				AssetUtils::AssetTypeToString(meta_data.Type) + "InBuiltAsset" + entry.path().stem().string()
+			));
+
+			ImportCustomAsset(handle, meta_data);
+		}
+
+		for (const auto& entry : std::filesystem::recursive_directory_iterator("Resources/Models/"))
+		{
+			if (!AssetManager::IsExtensionSupported(entry.path().extension()))
+				continue;
+
+			AssetType type = AssetManager::GetAssetTypeFromFileExtension(entry.path().extension());
+			if (type != AssetType::ModelImport)
+				continue;
+
+			meta_data.AssetName = entry.path().stem().string();
+			meta_data.Type = AssetType::ModelImport;
+			meta_data.FilePath = entry.path();
+			meta_data.IsComposite = true;
+
+			AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+				AssetUtils::AssetTypeToString(meta_data.Type) + "InBuiltAsset" + entry.path().stem().string()
+			));
+
+			ImportCustomAsset(handle, meta_data);
+		}
+
+		for (const auto& entry : std::filesystem::recursive_directory_iterator("Resources/Textures/"))
+		{
+			if (!AssetManager::IsExtensionSupported(entry.path().extension()))
+				continue;
+
+			AssetType type = AssetManager::GetAssetTypeFromFileExtension(entry.path().extension());
+			if (type != AssetType::Texture2D)
+				continue;
+
+			meta_data.AssetName = entry.path().stem().string();
+			meta_data.Type = AssetType::Texture2D;
+			meta_data.FilePath = entry.path();
+			meta_data.IsComposite = false;
+
+			AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+				AssetUtils::AssetTypeToString(meta_data.Type) + "InBuiltAsset" + entry.path().stem().string()
+			));
+
+			ImportCustomAsset(handle, meta_data);
+		}
 	}
 
 	bool EditorAssetManager::IsAssetHandleValid(const AssetHandle& asset_handle) const {

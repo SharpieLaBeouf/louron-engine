@@ -23,6 +23,7 @@ namespace Louron {
 			case AssetType::Material_Standard:		type_string = "AssetType::Material_Standard";	 break;
 			case AssetType::Material_Skybox:		type_string = "AssetType::Material_Skybox";		 break;
 
+			case AssetType::Shader:					type_string = "AssetType::Shader";				 break;
 			case AssetType::Compute_Shader:			type_string = "AssetType::Compute_Shader";		 break;
 
 		}
@@ -47,6 +48,7 @@ namespace Louron {
 		if (assetType == "AssetType::Material_Standard")	return AssetType::Material_Standard;
 		if (assetType == "AssetType::Material_Skybox")		return AssetType::Material_Skybox;
 
+		if (assetType == "AssetType::Shader")				return AssetType::Shader;
 		if (assetType == "AssetType::Compute_Shader")		return AssetType::Compute_Shader;
 
 		return AssetType::None;

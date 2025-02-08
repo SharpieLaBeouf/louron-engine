@@ -25,6 +25,26 @@
 // External Vendor Library Headers
 #include <entt/entt.hpp>
 
+// So we can Key a Pair of Material and Uniform Block
+struct _MaterialWrapper {
+	std::shared_ptr<Louron::PBRMaterial> material;
+	std::shared_ptr<Louron::MaterialUniformBlock> uniform_block;
+
+	// Compare the actual contents, not just pointers
+	bool operator==(const _MaterialWrapper& other) const {
+		return material.get() == other.material.get() && uniform_block.get() == other.uniform_block.get();
+	}
+};
+
+namespace std {
+	template <>
+	struct hash<_MaterialWrapper> {
+		std::size_t operator()(const _MaterialWrapper& mw) const {
+			return std::hash<std::shared_ptr<Louron::PBRMaterial>>{}(mw.material) ^ (std::hash<std::shared_ptr<Louron::MaterialUniformBlock>>{}(mw.uniform_block) << 1);
+		}
+	};
+}
+
 namespace Louron {
 
 	namespace SSBOLightStructs {
@@ -262,7 +282,7 @@ namespace Louron {
 
 						if (oct_scene_ref->HasEntity(data_source->Data)) {
 							Entity entity = data_source->Data;
-							if (!entity.HasComponent<AssetMeshFilter>() || !entity.HasComponent<AssetMeshRenderer>()) {
+							if (!entity.HasComponent<MeshFilterComponent>() || !entity.HasComponent<MeshRendererComponent>()) {
 								remove_entities.push_back(entity);
 							}
 						}
@@ -275,10 +295,10 @@ namespace Louron {
 						oct_ref->Remove(entity);
 
 					oct_ref->TryShrinkOctree();
-					auto mesh_view = oct_scene_ref->GetAllEntitiesWith<AssetMeshRenderer, AssetMeshFilter>();
+					auto mesh_view = oct_scene_ref->GetAllEntitiesWith<MeshRendererComponent, MeshFilterComponent>();
 					for (const auto& entity_handle : mesh_view) {
 
-						auto& component = mesh_view.get<AssetMeshFilter>(entity_handle);
+						auto& component = mesh_view.get<MeshFilterComponent>(entity_handle);
 
 						if (component.MeshFilterAssetHandle == NULL_UUID)
 							continue;
@@ -618,10 +638,10 @@ namespace Louron {
 		// Update Light Indice Buffers
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.PL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_POINT_LIGHTS, nullptr, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Indices_Buffer);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, numberOfTiles * sizeof(VisibleLightIndex) * MAX_SPOT_LIGHTS, nullptr, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	}
@@ -882,7 +902,7 @@ namespace Louron {
 			if (!data->Data)
 				continue;
 
-			auto& component = data->Data.GetComponent<AssetMeshRenderer>();
+			auto& component = data->Data.GetComponent<MeshRendererComponent>();
 			if (component.Active)
 				FP_Data.RenderableEntities.push_back(data->Data);
 		}
@@ -957,7 +977,10 @@ namespace Louron {
 			return;
 		}
 
-		scene_ref->GetSceneFrameBuffer()->ClearEntityPixelData(NULL_UUID);
+		{
+			L_PROFILE_SCOPE("Forward Plus - Clear Entity Pixel Data");
+			scene_ref->GetSceneFrameBuffer()->ClearEntityPixelData(NULL_UUID);
+		}
 
 		// Key #1 - Distance - Value UUID of Entities that have submeshes
 		std::vector<std::tuple<float, UUID, std::shared_ptr<SubMesh>>> sorted_entities;
@@ -969,7 +992,7 @@ namespace Louron {
 
 				if (!scene_ref->ValidEntity(entity)) continue;
 
-				auto asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
+				auto asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
 
 				if (!asset_mesh)
 					continue;
@@ -988,12 +1011,13 @@ namespace Louron {
 				return std::get<0>(a) < std::get<0>(b);
 			});
 			
-			if (std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FP_Depth"); shader) 
+			if (auto shader = AssetManager::GetInbuiltShader("FP_Depth"); shader)
 			{
-
 				shader->Bind();
+				scene_ref->GetSceneFrameBuffer()->BindEntitySSBO();
 				shader->SetMat4("u_Proj", projection_matrix);
 				shader->SetMat4("u_View", view_matrix);
+				shader->SetIntVec2("u_ScreenSize", { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
 
 				for (auto& [distance, entity_uuid, sub_mesh] : sorted_entities) 
 				{
@@ -1003,6 +1027,7 @@ namespace Louron {
 					Renderer::DrawSubMesh(sub_mesh);
 				}
 
+				scene_ref->GetSceneFrameBuffer()->UnBindEntitySSBO();
 				shader->UnBind();
 			}
 			else 
@@ -1010,6 +1035,7 @@ namespace Louron {
 				L_CORE_ERROR("FP Depth Shader Not Found");
 			}
 		}
+
 
 		glFlush();
 	}
@@ -1029,7 +1055,7 @@ namespace Louron {
 
 		L_PROFILE_SCOPE("Tile Based Cull");
 		// Conduct Light Cull
-		std::shared_ptr<Shader> lightCull = Engine::Get().GetShaderLibrary().GetShader("FP_Light_Culling");
+		std::shared_ptr<Shader> lightCull = AssetManager::GetInbuiltShader("FP_Light_Culling", true);
 		if (lightCull) {
 
 			lightCull->Bind();
@@ -1038,12 +1064,16 @@ namespace Louron {
 			lightCull->SetMat4("u_Proj", projection_matrix);
 			
 			auto& size = scene_ref->GetSceneFrameBuffer()->GetConfig();
-			lightCull->SetiVec2("u_ScreenSize", glm::ivec2(size.Width, size.Height));
+			lightCull->SetIntVec2("u_ScreenSize", glm::ivec2(size.Width, size.Height));
 
-			// Bind depth to texture 4 so this does not interfere with any diffuse, normal, or specular textures used 
-			glActiveTexture(GL_TEXTURE4);
+			// Bind depth to texture 3 so this does not interfere with any 
+			// diffuse, normal, or specular textures used 
+			// 
+			// Texture binding 3 is dedicated for depth map
+ 
+			glActiveTexture(GL_TEXTURE3);
 			glBindTexture(GL_TEXTURE_2D, scene_ref->GetSceneFrameBuffer()->GetTexture(FrameBufferTexture::DepthTexture));
-			lightCull->SetInt("u_Depth", 4);
+			lightCull->SetInt("u_Depth", 3);
 
 			glDispatchCompute(FP_Data.workGroupsX, FP_Data.workGroupsY, 1);
 
@@ -1060,7 +1090,7 @@ namespace Louron {
 
 	void ForwardPlusPipeline::ConductShadowMapping(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix)
 	{
-		L_PROFILE_SCOPE("Shadow Mapping Total");
+		L_PROFILE_SCOPE("Forward Plus - Shadow Mapping Total");
 
 		// Calculate every other frame
 		static bool conduct_shadow_pass = false;
@@ -1096,127 +1126,131 @@ namespace Louron {
 				}
 		}
 
-		// 2. Calculate Light Space World Space AABB - Get Meshes Intersecting with AABB from Octree
-		// TODO: Need to fix this because it is not including objects that are behind camera frustum that 
-		// may cast shadow into frustum. Maybe we do this after generating the cascades and use the 
-		// world space AABB of the light projection to find our meshes?
-		Bounds_Sphere world_light_bounds;
+		if(!dl_shadow_casting_vec.empty())
 		{
-			L_PROFILE_SCOPE("Directional Shadow Mapping 2a. Calculate Light Space Bounds");
 
-			world_light_bounds.BoundsCentre = camera_position;
-			world_light_bounds.BoundsRadius = 250.0f; // 500 diameter
-
-		}
-
-		{
-			L_PROFILE_SCOPE("Directional Shadow Mapping 2b. Get Meshes");
-
-			if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
-
-				std::unique_lock lock(oct_ref->GetOctreeMutex());
-
-				const auto& query_vec = oct_ref->Query(world_light_bounds);
-
-				dl_shadow_renderable_entities.reserve(query_vec.size());
-
-				for (const auto& data : query_vec)
-				{
-					if (!data->Data)
-						continue;
-
-					auto& component = data->Data.GetComponent<AssetMeshRenderer>();
-					if (component.Active && component.CastShadows)
-						dl_shadow_renderable_entities.push_back(data->Data);
-				}
-			}
-
-		}
-
-		// 3. Calculate Light Space Matricies Per Light Per Cascade - 40 x glm::mat4's is the max = MAX_DIRECTIONAL_LIGHTS * 4 cascades (per directional light)
-			
-		{
-			L_PROFILE_SCOPE("Directional Shadow Mapping 3. Calculate Cascade Light Matricies");
-			dl_shadow_light_space_matricies.reserve(dl_shadow_casting_vec.size() * 5);
-			FP_Data.DL_Shadow_LightSpaceMatrixIndex.clear();
-			FP_Data.DL_Shadow_LightShadowCascadeDistances.clear();
-
-			for (int light_index = 0; light_index < dl_shadow_casting_vec.size(); light_index++)
+			// 2. Calculate Light Space World Space AABB - Get Meshes Intersecting with AABB from Octree
+			// TODO: Need to fix this because it is not including objects that are behind camera frustum that 
+			// may cast shadow into frustum. Maybe we do this after generating the cascades and use the 
+			// world space AABB of the light projection to find our meshes?
+			Bounds_Sphere world_light_bounds;
 			{
-				Entity entity = dl_shadow_casting_vec[light_index];
-				if (!entity)
-					continue;
+				L_PROFILE_SCOPE("Directional Shadow Mapping 2a. Calculate Light Space Bounds");
 
-				std::array<float, 5>& shadow_cascade_distances = FP_Data.DL_Shadow_LightShadowCascadeDistances[entity.GetUUID()];
-				std::array<glm::mat4, 5> light_space_matrices = Frustum::CalculateCascadeLightSpaceMatrices(projection_matrix, view_matrix, entity.GetComponent<TransformComponent>().GetForwardDirection(), shadow_cascade_distances);
+				world_light_bounds.BoundsCentre = camera_position;
+				world_light_bounds.BoundsRadius = 250.0f; // 500 diameter
 
-				dl_shadow_light_space_matricies.insert(dl_shadow_light_space_matricies.end(), light_space_matrices.begin(), light_space_matrices.end());
-				FP_Data.DL_Shadow_LightSpaceMatrixIndex[entity.GetUUID()] = light_index;
 			}
-		}
 
-		// 4. Update Light Space Matrix SSBO Data
-			
-		{
-			L_PROFILE_SCOPE("Directional Shadow Mapping 4. Updating Light Matrix SSBO Data");
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
+			{
+				L_PROFILE_SCOPE("Directional Shadow Mapping 2b. Get Meshes");
 
-			// Update SSBO data with light data
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
-			glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, dl_shadow_light_space_matricies.size() * sizeof(glm::mat4), dl_shadow_light_space_matricies.data());
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-		}
+				if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
 
-		// 5. Render Shadow Map from Light Space Matrix View & Proj
+					std::unique_lock lock(oct_ref->GetOctreeMutex());
 
-		{
-			L_PROFILE_SCOPE("Directional Shadow Mapping 5. Rendering Cascaded Shadow Maps");
-			glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DL_Shadow_FrameBuffer);
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.DL_Shadow_Texture_Array, 0);
-			glDrawBuffer(GL_NONE);
-			glReadBuffer(GL_NONE);
+					const auto& query_vec = oct_ref->Query(world_light_bounds);
 
-			glCullFace(GL_FRONT);
+					dl_shadow_renderable_entities.reserve(query_vec.size());
 
-			glViewport(0, 0, FP_Data.DL_Shadow_Map_Res, FP_Data.DL_Shadow_Map_Res);
-			glClear(GL_DEPTH_BUFFER_BIT);
-
-			auto& shader = Engine::Get().GetShaderLibrary().GetShader("FP_Shadow_Directional");
-			shader->Bind();
-
-			for (int light_index = 0; light_index < dl_shadow_casting_vec.size(); ++light_index) {
-
-				Entity entity = dl_shadow_casting_vec[light_index];
-				if (!entity)
-					continue;
-
-				shader->SetUInt("u_LightIndex", light_index);
-
-				for (auto& mesh_entity : dl_shadow_renderable_entities) {
-
-					if (!mesh_entity)
-						continue;
-
-					glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
-					shader->SetMat4("u_Model", transform);
-
-					std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
-
-					if (asset_mesh) 
+					for (const auto& data : query_vec)
 					{
-						for (auto& sub_mesh : asset_mesh->SubMeshes)
-							Renderer::DrawSubMesh(sub_mesh);
+						if (!data->Data)
+							continue;
+
+						auto& component = data->Data.GetComponent<MeshRendererComponent>();
+						if (component.Active && component.CastShadows)
+							dl_shadow_renderable_entities.push_back(data->Data);
 					}
 				}
 
 			}
 
-			shader->UnBind();
+			// 3. Calculate Light Space Matricies Per Light Per Cascade - 40 x glm::mat4's is the max = MAX_DIRECTIONAL_LIGHTS * 4 cascades (per directional light)
 
-			if (scene_ref)
-				scene_ref->GetSceneFrameBuffer()->Bind();
+			{
+				L_PROFILE_SCOPE("Directional Shadow Mapping 3. Calculate Cascade Light Matricies");
+				dl_shadow_light_space_matricies.reserve(dl_shadow_casting_vec.size() * 5);
+				FP_Data.DL_Shadow_LightSpaceMatrixIndex.clear();
+				FP_Data.DL_Shadow_LightShadowCascadeDistances.clear();
 
-			glCullFace(GL_BACK);
+				for (int light_index = 0; light_index < dl_shadow_casting_vec.size(); light_index++)
+				{
+					Entity entity = dl_shadow_casting_vec[light_index];
+					if (!entity)
+						continue;
+
+					std::array<float, 5>& shadow_cascade_distances = FP_Data.DL_Shadow_LightShadowCascadeDistances[entity.GetUUID()];
+					std::array<glm::mat4, 5> light_space_matrices = Frustum::CalculateCascadeLightSpaceMatrices(projection_matrix, view_matrix, entity.GetComponent<TransformComponent>().GetForwardDirection(), shadow_cascade_distances);
+
+					dl_shadow_light_space_matricies.insert(dl_shadow_light_space_matricies.end(), light_space_matrices.begin(), light_space_matrices.end());
+					FP_Data.DL_Shadow_LightSpaceMatrixIndex[entity.GetUUID()] = light_index;
+				}
+			}
+
+			// 4. Update Light Space Matrix SSBO Data
+
+			{
+				L_PROFILE_SCOPE("Directional Shadow Mapping 4. Updating Light Matrix SSBO Data");
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
+
+				// Update SSBO data with light data
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.DL_Shadow_LightSpaceMatrix_Buffer);
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, dl_shadow_light_space_matricies.size() * sizeof(glm::mat4), dl_shadow_light_space_matricies.data());
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+			}
+
+			// 5. Render Shadow Map from Light Space Matrix View & Proj
+
+			{
+				L_PROFILE_SCOPE("Directional Shadow Mapping 5. Rendering Cascaded Shadow Maps");
+				glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.DL_Shadow_FrameBuffer);
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.DL_Shadow_Texture_Array, 0);
+				glDrawBuffer(GL_NONE);
+				glReadBuffer(GL_NONE);
+
+				glCullFace(GL_FRONT);
+
+				glViewport(0, 0, FP_Data.DL_Shadow_Map_Res, FP_Data.DL_Shadow_Map_Res);
+				glClear(GL_DEPTH_BUFFER_BIT);
+
+				auto shader = AssetManager::GetInbuiltShader("FP_Shadow_Directional");
+				shader->Bind();
+
+				for (int light_index = 0; light_index < dl_shadow_casting_vec.size(); ++light_index) {
+
+					Entity entity = dl_shadow_casting_vec[light_index];
+					if (!entity)
+						continue;
+
+					shader->SetUInt("u_LightIndex", light_index);
+
+					for (auto& mesh_entity : dl_shadow_renderable_entities) {
+
+						if (!mesh_entity)
+							continue;
+
+						glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
+						shader->SetMat4("u_Model", transform);
+
+						std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
+
+						if (asset_mesh)
+						{
+							for (auto& sub_mesh : asset_mesh->SubMeshes)
+								Renderer::DrawSubMesh(sub_mesh);
+						}
+					}
+
+				}
+
+				shader->UnBind();
+
+				if (scene_ref)
+					scene_ref->GetSceneFrameBuffer()->Bind();
+
+				glCullFace(GL_BACK);
+			}
 		}
 
 		#pragma endregion
@@ -1245,109 +1279,113 @@ namespace Louron {
 
 		// 2. Gather Meshes Inside Spot Light AABB's
 
+		if(!sl_shadow_casting_vec.empty())
 		{
-			L_PROFILE_SCOPE("Spot Shadow Mapping 2. Calculate ViewProj and Get Meshes in Frustum");
-			for (auto& entity : sl_shadow_casting_vec) {
 
-				if (!entity)
-					continue;
+			{
+				L_PROFILE_SCOPE("Spot Shadow Mapping 2. Calculate ViewProj and Get Meshes in Frustum");
+				for (auto& entity : sl_shadow_casting_vec) {
 
-				auto& transform = entity.GetComponent<TransformComponent>();
-
-				glm::mat4 light_proj = glm::perspective(glm::radians(entity.GetComponent<SpotLightComponent>().Angle), 1.0f, 0.1f, entity.GetComponent<SpotLightComponent>().Range);
-				glm::mat4 light_view = glm::lookAt(transform.GetGlobalPosition(), transform.GetGlobalPosition() + transform.GetForwardDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
-
-				sl_shadow_light_space_matricies.push_back(light_proj * light_view);
-
-				Frustum spot_frustum = { sl_shadow_light_space_matricies.back() };
-
-				if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
-
-					std::unique_lock lock(oct_ref->GetOctreeMutex());
-
-					const auto& query_vec = oct_ref->Query(spot_frustum);
-
-					auto& sl_renderable_entities = sl_shadow_renderable_entities[entity.GetUUID()];
-					sl_renderable_entities.reserve(query_vec.size());
-
-					for (const auto& data : query_vec)
-					{
-						if (!data->Data)
-							continue;
-
-						auto& component = data->Data.GetComponent<AssetMeshRenderer>();
-						if (component.Active && component.CastShadows)
-							sl_renderable_entities.push_back(data->Data);
-					}
-				}
-
-			}
-
-		}
-
-
-		// 3. Update Light Space Matrix SSBO Data
-
-		{
-			L_PROFILE_SCOPE("Spot Shadow Mapping 3. Updating Light Matrix SSBO Data");
-			glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, FP_Data.SL_Shadow_LightSpaceMatrix_Buffer);
-
-			// Update SSBO data with light data
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Shadow_LightSpaceMatrix_Buffer);
-			glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sl_shadow_light_space_matricies.size() * sizeof(glm::mat4), sl_shadow_light_space_matricies.data());
-			glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-		}
-
-		// 4. Render Shadow Map from Light Space Matrix ViewProj
-
-		{
-			L_PROFILE_SCOPE("Spot Shadow Mapping 4. Rendering Spot Shadow Maps");
-			glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.SL_Shadow_FrameBuffer);
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.SL_Shadow_Texture_Array, 0);
-			glDrawBuffer(GL_NONE);
-			glReadBuffer(GL_NONE);
-
-			glCullFace(GL_FRONT);
-
-			glViewport(0, 0, FP_Data.SL_Shadow_Map_Res, FP_Data.SL_Shadow_Map_Res);
-			glClear(GL_DEPTH_BUFFER_BIT);
-
-			FP_Data.SL_Shadow_LightIndexMap.clear();
-
-			auto& shader = Engine::Get().GetShaderLibrary().GetShader("FP_Shadow_Spot");
-			shader->Bind();
-
-			for (int light_index = 0; light_index < sl_shadow_casting_vec.size(); ++light_index) {
-
-				Entity entity = sl_shadow_casting_vec[light_index];
-				if (!entity)
-					continue;
-
-				FP_Data.SL_Shadow_LightIndexMap[entity.GetUUID()] = light_index;
-				shader->SetMat4("u_LightSpaceMatrix", sl_shadow_light_space_matricies[light_index]);
-				glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.SL_Shadow_Texture_Array, 0, light_index);
-
-				for (auto& mesh_entity : sl_shadow_renderable_entities[entity.GetUUID()]) {
-
-					if (!mesh_entity)
+					if (!entity)
 						continue;
 
-					glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
-					shader->SetMat4("u_Model", transform);
+					auto& transform = entity.GetComponent<TransformComponent>();
 
-					std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
-					for (auto& sub_mesh : asset_mesh->SubMeshes)
-						Renderer::DrawSubMesh(sub_mesh);
+					glm::mat4 light_proj = glm::perspective(glm::radians(entity.GetComponent<SpotLightComponent>().Angle), 1.0f, 0.1f, entity.GetComponent<SpotLightComponent>().Range);
+					glm::mat4 light_view = glm::lookAt(transform.GetGlobalPosition(), transform.GetGlobalPosition() + transform.GetForwardDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
+
+					sl_shadow_light_space_matricies.push_back(light_proj * light_view);
+
+					Frustum spot_frustum = { sl_shadow_light_space_matricies.back() };
+
+					if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
+
+						std::unique_lock lock(oct_ref->GetOctreeMutex());
+
+						const auto& query_vec = oct_ref->Query(spot_frustum);
+
+						auto& sl_renderable_entities = sl_shadow_renderable_entities[entity.GetUUID()];
+						sl_renderable_entities.reserve(query_vec.size());
+
+						for (const auto& data : query_vec)
+						{
+							if (!data->Data)
+								continue;
+
+							auto& component = data->Data.GetComponent<MeshRendererComponent>();
+							if (component.Active && component.CastShadows)
+								sl_renderable_entities.push_back(data->Data);
+						}
+					}
+
 				}
 
 			}
 
-			shader->UnBind();
 
-			if (scene_ref)
-				scene_ref->GetSceneFrameBuffer()->Bind();
+			// 3. Update Light Space Matrix SSBO Data
 
-			glCullFace(GL_BACK);
+			{
+				L_PROFILE_SCOPE("Spot Shadow Mapping 3. Updating Light Matrix SSBO Data");
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 6, FP_Data.SL_Shadow_LightSpaceMatrix_Buffer);
+
+				// Update SSBO data with light data
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, FP_Data.SL_Shadow_LightSpaceMatrix_Buffer);
+				glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sl_shadow_light_space_matricies.size() * sizeof(glm::mat4), sl_shadow_light_space_matricies.data());
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+			}
+
+			// 4. Render Shadow Map from Light Space Matrix ViewProj
+
+			{
+				L_PROFILE_SCOPE("Spot Shadow Mapping 4. Rendering Spot Shadow Maps");
+				glBindFramebuffer(GL_FRAMEBUFFER, FP_Data.SL_Shadow_FrameBuffer);
+				glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.SL_Shadow_Texture_Array, 0);
+				glDrawBuffer(GL_NONE);
+				glReadBuffer(GL_NONE);
+
+				glCullFace(GL_FRONT);
+
+				glViewport(0, 0, FP_Data.SL_Shadow_Map_Res, FP_Data.SL_Shadow_Map_Res);
+				glClear(GL_DEPTH_BUFFER_BIT);
+
+				FP_Data.SL_Shadow_LightIndexMap.clear();
+
+				auto shader = AssetManager::GetInbuiltShader("FP_Shadow_Spot");
+				shader->Bind();
+
+				for (int light_index = 0; light_index < sl_shadow_casting_vec.size(); ++light_index) {
+
+					Entity entity = sl_shadow_casting_vec[light_index];
+					if (!entity)
+						continue;
+
+					FP_Data.SL_Shadow_LightIndexMap[entity.GetUUID()] = light_index;
+					shader->SetMat4("u_LightSpaceMatrix", sl_shadow_light_space_matricies[light_index]);
+					glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, FP_Data.SL_Shadow_Texture_Array, 0, light_index);
+
+					for (auto& mesh_entity : sl_shadow_renderable_entities[entity.GetUUID()]) {
+
+						if (!mesh_entity)
+							continue;
+
+						glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
+						shader->SetMat4("u_Model", transform);
+
+						std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
+						for (auto& sub_mesh : asset_mesh->SubMeshes)
+							Renderer::DrawSubMesh(sub_mesh);
+					}
+
+				}
+
+				shader->UnBind();
+
+				if (scene_ref)
+					scene_ref->GetSceneFrameBuffer()->Bind();
+
+				glCullFace(GL_BACK);
+			}
 		}
 
 		#pragma endregion
@@ -1406,7 +1444,7 @@ namespace Louron {
 						if (!data->Data)
 							continue;
 
-						auto& component = data->Data.GetComponent<AssetMeshRenderer>();
+						auto& component = data->Data.GetComponent<MeshRendererComponent>();
 						if (component.Active && component.CastShadows)
 							entities_in_light.push_back(data->Data);
 					}
@@ -1417,6 +1455,7 @@ namespace Louron {
 		}
 
 		// 2. Initialise and Draw Shadow CubeMap Array
+		if (!pl_shadow_casting_vec.empty()) 
 		{
 			L_PROFILE_SCOPE("Point Shadow Mapping 2. Drawing");
 
@@ -1430,7 +1469,7 @@ namespace Louron {
 			glViewport(0, 0, FP_Data.PL_Shadow_Map_Res, FP_Data.PL_Shadow_Map_Res);
 			glClear(GL_DEPTH_BUFFER_BIT);
 
-			auto& shader = Engine::Get().GetShaderLibrary().GetShader("FP_Shadow_Point");
+			auto shader = AssetManager::GetInbuiltShader("FP_Shadow_Point");
 			shader->Bind();
 
 			for (int lightIndex = 0; lightIndex < pl_shadow_casting_vec.size(); ++lightIndex) {
@@ -1453,7 +1492,7 @@ namespace Louron {
 
 				int layerOffset = lightIndex * 6;
 				shader->SetInt("u_LayerOffset", layerOffset);
-				shader->SetVec3("u_LightPosition", light_pos);
+				shader->SetFloatVec3("u_LightPosition", light_pos);
 				shader->SetFloat("u_FarPlane", far_plane);
 
 				// Link up the offset to the light map so we can 
@@ -1469,7 +1508,7 @@ namespace Louron {
 					glm::mat4 transform = entity.GetComponent<TransformComponent>().GetGlobalTransform();
 					shader->SetMat4("u_Model", transform);
 
-					std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<AssetMeshFilter>().MeshFilterAssetHandle);
+					std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
 					for (auto& sub_mesh : asset_mesh->SubMeshes)
 						Renderer::DrawSubMesh(sub_mesh);
 				}
@@ -1486,6 +1525,7 @@ namespace Louron {
 		#pragma endregion
 
 	}
+
 
 	/// <summary>
 	/// Conduct final colour pass. Meshes are sorted by material, then
@@ -1504,26 +1544,78 @@ namespace Louron {
 			return;
 		}
 
+		//// Render Skybox First w/ No Depth Testing
+
+		auto skyboxView = scene_ref->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
+		if (skyboxView.begin() != skyboxView.end()) {
+
+			for (const auto& entity : skyboxView) {
+				auto [scene_camera, skybox] = skyboxView.get<CameraComponent, SkyboxComponent>(entity);
+
+				// Only draw the skybox for the primary camera
+				if (scene_camera.Primary && scene_camera.ClearFlags == CameraClearFlags::SKYBOX) {
+
+					if (auto mat_ref = AssetManager::GetAsset<SkyboxMaterial>(skybox.SkyboxMaterialAssetHandle); mat_ref) {
+
+						skybox.Bind();
+
+						// Save the current depth function
+						GLenum originalDepthFunc{};
+						glGetIntegerv(GL_DEPTH_FUNC, (GLint*)&originalDepthFunc);
+
+						// Change depth function to GL_ALWAYS for the skybox
+						glDepthFunc(GL_ALWAYS);
+
+						if (mat_ref->Bind()) {
+							CameraBase temp_camera(projection_matrix, view_matrix);
+							mat_ref->UpdateUniforms(camera_position, projection_matrix, view_matrix);
+							Renderer::DrawSkybox(skybox);
+							mat_ref->UnBind();
+						}
+						skybox.UnBind();
+
+						// Restore the original depth function after the skybox is rendered
+						glDepthFunc(originalDepthFunc);
+					}
+				}
+			}
+		}
+
+		// Kinda like AssetMap in the AssetManager, but this is pretty much purely 
+		// for the renderer so GetAsset calls are reduced to the AssetManager
+		// 
+		// Needs to be weak PTR as this will not own the asset
+		static std::unordered_map<AssetHandle, std::weak_ptr<AssetMesh>> fast_loaded_asset_references;
+
 		//// Render All MeshComponents in Scene
 
 		if (!FP_Data.RenderableEntities.empty()) {
 
-
-			// Key #1 = Material Asset ID
+			// Key #1 = Material Asset ID, Material Uniform Block in _MaterialWrapper
 			// Key #2 = SubMesh Pointer
 			// Value = array of entities to render using material and submesh
-			std::unordered_map<AssetHandle, std::unordered_map<std::shared_ptr<SubMesh>, std::vector<UUID>>> renderables;
+			static std::unordered_map<
 
-			// Kinda like AssetMap in the AssetManager, but this is pretty much purely 
-			// for the renderer so GetAsset calls are reduced to the AssetManager
-			static std::unordered_map<AssetHandle, std::shared_ptr<AssetMesh>> fast_loaded_asset_references; 
+				_MaterialWrapper,
+					
+					// Value is Another Map of SubMeshes to this Material
+					std::unordered_map<
 
-			auto& debug_line_shader = Engine::Get().GetShaderLibrary().GetShader("Debug_Line_Draw");
+						// Key is SubMesh Asset
+						std::shared_ptr<SubMesh>, 
+							
+							// VALUE is a list of Entities that will be rendered with the particular material combo and sub mesh
+							std::vector<UUID>>> renderables{};
 
+			for (auto& material_block : renderables)
+				for (auto& [sub_mesh, entity_vector] : material_block.second)
+					entity_vector.clear();
+
+			auto debug_line_shader = AssetManager::GetInbuiltShader("Debug_Line_Draw");
 			if(debug_line_shader)
 			{
 				debug_line_shader->Bind();
-				debug_line_shader->SetVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
+				debug_line_shader->SetFloatVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
 				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
 				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
 				debug_line_shader->SetBool("u_UseInstanceData", false);
@@ -1534,8 +1626,8 @@ namespace Louron {
 
 				if (!scene_ref->ValidEntity(entity)) continue;
 
-				auto& component = entity.GetComponent<AssetMeshFilter>();
-				auto& mesh_asset = fast_loaded_asset_references[component.MeshFilterAssetHandle];
+				auto& component = entity.GetComponent<MeshFilterComponent>();
+				auto mesh_asset = fast_loaded_asset_references[component.MeshFilterAssetHandle].lock();
 
 				if (!mesh_asset) {
 					mesh_asset = AssetManager::GetAsset<AssetMesh>(component.MeshFilterAssetHandle);
@@ -1543,14 +1635,40 @@ namespace Louron {
 				}
 
 				auto& submeshes = mesh_asset->SubMeshes;
-				auto& material_handles = entity.GetComponent<AssetMeshRenderer>().MeshRendererMaterialHandles;
+				auto& material_handles = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
 
-				// Ensure the renderables map is reserved to avoid frequent reallocations
-				for (size_t i = 0; i < material_handles.size() && i < submeshes.size(); ++i) {
-					auto& material_map = renderables[material_handles[i]];
-					auto& entity_list = material_map[submeshes[i]];
-					entity_list.reserve(256); // TODO: CHANGE THIS LATER YALL
-					entity_list.push_back(entity.GetUUID());
+				// MATERIAL AND MATERIAL UNIFORM BLOCK SORTING
+				// Materials will be sorted based on their material, and the uniform block of an individual material on a MeshRendererComponent. 
+				// This is so that during runtime, we can specify custom uniforms for individual materials in MeshRendererComponent's without 
+				// creating new material instances that sit in memory and may leak! 
+				// 
+				// Custom uniform blocks will be automatically cleaned up when the MeshRendererComponent is deleted, such as when an entity is destroyed!
+				int material_index = 0;
+				for (int i = 0; i < submeshes.size(); ++i)
+				{
+					auto& mesh_renderer_material_pair = material_handles[material_index]; // Material Handle + Uniform Group in Mesh Renderer Component
+
+					const auto& material_asset = AssetManager::GetAsset<PBRMaterial>(mesh_renderer_material_pair.first);
+
+					if (!material_asset)
+						continue;
+
+					auto& sub_mesh_map = renderables[{ material_asset, mesh_renderer_material_pair.second ? mesh_renderer_material_pair.second : material_asset->GetUniformBlock() }]; // Keys this to the renderables
+					auto& entity_vector = sub_mesh_map[submeshes[i]]; // Get the Vector of the Sub Mesh
+					
+					// If First - Set Allocation for 8 entities
+					if (entity_vector.size() == 0 && entity_vector.capacity() == 0)
+						entity_vector.reserve(8);
+
+					// If we need to reallocate, double if capacity is under 64, if above, we will + 1 only
+					if (entity_vector.size() >= entity_vector.capacity())
+						entity_vector.reserve(entity_vector.size() <= 64 ? entity_vector.capacity() * 2 : entity_vector.capacity() + 1);
+
+					entity_vector.push_back(entity.GetUUID());
+
+					// Makes sure we don't exceed the maximum materials, if we do, then we will just use the last material in the Mesh Renderer materials vector
+					if (material_index < material_handles.size() - 1)
+						material_index++;
 				}
 
 				if (component.GetShouldDisplayDebugLines() && debug_line_shader) {
@@ -1560,9 +1678,9 @@ namespace Louron {
 			}
 
 			// Lets colour in some triangles!
-			for (const auto& [material_asset_handle, mesh_map] : renderables) {
+			for (const auto& [material_wrapper_pair, mesh_map] : renderables) {
 
-				auto material_asset = AssetManager::GetAsset<PBRMaterial>(material_asset_handle);
+				const auto& material_asset = material_wrapper_pair.material;
 
 				if (!material_asset)
 					continue;
@@ -1571,24 +1689,41 @@ namespace Louron {
 					continue;
 
 				auto shader = material_asset->GetShader();
-				material_asset->UpdateUniforms(camera_position, projection_matrix, view_matrix);
+				if (shader->IsValid())
+				{
+					material_asset->UpdateUniforms(camera_position, projection_matrix, view_matrix, material_wrapper_pair.uniform_block); // Change
 
-				// Update Specific Forward Plus Uniforms
-				shader->SetInt("u_TilesX", FP_Data.workGroupsX);
-				shader->SetInt("u_ShowLightComplexity", FP_Data.ShowLightComplexity);
+					// Update Specific Forward Plus Uniforms
+					shader->SetInt("u_TilesX", FP_Data.workGroupsX);
+					shader->SetInt("u_ShowLightComplexity", FP_Data.ShowLightComplexity);
 
-				glActiveTexture(GL_TEXTURE4);
-				glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, FP_Data.PL_Shadow_CubeMap_Array);
-				shader->SetInt("u_PL_ShadowCubeMapArray", 4);
+					// Texture binding 4 is dedicated for Point Light Shadow Cube Map Array
+					glActiveTexture(GL_TEXTURE4);
+					glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, FP_Data.PL_Shadow_CubeMap_Array);
+					shader->SetInt("u_PL_ShadowCubeMapArray", 4);
 
-				glActiveTexture(GL_TEXTURE5);
-				glBindTexture(GL_TEXTURE_2D_ARRAY, FP_Data.DL_Shadow_Texture_Array);
-				shader->SetInt("u_DL_ShadowMapArray", 5);
+					// Texture binding 5 is dedicated for Directional Light Shadow Texture Array
+					glActiveTexture(GL_TEXTURE5);
+					glBindTexture(GL_TEXTURE_2D_ARRAY, FP_Data.DL_Shadow_Texture_Array);
+					shader->SetInt("u_DL_ShadowMapArray", 5);
 
-				glActiveTexture(GL_TEXTURE6);
-				glBindTexture(GL_TEXTURE_2D_ARRAY, FP_Data.SL_Shadow_Texture_Array);
-				shader->SetInt("u_SL_ShadowMapArray", 6);
+					// Texture binding 6 is dedicated for Spot Light Shadow Texture Array
+					glActiveTexture(GL_TEXTURE6);
+					glBindTexture(GL_TEXTURE_2D_ARRAY, FP_Data.SL_Shadow_Texture_Array);
+					shader->SetInt("u_SL_ShadowMapArray", 6);
 
+				}
+				else
+				{
+					shader = AssetManager::GetInbuiltShader("Invalid Shader");
+					shader->Bind();
+
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, AssetManager::GetInbuiltAsset<Texture>("Invalid Checkered Texture")->GetID());
+					shader->SetInt("u_InvalidTexture", 0);
+					shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+					shader->SetMat4("u_VertexIn.View", view_matrix);
+				}
 
 				for (const auto& [sub_mesh, entities] : mesh_map) {
 
@@ -1620,39 +1755,15 @@ namespace Louron {
 			}
 		}
 
-		auto skyboxView = scene_ref->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
-		if (skyboxView.begin() != skyboxView.end()) {
-
-			for (const auto& entity : skyboxView) {
-				auto [scene_camera, skybox] = skyboxView.get<CameraComponent, SkyboxComponent>(entity);
-
-				// Only draw the skybox for the primary camera
-				if (scene_camera.Primary && scene_camera.ClearFlags == CameraClearFlags::SKYBOX) {
-
-					if (auto mat_ref = AssetManager::GetAsset<SkyboxMaterial>(skybox.SkyboxMaterialAssetHandle); mat_ref){
-
-						skybox.Bind();
-						if (mat_ref->Bind()) {
-							CameraBase temp_camera(projection_matrix, view_matrix);
-							mat_ref->UpdateUniforms(camera_position, projection_matrix, view_matrix);
-							Renderer::DrawSkybox(skybox);
-							mat_ref->UnBind();
-						}
-						skybox.UnBind();
-					}
-				}
-			}
-		}
-
 		// RENDER DEBUG VIEW FOR OCTREE
 		if (auto octree_ref = scene_ref->GetOctree().lock(); octree_ref && scene_ref->GetDisplayOctree()) {
 
-			auto& debug_line_shader = Engine::Get().GetShaderLibrary().GetShader("Debug_Line_Draw");
+			auto debug_line_shader = AssetManager::GetInbuiltShader("Debug_Line_Draw");
 
 			// Draw Octree
 			if (debug_line_shader) {
 				debug_line_shader->Bind();
-				debug_line_shader->SetVec4("u_LineColor", { 1.0f, 0.0f, 0.0f, 1.0f });
+				debug_line_shader->SetFloatVec4("u_LineColor", { 1.0f, 0.0f, 0.0f, 1.0f });
 				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
 				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
 				debug_line_shader->SetBool("u_UseInstanceData", true);
@@ -1662,7 +1773,7 @@ namespace Louron {
 
 			if (debug_line_shader) {
 				debug_line_shader->Bind();
-				debug_line_shader->SetVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
+				debug_line_shader->SetFloatVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
 				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
 				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
 				debug_line_shader->SetBool("u_UseInstanceData", true);
@@ -1677,15 +1788,17 @@ namespace Louron {
 
 				if (!scene_ref->ValidEntity(entity)) continue;
 
-				if(entity.HasComponent<AssetMeshFilter>())
-					bounds_matricies.push_back(entity.GetComponent<AssetMeshFilter>().TransformedAABB.GetGlobalBoundsMat4());
+				if(entity.HasComponent<MeshFilterComponent>())
+					bounds_matricies.push_back(entity.GetComponent<MeshFilterComponent>().TransformedAABB.GetGlobalBoundsMat4());
 			}
 
 			Renderer::DrawInstancedDebugCube(bounds_matricies);
 		}
 
 		// Clean Up Scene Render Pass
-		for (int i = 0; i < 4; i++) {
+		GLint maxTextureUnits = 7;
+		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+		for (int i = 0; i < maxTextureUnits; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
@@ -1706,7 +1819,7 @@ namespace Louron {
 			return;
 		}
 
-		std::shared_ptr<Shader> shader = Engine::Get().GetShaderLibrary().GetShader("FBO Texture Shader");
+		auto shader = AssetManager::GetInbuiltShader("FBO Texture Shader");
 		if (shader)
 		{
 			shader->Bind();

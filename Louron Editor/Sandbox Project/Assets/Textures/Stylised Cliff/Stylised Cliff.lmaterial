@@ -1,0 +1,14 @@
+Material Asset Name: Stylised Cliff
+Material Asset Type: AssetType::Material_Standard
+Shader Handle: 487657122
+Render Type: Opaque
+Roughness: 0.74000001
+Metallic: 1
+Albedo Tint: [1, 1, 1, 1]
+AlbedoTextureAsset: 321258591
+MetallicTextureAsset: 4294967295
+NormalTextureAsset: 3750660094
+Material Uniform Block:
+  - Name: MyCustomProperty
+    Type: float
+    Value: 0

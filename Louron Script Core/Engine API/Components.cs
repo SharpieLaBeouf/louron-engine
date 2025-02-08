@@ -54,6 +54,11 @@ namespace Louron
 
         #region Component Functions
 
+        internal Component()
+        {
+            Entity = new Entity(uint.MaxValue);
+        }
+
         public T AddComponent<T>() where T : Component, new()
         {
             if (HasComponent<T>()) {
@@ -141,19 +146,6 @@ namespace Louron
         {
             base.SetEntity(entity_uuid);
         }
-
-        //public Transform transform
-        //{
-        //    get
-        //    {
-        //        EngineCallbacks.TransformComponent_GetTransform(Entity.ID, out Transform result);
-        //        return result;
-        //    }
-        //    set
-        //    {
-        //        EngineCallbacks.TransformComponent_SetTransform(Entity.ID, ref value);
-        //    }
-        //}
     }
 
     public class TagComponent : Component
@@ -428,4 +420,97 @@ namespace Louron
         }
     }
 
+    public class MeshRendererComponent : Component
+    {
+        internal override void SetEntity(UInt32 entity_uuid)
+        {
+            base.SetEntity(entity_uuid);
+        }
+
+        /// <summary>
+        /// This will tell the renderer to use a unique set of uniforms 
+        /// for the material binding in a MeshRendererComponent.
+        /// </summary>
+        /// <param name="material_index">Leaving default will enable a unique uniform block only for the last material element attached.</param>
+        public void EnableUniformBlock(uint material_index = uint.MaxValue)
+        {
+            EngineCallbacks.MeshRenderer_EnableUniformBlock(Entity.ID, material_index);
+        }
+
+        /// <summary>
+        /// This will give you the pointer to the MaterialUniformBlock. 
+        /// Please use this once and store as fetching this multiple times 
+        /// or even once throughout frame MAY impact performance.
+        /// </summary>
+        /// <param name="material_index">Leaving default will get the uniform block only for the last material element attached.</param>
+        public MaterialUniformBlock GetUniformBlock(uint material_index = uint.MaxValue)
+        {
+            return new MaterialUniformBlock(EngineCallbacks.MeshRenderer_GetUniformBlock(Entity.ID, material_index));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="material_index">Leaving default will disable a unique uniform block only for the last material element attached.</param>
+        public void DisableUniformBlock(uint material_index = uint.MaxValue)
+        {
+            EngineCallbacks.MeshRenderer_DisableUniformBlock(Entity.ID, material_index);
+        }
+
+        /// <summary>
+        /// This will tell the renderer to enable unique sets of uniforms 
+        /// for all materials bound to this MeshRendererComponent.
+        /// </summary>
+        public void EnableAllUniformBlocks()
+        {
+            EngineCallbacks.MeshRenderer_EnableAllUniformBlocks(Entity.ID);
+
+        }
+
+        /// <summary>
+        /// This will tell the renderer to disable unique sets of uniforms 
+        /// for all materials bound to this MeshRendererComponent.
+        /// </summary>
+        public void DisableAllUniformBlocks()
+        {
+            EngineCallbacks.MeshRenderer_DisableAllUniformBlocks(Entity.ID);
+        }
+
+        public Material material
+        {
+            get
+            {
+                Material result = new Material(EngineCallbacks.MeshRendererComponent_GetMaterial(Entity.ID));
+                return result;
+            }
+            set
+            {
+                EngineCallbacks.MeshRendererComponent_SetMaterial(Entity.ID, value.Asset_Handle);
+            }
+        }
+
+        public Material[] materials
+        {
+            get
+            {
+                uint[] handles = EngineCallbacks.MeshRendererComponent_GetMaterials(Entity.ID);
+                Material[] materials = new Material[handles.Length];
+
+                for (int i = 0; i < materials.Length; i++)
+                    materials[i].Asset_Handle = handles[i];
+                
+                return materials;
+            }
+            set
+            {
+                Material[] materials = value;
+                uint[] handles = new uint[materials.Length];
+
+                for (int i = 0; i < handles.Length; i++)
+                    handles[i] = materials[i].Asset_Handle;
+
+                EngineCallbacks.MeshRendererComponent_SetMaterials(Entity.ID, handles, (uint)handles.Length);
+            }
+        }
+    }
 }

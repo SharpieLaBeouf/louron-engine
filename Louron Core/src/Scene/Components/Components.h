@@ -422,8 +422,8 @@ namespace Louron {
     template<typename... Component>
     struct ComponentGroup { };
 
-    struct AssetMeshFilter;
-    struct AssetMeshRenderer;
+    struct MeshFilterComponent;
+    struct MeshRendererComponent;
 
     struct PointLightComponent;
     struct SpotLightComponent;
@@ -449,8 +449,8 @@ namespace Louron {
         AudioListener,
         AudioEmitter,
 
-        AssetMeshFilter,
-        AssetMeshRenderer,
+        MeshFilterComponent,
+        MeshRendererComponent,
 
         LODMeshComponent,
 

@@ -14,6 +14,8 @@
 
 namespace Louron {
 
+	class Shader;
+
 	using AssetMap = std::map<AssetHandle, std::shared_ptr<Asset>>;
 	using AssetRegistry = std::map<AssetHandle, AssetMetaData>;
 
@@ -21,11 +23,14 @@ namespace Louron {
 
 	public:
 		virtual std::shared_ptr<Asset> GetAsset(const AssetHandle& handle) = 0;
+		virtual std::shared_ptr<Shader> GetInbuiltShader(const std::string& default_shader_name, bool is_compute = false) = 0;
 
 		virtual bool IsAssetHandleValid(const AssetHandle& handle) const = 0;
 		virtual bool IsAssetLoaded(const AssetHandle& handle) const = 0;
 		virtual AssetType GetAssetType(const AssetHandle& handle) const = 0;
 
+		virtual void AddRuntimeAsset(std::shared_ptr<Asset> asset, AssetHandle asset_handle, AssetMetaData asset_meta_data) = 0;
+		virtual void RemoveRuntimeAsset(AssetHandle asset_handle) = 0;
 	};
 
 	struct AssetMesh;
@@ -83,6 +88,12 @@ namespace Louron {
 		/// <param name="asset_handle">The handle of the Asset.</param>
 		/// <param name="asset_meta_data">The meta data of the Asset.</param>
 		void ImportCustomAsset(const AssetHandle& asset_handle, const AssetMetaData& asset_meta_data);
+
+		/// <summary>
+		/// This will re-import the appropriate custom asset where there have been changes to a custom asset.
+		/// </summary>
+		/// <param name="asset_file_path">File path must be absolute file location on disk.</param>
+		void ReImportCustomAsset(const std::filesystem::path& asset_file_path);
 
 		/// <summary>
 		/// Imports the appropriate asset located at the file path.
@@ -168,6 +179,9 @@ namespace Louron {
 			return nullptr;
 		}
 
+		virtual void AddRuntimeAsset(std::shared_ptr<Asset> asset, AssetHandle asset_handle, AssetMetaData asset_meta_data) override;
+		virtual void RemoveRuntimeAsset(AssetHandle asset_handle) override;
+
 		/// <summary>
 		/// Get an asset of no particular type. This will need to be static_pointer_cast'd to 
 		/// the applicable Asset Type for use.
@@ -175,6 +189,18 @@ namespace Louron {
 		/// <param name="handle">The Asset Handle of the Asset you are trying to get.</param>
 		/// <returns>A pointer to the asset base class, or nullptr if does not exist, or type does not match.</returns>
 		virtual std::shared_ptr<Asset> GetAsset(const AssetHandle& asset_handle) override;
+
+		/// <summary>
+		/// When you call this function, it will look for internal shaders that are built in 
+		/// to the pipeline and are not custom shaders made through the editor.
+		/// </summary>
+		/// <param name="default_shader_name">Name of InBuilt Shader.</param>
+		virtual std::shared_ptr<Shader> GetInbuiltShader(const std::string& default_shader_name, bool is_compute = false) override;
+
+		/// <summary>
+		/// This will initialise all default inbuilt resources the editor provides.
+		/// </summary>
+		void InitDefaultResources();
 
 	public: // Helper Methods
 
@@ -212,8 +238,11 @@ namespace Louron {
 		void SerialiseMetaDataFile(const AssetHandle& asset_handle, const AssetMetaData& asset_meta_data, const std::filesystem::path& meta_data_file_path);
 
 	private:
+
 		AssetRegistry m_AssetRegistry{};
 		AssetMap m_LoadedAssets{};
+
+		std::vector<AssetHandle> m_RuntimeCreatedAssetRegistry;
 	};
 
 }

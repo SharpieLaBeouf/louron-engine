@@ -107,6 +107,7 @@ namespace Louron {
 		// Additionally, as this is a new project, we will serialise the empty AssetManager to
 		// ensure the file is created in the AssetDirectory.
 		project->m_AssetManager = std::make_shared<EditorAssetManager>();
+		project->GetEditorAssetManager()->InitDefaultResources();
 		project->GetEditorAssetManager()->RefreshAssetRegistry(project->GetAssetDirectory());
 
 		// We now want to create a new empty scene that is attached to this Project automatically.
@@ -176,6 +177,7 @@ namespace Louron {
 		project->m_ProjectDirectory = abs_project_file_path.parent_path();
 
 		project->m_AssetManager = std::make_shared<EditorAssetManager>();
+		project->GetEditorAssetManager()->InitDefaultResources();
 		project->GetEditorAssetManager()->RefreshAssetRegistry(project->GetAssetDirectory());
 
 		L_CORE_INFO("Project Loaded: {0}", project->m_Config.Name);

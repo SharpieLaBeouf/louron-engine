@@ -154,7 +154,7 @@ namespace Louron
 
         protected Entity()
         {
-            ID = 0;
+            ID = uint.MaxValue;
             _transform = new Transform();
         }
 

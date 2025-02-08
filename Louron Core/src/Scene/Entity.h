@@ -105,10 +105,10 @@ namespace Louron {
 				}
 
 				// Get the Optimal Size and Center for Box Collider Based on MeshFilter
-				if (HasComponent<AssetMeshFilter>())
+				if (HasComponent<MeshFilterComponent>())
 				{
 					glm::mat4 global_transform = GetComponent<TransformComponent>().GetGlobalTransform();
-					Bounds_AABB mesh_bounds = AssetManager::GetAsset<AssetMesh>(GetComponent<AssetMeshFilter>().MeshFilterAssetHandle)->MeshBounds;
+					Bounds_AABB mesh_bounds = AssetManager::GetAsset<AssetMesh>(GetComponent<MeshFilterComponent>().MeshFilterAssetHandle)->MeshBounds;
 
 					// Create OBB transformation matrix
 					glm::mat4 obb_transform = glm::mat4(1.0f);

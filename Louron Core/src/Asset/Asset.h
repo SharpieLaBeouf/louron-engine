@@ -27,7 +27,8 @@ namespace Louron {
 		Material_Standard,
 		Material_Skybox,
 
-		Compute_Shader
+		Compute_Shader,
+		Shader
 
 	};
 

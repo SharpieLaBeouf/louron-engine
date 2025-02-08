@@ -389,5 +389,54 @@ namespace Louron
 
         #endregion
 
+        #region Material
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint Material_Create(string material_name);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint Material_SetShader(uint asset_handle, uint shader_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint Material_Destroy(uint asset_handle);
+
+        #endregion
+
+        #region MeshRendererComponent
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint MeshRendererComponent_GetMaterial(uint entityID);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MeshRendererComponent_SetMaterial(uint entityID, uint material_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint[] MeshRendererComponent_GetMaterials(uint entityID);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MeshRendererComponent_SetMaterials(uint entityID, uint[] material_handles, uint num_elements);
+
+        // Uniform Blocks
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MeshRenderer_EnableUniformBlock(uint entityID, uint material_index);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static IntPtr MeshRenderer_GetUniformBlock(uint entityID, uint material_index);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MeshRenderer_DisableUniformBlock(uint entityID, uint material_index);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MeshRenderer_EnableAllUniformBlocks(uint entityID);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MeshRenderer_DisableAllUniformBlocks(uint entityID);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MaterialUniformBlock_SetUniform(IntPtr uniform_block, string uniform_name, uint type, IntPtr value);
+
+        #endregion
+
+
     }
 }

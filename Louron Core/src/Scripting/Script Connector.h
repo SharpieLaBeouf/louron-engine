@@ -266,6 +266,39 @@ namespace Louron {
 
 #pragma endregion
 
+#pragma region Material
+
+		// TODO: Implement Material as a type in scripting so we can set material script fields in editor 
+		static AssetHandle Material_Create(MonoString* name);
+		static void Material_SetShader(AssetHandle asset_handle, AssetHandle shader_handle);
+		static void Material_Destroy(AssetHandle asset_handle);
+
+#pragma endregion
+
+#pragma region MeshRendererComponent
+
+		static AssetHandle MeshRendererComponent_GetMaterial(UUID entityID);
+		static void MeshRendererComponent_SetMaterial(UUID entityID, AssetHandle material_handle);
+		static uint32_t* MeshRendererComponent_GetMaterials(UUID entityID);
+		static void MeshRendererComponent_SetMaterials(UUID entityID, uint32_t* material_handles, uint32_t num_elements);
+		
+		static void MeshRenderer_EnableUniformBlock(UUID entityID, uint32_t material_index);
+		static void MeshRenderer_DisableUniformBlock(UUID entityID, uint32_t material_index);
+
+		static void MeshRenderer_EnableAllUniformBlocks(UUID entityID);
+		static void MeshRenderer_DisableAllUniformBlocks(UUID entityID);
+
+		static MaterialUniformBlock* MeshRenderer_GetUniformBlock(UUID entityID, uint32_t material_index);
+
+#pragma endregion
+
+#pragma region MaterialUniformBlock
+
+		// IMPLEMENT CALLBACKS SO WE CAN SET PROPERTIES FROM SCRIPTS! E.g., MaterialUniformBlock::SetUniform("myFloat", GLSLType::Float, 69.0f);
+		static void MaterialUniformBlock_SetUniform(MaterialUniformBlock* uniform_block, MonoString* uniform_name, uint32_t type, void* value);
+
+#pragma endregion
+
 	};
 
 }

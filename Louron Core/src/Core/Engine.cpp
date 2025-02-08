@@ -48,25 +48,7 @@ namespace Louron {
         // Renderer Init Debug VAOs
         Renderer::Init();
 
-        m_ShaderLibrary = std::make_unique<ShaderLibrary>();
-
-        // TODO: Move loading to Scene Management for Loading Scenes?
-
-        // Load All Shaders 
-        {
-            for (const auto& path : FindFilePaths(".glsl")) {
-                m_ShaderLibrary->LoadShader(path);
-            }
-
-            for (const auto& path : FindFilePaths(".comp")) {
-                m_ShaderLibrary->LoadShader(path, true);
-            }
-
-            for (const auto& path : FindFilePaths(".compute")) {
-                m_ShaderLibrary->LoadShader(path, true);
-            }
-        }
-
+        // TODO: Do we even use this anymore?
         m_TextureLibrary = std::make_unique<TextureLibrary>();
 
         // Init Input Manager

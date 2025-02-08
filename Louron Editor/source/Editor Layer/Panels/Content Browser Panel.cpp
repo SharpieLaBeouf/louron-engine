@@ -56,6 +56,7 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 		
 	// Begin the table with 2 columns
 	if (ImGui::BeginTable("MyTable", 2, ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp | ImGuiTableFlags_NoSavedSettings)) {
+
 		{ // Setup
 
 			// Setup the first column and set its initial width
@@ -68,6 +69,7 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(0); // Set to first column
 		}
+
 		auto directory_folder_drop_source = [&](const std::filesystem::path& file_path) {
 
 			if (ImGui::BeginDragDropSource())
@@ -391,6 +393,9 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 
 						ImGui::ImageButton(entry.path().string().c_str(), (ImTextureID)(uintptr_t)texture_id, {64.0f, 64.0f}, {0, 1}, {1, 0});
 
+						if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && AssetManager::GetAssetTypeFromFileExtension(entry.path().extension()) == AssetType::Material_Standard)
+							editor_layer.m_MaterialContext = Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(entry.path(), Project::GetActiveProject()->GetAssetDirectory());
+
 						if (ImGui::BeginDragDropSource())
 						{
 							std::string path_str = entry.path().string(); // Convert to string
@@ -473,7 +478,7 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 				}
 
 				static bool script_create = false;
-				Utils::OnCreateNewScriptGUI(&script_create);
+				::Utils::OnCreateNewScriptGUI(&script_create);
 
 				static bool delete_file_path = false;
 				static std::filesystem::path path_to_delete{};
@@ -482,6 +487,11 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 					
 					// Handle item-specific context menu
 					if (ImGui::BeginPopup("ItemContextMenu")) {
+
+						if (ImGui::MenuItem(std::filesystem::is_directory(path_clicked) ? "Open Directory In File Explorer" : "Open File")) {
+							std::string command = "explorer \"" + path_clicked.string() + "\"";
+							std::system(command.c_str());
+						}
 
 						if (ImGui::MenuItem("Rename")) {
 							is_renaming_path = true;
@@ -546,12 +556,12 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 								counter++;
 							}
 
-							std::shared_ptr<PBRMaterial> material = std::make_shared<PBRMaterial>();
-							material->SetName(file_path.stem().string());
+							PBRMaterial material = PBRMaterial{};
+							material.SetName(file_path.stem().string());
 
 							YAML::Emitter out;
 							out << YAML::BeginMap;
-							material->Serialize(out);
+							material.Serialize(out);
 							out << YAML::EndMap;
 
 							std::ofstream fout(file_path); // Create the file
@@ -563,6 +573,30 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 							first_focus = true;
 
 							Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory());
+						}
+
+						if (ImGui::MenuItem("Create New Shader")) {
+							std::filesystem::path file_path = m_CurrentDirectory / "New Shader.lshader";
+
+							// Ensure unique filename
+							int counter = 1;
+							while (std::filesystem::exists(file_path)) {
+								file_path = m_CurrentDirectory / ("New Shader (" + std::to_string(counter) + ").lshader");
+								counter++;
+							}
+
+							std::filesystem::copy("Resources/Shaders/Forward+/FP_Material_PBR_Shader.glsl", file_path);
+							is_renaming_path = true;
+							renaming_path = file_path;
+							new_path_file_name = file_path.filename().string();
+							first_focus = true;
+
+							Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory());
+						}
+
+						if (ImGui::MenuItem("Open Directory In File Explorer")) {
+							std::string command = "explorer \"" + m_CurrentDirectory.string() + "\"";
+							std::system(command.c_str());
 						}
 
 						ImGui::EndPopup();
@@ -650,6 +684,7 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 		// End the table
 		ImGui::EndTable();
 	}
+
 }
 
 void ContentBrowserPanel::AssetFileListener::handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename)
@@ -737,6 +772,7 @@ void ContentBrowserPanel::AssetFileListener::handleFileAction(efsw::WatchID watc
 				AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(handle);
 				std::filesystem::rename(meta_old_path, new_path.string() + ".meta");
 
+				meta_data.AssetName = new_path.stem().string();
 				meta_data.FilePath = std::filesystem::relative(new_path, Project::GetActiveProject()->GetAssetDirectory());
 
 				Engine::Get().SubmitToMainThread([this, handle, meta_data]() {

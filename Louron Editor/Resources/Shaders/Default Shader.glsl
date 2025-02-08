@@ -31,7 +31,8 @@ void main() {
 #version 450 core
 
 in vec2 TexCoord;
-out vec4 fragColour;
+
+out vec4 out_FragColour;
 
 struct Material{
 
@@ -41,6 +42,7 @@ struct Material{
 };
 uniform Material u_Material;
 
-void main() {
-	fragColour = texture(u_Material.diffuseMap, vec2(TexCoord.x, TexCoord.y)) * u_Material.diffuse;
+void main() 
+{
+	out_FragColour = texture(u_Material.diffuseMap, vec2(TexCoord.x, TexCoord.y)) * u_Material.diffuse;
 }

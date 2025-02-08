@@ -295,9 +295,9 @@ namespace Louron {
 
 			std::vector<OctreeBounds<Entity>::OctreeData> data_sources;
 
-			auto bounds_view_mesh = dest_scene->GetAllEntitiesWith<AssetMeshFilter, AssetMeshRenderer>();
+			auto bounds_view_mesh = dest_scene->GetAllEntitiesWith<MeshFilterComponent, MeshRendererComponent>();
 			for (const auto& entity_handle : bounds_view_mesh) {
-				auto& mesh_filter = bounds_view_mesh.get<AssetMeshFilter>(entity_handle);
+				auto& mesh_filter = bounds_view_mesh.get<MeshFilterComponent>(entity_handle);
 
 				// Ensure the AABB is up to date
 				mesh_filter.UpdateTransformedAABB();
@@ -561,15 +561,15 @@ namespace Louron {
 				}
 
 				// 1.g. MeshFilter
-				if (prefab_registry->has<AssetMeshFilter>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<AssetMeshFilter>(start_prefab_entity);
-					instantiated_entity.AddComponent<AssetMeshFilter>(component);
+				if (prefab_registry->has<MeshFilterComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<MeshFilterComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<MeshFilterComponent>(component);
 				}
 
 				// 1.h. MeshRenderer
-				if (prefab_registry->has<AssetMeshRenderer>(start_prefab_entity)) {
-					auto& component = prefab_registry->get<AssetMeshRenderer>(start_prefab_entity);
-					instantiated_entity.AddComponent<AssetMeshRenderer>(component);
+				if (prefab_registry->has<MeshRendererComponent>(start_prefab_entity)) {
+					auto& component = prefab_registry->get<MeshRendererComponent>(start_prefab_entity);
+					instantiated_entity.AddComponent<MeshRendererComponent>(component);
 				}
 
 				// 1.i. PointLight Component

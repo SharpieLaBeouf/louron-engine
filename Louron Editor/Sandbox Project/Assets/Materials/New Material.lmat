@@ -1,9 +1,0 @@
-Material Asset Name: New Material
-Material Asset Type: AssetType::Material_Standard
-Render Type: Opaque
-Roughness: 0.5
-Metallic: 0
-Albedo Tint: [1, 0, 0, 1]
-AlbedoTextureAsset: 4294967295
-MetallicTextureAsset: 4294967295
-NormalTextureAsset: 4294967295

@@ -28,6 +28,7 @@ namespace Louron {
 #pragma region Asset Import
 
 	using AssetImportFunction = std::function<std::shared_ptr<Asset>(AssetMap*, AssetRegistry*, AssetHandle, const AssetMetaData&, const std::filesystem::path&)>;
+	
 	static std::map<AssetType, AssetImportFunction> s_AssetImportFunctions = {
 
 		//{ AssetType::Audio, AudioImporter::ImportAudio },
@@ -41,7 +42,8 @@ namespace Louron {
 
 		{ AssetType::ModelImport,				ModelImporter::ImportModel },
 
-		{ AssetType::Compute_Shader,			ComputeShaderImporter::ImportComputeShader }
+		{ AssetType::Shader,					ShaderImporter::ImportShader },
+		{ AssetType::Compute_Shader,			ShaderImporter::ImportComputeShader }
 	};
 
 	std::shared_ptr<Asset> AssetImporter::ImportAsset(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& metadata, const std::filesystem::path& project_asset_directory)
@@ -185,10 +187,10 @@ namespace Louron {
 
 	std::shared_ptr<Prefab> ModelImporter::ImportModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory)
 	{
-		return LoadModel(asset_map, asset_reg, handle, meta_data.IsCustomAsset ? meta_data.FilePath : Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
+		return LoadModel(asset_map, asset_reg, handle, meta_data, meta_data.IsCustomAsset ? meta_data.FilePath : Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
 	}
 
-	std::shared_ptr<Prefab> ModelImporter::LoadModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const std::filesystem::path& path)
+	std::shared_ptr<Prefab> ModelImporter::LoadModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& path)
 	{
 		if (!asset_map) {
 			L_CORE_ERROR("Cannot Import Model - Asset Map Invalid.");
@@ -243,7 +245,7 @@ namespace Louron {
 		std::shared_ptr<Prefab> model_prefab = std::make_shared<Prefab>();
 		model_prefab->SetMutable(false);
 
-		ProcessNode(scene, scene->mRootNode, model_prefab, entt::null, asset_map, asset_reg, handle, path);
+		ProcessNode(scene, scene->mRootNode, model_prefab, entt::null, asset_map, asset_reg, handle, meta_data, path);
 
 		return model_prefab;
 	}
@@ -268,10 +270,8 @@ namespace Louron {
 		return absolute_texture_path;
 	}
 
-	void ModelImporter::ProcessMesh(const aiScene* scene, aiMesh* mesh, std::shared_ptr<Prefab> model_prefab, entt::entity current_entity_handle, std::shared_ptr<AssetMesh> asset_mesh, AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle parent_asset_handle, const std::filesystem::path& path)
+	void ModelImporter::ProcessMesh(const aiScene* scene, aiMesh* mesh, std::shared_ptr<Prefab> model_prefab, entt::entity current_entity_handle, std::shared_ptr<AssetMesh> asset_mesh, AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle parent_asset_handle, const AssetMetaData& parent_meta_data, const std::filesystem::path& path)
 	{
-		
-
 		// 1. Process Vertices
 		std::vector<Vertex> mesh_vertices;
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
@@ -323,6 +323,7 @@ namespace Louron {
 			material_metadata.Type = AssetType::Material_Standard;
 			material_metadata.AssetName = materialName.C_Str();
 			material_metadata.ParentAssetHandle = parent_asset_handle;
+			material_metadata.IsCustomAsset = parent_meta_data.IsCustomAsset;
 
 			std::shared_ptr<PBRMaterial> asset_material = std::make_shared<PBRMaterial>();
 
@@ -454,8 +455,8 @@ namespace Louron {
 			
 			if (asset_material) {
 
-				auto& component = model_prefab->GetComponent<AssetMeshRenderer>(current_entity_handle);
-				component.MeshRendererMaterialHandles.push_back(asset_material_handle);
+				auto& component = model_prefab->GetComponent<MeshRendererComponent>(current_entity_handle);
+				component.MeshRendererMaterialHandles.push_back({ asset_material_handle, nullptr });
 
 				asset_material->Handle = asset_material_handle;
 
@@ -466,12 +467,12 @@ namespace Louron {
 		}
 		else 
 		{
-			model_prefab->GetComponent<AssetMeshRenderer>(current_entity_handle).MeshRendererMaterialHandles.push_back(asset_material_handle);
+			model_prefab->GetComponent<MeshRendererComponent>(current_entity_handle).MeshRendererMaterialHandles.push_back({ asset_material_handle, nullptr });
 		}
 
 	}
 
-	void ModelImporter::ProcessNode(const aiScene* scene, aiNode* node, std::shared_ptr<Prefab> model_prefab, entt::entity parent_entity_handle, AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle parent_asset_handle, const std::filesystem::path& path)
+	void ModelImporter::ProcessNode(const aiScene* scene, aiNode* node, std::shared_ptr<Prefab> model_prefab, entt::entity parent_entity_handle, AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle parent_asset_handle, const AssetMetaData& parent_meta_data, const std::filesystem::path& path)
 	{
 		entt::entity current_entity_handle = entt::null;
 
@@ -522,8 +523,8 @@ namespace Louron {
 					node->mTransformation.a4, node->mTransformation.b4, node->mTransformation.c4, node->mTransformation.d4
 				);
 				model_prefab->GetComponent<TransformComponent>(current_entity_handle).SetTransform(local_transformation);
-				model_prefab->AddComponent<AssetMeshFilter>(current_entity_handle).MeshFilterAssetHandle = handle;
-				model_prefab->AddComponent<AssetMeshRenderer>(current_entity_handle);
+				model_prefab->AddComponent<MeshFilterComponent>(current_entity_handle).MeshFilterAssetHandle = handle;
+				model_prefab->AddComponent<MeshRendererComponent>(current_entity_handle);
 
 				AssetMetaData metadata;
 
@@ -531,12 +532,13 @@ namespace Louron {
 				metadata.AssetName = node->mName.C_Str();
 				metadata.ParentAssetHandle = parent_asset_handle;
 				metadata.FilePath = std::filesystem::relative(path, Project::GetActiveProject()->GetAssetDirectory());
+				metadata.IsCustomAsset = parent_meta_data.IsCustomAsset;
 
 				// Process Meshes of the Node
 				for (unsigned int i = 0; i < node->mNumMeshes; i++) {
 
 					aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-					ProcessMesh(scene, mesh, model_prefab, current_entity_handle, asset_mesh, asset_map, asset_reg, parent_asset_handle, path);
+					ProcessMesh(scene, mesh, model_prefab, current_entity_handle, asset_mesh, asset_map, asset_reg, parent_asset_handle, parent_meta_data, path);
 
 					// Calculate the the AABB of the mesh including any sub meshes
 					// Update bounds to include the current submesh
@@ -560,15 +562,15 @@ namespace Louron {
 					asset_reg->operator[](handle) = metadata;
 				}
 				else {
-					model_prefab->RemoveComponent<AssetMeshFilter>(current_entity_handle);
-					model_prefab->RemoveComponent<AssetMeshRenderer>(current_entity_handle);
+					model_prefab->RemoveComponent<MeshFilterComponent>(current_entity_handle);
+					model_prefab->RemoveComponent<MeshRendererComponent>(current_entity_handle);
 				}
 			}
 		}
 
 		// Process Any Children Nodes
 		for (unsigned int i = 0; i < node->mNumChildren; i++) {
-			ProcessNode(scene, node->mChildren[i], model_prefab, current_entity_handle, asset_map, asset_reg, parent_asset_handle, path);
+			ProcessNode(scene, node->mChildren[i], model_prefab, current_entity_handle, asset_map, asset_reg, parent_asset_handle, parent_meta_data, path);
 		}
 	}
 
@@ -576,12 +578,27 @@ namespace Louron {
 
 #pragma region Compute Shader Import
 
-	std::shared_ptr<ComputeShaderAsset> ComputeShaderImporter::ImportComputeShader(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory)
+	std::shared_ptr<Shader> ShaderImporter::ImportShader(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory)
+	{
+		return LoadShader(meta_data.IsCustomAsset ? meta_data.FilePath : Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
+	}
+
+	std::shared_ptr<Shader> ShaderImporter::LoadShader(const std::filesystem::path& path)
+	{
+		if(AssetManager::GetAssetTypeFromFileExtension(path.extension()) == AssetType::Compute_Shader)
+			return std::make_shared<Shader>(path.string().c_str(), true);
+		else if (AssetManager::GetAssetTypeFromFileExtension(path.extension()) == AssetType::Shader)
+			return std::make_shared<Shader>(path.string().c_str(), false);
+
+		return nullptr;
+	}
+
+	std::shared_ptr<ComputeShaderAsset> ShaderImporter::ImportComputeShader(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory)
 	{
 		return LoadComputeShader(meta_data.IsCustomAsset ? meta_data.FilePath : Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
 	}
 
-	std::shared_ptr<ComputeShaderAsset> ComputeShaderImporter::LoadComputeShader(const std::filesystem::path& path) 
+	std::shared_ptr<ComputeShaderAsset> ShaderImporter::LoadComputeShader(const std::filesystem::path& path) 
 	{
 		return std::make_shared<ComputeShaderAsset>(path);
 	}

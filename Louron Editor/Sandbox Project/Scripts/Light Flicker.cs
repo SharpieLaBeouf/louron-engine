@@ -36,7 +36,7 @@ namespace SandboxProject
             float noise = LMath.PerlinNoise(time, 0.0f);
 
             // Map noise value to the desired intensity range
-            light.intensity = LMath.Lerp(noise, minIntensity, maxIntensity);
+            light.intensity = Math.Clamp(LMath.Lerp(noise, minIntensity, maxIntensity), minIntensity, maxIntensity);
         }
 
         void OnFixedUpdate() 

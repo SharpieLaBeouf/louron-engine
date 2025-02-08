@@ -46,6 +46,7 @@ namespace Louron {
 		RigidbodyComponent,
 		BoxColliderComponent,
 		SphereColliderComponent,
+		MeshRendererComponent,
 		Component,
 		Prefab,
 		ComputeShader
@@ -220,7 +221,7 @@ namespace Louron {
 		UUID GetFieldEntityValue(const std::string& field_name);
 
 		void SetFieldComponentPropertyValue(const ScriptFieldInstance& field_instance, UUID value);
-		UUID GetComponentPropertyValue(const std::string& field_name);
+		UUID GetFieldComponentPropertyValue(const std::string& field_name);
 
 		void SetFieldPrefabValue(const ScriptFieldInstance& field_instance, AssetHandle value);
 		AssetHandle GetFieldPrefabValue(const std::string& field_name);
@@ -357,6 +358,7 @@ namespace Louron {
 				case ScriptFieldType::RigidbodyComponent:			return "RigidbodyComponent";
 				case ScriptFieldType::BoxColliderComponent:			return "BoxColliderComponent";
 				case ScriptFieldType::SphereColliderComponent:		return "SphereColliderComponent";
+				case ScriptFieldType::MeshRendererComponent:		return "MeshRendererComponent";
 				case ScriptFieldType::Component:					return "Component";
 				case ScriptFieldType::Prefab:						return "Prefab";
 				case ScriptFieldType::ComputeShader:				return "ComputeShader";
@@ -396,6 +398,7 @@ namespace Louron {
 			if (fieldType == "RigidbodyComponent")			return ScriptFieldType::RigidbodyComponent;
 			if (fieldType == "BoxColliderComponent")		return ScriptFieldType::BoxColliderComponent;
 			if (fieldType == "SphereColliderComponent")		return ScriptFieldType::SphereColliderComponent;
+			if (fieldType == "MeshRendererComponent")		return ScriptFieldType::MeshRendererComponent;
 			if (fieldType == "Component")					return ScriptFieldType::Component;
 			if (fieldType == "Prefab")						return ScriptFieldType::Prefab;
 			if (fieldType == "ComputeShader")				return ScriptFieldType::ComputeShader;

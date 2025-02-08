@@ -54,6 +54,7 @@ namespace Louron {
 		{ "Louron.RigidbodyComponent",			ScriptFieldType::RigidbodyComponent },
 		{ "Louron.BoxColliderComponent",		ScriptFieldType::BoxColliderComponent },
 		{ "Louron.SphereColliderComponent",		ScriptFieldType::SphereColliderComponent },
+		{ "Louron.MeshRendererComponent",		ScriptFieldType::MeshRendererComponent },
 		{ "Louron.Component",					ScriptFieldType::Component },
 		{ "Louron.Prefab",						ScriptFieldType::Prefab },
 		{ "Louron.ComputeShader",				ScriptFieldType::ComputeShader }
@@ -890,7 +891,8 @@ namespace Louron {
 	}
 
 	const std::unordered_map<std::string, std::shared_ptr<ScriptClass>>& ScriptManager::GetEntityClasses() {
-		if (!s_Data) return {};
+
+		L_CORE_ASSERT(s_Data, "Script Data Not Initialised.");
 
 		return s_Data->EntityClasses;
 	}
@@ -1145,7 +1147,7 @@ namespace Louron {
 
 	}
 
-	UUID ScriptInstance::GetComponentPropertyValue(const std::string& name)
+	UUID ScriptInstance::GetFieldComponentPropertyValue(const std::string& name)
 	{
 		// Retrieve the MonoClassField for the property on the current script class
 		MonoClassField* componentField = mono_class_get_field_from_name(m_ScriptClass->GetMonoClass(), name.c_str());

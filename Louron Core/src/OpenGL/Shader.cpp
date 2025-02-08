@@ -5,6 +5,7 @@
 
 // C++ Standard Library Headers
 #include <filesystem>
+#include <regex>
 
 // External Vendor Library Headers
 
@@ -33,15 +34,30 @@ namespace Louron {
 	void Shader::SetName(const std::string& name) { m_Name = name; }
 
 	void Shader::SetBool(const GLchar* name, bool value) const { glUniform1i(glGetUniformLocation(m_Program, name), (int)value); }
+	void Shader::SetBoolVec2(const GLchar* name, const glm::bvec2& value) const { glUniform2i(glGetUniformLocation(m_Program, name), (int)value.x, (int)value.y); }
+	void Shader::SetBoolVec3(const GLchar* name, const glm::bvec3& value) const { glUniform3i(glGetUniformLocation(m_Program, name), (int)value.x, (int)value.y, (int)value.z); }
+	void Shader::SetBoolVec4(const GLchar* name, const glm::bvec4& value) const { glUniform4i(glGetUniformLocation(m_Program, name), (int)value.x, (int)value.y, (int)value.z, (int)value.w); }
+
 	void Shader::SetInt(const GLchar* name, int value) const { glUniform1i(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetIntVec2(const GLchar* name, const glm::ivec2& value) const { glUniform2iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetIntVec3(const GLchar* name, const glm::ivec3& value) const { glUniform3iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetIntVec4(const GLchar* name, const glm::ivec4& value) const { glUniform4iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+
 	void Shader::SetUInt(const GLchar* name, GLuint value) const { glUniform1ui(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetUIntVec2(const GLchar* name, const glm::uvec2& value) const { glUniform2uiv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetUIntVec3(const GLchar* name, const glm::uvec3& value) const { glUniform3uiv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetUIntVec4(const GLchar* name, const glm::uvec4& value) const { glUniform4uiv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+
 	void Shader::SetFloat(const GLchar* name, float value) const { glUniform1f(glGetUniformLocation(m_Program, name), value); }
-	void Shader::SetiVec2(const GLchar* name, const glm::ivec2& value) const { glUniform2iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetiVec3(const GLchar* name, const glm::ivec3& value) const { glUniform3iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetiVec4(const GLchar* name, const glm::ivec4& value) const { glUniform4iv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetVec2(const GLchar* name, const glm::vec2& value) const { glUniform2fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetVec3(const GLchar* name, const glm::vec3& value) const { glUniform3fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
-	void Shader::SetVec4(const GLchar* name, const glm::vec4& value) const { glUniform4fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetFloatVec2(const GLchar* name, const glm::vec2& value) const { glUniform2fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetFloatVec3(const GLchar* name, const glm::vec3& value) const { glUniform3fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetFloatVec4(const GLchar* name, const glm::vec4& value) const { glUniform4fv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+
+	void Shader::SetDouble(const GLchar* name, double value) const { glUniform1d(glGetUniformLocation(m_Program, name), value); }
+	void Shader::SetDoubleVec2(const GLchar* name, const glm::dvec2& value) const { glUniform2dv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetDoubleVec3(const GLchar* name, const glm::dvec3& value) const { glUniform3dv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+	void Shader::SetDoubleVec4(const GLchar* name, const glm::dvec4& value) const { glUniform4dv(glGetUniformLocation(m_Program, name), 1, &value[0]); }
+
 	void Shader::SetMat2(const GLchar* name, const glm::mat2& mat) const { glUniformMatrix2fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
 	void Shader::SetMat3(const GLchar* name, const glm::mat3& mat) const { glUniformMatrix3fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
 	void Shader::SetMat4(const GLchar* name, const glm::mat4& mat) const { glUniformMatrix4fv(glGetUniformLocation(m_Program, name), 1, GL_FALSE, &mat[0][0]); }
@@ -79,10 +95,10 @@ namespace Louron {
 		if (!m_IsComputeShader) {
 
 			enum class ShaderType {
-				NONE = -1, VERTEX = 0, FRAGMENT = 1, GEOMETRY = 2
+				NONE = -1, VERTEX = 0, FRAGMENT = 1, GEOMETRY = 2, CUSTOM_MATERIAL_UNIFORNS = 3
 			};
 
-			std::string line; std::stringstream ss[3];
+			std::string line; std::stringstream ss[4];
 			ShaderType type = ShaderType::NONE;
 			while (getline(file, line))
 			{
@@ -94,6 +110,8 @@ namespace Louron {
 						type = ShaderType::FRAGMENT;
 					else if (line.find("GEOMETRY") != std::string::npos)
 						type = ShaderType::GEOMETRY;
+					else if (line.find("CUSTOM_MATERIAL_UNIFORMS") != std::string::npos)
+						type = ShaderType::CUSTOM_MATERIAL_UNIFORNS;
 				}
 				else
 					ss[(int)type] << line << '\n';
@@ -102,6 +120,26 @@ namespace Louron {
 			std::string vString = ss[0].str();
 			std::string fString = ss[1].str();
 			std::string gString = ss[2].str();
+			std::string customMaterialStructString = ss[3].str();
+
+			if (customMaterialStructString.empty())
+				customMaterialStructString = "struct MaterialUniforms { int DO_NOT_USE_PLACE_HOLDER; };\n";
+
+			// Function to insert customMaterialStructString after the #version line
+			auto insertAfterVersion = [](std::string& shaderString, const std::string& customStruct) {
+				size_t versionPos = shaderString.find("#version");
+				if (versionPos != std::string::npos) {
+					// Insert after the #version line (skip the #version line itself)
+					size_t newlinePos = shaderString.find('\n', versionPos);
+					if (newlinePos != std::string::npos) {
+						shaderString.insert(newlinePos + 1, customStruct);  // Insert right after the #version line
+					}
+				}
+			};
+
+			// Insert customMaterialStructString into both vertex and fragment shader strings
+			insertAfterVersion(vString, customMaterialStructString);
+			insertAfterVersion(fString, customMaterialStructString);
 
 			const GLchar* vShaderCode = vString.c_str();
 			const GLchar* fShaderCode = fString.c_str();
@@ -114,6 +152,7 @@ namespace Louron {
 			glCompileShader(vertex);
 			if (!checkCompileErrors(vertex, "VERTEX")) {
 				glDeleteShader(vertex);
+				m_Program = -1;
 				return;
 			}
 
@@ -123,6 +162,7 @@ namespace Louron {
 			if (!checkCompileErrors(fragment, "FRAGMENT")) {
 				glDeleteShader(vertex);
 				glDeleteShader(fragment);
+				m_Program = -1;
 				return;
 			}
 
@@ -134,6 +174,7 @@ namespace Louron {
 					glDeleteShader(vertex);
 					glDeleteShader(fragment);
 					glDeleteShader(geometry);
+					m_Program = -1;
 					return;
 				}
 			}
@@ -149,12 +190,15 @@ namespace Louron {
 				glDeleteShader(fragment);
 				if (!gString.empty()) glDeleteShader(geometry);
 				glDeleteProgram(program);
+				m_Program = -1;
 				return;
 			}
 
 			m_Program = program;
 
 			L_CORE_INFO("Shader Compiled Successfully: {}", m_Name);
+
+			ExtractCustomUniforms(customMaterialStructString);
 
 			glDeleteShader(vertex);
 			glDeleteShader(fragment);
@@ -175,12 +219,23 @@ namespace Louron {
 			compute = glCreateShader(GL_COMPUTE_SHADER);
 			glShaderSource(compute, 1, &cShaderCode, NULL);
 			glCompileShader(compute);
-			checkCompileErrors(compute, "COMPUTE");
+			if (!checkCompileErrors(compute, "COMPUTE"))
+			{
+				glDeleteShader(compute);
+				m_Program = -1;
+				return;
+			}
 
 			GLuint program = glCreateProgram();
 			glAttachShader(program, compute);
 			glLinkProgram(program);
-			checkCompileErrors(program, "PROGRAM");
+			if (!checkCompileErrors(compute, "PROGRAM"))
+			{
+				glDeleteShader(compute);
+				glDeleteProgram(program);
+				m_Program = -1;
+				return;
+			}
 
 			m_Program = program;
 
@@ -192,94 +247,44 @@ namespace Louron {
 
 	}
 
-// -- Shader Library --
 
-	void ShaderLibrary::UnBindAllShaders() { glUseProgram(0); }
 
-	/// <summary>
-	/// Initialises the ShaderLibrary class so that it always holds a default shader.
-	/// </summary>
-	ShaderLibrary::ShaderLibrary() {
-		namespace fs = std::filesystem;
-		try {
-			fs::path currentPath = fs::current_path();
+	void Shader::ExtractCustomUniforms(const std::string& source)
+	{
+		std::istringstream stream(source);
+		std::string line;
 
-			for (const auto& entry : fs::recursive_directory_iterator(currentPath)) {
-				if (entry.is_regular_file() && entry.path().filename() == "Default Shader.glsl") {
-					m_DefaultShader = LoadShader(entry.path().string());
-					break; // Found the shader, no need to continue searching
+		while (std::getline(stream, line)) {
+			// Trim whitespace
+			line = std::regex_replace(line, std::regex("^\s+|\s+$"), "");
+			if (line.empty() || line.rfind("//", 0) == 0) continue; // Skip comments
+
+			size_t commentPos = line.find("//");
+			if (commentPos != std::string::npos) line = line.substr(0, commentPos);
+
+			size_t pos = 0;
+			while ((pos = line.find(";")) != std::string::npos) {
+				std::string statement = line.substr(0, pos);
+				line = line.substr(pos + 1);
+
+				std::istringstream ss(statement);
+				std::string typeStr, varName;
+				ss >> typeStr;
+
+				if (typeMap.find(typeStr) == typeMap.end()) 
+					continue;
+
+				GLSLType type = typeMap.at(typeStr);
+
+				while (ss >> varName) {
+					varName = std::regex_replace(varName, std::regex(",[ ]*"), "");
+					if (!varName.empty() && varName != "DO_NOT_USE_PLACE_HOLDER")
+					{
+						m_CustomUniforms.push_back({ varName, type });
+						L_CORE_INFO(" - Custom Uniform Found : (Type:{}, Name : {})", typeStr, varName);
+					}
 				}
 			}
-
-			if (!m_DefaultShader) {
-				L_CORE_ERROR("Could Not Find Default Shader.");
-			}
 		}
-		catch (const std::exception& e) {
-			L_CORE_ERROR("Error Searching for Default Shader File: {0}", e.what());
-		}
-	}
-
-	void ShaderLibrary::ReloadAllShaders() {
-
-		for (const auto& [name, shader] : m_Shaders) {
-			shader->LoadShader();
-		}
-
-	}
-
-	/// <summary>
-	/// This loads a shader based on the name of the shader file path.
-	/// </summary>
-	/// <param name="shaderFile">File Path to Shader</param>
-	/// <param name="isComputeShader">Set to true if it is a Compute Shader</param>
-	/// <returns></returns>
-	std::shared_ptr<Shader>& ShaderLibrary::LoadShader(const std::filesystem::path& shader_file_path, bool isComputeShader) {
-
-		std::string shaderName = shader_file_path.stem().string();
-
-		// Check if Shader Already Exists
-		if (ShaderExists(shaderName)) {
-			L_CORE_INFO("Shader Already Loaded: {0}", shaderName);
-			return m_Shaders[shaderName];
-		}
-
-		std::shared_ptr<Shader> shader = std::make_shared<Shader>(shader_file_path.string().c_str(), isComputeShader);
-
-		// Check if Shader Linked Successfully
-		GLint success;
-		glGetProgramiv(shader->GetProgram(), GL_LINK_STATUS, &success);
-
-		if (success == GL_FALSE) {
-			L_CORE_WARN("Shader Not Loaded - Returning Default Shader");
-			return m_DefaultShader;
-		}
-
-		L_CORE_INFO("Shader Loaded: {0}", shaderName);
-		m_Shaders[shaderName] = std::move(shader);
-		m_Shaders[shaderName]->SetName(shaderName);
-		return m_Shaders[shaderName];
-	}
-
-	/// <summary>
-	/// This returns a unique_ptr reference to a given shader. Where there is no shader that exists, it returns a default shader.
-	/// </summary>
-	/// <param name="shaderName"></param>
-	/// <returns></returns>
-	std::shared_ptr<Shader>& ShaderLibrary::GetShader(const std::string& shaderName) {
-		if (ShaderExists(shaderName))
-			return m_Shaders[shaderName];
-
-		L_CORE_WARN("Shader Not Loaded - Returning Default Shader");
-		return m_DefaultShader;
-	}
-
-	/// <summary>
-	/// Checks if the shader exists within the map.
-	/// </summary>
-	/// <param name="name"></param>
-	/// <returns></returns>
-	bool ShaderLibrary::ShaderExists(const std::string& name) const {
-		return m_Shaders.find(name) != m_Shaders.end();
 	}
 }

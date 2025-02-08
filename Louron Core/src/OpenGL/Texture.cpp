@@ -77,29 +77,54 @@ namespace Louron {
 		if (textureData)
 		{
 			GLenum format = GL_RGBA;
+			GLenum internalFormat = GL_RGBA;
 
-			switch (nrChannels) {
-			case 1:
-				format = GL_RED;
-				break;
-			case 3:
-				format = GL_RGB;
-				break;
-			case 4:
-				format = GL_RGBA;
-				break;
+			switch (nrChannels) 
+			{
+				case 1:
+				{
+					format = GL_RED;
+					internalFormat = GL_R8;
+					break;
+				}
+				case 3:
+				{
+					format = GL_RGB;
+					internalFormat = GL_RGB8;
+					break;
+				}
+				case 4:
+				{
+					format = GL_RGBA;
+					internalFormat = GL_RGBA8;
+					break;
+				}
 			}
 
 			this->Bind();
-			glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
+
+			if (format == GL_RED)
+			{
+				GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_ONE };
+				glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+			}
+
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, textureData);
 			glGenerateMipmap(GL_TEXTURE_2D);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_WrapMode);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_WrapMode);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, m_WrapMode);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_FilterMode);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (m_FilterMode == GL_LINEAR) ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_FilterMode);
+
+			if (GLAD_GL_EXT_texture_filter_anisotropic == GL_TRUE) {
+
+				GLfloat max_aniso = 0.0f;
+				glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_aniso);
+				glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_aniso);
+
+			}
 
 			m_Name = texturePath.filename().replace_extension().string();
 			m_Size.x = width;
@@ -133,6 +158,13 @@ namespace Louron {
 	}
 
 	void Texture::SetWrapMode(GLint parameter) {
+		// Validate the wrap mode
+		if (parameter != GL_REPEAT && parameter != GL_MIRRORED_REPEAT && parameter != GL_CLAMP_TO_EDGE && parameter != GL_CLAMP_TO_BORDER)
+		{
+			L_CORE_WARN("Could Not Set Wrap Mode: Invalid OpenGL Wrap Parameter.");
+			return;
+		}
+
 		m_WrapMode = parameter;
 
 		this->Bind();
@@ -142,10 +174,17 @@ namespace Louron {
 	}
 
 	void Texture::SetFilterMode(GLint parameter) {
+
+		if (parameter != GL_LINEAR && parameter != GL_NEAREST)
+		{
+			L_CORE_WARN("Could Not Set Filter Mode: Invalid OpenGL Filter Parameter.");
+			return;
+		}
+
 		m_FilterMode = parameter;
 
 		this->Bind();
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_FilterMode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (m_FilterMode == GL_LINEAR) ? GL_LINEAR_MIPMAP_LINEAR : GL_NEAREST_MIPMAP_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_FilterMode);
 	}	
 

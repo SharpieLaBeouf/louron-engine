@@ -36,7 +36,7 @@ namespace Louron {
 		VAO->SetIndexBuffer(ebo);
 	}
 
-	void AssetMeshRenderer::Serialize(YAML::Emitter& out) {
+	void MeshRendererComponent::Serialize(YAML::Emitter& out) {
 		out << YAML::Key << "MeshRendererComponent";
 		out << YAML::BeginMap;
 
@@ -48,7 +48,7 @@ namespace Louron {
 			out << YAML::Key << "MaterialAssetHandles" << YAML::Value;
 			
 			out << YAML::BeginSeq;
-			for (const auto& handle : MeshRendererMaterialHandles) {
+			for (const auto& [handle, uniform_block] : MeshRendererMaterialHandles) {
 				out << (uint32_t)handle;
 			}
 			out << YAML::EndSeq;
@@ -57,7 +57,7 @@ namespace Louron {
 		out << YAML::EndMap;
 	}
 
-	bool AssetMeshRenderer::Deserialize(const YAML::Node data)
+	bool MeshRendererComponent::Deserialize(const YAML::Node data)
 	{
 		YAML::Node component = data;
 
@@ -79,7 +79,7 @@ namespace Louron {
 
 			MeshRendererMaterialHandles.clear();
 			for (const auto& handle : handles) {
-				MeshRendererMaterialHandles.push_back(handle.as<uint32_t>());
+				MeshRendererMaterialHandles.push_back({ handle.as<uint32_t>() , nullptr });
 			}
 		}
 		else {
@@ -89,7 +89,7 @@ namespace Louron {
 		return true;
 	}
 
-	void AssetMeshFilter::UpdateTransformedAABB() {
+	void MeshFilterComponent::UpdateTransformedAABB() {
 
 		Entity entity = GetEntity();
 
@@ -134,7 +134,7 @@ namespace Louron {
 		}
 	}
 
-	void AssetMeshFilter::Serialize(YAML::Emitter& out) const {
+	void MeshFilterComponent::Serialize(YAML::Emitter& out) const {
 
 		out << YAML::Key << "MeshFilterComponent";
 		out << YAML::BeginMap;
@@ -144,7 +144,7 @@ namespace Louron {
 		out << YAML::EndMap;
 	}
 
-	bool AssetMeshFilter::Deserialize(const YAML::Node data) {
+	bool MeshFilterComponent::Deserialize(const YAML::Node data) {
 		
 		YAML::Node component = data;
 

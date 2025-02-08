@@ -161,12 +161,12 @@ namespace Louron {
 			entity.GetComponent<CameraComponent>().Serialize(out);
 		}
 
-		if (entity.HasComponent<AssetMeshFilter>()) {
-			entity.GetComponent<AssetMeshFilter>().Serialize(out);
+		if (entity.HasComponent<MeshFilterComponent>()) {
+			entity.GetComponent<MeshFilterComponent>().Serialize(out);
 		}
 
-		if (entity.HasComponent<AssetMeshRenderer>()) {
-			entity.GetComponent<AssetMeshRenderer>().Serialize(out);
+		if (entity.HasComponent<MeshRendererComponent>()) {
+			entity.GetComponent<MeshRendererComponent>().Serialize(out);
 		}
 
 		if (entity.HasComponent<LODMeshComponent>()) {
@@ -362,7 +362,7 @@ namespace Louron {
 					auto meshFilter = entity["MeshFilterComponent"];
 					if (meshFilter) {
 
-						auto& entityMeshFilter = deserializedEntity.AddComponent<AssetMeshFilter>();
+						auto& entityMeshFilter = deserializedEntity.AddComponent<MeshFilterComponent>();
 
 						if (!entityMeshFilter.Deserialize(meshFilter))
 							L_CORE_WARN("Deserialisation of Mesh Filter Not Complete.");
@@ -372,7 +372,7 @@ namespace Louron {
 					auto meshRenderer = entity["MeshRendererComponent"];
 					if (meshRenderer) {
 
-						auto& entityMeshRenderer = deserializedEntity.AddComponent<AssetMeshRenderer>();
+						auto& entityMeshRenderer = deserializedEntity.AddComponent<MeshRendererComponent>();
 
 						if (!entityMeshRenderer.Deserialize(meshRenderer))
 							L_CORE_WARN("Deserialisation of Mesh Renderer Not Complete.");
@@ -480,9 +480,9 @@ namespace Louron {
 
 			std::vector<OctreeBounds<Entity>::OctreeData> data_sources;
 
-			auto bounds_view_mesh = scene_ref->GetAllEntitiesWith<AssetMeshFilter, AssetMeshRenderer>();
+			auto bounds_view_mesh = scene_ref->GetAllEntitiesWith<MeshFilterComponent, MeshRendererComponent>();
 			for (const auto& entity_handle : bounds_view_mesh) {
-				auto& mesh_filter = bounds_view_mesh.get<AssetMeshFilter>(entity_handle);
+				auto& mesh_filter = bounds_view_mesh.get<MeshFilterComponent>(entity_handle);
 
 				// Ensure the AABB is up to date
 				mesh_filter.UpdateTransformedAABB();

@@ -267,15 +267,15 @@ namespace Louron {
 			}
 
 			// 1.g. MeshFilter
-			if (start_entity.HasComponent<AssetMeshFilter>()) {
-				auto& component = start_entity.GetComponent<AssetMeshFilter>();
-				m_PrefabRegistry.emplace_or_replace<AssetMeshFilter>(prefab_entity_handle, component);
+			if (start_entity.HasComponent<MeshFilterComponent>()) {
+				auto& component = start_entity.GetComponent<MeshFilterComponent>();
+				m_PrefabRegistry.emplace_or_replace<MeshFilterComponent>(prefab_entity_handle, component);
 			}
 
 			// 1.h. MeshRenderer
-			if (start_entity.HasComponent<AssetMeshRenderer>()) {
-				auto& component = start_entity.GetComponent<AssetMeshRenderer>();
-				m_PrefabRegistry.emplace_or_replace<AssetMeshRenderer>(prefab_entity_handle, component);
+			if (start_entity.HasComponent<MeshRendererComponent>()) {
+				auto& component = start_entity.GetComponent<MeshRendererComponent>();
+				m_PrefabRegistry.emplace_or_replace<MeshRendererComponent>(prefab_entity_handle, component);
 			}
 
 			// 1.i. PointLight Component
@@ -395,12 +395,12 @@ namespace Louron {
 			GetComponent<CameraComponent>(entity).Serialize(out);
 		}
 
-		if (HasComponent<AssetMeshFilter>(entity)) {
-			GetComponent<AssetMeshFilter>(entity).Serialize(out);
+		if (HasComponent<MeshFilterComponent>(entity)) {
+			GetComponent<MeshFilterComponent>(entity).Serialize(out);
 		}
 
-		if (HasComponent<AssetMeshRenderer>(entity)) {
-			GetComponent<AssetMeshRenderer>(entity).Serialize(out);
+		if (HasComponent<MeshRendererComponent>(entity)) {
+			GetComponent<MeshRendererComponent>(entity).Serialize(out);
 		}
 
 		if (HasComponent<LODMeshComponent>(entity)) {
@@ -484,7 +484,7 @@ namespace Louron {
 		auto meshFilter = entity_node["MeshFilterComponent"];
 		if (meshFilter) {
 
-			auto& entityMeshFilter = AddComponent<AssetMeshFilter>(entity);
+			auto& entityMeshFilter = AddComponent<MeshFilterComponent>(entity);
 
 			if (!entityMeshFilter.Deserialize(meshFilter))
 				L_CORE_WARN("Deserialisation of Mesh Filter Not Complete.");
@@ -494,7 +494,7 @@ namespace Louron {
 		auto meshRenderer = entity_node["MeshRendererComponent"];
 		if (meshRenderer) {
 
-			auto& entityMeshRenderer = AddComponent<AssetMeshRenderer>(entity);
+			auto& entityMeshRenderer = AddComponent<MeshRendererComponent>(entity);
 
 			if (!entityMeshRenderer.Deserialize(meshRenderer))
 				L_CORE_WARN("Deserialisation of Mesh Renderer Not Complete.");

@@ -81,6 +81,8 @@ private:
 	efsw::FileWatcher* m_ScriptFileWatcher = new efsw::FileWatcher();
 	ScriptFileListener* m_ScriptFileListener = new ScriptFileListener();
 
+	Louron::AssetHandle m_MaterialContext = NULL_UUID;
+
 	void CheckInput();
 
 	void NewScene();
@@ -91,6 +93,7 @@ private:
 
 	void DisplayHierarchyWindow();
 	void DisplayPropertiesWindow();
+	void DisplayMaterialPropertiesWindow();
 	void DisplayScriptFields(const std::string& script_name);
 
 	void DisplayContentBrowserWindow();
@@ -98,6 +101,7 @@ private:
 	void DisplayRenderStatsWindow();
 	void DisplayProfilerWindow();
 	void DisplayAssetRegistryWindow();
+
 
 	void DisplayProjectProperties();
 	void DisplaySceneProperties();
