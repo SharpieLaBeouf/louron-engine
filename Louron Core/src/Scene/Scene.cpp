@@ -868,6 +868,7 @@ namespace Louron {
 	// UPDATE
 	void Scene::OnUpdate(EditorCamera* editor_camera) {
 
+		L_PROFILE_SCOPE("Scene - OnUpdate");
 		// Physics
 		if (!m_IsPaused && (m_IsRunning || m_IsSimulating)) {
 			PhysicsSystem::UpdatePhysicsObjects(std::static_pointer_cast<Scene>(shared_from_this()));

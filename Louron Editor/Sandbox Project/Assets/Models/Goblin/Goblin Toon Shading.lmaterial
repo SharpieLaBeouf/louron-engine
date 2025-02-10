@@ -1,0 +1,14 @@
+Material Asset Name: Goblin Toon Shading
+Material Asset Type: AssetType::Material_Standard
+Shader Handle: 1679242868
+Render Type: Opaque
+Roughness: 0.469999999
+Metallic: 0
+Albedo Tint: [1, 1, 1, 1]
+AlbedoTextureAsset: 509791957
+MetallicTextureAsset: 4294967295
+NormalTextureAsset: 4294967295
+Material Uniform Block:
+  - Name: MyCustomProperty
+    Type: float
+    Value: 0

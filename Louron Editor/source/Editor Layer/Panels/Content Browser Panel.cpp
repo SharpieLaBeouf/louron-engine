@@ -518,9 +518,23 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 					// Handle blank space context menu
 					if (ImGui::BeginPopup("BlankSpaceContextMenu")) {
 
+						if (ImGui::MenuItem("Create New Folder")) {
+							std::filesystem::path file_path = m_CurrentDirectory / "New Folder";
+
+							if (!std::filesystem::exists(file_path))
+							{
+								std::filesystem::create_directories(file_path);
+								is_renaming_path = true;
+								renaming_path = file_path;
+								new_path_file_name = file_path.filename().string();
+								first_focus = true;
+							}
+						}
+
+						// Scripts Folder
 						if (m_CurrentDirectory.lexically_normal().string().find((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").lexically_normal().string()) != std::string::npos) {
 
-							if (ImGui::MenuItem("Create Script File")) {
+							if (ImGui::MenuItem("Create New Script")) {
 
 								std::filesystem::path file_path = m_CurrentDirectory / "New Script.cs";
 
@@ -533,66 +547,131 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 							}
 						}
 
-						if (ImGui::MenuItem("Create Folder")) {
-							std::filesystem::path file_path = m_CurrentDirectory / "New Folder";
-							
-							if (!std::filesystem::exists(file_path))
-							{
-								std::filesystem::create_directories(file_path);
+						// Assets Folder
+						if (m_CurrentDirectory.lexically_normal().string().find((Project::GetActiveProject()->GetProjectDirectory() / "Assets").lexically_normal().string()) != std::string::npos) {
+
+							if (ImGui::MenuItem("Create New Material")) {
+								std::filesystem::path file_path = m_CurrentDirectory / "New Material.lmat";
+
+								// Ensure unique filename
+								int counter = 1;
+								while (std::filesystem::exists(file_path)) {
+									file_path = m_CurrentDirectory / ("New Material (" + std::to_string(counter) + ").lmat");
+									counter++;
+								}
+
+								PBRMaterial material = PBRMaterial{};
+								material.SetName(file_path.stem().string());
+
+								YAML::Emitter out;
+								out << YAML::BeginMap;
+								material.Serialize(out);
+								out << YAML::EndMap;
+
+								std::ofstream fout(file_path); // Create the file
+								fout << out.c_str();
+								fout.close();
+
 								is_renaming_path = true;
 								renaming_path = file_path;
 								new_path_file_name = file_path.filename().string();
 								first_focus = true;
+
+								// Ensure Custom Handle When Creating Asset
+								AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+									AssetUtils::AssetTypeToString(AssetType::Material_Standard) + std::filesystem::relative(file_path, Project::GetActiveProject()->GetAssetDirectory()).string()
+									));
+
+								counter = 0;
+								while (AssetManager::IsAssetHandleValid(handle))
+								{
+									handle = static_cast<uint32_t>(std::hash<std::string>{}(
+										AssetUtils::AssetTypeToString(AssetType::Material_Standard) + std::filesystem::relative(file_path, Project::GetActiveProject()->GetAssetDirectory()).string() + "_" + std::to_string(counter)
+										));
+									counter++;
+								}
+
+								Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory(), handle);
+							}
+
+							if (ImGui::MenuItem("Create New Shader")) {
+								std::filesystem::path file_path = m_CurrentDirectory / "New Shader.lshader";
+
+								// Ensure unique filename
+								int counter = 1;
+								while (std::filesystem::exists(file_path)) {
+									file_path = m_CurrentDirectory / ("New Shader (" + std::to_string(counter) + ").lshader");
+									counter++;
+								}
+
+								std::filesystem::copy("Resources/Shaders/Forward+/FP_Material_PBR_Shader.glsl", file_path);
+								is_renaming_path = true;
+								renaming_path = file_path;
+								new_path_file_name = file_path.filename().string();
+								first_focus = true;
+
+								// Ensure Custom Handle When Creating Asset
+								AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+									AssetUtils::AssetTypeToString(AssetType::Shader) + std::filesystem::relative(file_path, Project::GetActiveProject()->GetAssetDirectory()).string()
+									));
+
+								counter = 0;
+								while (AssetManager::IsAssetHandleValid(handle))
+								{
+									handle = static_cast<uint32_t>(std::hash<std::string>{}(
+										AssetUtils::AssetTypeToString(AssetType::Material_Standard) + std::filesystem::relative(file_path, Project::GetActiveProject()->GetAssetDirectory()).string() + "_" + std::to_string(counter)
+										));
+									counter++;
+								}
+
+								Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory(), handle);
+							}
+
+							if (ImGui::MenuItem("Create New Compute Shader")) {
+								std::filesystem::path file_path = m_CurrentDirectory / "New Compute Shader.compute";
+
+								// Ensure unique filename
+								int counter = 1;
+								while (std::filesystem::exists(file_path)) {
+									file_path = m_CurrentDirectory / ("New Compute Shader (" + std::to_string(counter) + ").compute");
+									counter++;
+								}
+
+								std::filesystem::copy("Resources/Templates/Template Compute Shader.compute", file_path);
+								is_renaming_path = true;
+								renaming_path = file_path;
+								new_path_file_name = file_path.filename().string();
+								first_focus = true;
+
+								// Ensure Custom Handle When Creating Asset
+								AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+									AssetUtils::AssetTypeToString(AssetType::Compute_Shader) + std::filesystem::relative(file_path, Project::GetActiveProject()->GetAssetDirectory()).string()
+									));
+
+								counter = 0;
+								while (AssetManager::IsAssetHandleValid(handle))
+								{
+									handle = static_cast<uint32_t>(std::hash<std::string>{}(
+										AssetUtils::AssetTypeToString(AssetType::Compute_Shader) + std::filesystem::relative(file_path, Project::GetActiveProject()->GetAssetDirectory()).string() + "_" + std::to_string(counter)
+										));
+									counter++;
+								}
+
+								Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory(), handle);
+							}
+
+						}
+
+						// Scenes Folder
+						if (m_CurrentDirectory.lexically_normal().string().find((Project::GetActiveProject()->GetProjectDirectory() / "Scenes").lexically_normal().string()) != std::string::npos) {
+
+							if (ImGui::MenuItem("Create New Scene"))
+							{
+								// TODO: Implement
 							}
 						}
 
-						if (ImGui::MenuItem("Create New Material")) {
-							std::filesystem::path file_path = m_CurrentDirectory / "New Material.lmat";
-
-							// Ensure unique filename
-							int counter = 1;
-							while (std::filesystem::exists(file_path)) {
-								file_path = m_CurrentDirectory / ("New Material (" + std::to_string(counter) + ").lmat");
-								counter++;
-							}
-
-							PBRMaterial material = PBRMaterial{};
-							material.SetName(file_path.stem().string());
-
-							YAML::Emitter out;
-							out << YAML::BeginMap;
-							material.Serialize(out);
-							out << YAML::EndMap;
-
-							std::ofstream fout(file_path); // Create the file
-							fout << out.c_str();
-
-							is_renaming_path = true;
-							renaming_path = file_path;
-							new_path_file_name = file_path.filename().string();
-							first_focus = true;
-
-							Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory());
-						}
-
-						if (ImGui::MenuItem("Create New Shader")) {
-							std::filesystem::path file_path = m_CurrentDirectory / "New Shader.lshader";
-
-							// Ensure unique filename
-							int counter = 1;
-							while (std::filesystem::exists(file_path)) {
-								file_path = m_CurrentDirectory / ("New Shader (" + std::to_string(counter) + ").lshader");
-								counter++;
-							}
-
-							std::filesystem::copy("Resources/Shaders/Forward+/FP_Material_PBR_Shader.glsl", file_path);
-							is_renaming_path = true;
-							renaming_path = file_path;
-							new_path_file_name = file_path.filename().string();
-							first_focus = true;
-
-							Project::GetStaticEditorAssetManager()->ImportAsset(file_path, Project::GetActiveProject()->GetAssetDirectory());
-						}
+						ImGui::Separator();
 
 						if (ImGui::MenuItem("Open Directory In File Explorer")) {
 							std::string command = "explorer \"" + m_CurrentDirectory.string() + "\"";

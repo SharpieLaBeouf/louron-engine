@@ -1,0 +1,17 @@
+Material Asset Name: Bubble Material
+Material Asset Type: AssetType::Material_Standard
+Shader Handle: 1221719377
+Render Type: Transparent
+Roughness: 0.5
+Metallic: 0
+Albedo Tint: [1, 1, 1, 1]
+AlbedoTextureAsset: 4294967295
+MetallicTextureAsset: 4294967295
+NormalTextureAsset: 4294967295
+Material Uniform Block:
+  - Name: BubbleColour
+    Type: vec4
+    Value: [1, 0, 0, 0.101960786]
+  - Name: Threshold
+    Type: float
+    Value: 0

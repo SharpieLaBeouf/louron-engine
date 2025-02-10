@@ -56,7 +56,7 @@ uniform bool u_UseInstanceData = false;
 uniform MaterialUniforms u_MaterialUniforms;
 
 void main() {
-
+    
     mat4 model_matrix = (u_UseInstanceData ? aInstanceMatrix : u_VertexIn.Model);
     gl_Position = u_VertexIn.Proj * u_VertexIn.View * model_matrix * vec4(aPos, 1.0);
 
@@ -67,8 +67,12 @@ void main() {
 
     // Normal Mapping Functions - Construct TBN Matrix
 	vec3 T = normalize(normal_matrix * aTangent);
-	vec3 B = normalize(normal_matrix * aBitangent);
 	vec3 N = normalize(normal_matrix * aNormal);
+    
+    // Gram-Schmidt process
+    T = normalize(T - dot(T, N) * N);
+	vec3 B = cross(N, T);
+
 	mat3 TBN = transpose(mat3(T, B, N));
 
     // Set VertexOut Data
@@ -84,7 +88,7 @@ void main() {
 
 #version 450 core
 
-struct PBRMaterial {
+class PBRMaterial {
     vec4 albedoTint;
     sampler2D albedoTexture;
 
@@ -196,8 +200,17 @@ uniform samplerCubeArray u_PL_ShadowCubeMapArray;
 // Forward Plus Uniform Variables
 uniform int u_TilesX;
 uniform ivec2 u_ScreenSize;
-uniform sampler2D u_Depth;
 uniform bool u_ShowLightComplexity;
+
+// Camera
+uniform float u_Near;
+uniform float u_Far;
+
+// Depth Sampling
+uniform int u_Samples; // Number of Samples Per Pixel
+bool IsMultiSampled() { return (u_Samples > 1); }
+float LouronSampleDepthTexture(vec2 frag_coord); // Pass gl_FragCoord.xy, or any other frag coordinate you are trying to sample
+float LouronLineariseDepth(float depth);
 
 // Forward Plus Local Variables
 uint index;
@@ -219,6 +232,7 @@ vec3 LouronCalculatePBR_Lighting_Spot(vec3 normal, vec3 fragPos, vec3 view_direc
 vec3 LouronCalculateHDR_Reinhard(vec3 colour);
 vec3 LouronCalculateHDR_Exposure(vec3 colour, float exposure);
 vec3 LouronCalculateGammaCorrection(vec3 colour, float gamma);
+vec3 LouronGetNormal();
 
 layout (location = 0) out vec4 out_FragColour;
 
@@ -226,25 +240,23 @@ layout (location = 0) out vec4 out_FragColour;
 // The Engine will bind all uniforms in this block, using this name as the key. 
 uniform MaterialUniforms u_MaterialUniforms; 
 
-void main() {
-    // Fetch the noise value for the dissolve effect (using the tile index)
-    float dissolve_factor = texture(u_MaterialUniforms.NoiseMap, fragment_in.TexCoord).r;  // Assuming the noise map is in red channel
+// ------------------------------------------------------------------------------------------
+//                                  Main Shader Function 
+// ------------------------------------------------------------------------------------------
+void main() 
+{
+    float dissolve_factor = texture(u_MaterialUniforms.NoiseMap, fragment_in.TexCoord).r;
 
     // Apply time-based animation to the dissolve threshold
-    float dissolve_threshold = smoothstep(1.0, 0.0, dissolve_factor - u_MaterialUniforms.Time);  // Adjust time with factor
+    float dissolve_threshold = smoothstep(1.0, 0.0, dissolve_factor - u_MaterialUniforms.Time);
 
     // If the dissolve factor is below the threshold, discard the pixel and reset depth
-    if (dissolve_threshold < 0.5) {
-        // Set depth value for discarded fragment to ensure the skybox will be rendered
-        discard; // Discard the fragment
-    }
-
+    if (dissolve_threshold < 0.5) 
+        discard;
+    
     // Calculate the edge glow intensity based on the dissolve threshold
     // The glow should only happen in the transition range (around the edge of the dissolve effect)
-    float edgeGlow = smoothstep(0.4, 0.5, dissolve_threshold) - smoothstep(0.5, u_MaterialUniforms.DissolveWidth, dissolve_threshold);  // Controls the width of the edge glow
-
-    // Define the color of the glow
-    vec3 glowColor = vec3(1.0, 0.5, 0.0);  // Orange glow (can be customized)
+    float edgeGlow = smoothstep(0.4, 0.5, dissolve_threshold) - smoothstep(0.5, 0.5 + (u_MaterialUniforms.DissolveWidth * 0.1), dissolve_threshold);  // Controls the width of the edge glow
 
     // Determine which tile this pixel belongs to
     index = tileID.y * u_TilesX + tileID.x;
@@ -272,6 +284,7 @@ void main() {
 
     out_FragColour = vec4(result, 1.0);
 }
+
 
 // -------------------------------------------
 //              PBR Functions 
@@ -508,7 +521,7 @@ float PointLightShadowCalculation(vec3 light_pos, float point_light_far_plane, u
 }
 
 // -------------------------------------------
-//        InBuild Lighting Calculations 
+//        InBuilt Lighting Calculations 
 // -------------------------------------------
 
 // Calculate Directional Light Lighting in Scene (MAX 10)
@@ -529,7 +542,10 @@ vec3 LouronCalculatePBR_Lighting_Directional(vec3 normal, vec3 view_direction, v
             continue;
 
         vec3 radiance = light.colour.rgb * light.intensity;
-        float shadow_factor = 1.0 - DirectionalLightShadowCalculation(normal, -light.direction.xyz, light.shadowLightIndex, light.shadowCascadePlaneDistances, (light.shadowCastingType == 2));
+        float shadow_factor = 1.0;
+        
+        if(light.shadowLightIndex != -1)
+            shadow_factor -= DirectionalLightShadowCalculation(normal, -light.direction.xyz, light.shadowLightIndex, light.shadowCascadePlaneDistances, (light.shadowCastingType == 2));
 
         directional_result += CalculatePBR(normal, radiance, shadow_factor, light_direction, view_direction, albedo, metallic, roughness);
     }
@@ -556,14 +572,17 @@ vec3 LouronCalculatePBR_Lighting_Point(vec3 normal, vec3 fragPos, vec3 view_dire
             continue;
         
         vec3 tang_light_pos = fragment_in.TBN_Matrix * PL_Buffer_Data.data[lightIndex].position.xyz;
-        float dist = length(tang_light_pos - fragPos);
+        float dist = length(PL_Buffer_Data.data[lightIndex].position.xyz - fragment_in.FragPos);
         if (dist < PL_Buffer_Data.data[lightIndex].radius) {
             
             PointLight light = PL_Buffer_Data.data[lightIndex];
             vec3 light_direction = normalize(tang_light_pos - fragPos);
            
             vec3 radiance = light.colour.rgb * light.intensity * Attenuation_InverseSquareLawWithFalloff(light.radius, dist);
-            float shadow_factor = 1.0 - PointLightShadowCalculation(light.position.xyz, light.radius, light.shadowLayerIndex, (light.shadowCastingType == 1) ? 1 : 20);
+            float shadow_factor = 1.0;
+            
+            if (light.shadowLayerIndex != -1)
+                shadow_factor -= PointLightShadowCalculation(light.position.xyz, light.radius, light.shadowLayerIndex, (light.shadowCastingType == 1) ? 1 : 20);
 
             point_result += CalculatePBR(normal, radiance, shadow_factor, light_direction, view_direction, albedo, metallic, roughness);
             
@@ -620,8 +639,11 @@ vec3 LouronCalculatePBR_Lighting_Spot(vec3 normal, vec3 fragPos, vec3 view_direc
             float spot_light_intensity = light.intensity * angle_factor; // Calculate the spotlight intensity based on the angle factor
             
             vec3 radiance = light.colour.rgb * spot_light_intensity * Attenuation_InverseSquareLawWithFalloff(light.range, dist);
-            float shadow_factor = 1.0 - SpotLightShadowCalculation(normal, light.position.xyz, -light.direction.xyz, light.shadowLayerIndex, (light.shadowCastingType == 2));
-
+            float shadow_factor = 1.0;
+            
+            if (light.shadowLayerIndex != -1) 
+                shadow_factor -= SpotLightShadowCalculation(normal, light.position.xyz, -light.direction.xyz, light.shadowLayerIndex, (light.shadowCastingType == 2));
+            
             spot_result += CalculatePBR(normal, radiance, shadow_factor, light_direction, view_direction, albedo, metallic, roughness);
             
             lightCount++; // For Light Complexity Heat Map
@@ -662,4 +684,43 @@ vec3 LouronCalculateHDR_Exposure(vec3 colour, float exposure)
 vec3 LouronCalculateGammaCorrection(vec3 colour, float gamma)
 {
     return pow(colour, vec3(1.0/gamma)); 
+}
+
+vec3 LouronGetNormal()
+{
+	return normalize((texture(u_Material.normalTexture, fragment_in.TexCoord).rgb) * 2.0 - 1.0);
+}
+
+// -------------------------------------------
+//        InBuilt Helper Functions
+// -------------------------------------------
+
+// Declared Depth Samplers Down 
+// Here to Avoid Direct Access.
+// Please prefer to use the LouronSampleDepthTexture Method.
+uniform sampler2D u_Depth;
+uniform sampler2DMS u_Depth_MS;
+float LouronSampleDepthTexture(vec2 frag_coord)
+{
+    vec2 depthUV = frag_coord / u_ScreenSize;
+
+    if(IsMultiSampled())
+    {
+        float sum = 0.0;
+        for (int i = 0; i < u_Samples; ++i) 
+        {
+            sum += texelFetch(u_Depth_MS, ivec2(frag_coord), i).r;
+        }
+        return sum / float(u_Samples);
+    }
+    
+    return texture(u_Depth, depthUV).r;
+}
+
+// Depth Texture is Non-Linearised, Use This to Linearise.
+float LouronLineariseDepth(float depth) {
+	float zNdc = 2 * depth - 1;
+	float zEye = (2 * u_Far * u_Near) / ((u_Far + u_Near) - zNdc * (u_Far - u_Near));
+	float linearDepth = (zEye - u_Near) / (u_Far - u_Near);
+	return 1.0 - linearDepth;
 }

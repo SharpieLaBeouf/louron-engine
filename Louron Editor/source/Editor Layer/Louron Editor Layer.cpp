@@ -1857,8 +1857,8 @@ void LouronEditorLayer::DisplayRenderStatsWindow() {
 
 		if (ImGui::TreeNodeEx("Rendering Options", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-			ImGui::Checkbox("View Light Complexity", &FP_Data.ShowLightComplexity);
-			ImGui::Checkbox("View Wireframe", &FP_Data.ShowWireframe);
+			ImGui::Checkbox("View Light Complexity", &FP_Data.Debug_ShowLightComplexity);
+			ImGui::Checkbox("View Wireframe", &FP_Data.Debug_ShowWireframe);
 
 			ImGui::TreePop();
 		}
@@ -1886,8 +1886,8 @@ void LouronEditorLayer::DisplayRenderStatsWindow() {
 			ImGui::Text("Entities Rendered: %i", stats.Entities_Rendered);
 			ImGui::Text("Entities Culled: %i", stats.Entities_Culled);
 
-			ImGui::Text("Visible Point Lights: %i", (int)FP_Data.PLEntities.size());
-			ImGui::Text("Visible Spot Lights: %i", (int)FP_Data.SLEntities.size());
+			ImGui::Text("Visible Point Lights: %i", (int)FP_Data.PLEntitiesInFrustum.size());
+			ImGui::Text("Visible Spot Lights: %i", (int)FP_Data.SLEntitiesInFrustum.size());
 
 			if (ImGui::TreeNodeEx("Octree Info", ImGuiTreeNodeFlags_DefaultOpen)) {
 				bool octree_display_toggle = Project::GetActiveScene()->GetDisplayOctree();

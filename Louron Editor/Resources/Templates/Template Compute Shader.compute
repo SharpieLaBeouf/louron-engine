@@ -1,0 +1,38 @@
+#version 450 core
+
+// COMPUTE BUFFER EXAMPLE
+// Must ensure that you put all your uniforms in a struct
+// Must ensure that you follow std430 for buffer data alignment (NOTE: do not use Vec3's, prefer Vec4)
+struct UniformStruct
+{
+    float MyFloat;
+};
+
+// If you have multiple buffers, ensure you 
+// create multiple structs matching the data 
+// in C#, and set the appropriate binding here
+// and in C# using ComputeShader::SetBuffer(buffer, 0 <- BINDING);
+
+// Duplicate this and ensure new binding is set for multiple ComputeBuffer's and struct's match
+layout(std430, binding = 0) // <- BINDING
+buffer ComputeBuffer
+{
+    UniformStruct data[]; // Your COMPUTE BUFFER Struct Here
+
+} ComputeBufferData;
+
+// UNIFORM EXAMPLE
+uniform float u_MulFactor;
+
+layout(local_size_x = 1024, local_size_y = 1, local_size_z = 1) in;
+void main()
+{
+    uint index = gl_GlobalInvocationID.x;
+
+    // Ensure we do not index out of bounds data
+    if (index >= ComputeBufferData.data.length())
+        return;
+
+    // Simple operation: multiply element by MulFactor uniform
+    ComputeBufferData.data[index].MyFloat *= u_MulFactor; 
+}

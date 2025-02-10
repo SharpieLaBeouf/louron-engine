@@ -1,0 +1,14 @@
+Material Asset Name: BackPack Toon
+Material Asset Type: AssetType::Material_Standard
+Shader Handle: 1679242868
+Render Type: Opaque
+Roughness: 0.129999995
+Metallic: 0
+Albedo Tint: [1, 1, 1, 1]
+AlbedoTextureAsset: 2675128306
+MetallicTextureAsset: 4294967295
+NormalTextureAsset: 1684900941
+Material Uniform Block:
+  - Name: MyCustomProperty
+    Type: float
+    Value: 0

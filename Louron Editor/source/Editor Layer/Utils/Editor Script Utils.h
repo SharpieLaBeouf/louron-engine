@@ -101,72 +101,26 @@ namespace Utils {
 		projectName.erase(std::remove(projectName.begin(), projectName.end(), ' '), projectName.end());
 		scriptName.erase(std::remove(scriptName.begin(), scriptName.end(), ' '), scriptName.end());
 
-		std::string content =
-			"using System;\n"
-			"using System.Collections.Generic;\n"
-			"using System.Text;\n\n"
-			"using Louron;\n\n"
-			"namespace " + projectName + "\n"
-			"{\n"
-			"\n"
-			"	public class " + scriptName + " : Entity\n"
-			"	{\n"
-			"		\n"
-			"		public void OnStart()\n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		public void OnUpdate()\n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		public void OnFixedUpdate() \n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		public void OnDestroy() \n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		// Collider Functions\n"
-			"		public void OnCollideEnter(Collider other) \n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		public void OnCollideStay(Collider other) \n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		public void OnCollideLeave(Collider other) \n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		// Collider Trigger Functions\n"
-			"		public void OnTriggerEnter(Collider other) \n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		public void OnTriggerStay(Collider other) \n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"		public void OnTriggerLeave(Collider other) \n"
-			"		{\n"
-			"			\n"
-			"		}\n"
-			"		\n"
-			"	}\n"
-			"	\n"
-			"}";
+		// Load template file
+		std::ifstream template_file("Resources/Templates/Template CS Script.cs");
+		if (!template_file.is_open()) {
+			L_CORE_ERROR("Failed to open script template file.");
+			return "";
+		}
+
+		std::stringstream buffer;
+		buffer << template_file.rdbuf();
+		std::string content = buffer.str();
+		template_file.close();
+
+		// Replace placeholders
+		size_t pos;
+		while ((pos = content.find("<<PROJECT_NAME>>")) != std::string::npos) {
+			content.replace(pos, 16, projectName);
+		}
+		while ((pos = content.find("<<SCRIPT_NAME>>")) != std::string::npos) {
+			content.replace(pos, 15, scriptName);
+		}
 
 		// C# Script File 
 		std::ofstream script_file_path(file_path);
@@ -258,7 +212,8 @@ namespace Utils {
 
 			ImGui::SameLine();
 
-			if (ImGui::Button("...")) {
+			if (ImGui::Button("...")) 
+			{
 				new_script_path = Louron::FileUtils::SaveFile("C# Script (*.cs)\0*.cs\0", (Louron::Project::GetActiveProject()->GetProjectDirectory() / "Scripts")); // Open File Dialog in Scripts Folder
 
 				if (new_script_path.lexically_normal().string().find((Louron::Project::GetActiveProject()->GetProjectDirectory() / "Scripts").lexically_normal().string()) != 0) {
@@ -289,7 +244,7 @@ namespace Utils {
 				}
 				else {
 
-					script_full_name = Utils::GenerateScriptFile(Louron::Project::GetActiveProject()->GetConfig().Name, new_script_path);
+					script_full_name = ::Utils::GenerateScriptFile(Louron::Project::GetActiveProject()->GetConfig().Name, new_script_path);
 
 					std::string command = "start \"\" \"" + new_script_path.string() + "\"";
 					std::system(command.c_str());

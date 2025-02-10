@@ -68,10 +68,13 @@ namespace Louron {
 		/// </summary>
 		bool IsValid() const;
 
+		bool IsMultiSampled() const { return m_MultiSampled; }
+
 		/// <summary>
 		/// Get the texture ID of the required texture type.
 		/// </summary>
 		GLuint GetTexture(const FrameBufferTexture& texture_type) const;
+		GLuint GetMultiSampledTexture(const FrameBufferTexture& texture_type) const;
 
 		/// <summary>
 		/// This must be called after all rendering has been completed.

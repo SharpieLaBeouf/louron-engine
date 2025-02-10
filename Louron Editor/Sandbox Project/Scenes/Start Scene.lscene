@@ -2,63 +2,24 @@ Scene Name: Start Scene
 Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
 Scene Pipeline Type: 1
 Entities:
-  - Entity: 3389872355
+  - Entity: 4162061637
     TagComponent:
-      Tag: Goblin Mesh.LOD3
+      Tag: Spot Light
     HierarchyComponent:
-      Parent: 331227340
+      Parent: 4294967295
       Children:
         []
     TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [-90.0000076, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 3683807884
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 3976985170
-  - Entity: 2436976214
-    TagComponent:
-      Tag: Goblin Mesh.LOD1
-    HierarchyComponent:
-      Parent: 331227340
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [-90.0000076, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 3683808754
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 1793164658
-  - Entity: 3711093502
-    TagComponent:
-      Tag: Goblin Mesh.LOD2
-    HierarchyComponent:
-      Parent: 331227340
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [-90.0000076, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 3683808319
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 3976985170
+      Translation: [7.1299777, 6.38759661, 3.3080225]
+      Rotation: [2.36578178, 56.2960663, 25.6620808]
+      Scale: [1.00000095, 0.999999642, 1.00000012]
+    SpotLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Range: 34.5
+      Angle: 80.7099991
+      Intensity: 81.5
+      Shadow Type: None
   - Entity: 3077619168
     TagComponent:
       Tag: Directional Light
@@ -72,8 +33,8 @@ Entities:
       Scale: [1, 1, 1]
     DirectionalLightComponent:
       Active: true
-      Colour: [1, 1, 1, 1]
-      Intensity: 1
+      Colour: [0.34803921, 0.635668933, 1, 1]
+      Intensity: 0.200000003
       Shadow Type: Soft
   - Entity: 2006140417
     TagComponent:
@@ -103,60 +64,36 @@ Entities:
       ClearColour: [1, 1, 1, 1]
     SkyboxComponent:
       MaterialAssetHandle: 4158978962
-  - Entity: 331227340
+  - Entity: 3279442285
     TagComponent:
-      Tag: Goblin_Export_LOD (1)
+      Tag: Suzanne
     HierarchyComponent:
       Parent: 4294967295
       Children:
-        - 3711093502
-        - 2436976214
-        - 3389872355
+        []
     TransformComponent:
-      Translation: [0, 1.10000002, 0]
-      Rotation: [0, -117.699997, 0]
-      Scale: [5, 5, 5]
-    LODMeshComponent:
-      MaxDistanceOverFarPlane: true
-      MaxDistance: 200
-      LOD Elements:
-        Element 0:
-          Distance Threshold: 0.179940999
-          Entities:
-            - 2436976214
-        Element 1:
-          Distance Threshold: 0.407079637
-          Entities:
-            - 3711093502
-        Element 2:
-          Distance Threshold: 0.699115038
-          Entities:
-            - 3389872355
-  - Entity: 2418869427
+      Translation: [0, 4.37071133, 0]
+      Rotation: [0, -0, 0]
+      Scale: [2.82999992, 2.82999992, 2.82999992]
+    MeshFilterComponent:
+      MeshAssetHandle: 25272252
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1428907002
+  - Entity: 384021494
     TagComponent:
       Tag: Cube
     HierarchyComponent:
       Parent: 4294967295
       Children:
         []
-    ScriptComponent:
-      Script_1:
-        Active: true
-        Script Name: SandboxProject.ComputeShaderTest
-        Fields:
-          - Name: CompShader
-            Type: ComputeShader
-            Data: 3300982327
-          - Name: Iterations
-            Type: Int
-            Data: 100
-          - Name: Addition
-            Type: Vector2
-            Data: [5, 5]
     TransformComponent:
-      Translation: [0, -1.40993357, 1.21787153e-07]
+      Translation: [0, -2.38418579e-07, 0]
       Rotation: [0, -0, 0]
-      Scale: [5, 0.100000001, 5]
+      Scale: [10, 0.100000001, 10]
     MeshFilterComponent:
       MeshAssetHandle: 2903028380
     MeshRendererComponent:
@@ -165,72 +102,3 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1699558496
-    BoxColliderComponent:
-      IsTrigger: false
-      Centre: [0, 0, 0]
-      Size: [1, 1, 1]
-      MaterialProperties: [0.600000024, 0.600000024, 0]
-  - Entity: 1541864074
-    TagComponent:
-      Tag: AK47_LODs (1)
-    HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        - 2358720621
-        - 1282498823
-    TransformComponent:
-      Translation: [-0.825707495, -0.600000024, 2.60891795]
-      Rotation: [0, 89.980217, 0]
-      Scale: [4.99999952, 5, 4.99999952]
-    LODMeshComponent:
-      MaxDistanceOverFarPlane: true
-      MaxDistance: 200
-      LOD Elements:
-        Element 0:
-          Distance Threshold: 0.348441929
-          Entities:
-            - 2358720621
-        Element 1:
-          Distance Threshold: 0.807365417
-          Entities:
-            - 1282498823
-  - Entity: 2358720621
-    TagComponent:
-      Tag: AK47_LOD01
-    HierarchyComponent:
-      Parent: 1541864074
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [89.9999847, -0, -180]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 4265154656
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 2
-      MaterialAssetHandles:
-        - 232925268
-        - 232925268
-  - Entity: 1282498823
-    TagComponent:
-      Tag: AK47_LOD02
-    HierarchyComponent:
-      Parent: 1541864074
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [89.9999847, -0, -180]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 4265155961
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 2
-      MaterialAssetHandles:
-        - 232925268
-        - 232925268

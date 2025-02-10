@@ -1,0 +1,14 @@
+Material Asset Name: Toon Red
+Material Asset Type: AssetType::Material_Standard
+Shader Handle: 1679242868
+Render Type: Opaque
+Roughness: 0.159999996
+Metallic: 0
+Albedo Tint: [1, 0, 0, 0.992156863]
+AlbedoTextureAsset: 4294967295
+MetallicTextureAsset: 4294967295
+NormalTextureAsset: 4294967295
+Material Uniform Block:
+  - Name: MyCustomProperty
+    Type: float
+    Value: 0

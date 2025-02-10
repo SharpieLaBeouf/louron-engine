@@ -22,7 +22,7 @@ struct Entity
     float depth;
 };
 
-layout(std430, binding = 0) buffer EntityBuffer { Entity data[]; } EntityBuffer_Data;
+layout(std430, binding = 10) buffer EntityBuffer { Entity data[]; } EntityBuffer_Data;
 
 uniform uint u_EntityID;
 uniform ivec2 u_ScreenSize;

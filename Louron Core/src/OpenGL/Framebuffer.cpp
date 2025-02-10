@@ -79,14 +79,12 @@ namespace Louron {
 			glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, m_Config.Samples, GL_DEPTH24_STENCIL8, m_Config.Width, m_Config.Height, GL_FALSE);
 		}
 
-		GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-
 		// Normal FBO
 		glCreateFramebuffers(1, &m_FBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_FBO);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_ColourTexture, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, m_DepthTexture, 0);
-		glDrawBuffers(2, drawBuffers);
+		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 		// Check FBO completeness
 		L_CORE_ASSERT((glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE), "Framebuffer Creation Failed!");
@@ -98,7 +96,7 @@ namespace Louron {
 			glBindFramebuffer(GL_FRAMEBUFFER, m_MS_FBO);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, m_MS_ColourTexture, 0);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, m_MS_DepthTexture, 0);
-			glDrawBuffers(2, drawBuffers);
+			glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
 			// Check FBO completeness
 			L_CORE_ASSERT(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Framebuffer Creation Failed!");
@@ -175,6 +173,7 @@ namespace Louron {
 		_EntityClearData clearData = { value, 0x3F800000 }; // 1.0f as uint
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_ENTITY_SSBO);
 		glClearBufferData(GL_SHADER_STORAGE_BUFFER, GL_RG32UI, GL_RG_INTEGER, GL_UNSIGNED_INT, &clearData);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 	}
 
 	bool FrameBuffer::IsValid() const {
@@ -205,6 +204,22 @@ namespace Louron {
 
 			case FrameBufferTexture::ColourTexture:			return m_ColourTexture;
 			case FrameBufferTexture::DepthTexture:			return m_DepthTexture;
+
+		}
+
+		L_CORE_WARN("No Texture Type Provided - Returning Colour Texture.");
+		return m_ColourTexture;
+	}
+
+	GLuint FrameBuffer::GetMultiSampledTexture(const FrameBufferTexture& texture_type) const {
+
+		if (!IsValid())
+			return -1;
+
+		switch (texture_type) {
+
+		case FrameBufferTexture::ColourTexture:			return m_MS_ColourTexture;
+		case FrameBufferTexture::DepthTexture:			return m_MS_DepthTexture;
 
 		}
 
@@ -244,7 +259,7 @@ namespace Louron {
 	void FrameBuffer::BindEntitySSBO() const
 	{
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, m_ENTITY_SSBO);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_ENTITY_SSBO);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, m_ENTITY_SSBO);
 	}
 
 	void FrameBuffer::UnBindEntitySSBO() const

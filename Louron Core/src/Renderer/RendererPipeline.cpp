@@ -25,26 +25,6 @@
 // External Vendor Library Headers
 #include <entt/entt.hpp>
 
-// So we can Key a Pair of Material and Uniform Block
-struct _MaterialWrapper {
-	std::shared_ptr<Louron::PBRMaterial> material;
-	std::shared_ptr<Louron::MaterialUniformBlock> uniform_block;
-
-	// Compare the actual contents, not just pointers
-	bool operator==(const _MaterialWrapper& other) const {
-		return material.get() == other.material.get() && uniform_block.get() == other.uniform_block.get();
-	}
-};
-
-namespace std {
-	template <>
-	struct hash<_MaterialWrapper> {
-		std::size_t operator()(const _MaterialWrapper& mw) const {
-			return std::hash<std::shared_ptr<Louron::PBRMaterial>>{}(mw.material) ^ (std::hash<std::shared_ptr<Louron::MaterialUniformBlock>>{}(mw.uniform_block) << 1);
-		}
-	};
-}
-
 namespace Louron {
 
 	namespace SSBOLightStructs {
@@ -229,7 +209,7 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::OnUpdate(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix) {
 
-		L_PROFILE_SCOPE("Forward Plus");
+		L_PROFILE_SCOPE("Forward Plus - Overall");
 
 		auto scene_ref = m_Scene.lock();
 
@@ -256,8 +236,8 @@ namespace Louron {
 			}
 
 			// Gather All Point and Spot Lights Visible in Camera Frustum
-			FP_Data.PLEntities.clear();
-			FP_Data.SLEntities.clear();
+			FP_Data.PLEntitiesInFrustum.clear();
+			FP_Data.SLEntitiesInFrustum.clear();
 			FP_Data.DLEntities.clear();
 			ConductLightFrustumCull();
 
@@ -322,7 +302,7 @@ namespace Louron {
 
 		// 2. RENDERING
 		{
-			L_PROFILE_SCOPE("Forward Plus - Rendering");
+			L_PROFILE_SCOPE("Forward Plus - Total Rendering");
 
 			ConductShadowMapping(camera_position, projection_matrix, view_matrix);
 
@@ -332,9 +312,10 @@ namespace Louron {
 			scene_ref->GetSceneFrameBuffer()->Bind();
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 				
-			glPolygonMode(GL_FRONT_AND_BACK, FP_Data.ShowWireframe ? GL_LINE : GL_FILL);
+			glPolygonMode(GL_FRONT_AND_BACK, FP_Data.Debug_ShowWireframe ? GL_LINE : GL_FILL);
 
 			ConductDepthPass(camera_position, projection_matrix, view_matrix);
+
 			ConductTiledBasedLightCull(projection_matrix, view_matrix);
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -543,12 +524,15 @@ namespace Louron {
 
 		}
 
-		FP_Data.RenderableEntities.reserve(1024);
+		FP_Data.RenderableEntitiesInFrustum.reserve(1024);
 		FP_Data.OctreeEntitiesInCamera.reserve(1024);
 
-		FP_Data.PLEntities.reserve(MAX_POINT_LIGHTS);
-		FP_Data.SLEntities.reserve(MAX_SPOT_LIGHTS);
+		FP_Data.PLEntitiesInFrustum.reserve(MAX_POINT_LIGHTS);
+		FP_Data.SLEntitiesInFrustum.reserve(MAX_SPOT_LIGHTS);
 		FP_Data.DLEntities.reserve(MAX_DIRECTIONAL_LIGHTS);
+
+		FP_Data.OpaqueRenderables = {};
+		FP_Data.TransparentRenderables = {};
 	}
 
 	/// <summary>
@@ -556,9 +540,14 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::OnStopPipeline() {
 		
-		if (FP_Data.OctreeUpdateThread.joinable()) {
+		if (FP_Data.OctreeUpdateThread.joinable())
 			FP_Data.OctreeUpdateThread.join();
-		}
+
+		if (FP_Data.RenderQueueSortingThread.joinable())
+			FP_Data.RenderQueueSortingThread.join();
+
+		if (FP_Data.DepthQueueSortingThread.joinable())
+			FP_Data.DepthQueueSortingThread.join();
 
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
@@ -678,7 +667,7 @@ namespace Louron {
 				s_PointLightVector.clear();
 				
 				// Add lights to vector that are contained within the scene up to a maximum of 1024
-				for (auto& entity : FP_Data.PLEntities) {
+				for (auto& entity : FP_Data.PLEntitiesInFrustum) {
 					
 					if (s_PointLightVector.size() >= MAX_POINT_LIGHTS)
 						break;
@@ -717,7 +706,7 @@ namespace Louron {
 				s_SpotLightVector.clear();
 
 				// Add lights to vector that are contained within the scene up to a maximum of 1024
-				for (auto& entity : FP_Data.SLEntities) {
+				for (auto& entity : FP_Data.SLEntitiesInFrustum) {
 
 					if (s_SpotLightVector.size() >= MAX_POINT_LIGHTS)
 						break;
@@ -804,7 +793,7 @@ namespace Louron {
 		auto pl_view = scene_ref->GetAllEntitiesWith<PointLightComponent>();
 		for (const auto& entity_handle : pl_view) {
 
-			if (FP_Data.PLEntities.size() >= MAX_POINT_LIGHTS)
+			if (FP_Data.PLEntitiesInFrustum.size() >= MAX_POINT_LIGHTS)
 				break;
 
 			if (!pl_view.get<PointLightComponent>(entity_handle).Active)
@@ -812,7 +801,7 @@ namespace Louron {
 
 			Entity entity = { entity_handle, scene_ref.get() };
 			if (IsSphereInsideFrustum({ entity.GetComponent<TransformComponent>().GetGlobalPosition(), entity.GetComponent<PointLightComponent>().Radius }, FP_Data.Camera_Frustum)) {
-				FP_Data.PLEntities.push_back(entity);
+				FP_Data.PLEntitiesInFrustum.push_back(entity);
 			}
 
 		}
@@ -820,7 +809,7 @@ namespace Louron {
 		auto sl_view = scene_ref->GetAllEntitiesWith<SpotLightComponent>();
 		for (const auto& entity_handle : sl_view) {
 
-			if (FP_Data.SLEntities.size() >= MAX_SPOT_LIGHTS)
+			if (FP_Data.SLEntitiesInFrustum.size() >= MAX_SPOT_LIGHTS)
 				break;
 
 			if (!sl_view.get<SpotLightComponent>(entity_handle).Active)
@@ -846,7 +835,7 @@ namespace Louron {
 			}
 
 			if (IsSphereInsideFrustum(sphere, FP_Data.Camera_Frustum)) {
-				FP_Data.SLEntities.push_back(entity);
+				FP_Data.SLEntitiesInFrustum.push_back(entity);
 			}
 
 		}
@@ -890,12 +879,14 @@ namespace Louron {
 			FP_Data.OctreeEntitiesInCamera.insert(FP_Data.OctreeEntitiesInCamera.begin(), query_vec.begin(), query_vec.end());
 		}
 
+		std::unique_lock lock(FP_Data.RenderSortingMutex);
+
 		// Transfer Data Over because we don't want 
 		// to hold the shared_ptr's to OctreeData
-		FP_Data.RenderableEntities.clear();
+		FP_Data.RenderableEntitiesInFrustum.clear();
 
-		if (FP_Data.OctreeEntitiesInCamera.size() > FP_Data.RenderableEntities.capacity())
-			FP_Data.RenderableEntities.reserve(FP_Data.RenderableEntities.capacity() * 2);
+		if (FP_Data.OctreeEntitiesInCamera.size() > FP_Data.RenderableEntitiesInFrustum.capacity())
+			FP_Data.RenderableEntitiesInFrustum.reserve(FP_Data.RenderableEntitiesInFrustum.capacity() * 2);
 
 		for (const auto& data : FP_Data.OctreeEntitiesInCamera) 
 		{
@@ -904,7 +895,7 @@ namespace Louron {
 
 			auto& component = data->Data.GetComponent<MeshRendererComponent>();
 			if (component.Active)
-				FP_Data.RenderableEntities.push_back(data->Data);
+				FP_Data.RenderableEntitiesInFrustum.push_back(data->Data);
 		}
 
 		{
@@ -948,7 +939,7 @@ namespace Louron {
 						if (entity_handle == NULL_UUID)
 							continue;
 
-						FP_Data.RenderableEntities.erase(std::remove(FP_Data.RenderableEntities.begin(), FP_Data.RenderableEntities.end(), scene_ref->FindEntityByUUID(entity_handle)), FP_Data.RenderableEntities.end());
+						FP_Data.RenderableEntitiesInFrustum.erase(std::remove(FP_Data.RenderableEntitiesInFrustum.begin(), FP_Data.RenderableEntitiesInFrustum.end(), scene_ref->FindEntityByUUID(entity_handle)), FP_Data.RenderableEntitiesInFrustum.end());
 					}
 				}
 
@@ -978,48 +969,36 @@ namespace Louron {
 		}
 
 		{
-			L_PROFILE_SCOPE("Forward Plus - Clear Entity Pixel Data");
+			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Clear Entity Pixel Data");
 			scene_ref->GetSceneFrameBuffer()->ClearEntityPixelData(NULL_UUID);
 		}
+		
+		// Wait for Octree Update Thread
+		if (FP_Data.DepthQueueSortingThread.joinable()) {
+			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Sorting Thread Wait");
+			FP_Data.DepthQueueSortingThread.join();
+		}
 
-		// Key #1 - Distance - Value UUID of Entities that have submeshes
-		std::vector<std::tuple<float, UUID, std::shared_ptr<SubMesh>>> sorted_entities;
+		if (!FP_Data.DepthRenderables.empty()) {
 
-		if (!FP_Data.RenderableEntities.empty()) {
-
-			for (auto& entity : FP_Data.RenderableEntities) 
-			{
-
-				if (!scene_ref->ValidEntity(entity)) continue;
-
-				auto asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
-
-				if (!asset_mesh)
-					continue;
-
-				const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
-				float distance = glm::length(objectPosition - camera_position);
-
-				for (std::shared_ptr<SubMesh> sub_mesh : asset_mesh->SubMeshes) {
-					sorted_entities.emplace_back(distance, entity.GetUUID(), sub_mesh);
-				}
-
-			}
-						
-			// Lambda function compares the distances of two entities (a and b) and orders them in a way that ensures front-to-back sorting
-			std::sort(sorted_entities.begin(), sorted_entities.end(), [](const auto& a, const auto& b) {
-				return std::get<0>(a) < std::get<0>(b);
-			});
-			
+			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Rendering");
 			if (auto shader = AssetManager::GetInbuiltShader("FP_Depth"); shader)
 			{
 				shader->Bind();
 				scene_ref->GetSceneFrameBuffer()->BindEntitySSBO();
 				shader->SetMat4("u_Proj", projection_matrix);
 				shader->SetMat4("u_View", view_matrix);
+
+				float A = projection_matrix[2][2];
+				float B = projection_matrix[3][2];
+				float near_plane = B / (A - 1.0f);
+				float far_plane = B / (A + 1.0f);
+				shader->SetFloat("u_Near", near_plane);
+				shader->SetFloat("u_Far", far_plane);
+
 				shader->SetIntVec2("u_ScreenSize", { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
 
-				for (auto& [distance, entity_uuid, sub_mesh] : sorted_entities) 
+				for (auto& [distance, entity_uuid, sub_mesh] : FP_Data.DepthRenderables) 
 				{
 					shader->SetMat4("u_Model", scene_ref->FindEntityByUUID(entity_uuid).GetComponent<TransformComponent>().GetGlobalTransform());
 					shader->SetUInt("u_EntityID", entity_uuid);
@@ -1036,6 +1015,65 @@ namespace Louron {
 			}
 		}
 
+		FP_Data.DepthQueueSortingThread = std::thread([&]() -> void
+		{
+			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Sorting");
+			std::unique_lock lock(FP_Data.RenderSortingMutex);
+
+			FP_Data.DepthRenderables.clear();
+
+			if (FP_Data.RenderableEntitiesInFrustum.empty())
+				return;
+
+			auto thread_scene_ref = m_Scene.lock();
+			if (!thread_scene_ref)
+				return;
+
+			for (auto& entity : FP_Data.RenderableEntitiesInFrustum)
+			{
+				if (!thread_scene_ref->ValidEntity(entity)) continue;
+
+				auto asset_mesh_handle = entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle;
+
+				// Check if Asset Handle is Valid
+				if (!AssetManager::IsAssetHandleValid(asset_mesh_handle))
+					continue;
+
+				// Retrieve Cached Mesh Asset
+				auto mesh_asset = FP_Data.CachedMeshAssets[asset_mesh_handle].lock();
+
+				// Check if Loaded
+				if (!mesh_asset)
+				{
+					// If Not Loaded, Call GetAsset to Load
+					mesh_asset = AssetManager::GetAsset<AssetMesh>(asset_mesh_handle);
+
+					// If Failed to Load - Continue
+					if (!mesh_asset)
+						continue;
+				}
+
+				const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+				float distance = glm::length(objectPosition - camera_position);
+
+				for (int i = 0; i < mesh_asset->SubMeshes.size(); i++)
+				{
+					auto& material_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+					auto asset_material = i < material_vector.size() ? AssetManager::GetAsset<PBRMaterial>(material_vector[i].first) : AssetManager::GetAsset<PBRMaterial>(material_vector.back().first);
+
+					if (!asset_material || asset_material->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT)
+						continue;
+
+					FP_Data.DepthRenderables.emplace_back(distance, entity.GetUUID(), mesh_asset->SubMeshes[i]);
+				}
+
+			}
+
+			// Front-to-Back sorting
+			std::sort(FP_Data.DepthRenderables.begin(), FP_Data.DepthRenderables.end(), [](const auto& a, const auto& b) {
+				return std::get<0>(a) < std::get<0>(b);
+			});
+		});
 
 		glFlush();
 	}
@@ -1246,9 +1284,6 @@ namespace Louron {
 
 				shader->UnBind();
 
-				if (scene_ref)
-					scene_ref->GetSceneFrameBuffer()->Bind();
-
 				glCullFace(GL_BACK);
 			}
 		}
@@ -1266,8 +1301,8 @@ namespace Louron {
 
 		{
 			L_PROFILE_SCOPE("Spot Shadow Mapping 1. Gathering");
-			sl_shadow_casting_vec.reserve(FP_Data.SLEntities.size());
-			for (auto& entity : FP_Data.SLEntities)
+			sl_shadow_casting_vec.reserve(FP_Data.SLEntitiesInFrustum.size());
+			for (auto& entity : FP_Data.SLEntitiesInFrustum)
 				if (entity.GetComponent<SpotLightComponent>().ShadowFlag != ShadowTypeFlag::NoShadows)
 				{
 					if (sl_shadow_casting_vec.size() >= FP_Data.SL_Shadow_Max_Maps)
@@ -1381,9 +1416,6 @@ namespace Louron {
 
 				shader->UnBind();
 
-				if (scene_ref)
-					scene_ref->GetSceneFrameBuffer()->Bind();
-
 				glCullFace(GL_BACK);
 			}
 		}
@@ -1401,8 +1433,8 @@ namespace Louron {
 		// 1. Gather and Sort Point Lights that have shadow mapping enabled
 		{
 			L_PROFILE_SCOPE("Point Shadow Mapping 1. Sorting");
-			pl_shadow_casting_vec.reserve(FP_Data.PLEntities.size());
-			for (auto& entity : FP_Data.PLEntities)
+			pl_shadow_casting_vec.reserve(FP_Data.PLEntitiesInFrustum.size());
+			for (auto& entity : FP_Data.PLEntitiesInFrustum)
 				if (entity.GetComponent<PointLightComponent>().ShadowFlag != ShadowTypeFlag::NoShadows)
 					pl_shadow_casting_vec.push_back(entity);
 
@@ -1476,7 +1508,7 @@ namespace Louron {
 
 				glm::vec3 light_pos = pl_shadow_casting_vec[lightIndex].GetComponent<TransformComponent>().GetGlobalPosition();
 
-				float near_plane = 1.0f;
+				float near_plane = 0.1f;
 				float far_plane = pl_shadow_casting_vec[lightIndex].GetComponent<PointLightComponent>().Radius * 2.0f;
 				glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1.0f, near_plane, far_plane);
 				std::vector<glm::mat4> shadowTransforms{};
@@ -1516,14 +1548,13 @@ namespace Louron {
 
 			shader->UnBind();
 
-			if (scene_ref)
-				scene_ref->GetSceneFrameBuffer()->Bind();
-
 			glCullFace(GL_BACK);
 		}
 
 		#pragma endregion
 
+		if (scene_ref)
+			scene_ref->GetSceneFrameBuffer()->Bind();
 	}
 
 
@@ -1545,146 +1576,70 @@ namespace Louron {
 		}
 
 		//// Render Skybox First w/ No Depth Testing
+		{
+			L_PROFILE_SCOPE("Forward Plus - Render Pass::Skybox");
 
-		auto skyboxView = scene_ref->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
-		if (skyboxView.begin() != skyboxView.end()) {
+			auto skyboxView = scene_ref->GetAllEntitiesWith<CameraComponent, SkyboxComponent>();
+			if (skyboxView.begin() != skyboxView.end()) {
 
-			for (const auto& entity : skyboxView) {
-				auto [scene_camera, skybox] = skyboxView.get<CameraComponent, SkyboxComponent>(entity);
+				for (const auto& entity : skyboxView) {
+					auto [scene_camera, skybox] = skyboxView.get<CameraComponent, SkyboxComponent>(entity);
 
-				// Only draw the skybox for the primary camera
-				if (scene_camera.Primary && scene_camera.ClearFlags == CameraClearFlags::SKYBOX) {
+					// Only draw the skybox for the primary camera
+					if (scene_camera.Primary && scene_camera.ClearFlags == CameraClearFlags::SKYBOX) {
 
-					if (auto mat_ref = AssetManager::GetAsset<SkyboxMaterial>(skybox.SkyboxMaterialAssetHandle); mat_ref) {
+						if (auto mat_ref = AssetManager::GetAsset<SkyboxMaterial>(skybox.SkyboxMaterialAssetHandle); mat_ref) {
 
-						skybox.Bind();
+							skybox.Bind();
 
-						// Save the current depth function
-						GLenum originalDepthFunc{};
-						glGetIntegerv(GL_DEPTH_FUNC, (GLint*)&originalDepthFunc);
+							// Save the current depth function
+							GLenum originalDepthFunc{};
+							glGetIntegerv(GL_DEPTH_FUNC, (GLint*)&originalDepthFunc);
 
-						// Change depth function to GL_ALWAYS for the skybox
-						glDepthFunc(GL_ALWAYS);
+							// Change depth function to GL_ALWAYS for the skybox
+							glDepthFunc(GL_ALWAYS);
 
-						if (mat_ref->Bind()) {
-							CameraBase temp_camera(projection_matrix, view_matrix);
-							mat_ref->UpdateUniforms(camera_position, projection_matrix, view_matrix);
-							Renderer::DrawSkybox(skybox);
-							mat_ref->UnBind();
+							if (mat_ref->Bind())
+							{
+								mat_ref->UpdateUniforms(camera_position, projection_matrix, view_matrix);
+								Renderer::DrawSkybox(skybox);
+								mat_ref->UnBind();
+							}
+							skybox.UnBind();
+
+							// Restore the original depth function after the skybox is rendered
+							glDepthFunc(originalDepthFunc);
 						}
-						skybox.UnBind();
-
-						// Restore the original depth function after the skybox is rendered
-						glDepthFunc(originalDepthFunc);
 					}
 				}
 			}
 		}
 
-		// Kinda like AssetMap in the AssetManager, but this is pretty much purely 
-		// for the renderer so GetAsset calls are reduced to the AssetManager
-		// 
-		// Needs to be weak PTR as this will not own the asset
-		static std::unordered_map<AssetHandle, std::weak_ptr<AssetMesh>> fast_loaded_asset_references;
+		// Wait for Sorting to Finish
+		if (FP_Data.RenderQueueSortingThread.joinable()) {
+			L_PROFILE_SCOPE("Forward Plus - Render Pass::Renderable Sorting Thread Wait");
+			FP_Data.RenderQueueSortingThread.join();
+		}
+		
+		// Rendering
+		float A = projection_matrix[2][2];
+		float B = projection_matrix[3][2];
+		float near_plane = B / (A - 1.0f);
+		float far_plane = B / (A + 1.0f);
 
-		//// Render All MeshComponents in Scene
+		// Lets colour in some triangles!
+		if (!FP_Data.OpaqueRenderables.empty()) 
+		{
 
-		if (!FP_Data.RenderableEntities.empty()) {
-
-			// Key #1 = Material Asset ID, Material Uniform Block in _MaterialWrapper
-			// Key #2 = SubMesh Pointer
-			// Value = array of entities to render using material and submesh
-			static std::unordered_map<
-
-				_MaterialWrapper,
-					
-					// Value is Another Map of SubMeshes to this Material
-					std::unordered_map<
-
-						// Key is SubMesh Asset
-						std::shared_ptr<SubMesh>, 
-							
-							// VALUE is a list of Entities that will be rendered with the particular material combo and sub mesh
-							std::vector<UUID>>> renderables{};
-
-			for (auto& material_block : renderables)
-				for (auto& [sub_mesh, entity_vector] : material_block.second)
-					entity_vector.clear();
-
-			auto debug_line_shader = AssetManager::GetInbuiltShader("Debug_Line_Draw");
-			if(debug_line_shader)
+			L_PROFILE_SCOPE("Forward Plus - Render Pass::Opaque Pass");
+			for (const auto& [material_wrapper_pair, mesh_map] : FP_Data.OpaqueRenderables) 
 			{
-				debug_line_shader->Bind();
-				debug_line_shader->SetFloatVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
-				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
-				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
-				debug_line_shader->SetBool("u_UseInstanceData", false);
-			}
-
-			// Identify Renderables - we have culling happy! :)
-			for (auto& entity : FP_Data.RenderableEntities) {
-
-				if (!scene_ref->ValidEntity(entity)) continue;
-
-				auto& component = entity.GetComponent<MeshFilterComponent>();
-				auto mesh_asset = fast_loaded_asset_references[component.MeshFilterAssetHandle].lock();
-
-				if (!mesh_asset) {
-					mesh_asset = AssetManager::GetAsset<AssetMesh>(component.MeshFilterAssetHandle);
-					if (!mesh_asset) continue;
-				}
-
-				auto& submeshes = mesh_asset->SubMeshes;
-				auto& material_handles = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
-
-				// MATERIAL AND MATERIAL UNIFORM BLOCK SORTING
-				// Materials will be sorted based on their material, and the uniform block of an individual material on a MeshRendererComponent. 
-				// This is so that during runtime, we can specify custom uniforms for individual materials in MeshRendererComponent's without 
-				// creating new material instances that sit in memory and may leak! 
-				// 
-				// Custom uniform blocks will be automatically cleaned up when the MeshRendererComponent is deleted, such as when an entity is destroyed!
-				int material_index = 0;
-				for (int i = 0; i < submeshes.size(); ++i)
-				{
-					auto& mesh_renderer_material_pair = material_handles[material_index]; // Material Handle + Uniform Group in Mesh Renderer Component
-
-					const auto& material_asset = AssetManager::GetAsset<PBRMaterial>(mesh_renderer_material_pair.first);
-
-					if (!material_asset)
-						continue;
-
-					auto& sub_mesh_map = renderables[{ material_asset, mesh_renderer_material_pair.second ? mesh_renderer_material_pair.second : material_asset->GetUniformBlock() }]; // Keys this to the renderables
-					auto& entity_vector = sub_mesh_map[submeshes[i]]; // Get the Vector of the Sub Mesh
-					
-					// If First - Set Allocation for 8 entities
-					if (entity_vector.size() == 0 && entity_vector.capacity() == 0)
-						entity_vector.reserve(8);
-
-					// If we need to reallocate, double if capacity is under 64, if above, we will + 1 only
-					if (entity_vector.size() >= entity_vector.capacity())
-						entity_vector.reserve(entity_vector.size() <= 64 ? entity_vector.capacity() * 2 : entity_vector.capacity() + 1);
-
-					entity_vector.push_back(entity.GetUUID());
-
-					// Makes sure we don't exceed the maximum materials, if we do, then we will just use the last material in the Mesh Renderer materials vector
-					if (material_index < material_handles.size() - 1)
-						material_index++;
-				}
-
-				if (component.GetShouldDisplayDebugLines() && debug_line_shader) {
-					debug_line_shader->SetMat4("u_VertexIn.Model", component.TransformedAABB.GetGlobalBoundsMat4());
-					Renderer::DrawDebugCube();
-				}
-			}
-
-			// Lets colour in some triangles!
-			for (const auto& [material_wrapper_pair, mesh_map] : renderables) {
 
 				const auto& material_asset = material_wrapper_pair.material;
 
 				if (!material_asset)
 					continue;
-				
+
 				if (!material_asset->Bind())
 					continue;
 
@@ -1695,7 +1650,27 @@ namespace Louron {
 
 					// Update Specific Forward Plus Uniforms
 					shader->SetInt("u_TilesX", FP_Data.workGroupsX);
-					shader->SetInt("u_ShowLightComplexity", FP_Data.ShowLightComplexity);
+					shader->SetInt("u_ShowLightComplexity", FP_Data.Debug_ShowLightComplexity);
+
+					shader->SetFloat("u_Near", near_plane);
+					shader->SetFloat("u_Far", far_plane);
+
+					shader->SetIntVec2("u_ScreenSize", { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
+
+					if (scene_ref->GetSceneFrameBuffer()->IsMultiSampled())
+					{
+						shader->SetInt("u_Samples", scene_ref->GetSceneFrameBuffer()->GetConfig().Samples);
+						glActiveTexture(GL_TEXTURE3);
+						glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, scene_ref->GetSceneFrameBuffer()->GetMultiSampledTexture(FrameBufferTexture::DepthTexture));
+						shader->SetInt("u_Depth_MS", 3);
+					}
+					else
+					{
+						shader->SetInt("u_Samples", scene_ref->GetSceneFrameBuffer()->GetConfig().Samples);
+						glActiveTexture(GL_TEXTURE3);
+						glBindTexture(GL_TEXTURE_2D, scene_ref->GetSceneFrameBuffer()->GetTexture(FrameBufferTexture::DepthTexture));
+						shader->SetInt("u_Depth", 3);
+					}
 
 					// Texture binding 4 is dedicated for Point Light Shadow Cube Map Array
 					glActiveTexture(GL_TEXTURE4);
@@ -1755,44 +1730,310 @@ namespace Louron {
 			}
 		}
 
-		// RENDER DEBUG VIEW FOR OCTREE
-		if (auto octree_ref = scene_ref->GetOctree().lock(); octree_ref && scene_ref->GetDisplayOctree()) {
+		if (!FP_Data.TransparentRenderables.empty())
+		{
+			L_PROFILE_SCOPE("Forward Plus - Render Pass::Transparent Pass");
 
-			auto debug_line_shader = AssetManager::GetInbuiltShader("Debug_Line_Draw");
+			// Disable Depth Writing During Transparent Pass
+			// Depth Already Written During Depth/Colour Pass
+			// We do not want to override during colour pass...
+			glDepthMask(GL_FALSE);
+			glDisable(GL_CULL_FACE);
 
-			// Draw Octree
-			if (debug_line_shader) {
-				debug_line_shader->Bind();
-				debug_line_shader->SetFloatVec4("u_LineColor", { 1.0f, 0.0f, 0.0f, 1.0f });
-				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
-				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
-				debug_line_shader->SetBool("u_UseInstanceData", true);
+			// Enable Blending During Transparency Pass
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+			// Render Transparent Objects Back to Front One By One....
+			for (const auto& [distance, material_wrapper_pair, sub_mesh, entity_uuid] : FP_Data.TransparentRenderables)
+			{
+				Entity ent = scene_ref->FindEntityByUUID(entity_uuid);
+				if (!ent) continue;
+
+				const auto& material_asset = material_wrapper_pair.material;
+
+				if (!material_asset)
+					continue;
+
+				if (!material_asset->Bind())
+					continue;
+
+				auto shader = material_asset->GetShader();
+				if (shader->IsValid())
+				{
+					material_asset->UpdateUniforms(camera_position, projection_matrix, view_matrix, material_wrapper_pair.uniform_block); // Change
+
+					// Update Specific Forward Plus Uniforms
+					shader->SetInt("u_TilesX", FP_Data.workGroupsX);
+					shader->SetInt("u_ShowLightComplexity", FP_Data.Debug_ShowLightComplexity);
+
+					shader->SetFloat("u_Near", near_plane);
+					shader->SetFloat("u_Far", far_plane);
+
+					shader->SetIntVec2("u_ScreenSize", { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
+
+					// Texture binding 3 is dedicated for depth map
+					if (scene_ref->GetSceneFrameBuffer()->IsMultiSampled())
+					{
+						shader->SetInt("u_Samples", scene_ref->GetSceneFrameBuffer()->GetConfig().Samples);
+						glActiveTexture(GL_TEXTURE3);
+						glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, scene_ref->GetSceneFrameBuffer()->GetMultiSampledTexture(FrameBufferTexture::DepthTexture));
+						shader->SetInt("u_Depth_MS", 3);
+					}
+					else
+					{
+						shader->SetInt("u_Samples", scene_ref->GetSceneFrameBuffer()->GetConfig().Samples);
+						glActiveTexture(GL_TEXTURE3);
+						glBindTexture(GL_TEXTURE_2D, scene_ref->GetSceneFrameBuffer()->GetTexture(FrameBufferTexture::DepthTexture));
+						shader->SetInt("u_Depth", 3);
+					}
+
+					// Texture binding 4 is dedicated for Point Light Shadow Cube Map Array
+					glActiveTexture(GL_TEXTURE4);
+					glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, FP_Data.PL_Shadow_CubeMap_Array);
+					shader->SetInt("u_PL_ShadowCubeMapArray", 4);
+
+					// Texture binding 5 is dedicated for Directional Light Shadow Texture Array
+					glActiveTexture(GL_TEXTURE5);
+					glBindTexture(GL_TEXTURE_2D_ARRAY, FP_Data.DL_Shadow_Texture_Array);
+					shader->SetInt("u_DL_ShadowMapArray", 5);
+
+					// Texture binding 6 is dedicated for Spot Light Shadow Texture Array
+					glActiveTexture(GL_TEXTURE6);
+					glBindTexture(GL_TEXTURE_2D_ARRAY, FP_Data.SL_Shadow_Texture_Array);
+					shader->SetInt("u_SL_ShadowMapArray", 6);
+
+				}
+				else
+				{
+					shader = AssetManager::GetInbuiltShader("Invalid Shader");
+					shader->Bind();
+
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, AssetManager::GetInbuiltAsset<Texture>("Invalid Checkered Texture")->GetID());
+					shader->SetInt("u_InvalidTexture", 0);
+					shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+					shader->SetMat4("u_VertexIn.View", view_matrix);
+				}
+
+				shader->SetBool("u_UseInstanceData", false);
+
+				const auto& transform = ent.GetComponent<TransformComponent>().GetGlobalTransform();
+				shader->SetMat4("u_VertexIn.Model", transform);
+				Renderer::DrawSubMesh(sub_mesh);
 			}
 
-			Renderer::DrawInstancedDebugCube(octree_ref->GetAllOctreeBoundsMat4());
+			glDepthMask(GL_TRUE);
+			glEnable(GL_CULL_FACE);
+			glCullFace(GL_BACK);
 
-			if (debug_line_shader) {
-				debug_line_shader->Bind();
-				debug_line_shader->SetFloatVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
-				debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
-				debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
-				debug_line_shader->SetBool("u_UseInstanceData", true);
+			glDisable(GL_BLEND);
+		}
+
+		// Sorting
+		FP_Data.RenderQueueSortingThread = std::thread([&]() -> void 
+		{
+
+			L_PROFILE_SCOPE("Forward Plus - Render Pass::Renderable Sorting");
+
+			auto thread_scene_ref = m_Scene.lock();
+
+			if (!thread_scene_ref) {
+				L_CORE_ERROR("Invalid Scene!");
+				return;
 			}
 
-			// Draw All Bounds of Data Sources in Octree
+			FP_Data.OpaqueRenderables.clear();
+			FP_Data.TransparentRenderables.clear();
+			FP_Data.Debug_RenderAABB.clear();
+
+			std::unique_lock lock(FP_Data.RenderSortingMutex);
+			if (FP_Data.RenderableEntitiesInFrustum.empty())
+				return;
+
+			for (auto& entity : FP_Data.RenderableEntitiesInFrustum)
+			{
+				if (!thread_scene_ref->ValidEntity(entity))
+					continue;
+
+				auto& mesh_filter_component = entity.GetComponent<MeshFilterComponent>();
+
+				// Check if Asset Handle is Valid
+				if (!AssetManager::IsAssetHandleValid(mesh_filter_component.MeshFilterAssetHandle))
+					continue;
+
+				// Retrieve Cached Mesh Asset
+				auto mesh_asset = FP_Data.CachedMeshAssets[mesh_filter_component.MeshFilterAssetHandle].lock();
+
+				// Check if Loaded
+				if (!mesh_asset)
+				{
+					// If Not Loaded, Call GetAsset to Load
+					mesh_asset = AssetManager::GetAsset<AssetMesh>(mesh_filter_component.MeshFilterAssetHandle);
+
+					// If Failed to Load - Continue
+					if (!mesh_asset)
+						continue;
+				}
+
+				// Retrieve Sub Meshes
+				auto& sub_meshes = mesh_asset->SubMeshes;
+
+				// Retrieve All MeshMaterialHandles
+				auto& material_handles = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+
+				// MATERIAL AND MATERIAL UNIFORM BLOCK SORTING
+				// Materials will be sorted based on their material, and the uniform 
+				// block of an individual material on a MeshRendererComponent.
+				int material_index = 0;
+				for (int i = 0; i < sub_meshes.size(); ++i)
+				{
+					// Material Handle + Uniform Group in Mesh Renderer Component
+					// Nullptr means there is no custom uniform block
+					auto& mesh_renderer_material_pair = material_handles[material_index];
+
+					// Retrieve Cached Mesh Asset
+					auto material_asset = FP_Data.CachedMaterialAssets[mesh_renderer_material_pair.first].lock();
+
+					// Check if Loaded
+					if (!material_asset)
+					{
+						// If Not Loaded, Call GetAsset to Load
+						material_asset = AssetManager::GetAsset<PBRMaterial>(mesh_renderer_material_pair.first);
+
+						// If Failed to Load - Continue
+						if (!material_asset)
+							continue;
+					}
+
+					// Opaque Sorting
+					if (material_asset->GetRenderType() == RenderType::L_MATERIAL_OPAQUE)
+					{
+						// Retrieve the Uniform Block Associated w/ This Mesh Renderer Material
+						auto uniform_block = (mesh_renderer_material_pair.second) ? mesh_renderer_material_pair.second : material_asset->GetUniformBlock();
+
+						// Key the Material Wrapper to Secure Placement in Opaque Queue
+						auto& sub_mesh_map = FP_Data.OpaqueRenderables[{ material_asset, uniform_block}]; // Keys this to the opaque renderables
+
+						// Key the Sub Mesh to Retrieve Vector of Entities in this Rendering State
+						auto& entity_vector = sub_mesh_map[sub_meshes[i]];
+
+						// If First - Set Allocation for 8 entities
+						if (entity_vector.size() == 0 && entity_vector.capacity() == 0)
+							entity_vector.reserve(8);
+
+						// If we need to reallocate, double if capacity 
+						// is under 64, if above, we will + 8 only
+						if (entity_vector.size() >= entity_vector.capacity())
+							entity_vector.reserve(entity_vector.size() < 64 ? entity_vector.capacity() * 2 : entity_vector.capacity() + 8);
+
+						entity_vector.push_back(entity.GetUUID());
+					}
+					// Transparent Sorting
+					else if (material_asset->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT)
+					{
+						const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+						float distance = glm::length(objectPosition - camera_position);
+
+						// If First - Set Allocation for 128 entities
+						// This queue is not batched w/ multiple render
+						// states or materials, these all need to be 
+						// rendered back to front
+						if (FP_Data.TransparentRenderables.size() == 0 && FP_Data.TransparentRenderables.capacity() == 0)
+							FP_Data.TransparentRenderables.reserve(128);
+
+						// If we need to reallocate, double if capacity is under 1024, if above, we will + 16 only
+						if (FP_Data.TransparentRenderables.size() >= FP_Data.TransparentRenderables.capacity())
+							FP_Data.TransparentRenderables.reserve(FP_Data.TransparentRenderables.size() < 1024 ? FP_Data.TransparentRenderables.capacity() * 2 : FP_Data.TransparentRenderables.capacity() + 16);
+
+						// Emplace to Back of TransparentRenderQueue
+						FP_Data.TransparentRenderables.emplace_back
+						(
+							distance,
+							_MaterialWrapper{ material_asset, mesh_renderer_material_pair.second ? mesh_renderer_material_pair.second : material_asset->GetUniformBlock() },
+							sub_meshes[i],
+							entity.GetUUID()
+						);
+					}
+
+					// Makes sure we don't exceed the maximum materials, if we do, then we will 
+					// just continue using the last material in the Mesh Renderer materials vector
+					if (material_index < material_handles.size() - 1)
+						material_index++;
+				}
+
+				// Set Option for Debug Draw Cube for AABB
+				if (mesh_filter_component.GetShouldDisplayDebugLines())
+					FP_Data.Debug_RenderAABB.push_back(mesh_filter_component.TransformedAABB.GetGlobalBoundsMat4());
+			}
+
+			// Back-to-Front Sorting - Transparent Objects
+			std::sort(FP_Data.TransparentRenderables.begin(), FP_Data.TransparentRenderables.end(), [](const auto& a, const auto& b) {
+				return std::get<0>(a) > std::get<0>(b);
+			});
+		});
+
+		// Debug Rendering
+		{
+			L_PROFILE_SCOPE("Forward Plus - Render Pass::Draw Debug Lines");
+
 			static std::vector<glm::mat4> bounds_matricies{};
-			if(bounds_matricies.capacity() == 0) bounds_matricies.reserve(1024);
-			bounds_matricies.clear();
+			if (bounds_matricies.capacity() == 0) 
+				bounds_matricies.reserve(1024);
+			else
+				bounds_matricies.clear();
 
-			for (auto& entity : FP_Data.RenderableEntities) {
+			// Octree Display Enabled
+			if (auto octree_ref = scene_ref->GetOctree().lock(); octree_ref && scene_ref->GetDisplayOctree()) {
 
-				if (!scene_ref->ValidEntity(entity)) continue;
+				// Draw Octree
+				auto debug_line_shader = AssetManager::GetInbuiltShader("Debug_Line_Draw");
+				if (debug_line_shader) {
+					debug_line_shader->Bind();
+					debug_line_shader->SetFloatVec4("u_LineColor", { 1.0f, 0.0f, 0.0f, 1.0f });
+					debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+					debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
+					debug_line_shader->SetBool("u_UseInstanceData", true);
 
-				if(entity.HasComponent<MeshFilterComponent>())
-					bounds_matricies.push_back(entity.GetComponent<MeshFilterComponent>().TransformedAABB.GetGlobalBoundsMat4());
+					Renderer::DrawInstancedDebugCube(octree_ref->GetAllOctreeBoundsMat4());
+
+					debug_line_shader->Bind();
+					debug_line_shader->SetFloatVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
+					debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+					debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
+					debug_line_shader->SetBool("u_UseInstanceData", true);
+
+					// Draw All Bounds of Data Sources in Octree
+					for (auto& entity : FP_Data.RenderableEntitiesInFrustum) {
+
+						if (!scene_ref->ValidEntity(entity)) continue;
+
+						if (entity.HasComponent<MeshFilterComponent>())
+							bounds_matricies.push_back(entity.GetComponent<MeshFilterComponent>().TransformedAABB.GetGlobalBoundsMat4());
+					}
+
+					Renderer::DrawInstancedDebugCube(bounds_matricies);
+
+					debug_line_shader->UnBind();
+				}
 			}
+			// Only Draw Debug MeshFilter AABB's
+			else if (!FP_Data.Debug_RenderAABB.empty())
+			{
+				auto debug_line_shader = AssetManager::GetInbuiltShader("Debug_Line_Draw");
+				if (debug_line_shader)
+				{
+					debug_line_shader->Bind();
+					debug_line_shader->SetFloatVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
+					debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+					debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
+					debug_line_shader->SetBool("u_UseInstanceData", false);
 
-			Renderer::DrawInstancedDebugCube(bounds_matricies);
+					Renderer::DrawInstancedDebugCube(FP_Data.Debug_RenderAABB);
+
+					debug_line_shader->UnBind();
+				}
+			}
 		}
 
 		// Clean Up Scene Render Pass

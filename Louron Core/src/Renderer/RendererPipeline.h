@@ -5,12 +5,33 @@
 #include "../OpenGL/Vertex Array.h"
 #include "../Scene/Frustum.h"
 #include "../Scene/OctreeBounds.h"
+#include "../OpenGL/Material.h"
 
 // C++ Standard Library Headers
 #include <memory>
 
 // External Vendor Library Headers
 #include <glad/glad.h>
+
+// So we can Key a Pair of Material and Uniform Block
+struct _MaterialWrapper {
+	std::shared_ptr<Louron::PBRMaterial> material;
+	std::shared_ptr<Louron::MaterialUniformBlock> uniform_block;
+
+	// Compare the actual contents, not just pointers
+	bool operator==(const _MaterialWrapper& other) const {
+		return material.get() == other.material.get() && uniform_block.get() == other.uniform_block.get();
+	}
+};
+
+namespace std {
+	template <>
+	struct hash<_MaterialWrapper> {
+		std::size_t operator()(const _MaterialWrapper& mw) const {
+			return std::hash<std::shared_ptr<Louron::PBRMaterial>>{}(mw.material) ^ (std::hash<std::shared_ptr<Louron::MaterialUniformBlock>>{}(mw.uniform_block) << 1);
+		}
+	};
+}
 
 namespace Louron {
 
@@ -23,6 +44,9 @@ namespace Louron {
 	class Scene;
 	class Entity;
 	class CameraBase;
+
+	struct AssetMesh;
+	struct SubMesh;
 	struct Bounds_AABB;
 	struct Bounds_Sphere;
 
@@ -50,6 +74,10 @@ namespace Louron {
 
 		std::weak_ptr<Louron::Scene> m_Scene;
 	};
+
+	using DepthRenderQueue = std::vector<std::tuple<float, UUID, std::shared_ptr<SubMesh>>>;
+	using OpaqueRenderQueue = std::unordered_map<_MaterialWrapper, std::unordered_map<std::shared_ptr<SubMesh>, std::vector<UUID>>>;
+	using TransparentRenderQueue = std::vector<std::tuple<float, _MaterialWrapper, std::shared_ptr<SubMesh>, UUID>>;
 
 	class ForwardPlusPipeline : public RenderPipeline {
 
@@ -96,15 +124,27 @@ namespace Louron {
 			GLuint workGroupsX = -1;
 			GLuint workGroupsY = -1;
 
-			std::vector<Entity> RenderableEntities;
-			std::vector<Entity> PLEntities;
-			std::vector<Entity> SLEntities;
+			std::vector<Entity> RenderableEntitiesInFrustum;
+			std::vector<Entity> PLEntitiesInFrustum;
+			std::vector<Entity> SLEntitiesInFrustum;
 			std::vector<Entity> DLEntities;
 
 			Frustum Camera_Frustum{};
 
-			bool ShowLightComplexity = false;
-			bool ShowWireframe = false;
+			bool Debug_ShowLightComplexity = false;
+			bool Debug_ShowWireframe = false;
+			std::vector<glm::mat4> Debug_RenderAABB;
+
+			DepthRenderQueue DepthRenderables;
+			OpaqueRenderQueue OpaqueRenderables;
+			TransparentRenderQueue TransparentRenderables;
+			std::mutex RenderSortingMutex;
+			std::thread RenderQueueSortingThread;
+			std::thread DepthQueueSortingThread;
+
+			// Cached weak ptr's to reduce AssetManager Get Calls
+			std::unordered_map<AssetHandle, std::weak_ptr<AssetMesh>> CachedMeshAssets;
+			std::unordered_map<AssetHandle, std::weak_ptr<PBRMaterial>> CachedMaterialAssets;
 
 			std::thread OctreeUpdateThread;
 			std::vector<std::shared_ptr<OctreeDataSource<Entity>>> OctreeEntitiesInCamera;

@@ -101,7 +101,7 @@ namespace Louron {
 		/// <param name="asset_file_path">File path must be absolute file location on disk.</param>
 		/// <param name="project_asset_directory">The absolute file path of the Project Asset Directory.</param>
 		/// <returns>The Asset Handle of the loaded asset, or NULL_UUID.</returns>
-		AssetHandle ImportAsset(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory);
+		AssetHandle ImportAsset(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory, const AssetHandle custom_handle = NULL_UUID);
 
 		/// <summary>
 		/// This will force reimport a particular Asset. For instance, an FBX file is modified and has

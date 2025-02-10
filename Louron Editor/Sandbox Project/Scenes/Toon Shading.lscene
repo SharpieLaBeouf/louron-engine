@@ -1,0 +1,84 @@
+Scene Name: Toon Shading
+Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
+Scene Pipeline Type: 1
+Entities:
+  - Entity: 895205798
+    TagComponent:
+      Tag: Sphere
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 3.96924591, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 1346696148
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 3097488182
+  - Entity: 614684837
+    TagComponent:
+      Tag: Floor
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [10, 0.100000001, 10]
+    MeshFilterComponent:
+      MeshAssetHandle: 2903028380
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1468248674
+  - Entity: 3077619168
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-50, 28.3999996, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Intensity: 1
+      Shadow Type: None
+  - Entity: 2006140417
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.CameraMoveScript
+        Fields:
+          []
+    TransformComponent:
+      Translation: [0, 12.7961283, 30.8333855]
+      Rotation: [-10, 0, 0]
+      Scale: [0.999999881, 1, 0.999999881]
+    CameraComponent:
+      Camera:
+        Projection Type: Perspective
+        FOV: 60.0000038
+        Near: 0.00999999978
+        Far: 1000
+      Primary: true
+      ClearFlag: Skybox
+      ClearColour: [0.2640571, 0.3299537, 0.544117689, 1]

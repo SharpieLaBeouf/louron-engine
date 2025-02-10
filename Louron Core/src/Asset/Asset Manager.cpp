@@ -319,7 +319,7 @@ namespace Louron {
 		ImportCustomAsset(handle, meta_data);
 	}
 
-	AssetHandle EditorAssetManager::ImportAsset(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory)
+	AssetHandle EditorAssetManager::ImportAsset(const std::filesystem::path& asset_file_path, const std::filesystem::path& project_asset_directory, const AssetHandle custom_handle)
 	{
 		if (!std::filesystem::exists(asset_file_path))
 		{
@@ -363,7 +363,7 @@ namespace Louron {
 				meta_data.FilePath = std::filesystem::relative(asset_file_path, project_asset_directory);
 				meta_data.Type = AssetManager::GetAssetTypeFromFileExtension(asset_file_path.extension());
 				meta_data.IsComposite = AssetManager::IsAssetTypeComposite(meta_data.Type);
-				handle = GenerateNewAssetHandle(meta_data.Type, meta_data.FilePath);
+				handle = (custom_handle == NULL_UUID) ? GenerateNewAssetHandle(meta_data.Type, meta_data.FilePath) : custom_handle;
 			}
 		}
 		else
@@ -372,7 +372,7 @@ namespace Louron {
 			meta_data.FilePath = std::filesystem::relative(asset_file_path, project_asset_directory);
 			meta_data.Type = AssetManager::GetAssetTypeFromFileExtension(asset_file_path.extension());
 			meta_data.IsComposite = AssetManager::IsAssetTypeComposite(meta_data.Type);
-			handle = GenerateNewAssetHandle(meta_data.Type, meta_data.FilePath);
+			handle = (custom_handle == NULL_UUID) ? GenerateNewAssetHandle(meta_data.Type, meta_data.FilePath) : custom_handle;
 		}
 
 		L_CORE_ASSERT(meta_data.Type != AssetType::None, "Cannot Load Asset as MetaData Type Is NULL.");
