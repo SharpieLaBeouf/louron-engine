@@ -363,12 +363,49 @@ namespace Louron {
         }
     }
 
-    void RigidDynamic::SetRigidDynamicLockFlag(PxRigidDynamicLockFlag::Enum flag, bool value) {
+    void RigidDynamic::SetPositionConstraint(const glm::bvec3& position_constraint)
+    {
         if (m_Actor) {
-            m_Actor->setRigidDynamicLockFlag(flag, value);
+
+            PxRigidDynamicLockFlags lockFlags = m_Actor->getRigidDynamicLockFlags();
+            lockFlags.clear(PxRigidDynamicLockFlag::eLOCK_LINEAR_X);
+            lockFlags.clear(PxRigidDynamicLockFlag::eLOCK_LINEAR_Y);
+            lockFlags.clear(PxRigidDynamicLockFlag::eLOCK_LINEAR_Z);
+
+            if (position_constraint.x)
+                lockFlags |= PxRigidDynamicLockFlag::eLOCK_LINEAR_X;
+            if (position_constraint.y)
+                lockFlags |= PxRigidDynamicLockFlag::eLOCK_LINEAR_Y;
+            if (position_constraint.z)
+                lockFlags |= PxRigidDynamicLockFlag::eLOCK_LINEAR_Z;
+
+            m_Actor->setRigidDynamicLockFlags(lockFlags);
         }
         else {
-            L_CORE_ERROR("Cannot Set Rigid Dynamic Lock Flag - Actor is Nullptr.");
+            L_CORE_ERROR("Cannot Set Rigid Dynamic Position Constraint - Actor is Nullptr.");
+        }
+    }
+
+    void RigidDynamic::SetRotationConstraint(const glm::bvec3& rotation_constraint)
+    {
+        if (m_Actor) {
+
+            PxRigidDynamicLockFlags lockFlags = m_Actor->getRigidDynamicLockFlags();
+            lockFlags.clear(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X);
+            lockFlags.clear(PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y);
+            lockFlags.clear(PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z);
+
+            if (rotation_constraint.x)
+                lockFlags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_X;
+            if (rotation_constraint.y)
+                lockFlags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y;
+            if (rotation_constraint.z)
+                lockFlags |= PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z;
+
+            m_Actor->setRigidDynamicLockFlags(lockFlags);
+        }
+        else {
+            L_CORE_ERROR("Cannot Set Rigid Dynamic Rotation Constraint - Actor is Nullptr.");
         }
     }
 

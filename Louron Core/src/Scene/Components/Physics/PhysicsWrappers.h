@@ -111,7 +111,9 @@ namespace Louron {
 		void SetCMassLocalPose(const PxTransform& pose);
 		void SetRigidBodyFlag(PxRigidBodyFlag::Enum flag, bool value);
 		void SetSolverIterationCounts(PxU32 minPositionIters, PxU32 minVelocityIters);
-		void SetRigidDynamicLockFlag(PxRigidDynamicLockFlag::Enum flag, bool value);
+
+		void SetPositionConstraint(const glm::bvec3& position_constraint);
+		void SetRotationConstraint(const glm::bvec3& rotation_constraint);
 
 		#pragma endregion
 

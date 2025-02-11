@@ -21,10 +21,9 @@ ContentBrowserPanel::ContentBrowserPanel() {
 	m_FileTexture = TextureImporter::LoadTexture2D("Resources/Icons/FileIcon.png");
 }
 
-static efsw::WatchID m_AssetFileWatchID;
-
 void ContentBrowserPanel::StartFileWatcher()
 {
+	m_AssetFileWatcher->removeWatch(m_AssetFileWatchID);
 	m_AssetFileWatchID = m_AssetFileWatcher->addWatch(Project::GetActiveProject()->GetAssetDirectory().string(), m_AssetFileListener, true);
 	m_AssetFileWatcher->watch();
 }
@@ -406,7 +405,9 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 						if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left)) {
 
 							// If we support opening files in the editor, call the appropriate method to open that file
-							if (s_SupportedOpenInEditorFiles.find(entry.path().extension().string()) != s_SupportedOpenInEditorFiles.end()) {
+							auto supported_type = s_SupportedOpenInEditorFiles.find(entry.path().extension().string());
+							if (supported_type != s_SupportedOpenInEditorFiles.end() && supported_type->first == ".lscene") 
+							{
 								editor_layer.OpenScene(entry.path());
 							}
 							else { // If not, we will system call the file to open in default system application

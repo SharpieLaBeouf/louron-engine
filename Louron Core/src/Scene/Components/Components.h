@@ -202,7 +202,7 @@ namespace Louron {
         bool Primary = false;
 
         CameraClearFlags ClearFlags = CameraClearFlags::COLOUR_ONLY;
-        glm::vec4 ClearColour = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glm::vec4 ClearColour = { 0.1764f, 0.3294f, 0.5607f, 1.0f };
 
 		CameraComponent() = default;
         CameraComponent(const CameraComponent& other) {
@@ -217,7 +217,7 @@ namespace Louron {
         CameraComponent(CameraComponent&& other) noexcept {
             this->Primary = other.Primary; other.Primary = false;
             this->ClearFlags = other.ClearFlags; other.ClearFlags = CameraClearFlags::COLOUR_ONLY;
-            this->ClearColour = other.ClearColour; other.ClearColour = { 1.0f, 1.0f, 1.0f, 1.0f };
+            this->ClearColour = other.ClearColour; other.ClearColour = { 0.1764f, 0.3294f, 0.5607f, 1.0f };
             this->CameraInstance = std::move(other.CameraInstance); other.CameraInstance = nullptr;
         }
         CameraComponent& operator=(const CameraComponent& other) {
@@ -240,7 +240,7 @@ namespace Louron {
 
             this->Primary = other.Primary; other.Primary = false;
             this->ClearFlags = other.ClearFlags; other.ClearFlags = CameraClearFlags::COLOUR_ONLY;
-            this->ClearColour = other.ClearColour; other.ClearColour = { 1.0f, 1.0f, 1.0f, 1.0f };
+            this->ClearColour = other.ClearColour; other.ClearColour = { 0.1764f, 0.3294f, 0.5607f, 1.0f };
             this->CameraInstance = std::move(other.CameraInstance); other.CameraInstance = nullptr;
 
             return *this;

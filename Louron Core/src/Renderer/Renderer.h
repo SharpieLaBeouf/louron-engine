@@ -20,7 +20,6 @@ namespace Louron {
 		GLuint SubMeshes_Rendered = 0; // Only Sub Meshes that have been rendered individually
 		GLuint SubMeshes_Instanced = 0; // Only Sub Meshes that have been instanced together
 
-		GLuint Entities_Rendered = 0; // Number of Entities that have been marked for rendering
 		GLuint Entities_Culled = 0; // Number of Entities that have been culled
 
 		GLuint Primitives_VerticeCount = 0; // Total Vertice Count

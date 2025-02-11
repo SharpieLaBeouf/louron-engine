@@ -860,6 +860,8 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::ConductRenderableFrustumCull(const glm::vec3& camera_position, const glm::mat4& projection_matrix) {
 
+		L_PROFILE_SCOPE("Forward Plus - Frustum Culling Octree Query");
+
 		auto scene_ref = m_Scene.lock();
 
 		if (!scene_ref) {
@@ -867,11 +869,13 @@ namespace Louron {
 			return;
 		}
 
-		L_PROFILE_SCOPE("Forward Plus - Frustum Culling Octree Query");
+		size_t total_oct_entities{};
 		if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
 
 			std::unique_lock lock(oct_ref->GetOctreeMutex());
 			const auto& query_vec = oct_ref->Query(FP_Data.Camera_Frustum);
+
+			total_oct_entities = oct_ref->TotalCount();
 
 			if (query_vec.size() > FP_Data.OctreeEntitiesInCamera.capacity())
 				FP_Data.OctreeEntitiesInCamera.reserve(FP_Data.OctreeEntitiesInCamera.capacity() * 2);
@@ -947,6 +951,8 @@ namespace Louron {
 		}
 
 		FP_Data.OctreeEntitiesInCamera.clear();
+
+		Renderer::s_RenderStats.Entities_Culled = static_cast<GLuint>(total_oct_entities - FP_Data.RenderableEntitiesInFrustum.size());
 	}
 
 	/// <summary>
@@ -1056,9 +1062,12 @@ namespace Louron {
 				const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
 				float distance = glm::length(objectPosition - camera_position);
 
+				auto& material_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+				if (material_vector.empty())
+					continue;
+
 				for (int i = 0; i < mesh_asset->SubMeshes.size(); i++)
 				{
-					auto& material_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
 					auto asset_material = i < material_vector.size() ? AssetManager::GetAsset<PBRMaterial>(material_vector[i].first) : AssetManager::GetAsset<PBRMaterial>(material_vector.back().first);
 
 					if (!asset_material || asset_material->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT)
@@ -1630,7 +1639,6 @@ namespace Louron {
 		// Lets colour in some triangles!
 		if (!FP_Data.OpaqueRenderables.empty()) 
 		{
-
 			L_PROFILE_SCOPE("Forward Plus - Render Pass::Opaque Pass");
 			for (const auto& [material_wrapper_pair, mesh_map] : FP_Data.OpaqueRenderables) 
 			{
@@ -1700,7 +1708,8 @@ namespace Louron {
 					shader->SetMat4("u_VertexIn.View", view_matrix);
 				}
 
-				for (const auto& [sub_mesh, entities] : mesh_map) {
+				for (const auto& [sub_mesh, entities] : mesh_map) 
+				{
 
 					size_t entity_count = entities.size();
 					if (entity_count == 0)
@@ -1719,9 +1728,9 @@ namespace Louron {
 						}
 
 						Renderer::DrawInstancedSubMesh(sub_mesh, transforms);
-
 					}
-					else {
+					else 
+					{
 						const auto& transform = scene_ref->FindEntityByUUID(entities[0]).GetComponent<TransformComponent>().GetGlobalTransform();
 						shader->SetMat4("u_VertexIn.Model", transform);
 						Renderer::DrawSubMesh(sub_mesh);
@@ -1882,6 +1891,9 @@ namespace Louron {
 				// Retrieve All MeshMaterialHandles
 				auto& material_handles = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
 
+				if (sub_meshes.empty() || material_handles.empty())
+					continue;
+
 				// MATERIAL AND MATERIAL UNIFORM BLOCK SORTING
 				// Materials will be sorted based on their material, and the uniform 
 				// block of an individual material on a MeshRendererComponent.
@@ -2027,7 +2039,7 @@ namespace Louron {
 					debug_line_shader->SetFloatVec4("u_LineColor", { 0.0f, 1.0f, 0.0f, 1.0f });
 					debug_line_shader->SetMat4("u_VertexIn.Proj", projection_matrix);
 					debug_line_shader->SetMat4("u_VertexIn.View", view_matrix);
-					debug_line_shader->SetBool("u_UseInstanceData", false);
+					debug_line_shader->SetBool("u_UseInstanceData", true);
 
 					Renderer::DrawInstancedDebugCube(FP_Data.Debug_RenderAABB);
 

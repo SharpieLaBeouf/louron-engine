@@ -1110,32 +1110,40 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				ImGui::Text("Freeze Position");
 				ImGui::NextColumn();
 
+				bool constraint_modified = false;
 				glm::bvec3 value_3 = component.GetPositionConstraint();
-				if (ImGui::Checkbox("X", &value_3.x))
-					component.SetPositionConstraint(value_3);
+				if (ImGui::Checkbox("X##PositionConstraint", &value_3.x))
+					constraint_modified = true;
 
 				ImGui::SameLine();
-				if (ImGui::Checkbox("Y", &value_3.y))
-					component.SetPositionConstraint(value_3);
+				if (ImGui::Checkbox("Y##PositionConstraint", &value_3.y))
+					constraint_modified = true;
 
 				ImGui::SameLine();
-				if (ImGui::Checkbox("Z", &value_3.z))
+				if (ImGui::Checkbox("Z##PositionConstraint", &value_3.z))
+					constraint_modified = true;
+
+				if(constraint_modified)
 					component.SetPositionConstraint(value_3);
 
 				ImGui::NextColumn();
 				ImGui::Text("Freeze Rotation");
 				ImGui::NextColumn();
 
+				constraint_modified = false;
 				value_3 = component.GetRotationConstraint();
-				if (ImGui::Checkbox("X", &value_3.x))
-					component.SetRotationConstraint(value_3);
+				if (ImGui::Checkbox("X##RotationConstraint", &value_3.x))
+					constraint_modified = true;
 
 				ImGui::SameLine();
-				if (ImGui::Checkbox("Y", &value_3.y))
-					component.SetRotationConstraint(value_3);
+				if (ImGui::Checkbox("Y##RotationConstraint", &value_3.y))
+					constraint_modified = true;
 
 				ImGui::SameLine();
-				if (ImGui::Checkbox("Z", &value_3.z))
+				if (ImGui::Checkbox("Z##RotationConstraint", &value_3.z))
+					constraint_modified = true;
+
+				if (constraint_modified)
 					component.SetRotationConstraint(value_3);
 
 				ImGui::NextColumn();
@@ -1574,8 +1582,8 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				if (!asset_material)
 					continue;
 
-				AssetType file_type = AssetManager::GetAssetTypeFromFileExtension(metadata_material.FilePath.extension());
-				bool immutable_material =  file_type != AssetType::Material_Standard && file_type != AssetType::Material_Skybox;
+				// Custom Assets are ones that are embedded in other importable files, or inbuilt resources
+				bool immutable_material = metadata_material.IsCustomAsset || metadata_material.ParentAssetHandle != NULL_UUID;
 				bool material_modified = false;
 
 				if (ImGui::TreeNode(std::string("Material: " + metadata_material.AssetName).c_str())) {

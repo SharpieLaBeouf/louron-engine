@@ -33,7 +33,7 @@ namespace Louron {
 	/// </param>
 	std::shared_ptr<Project> Project::NewProject(const std::string& project_name, const std::filesystem::path& project_folder_path) {
 
-		std::filesystem::path outFilePath = std::filesystem::absolute(project_folder_path / (project_name + ".lproj"));
+		std::filesystem::path outFilePath = std::filesystem::absolute(project_folder_path) / (project_name + ".lproj");
 
 		// 1. Validate ProjectFilePath
 		{
@@ -251,10 +251,13 @@ namespace Louron {
 		
 		Entity camera_entity = m_ActiveScene->CreateEntity("Main Camera");
 		auto& camera_component = camera_entity.AddComponent<CameraComponent>();
+		camera_entity.GetComponent<TransformComponent>().SetGlobalPosition({ 0.0f, 5.0f, 20.0f });
+		camera_entity.GetComponent<TransformComponent>().SetGlobalRotation({ -10.0f, 0.0f, 0.0f });
 		camera_component.CameraInstance = std::make_shared<SceneCamera>();
+		camera_component.Primary = true;
 
 		Entity directional_light = m_ActiveScene->CreateEntity("Directional Light");
-		directional_light.GetComponent<TransformComponent>().SetGlobalRotation({30.0f, 50.0f, 0.0f});
+		directional_light.GetComponent<TransformComponent>().SetGlobalRotation({-30.0f, 150.0f, 0.0f});
 		directional_light.AddComponent<DirectionalLightComponent>();
 
 		SceneConfig scnConfig = m_ActiveScene->GetConfig();

@@ -56,6 +56,8 @@ namespace Louron {
 		SetAngularDrag(m_AngularDrag);
 		SetGravity(m_UseGravity);
 		SetKinematic(m_IsKinematic);
+		SetPositionConstraint(m_PositionConstraint);
+		SetRotationConstraint(m_RotationConstraint);
 
 		PxRigidBodyExt::setMassAndUpdateInertia(*m_RigidDynamic->GetActor(), m_Mass);
 
@@ -252,14 +254,12 @@ namespace Louron {
 	}
 
 	void RigidbodyComponent::SetPositionConstraint(const glm::bvec3& positionConstraint) {
-
-		// TODO: apply Physx Constraint
 		m_PositionConstraint = positionConstraint;
+		if (m_RigidDynamic) m_RigidDynamic->SetPositionConstraint(positionConstraint);
 	}
 	void RigidbodyComponent::SetRotationConstraint(const glm::bvec3& rotationConstraint) {
-
-		// TODO: apply Physx Constraint
 		m_RotationConstraint = rotationConstraint;
+		if (m_RigidDynamic) m_RigidDynamic->SetRotationConstraint(rotationConstraint);
 	}
 
 	// Apply force to the rigid body

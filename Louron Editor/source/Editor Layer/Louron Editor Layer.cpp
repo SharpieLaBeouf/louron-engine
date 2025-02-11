@@ -334,6 +334,14 @@ void LouronEditorLayer::OnGuiRender() {
 							m_ScriptFileWatchID = m_ScriptFileWatcher->addWatch((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), m_ScriptFileListener, true);
 							m_ScriptFileWatcher->watch();
 
+							m_ContentBrowserPanel.StartFileWatcher();
+							m_ContentBrowserPanel.m_CurrentDirectory = Project::GetActiveProject()->GetAssetDirectory();
+
+							m_EditorCamera.reset();
+							m_EditorCamera = nullptr;
+							m_EditorCamera = std::make_unique<EditorCamera>();
+							m_EditorCamera->OnUpdate();
+
 							auto scene = Project::GetActiveScene();
 
 							FrameBufferConfig fbo_config;
@@ -578,6 +586,15 @@ void LouronEditorLayer::OnGuiRender() {
 					m_ScriptFileWatchID = m_ScriptFileWatcher->addWatch((Project::GetActiveProject()->GetProjectDirectory() / "Scripts").string(), m_ScriptFileListener, true);
 					m_ScriptFileWatcher->watch();
 
+					m_ContentBrowserPanel.StartFileWatcher();
+
+					m_ContentBrowserPanel.m_CurrentDirectory = Project::GetActiveProject()->GetAssetDirectory();
+
+					m_EditorCamera.reset();
+					m_EditorCamera = nullptr;
+					m_EditorCamera = std::make_unique<EditorCamera>();
+					m_EditorCamera->OnUpdate();
+
 					auto scene = Project::GetActiveScene();
 
 					FrameBufferConfig fbo_config;
@@ -665,7 +682,8 @@ void LouronEditorLayer::OnGuiRender() {
 						OnSceneStop();
 						project->GetActiveScene()->OnStop();
 
-						project->SaveScene();
+						// TODO: Implement Save Dialog
+						// project->SaveScene();
 
 						auto scene = project->NewScene(file_path);
 
@@ -1004,9 +1022,22 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 			ImGui::SetNextWindowBgAlpha(0.35f);
 			if (ImGui::Begin("Scene Stats", &m_ActiveGUIWindows["Scene Stats"], window_flags))
 			{
+				static float frame_rate = ImGui::GetIO().Framerate;
+				static float timer = 0.25f;
+
+				if (timer <= 0.0f)
+				{
+					frame_rate = ImGui::GetIO().Framerate;
+					timer = 0.25f;
+				}
+				else
+				{
+					timer -= Time::GetDeltaTime();
+				}
+
 				ImGui::Text("FPS Counter");
 				ImGui::Separator();
-				ImGui::Text("%.0f", ImGui::GetIO().Framerate);
+				ImGui::Text("%.0f", frame_rate);
 
 			}
 			ImGui::End();
@@ -1462,29 +1493,31 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 
 		ImGui::Columns(1);
 
-		ImGui::Dummy({ 0.0f, 5.0f });
-		ImGui::SeparatorText("Material Properties");
-		ImGui::Dummy({ 0.0f, 5.0f });
-
-		ImGui::Columns(2, "##MaterialPropsCols", false);
-		ImGui::SetColumnWidth(-1, first_col_width);
-
-		bool uniforms_modified = false;
-		UniformBlock uniform_block = material_ref->GetUniformBlock()->GetUniforms();
-		
-		for (auto& [name, uniform] : uniform_block)
+		if (shader != default_shader) 
 		{
-			GLSLType type = uniform.first;
-			UniformValue& value = uniform.second;
-
 			ImGui::Dummy({ 0.0f, 5.0f });
-			ImGui::Text(name.c_str());
-			ImGui::NextColumn();
+			ImGui::SeparatorText("Material Properties");
+			ImGui::Dummy({ 0.0f, 5.0f });
 
-			switch (type)
+			ImGui::Columns(2, "##MaterialPropsCols", false);
+			ImGui::SetColumnWidth(-1, first_col_width);
+
+			bool uniforms_modified = false;
+			UniformBlock uniform_block = material_ref->GetUniformBlock()->GetUniforms();
+
+			for (auto& [name, uniform] : uniform_block)
 			{
+				GLSLType type = uniform.first;
+				UniformValue& value = uniform.second;
 
-				// Bool
+				ImGui::Dummy({ 0.0f, 5.0f });
+				ImGui::Text(name.c_str());
+				ImGui::NextColumn();
+
+				switch (type)
+				{
+
+					// Bool
 				case GLSLType::Bool:
 				{
 					bool& temp = std::get<bool>(value);
@@ -1795,18 +1828,19 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 					ImGui::Text("Unsupported Type.");
 					break;
 				}
+				}
+
+				ImGui::NextColumn();
 			}
 
-			ImGui::NextColumn();
-		}
+			if (uniforms_modified)
+			{
+				material_modified = true;
+				material_ref->GetUniformBlock()->SetUniforms(uniform_block);
+			}
 
-		if (uniforms_modified)
-		{
-			material_modified = true;
-			material_ref->GetUniformBlock()->SetUniforms(uniform_block);
+			ImGui::Columns(1);
 		}
-
-		ImGui::Columns(1);
 
 		if (material_modified)
 		{
@@ -1883,7 +1917,6 @@ void LouronEditorLayer::DisplayRenderStatsWindow() {
 
 		if (ImGui::TreeNodeEx("Culling Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
 
-			ImGui::Text("Entities Rendered: %i", stats.Entities_Rendered);
 			ImGui::Text("Entities Culled: %i", stats.Entities_Culled);
 
 			ImGui::Text("Visible Point Lights: %i", (int)FP_Data.PLEntitiesInFrustum.size());
@@ -2325,7 +2358,13 @@ void LouronEditorLayer::OpenScene(const std::filesystem::path& scene_file_path) 
 		OnSceneStop();
 		project->GetActiveScene()->OnStop();
 
-		project->SaveScene();
+		// TODO: Implement Save Dialog
+		// project->SaveScene();
+
+		m_EditorCamera.reset();
+		m_EditorCamera = nullptr;
+		m_EditorCamera = std::make_unique<EditorCamera>();
+		m_EditorCamera->OnUpdate();
 
 		auto scene = project->LoadScene(filepath);
 

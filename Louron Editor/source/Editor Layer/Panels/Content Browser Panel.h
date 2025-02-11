@@ -37,6 +37,7 @@ private:
 		void handleFileAction(efsw::WatchID watchid, const std::string& dir, const std::string& filename, efsw::Action action, std::string oldFilename) override;
 	};
 
+	efsw::WatchID m_AssetFileWatchID;
     efsw::FileWatcher* m_AssetFileWatcher = new efsw::FileWatcher();
     AssetFileListener* m_AssetFileListener = new AssetFileListener();
 
@@ -44,6 +45,7 @@ private:
 	std::shared_ptr<Louron::Texture> m_FileTexture = nullptr;
 
 	Louron::Entity m_NewFocalEntity = {};
+
 
 	friend class LouronEditorLayer;
 
