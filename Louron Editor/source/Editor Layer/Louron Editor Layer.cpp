@@ -180,7 +180,7 @@ void LouronEditorLayer::OnUpdate() {
 						collider_cube_transform = glm::scale(collider_cube_transform, box_half_extents * 2.0f);
 
 						debug_line_shader->SetMat4("u_VertexIn.Model", collider_cube_transform);
-						Renderer::DrawDebugCube();
+						Renderer::DrawDebugCubeLines();
 						scene_ref->GetSceneFrameBuffer()->Unbind();
 					}
 
@@ -1889,7 +1889,7 @@ void LouronEditorLayer::DisplayRenderStatsWindow() {
 		auto& stats = Renderer::GetFrameRenderStats();
 		auto& FP_Data = std::static_pointer_cast<ForwardPlusPipeline>(Project::GetActiveScene()->GetConfig().ScenePipeline)->GetFPData();
 
-		if (ImGui::TreeNodeEx("Rendering Options", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx("Rendering Options")) {
 
 			ImGui::Checkbox("View Light Complexity", &FP_Data.Debug_ShowLightComplexity);
 			ImGui::Checkbox("View Wireframe", &FP_Data.Debug_ShowWireframe);
@@ -1897,87 +1897,128 @@ void LouronEditorLayer::DisplayRenderStatsWindow() {
 			ImGui::TreePop();
 		}
 
-		if (ImGui::TreeNodeEx("Rendering Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx("Rendering Stats")) {
 
-			ImGui::SeparatorText("Low Level API Calls");
-			ImGui::Text("Draw Calls: %i", stats.DrawCalls);
+			ImGui::SeparatorText("Geometry - OpenGL API Calls");
 
-			ImGui::SeparatorText("Primitives");
-			ImGui::Text("Total Vertice Count: %i", stats.Primitives_VerticeCount);
-			ImGui::Text("Triangle Count: %i", stats.Primitives_TriangleCount);
-			ImGui::Text("Line Count: %i", stats.Primitives_LineCount);
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Total Draw Calls:      %i", stats.Individual_DrawCalls + stats.Instanced_DrawCalls);
+			ImGui::Text("Individual Draw Calls: %i", stats.Individual_DrawCalls);
+			ImGui::Text("Instanced Draw Calls:  %i", stats.Instanced_DrawCalls);
+			ImGui::Text("Draw Calls Saved By Instancing:  %i", stats.Geometry_Colour_Instanced);
+			ImGui::Dummy({ 0.0f, 2.5f });
 
-			ImGui::SeparatorText("Sub Meshes");
-			ImGui::Text("Sub Meshes Renderered: %i", stats.SubMeshes_Rendered);
-			ImGui::Text("Sub Meshes Instanced: %i", stats.SubMeshes_Instanced);
-			ImGui::Text("Skyboxes Renderered: %i", stats.Skybox_Rendered);
+			ImGui::SeparatorText("Geometry - Depth");
+
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Total Geometry (Individual): %i", stats.Geometry_Depth_Rendered);
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Total Triangles: %i", stats.Geometry_Depth_TriangleCount);
+			ImGui::Text("Total Vertices:  %i", stats.Geometry_Depth_VerticeCount);
+			ImGui::Text("Total Lines:     %i", stats.Geometry_Depth_LineCount);
+			ImGui::Dummy({ 0.0f, 2.5f });
+
+			ImGui::SeparatorText("Geometry - Colour");
+
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Total Geometry (Individual): %i", stats.Geometry_Colour_Rendered);
+			ImGui::Text("Total Geometry (Instanced):  %i", stats.Geometry_Colour_Instanced);
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Total Triangles: %i", stats.Geometry_Colour_TriangleCount);
+			ImGui::Text("Total Vertices:  %i", stats.Geometry_Colour_VerticeCount);
+			ImGui::Text("Total Lines:     %i", stats.Geometry_Colour_LineCount);
+			ImGui::Dummy({ 0.0f, 2.5f });
+
+			ImGui::SeparatorText("Debug - OpenGL API Calls");
+
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Total Draw Calls:      %i", stats.Individual_DrawCalls + stats.Instanced_DrawCalls);
+			ImGui::Text("Individual Draw Calls: %i", stats.Individual_DrawCalls);
+			ImGui::Text("Instanced Draw Calls:  %i", stats.Instanced_DrawCalls);
+			ImGui::Text("Draw Calls Saved By Instancing:  %i", stats.Debug_Geometry_Colour_Instanced);
+			ImGui::Dummy({ 0.0f, 2.5f });
+
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Total Geometry (Individual): %i", stats.Debug_Geometry_Colour_Rendered);
+			ImGui::Text("Total Geometry (Instanced):  %i", stats.Debug_Geometry_Colour_Instanced);
+			ImGui::Text("Total Geometry (Depth):      %i", stats.Debug_Geometry_Depth_Rendered);
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Total Triangles: %i", stats.Debug_Geometry_TriangleCount);
+			ImGui::Text("Total Vertices:  %i", stats.Debug_Geometry_VerticeCount);
+			ImGui::Text("Total Lines:     %i", stats.Debug_Geometry_LineCount);
+			ImGui::Dummy({ 0.0f, 2.5f });
 
 			ImGui::TreePop();
 		}
 
-		if (ImGui::TreeNodeEx("Culling Stats", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (ImGui::TreeNodeEx("Culling Stats")) {
 
-			ImGui::Text("Entities Culled: %i", stats.Entities_Culled);
-
+			ImGui::Dummy({ 0.0f, 2.5f });
+			ImGui::Text("Entities Remaining: %i", stats.Entities_Culled_Remaining);
+			ImGui::Text("Entities Occlusion Culled: %i", stats.Entities_Culled_Occlusion);
+			ImGui::Text("Entities Frustum Culled: %i", stats.Entities_Culled_Frustum);
+			ImGui::Dummy({ 0.0f, 2.5f });
 			ImGui::Text("Visible Point Lights: %i", (int)FP_Data.PLEntitiesInFrustum.size());
 			ImGui::Text("Visible Spot Lights: %i", (int)FP_Data.SLEntitiesInFrustum.size());
-
-			if (ImGui::TreeNodeEx("Octree Info", ImGuiTreeNodeFlags_DefaultOpen)) {
-				bool octree_display_toggle = Project::GetActiveScene()->GetDisplayOctree();
-				if (ImGui::Checkbox("View Octree", &octree_display_toggle))
-					Project::GetActiveScene()->SetDisplayOctree(octree_display_toggle);
-
-				ImGui::Text("Octree Data Sources: %i", (int)Project::GetActiveScene()->GetOctree().lock()->GetAllOctreeDataSources().size());
-
-				static OctreeBoundsConfig config = Project::GetActiveScene()->GetOctree().lock()->GetConfig();
-
-				ImGui::DragFloat("Looseness", &config.Looseness, 0.001f, 1.0f, 2.0f);
-				ImGui::DragInt("PreferredDataSourceLimit", &config.PreferredDataSourceLimit, 0.25f, 1);
-
-				if (ImGui::Button("Rebuild Octree")) {
-					L_PROFILE_SCOPE("Rebuild Octree");
-					auto oct_ref = Project::GetActiveScene()->GetOctree().lock();
-					oct_ref->RebuildOctree(config);
-
-				}
-
-				// Length of interval in seconds we gather new results
-				static float timer_max = 0.5f;
-				ImGui::SliderFloat("Octree Stat Timer", &timer_max, 0.1f, 1.0f);
-
-				static float timer = timer_max;
-
-				static float octreeTime = 0.0f;
-
-				static const int data_size = 100;
-				static float data[data_size] = { 0.0f };
-				static int data_index = 0;
-
-				if (timer > 0.0f) {
-					timer -= Time::GetDeltaTime();
-				}
-				else {
-					timer = timer_max;
-
-					auto& results = Profiler::Get().GetResults();
-					octreeTime = results["Forward Plus - Frustum Culling Octree Query"].Time;
-
-					// Store the current octree time in the buffer
-					data[data_index] = octreeTime * 1000.0f; // Convert to microseconds for easier reading
-					data_index = (data_index + 1) % data_size; // Wrap around the buffer index
-				}
-
-				ImGui::Text("Octree Query Time: % .2fus", octreeTime * 1000.0f);
-
-				// Plot the historical octree times
-				ImVec2 plot_size = ImVec2(0, 80);
-				ImGui::PlotLines("##Octree Query Time (us)", data, data_size, data_index, nullptr, 0.0f, 100.0f, plot_size); // Adjust the y-range as needed
-
-				ImGui::TreePop();
-			}
+			ImGui::Dummy({ 0.0f, 2.5f });
 
 			ImGui::TreePop();
 		}
+
+		if (ImGui::TreeNodeEx("Octree Query Stats")) {
+			bool octree_display_toggle = Project::GetActiveScene()->GetDisplayOctree();
+			if (ImGui::Checkbox("View Octree", &octree_display_toggle))
+				Project::GetActiveScene()->SetDisplayOctree(octree_display_toggle);
+
+			ImGui::Text("Octree Data Sources: %i", (int)Project::GetActiveScene()->GetOctree().lock()->GetAllOctreeDataSources().size());
+
+			static OctreeBoundsConfig config = Project::GetActiveScene()->GetOctree().lock()->GetConfig();
+
+			ImGui::DragFloat("Looseness", &config.Looseness, 0.001f, 1.0f, 2.0f);
+			ImGui::DragInt("PreferredDataSourceLimit", &config.PreferredDataSourceLimit, 0.25f, 1);
+
+			if (ImGui::Button("Rebuild Octree")) {
+				L_PROFILE_SCOPE("Rebuild Octree");
+				auto oct_ref = Project::GetActiveScene()->GetOctree().lock();
+				oct_ref->RebuildOctree(config);
+
+			}
+
+			// Length of interval in seconds we gather new results
+			static float timer_max = 0.5f;
+			ImGui::SliderFloat("Octree Stat Timer", &timer_max, 0.1f, 1.0f);
+
+			static float timer = timer_max;
+
+			static float octreeTime = 0.0f;
+
+			static const int data_size = 100;
+			static float data[data_size] = { 0.0f };
+			static int data_index = 0;
+
+			if (timer > 0.0f) {
+				timer -= Time::GetDeltaTime();
+			}
+			else {
+				timer = timer_max;
+
+				auto& results = Profiler::Get().GetResults();
+				octreeTime = results["Forward Plus - Frustum Culling Octree Query"].Time;
+
+				// Store the current octree time in the buffer
+				data[data_index] = octreeTime * 1000.0f; // Convert to microseconds for easier reading
+				data_index = (data_index + 1) % data_size; // Wrap around the buffer index
+			}
+
+			ImGui::Text("Octree Query Time: % .2fus", octreeTime * 1000.0f);
+
+			// Plot the historical octree times
+			ImVec2 plot_size = ImVec2(0, 80);
+			ImGui::PlotLines("##Octree Query Time (us)", data, data_size, data_index, nullptr, 0.0f, 100.0f, plot_size); // Adjust the y-range as needed
+
+			ImGui::TreePop();
+		}
+
 	}
 	ImGui::End();
 }

@@ -127,6 +127,8 @@ namespace Louron {
 		/// <param name="looseness">This is a multiplier. 1.0f = Normal AABB, 2.0f = Test Against Current AABB Expanded by 2.0f.</param>
 		/// <returns>An enum holding the result of the function.</returns>
 		BoundsContainResult Contains(const glm::vec3& point, float looseness = 1.0f) const;
+
+		glm::vec3 ClosestPoint(const glm::vec3& point_location) const;
 	};
 
 }

@@ -63,47 +63,61 @@ namespace Louron {
 		glClear(mask);
 	}
 
-	void Renderer::DrawSubMesh(std::shared_ptr<SubMesh> sub_mesh) 
+	void Renderer::DrawDebugCubeTriangles(bool is_depth_pass)
 	{
-		sub_mesh->VAO->Bind();
-		glDrawElements(GL_TRIANGLES, sub_mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+		s_DebugCubeVAO->Bind();
+		glDrawElements(GL_TRIANGLES, s_DebugCubeVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 
-		s_RenderStats.DrawCalls++;
+		s_RenderStats.Debug_Individual_DrawCalls++;
+		s_RenderStats.Debug_Geometry_TriangleCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() / 3;
+		s_RenderStats.Debug_Geometry_VerticeCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount();
 
-		s_RenderStats.SubMeshes_Rendered++;
-
-		s_RenderStats.Primitives_TriangleCount += sub_mesh->VAO->GetIndexBuffer()->GetCount() / 3;
-		s_RenderStats.Primitives_VerticeCount += sub_mesh->VAO->GetIndexBuffer()->GetCount();
+		if (is_depth_pass)
+			s_RenderStats.Debug_Geometry_Depth_Rendered++;
+		else
+			s_RenderStats.Debug_Geometry_Colour_Rendered++;
 	}
 
-	void Renderer::DrawDebugCube() 
+	void Renderer::DrawDebugCubeLines()
 	{
 		s_DebugCubeVAO->Bind();
 		glDrawElements(GL_LINES, s_DebugCubeVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 
-		s_RenderStats.DrawCalls++;
-
-		s_RenderStats.SubMeshes_Rendered++;
-
-		s_RenderStats.Primitives_LineCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() / 2;
-		s_RenderStats.Primitives_VerticeCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount();
-		
+		s_RenderStats.Debug_Individual_DrawCalls++;
+		s_RenderStats.Debug_Geometry_Colour_Rendered++;
+		s_RenderStats.Debug_Geometry_LineCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() / 2;
+		s_RenderStats.Debug_Geometry_VerticeCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount();
 	}
 
-	void Renderer::DrawDebugSphere()
+	void Renderer::DrawDebugSphereTriangles(bool is_depth_pass)
+	{
+		s_DebugSphereVAO->Bind();
+
+		glDrawElements(GL_TRIANGLES, s_DebugSphereVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+
+		s_RenderStats.Debug_Individual_DrawCalls++;
+		s_RenderStats.Debug_Geometry_TriangleCount += s_DebugSphereVAO->GetIndexBuffer()->GetCount() / 3;
+		s_RenderStats.Debug_Geometry_VerticeCount += s_DebugSphereVAO->GetIndexBuffer()->GetCount();
+
+		if (is_depth_pass)
+			s_RenderStats.Debug_Geometry_Depth_Rendered++;
+		else
+			s_RenderStats.Debug_Geometry_Colour_Rendered++;
+	}
+
+	void Renderer::DrawDebugSphereLines()
 	{
 		s_DebugSphereVAO->Bind();
 
 		glDrawElements(GL_LINES, s_DebugSphereVAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 		
-		s_RenderStats.DrawCalls++;
-		s_RenderStats.SubMeshes_Rendered++;
-		s_RenderStats.Primitives_LineCount += s_DebugSphereVAO->GetIndexBuffer()->GetCount() / 2;
-		s_RenderStats.Primitives_VerticeCount += s_DebugSphereVAO->GetIndexBuffer()->GetCount();
+		s_RenderStats.Debug_Individual_DrawCalls++;
+		s_RenderStats.Debug_Geometry_Colour_Rendered++;
+		s_RenderStats.Debug_Geometry_LineCount += s_DebugSphereVAO->GetIndexBuffer()->GetCount() / 2;
+		s_RenderStats.Debug_Geometry_VerticeCount += s_DebugSphereVAO->GetIndexBuffer()->GetCount();
 	}
 
 	static GLuint s_DebugCubeInstanceBuffers = -1;
-
 	void Renderer::DrawInstancedDebugCube(std::vector<glm::mat4> transforms) 
 	{
 		if (transforms.empty())
@@ -176,28 +190,45 @@ namespace Louron {
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		s_RenderStats.DrawCalls++;
-		s_RenderStats.Primitives_LineCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() / 2 * static_cast<GLuint>(transforms.size());
-		s_RenderStats.Primitives_VerticeCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() * static_cast<GLuint>(transforms.size());
+		s_RenderStats.Debug_Instanced_DrawCalls++;
+		s_RenderStats.Debug_Geometry_Colour_Instanced++;
+		s_RenderStats.Debug_Geometry_LineCount += (s_DebugCubeVAO->GetIndexBuffer()->GetCount() / 2) * static_cast<GLuint>(transforms.size());
+		s_RenderStats.Debug_Geometry_VerticeCount += s_DebugCubeVAO->GetIndexBuffer()->GetCount() * static_cast<GLuint>(transforms.size());
 	}
 
 	void Renderer::DrawSkybox(SkyboxComponent& skybox) 
 	{
-
 		skybox.Bind();
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		s_RenderStats.DrawCalls++;
+		s_RenderStats.Individual_DrawCalls++;
+		s_RenderStats.Geometry_Colour_Rendered++;
+		s_RenderStats.Geometry_Colour_TriangleCount += 12;
+		s_RenderStats.Geometry_Colour_VerticeCount += 36;
+	}
 
-		s_RenderStats.Skybox_Rendered++;
+	void Renderer::DrawSubMesh(std::shared_ptr<SubMesh> sub_mesh, bool is_depth_pass)
+	{
+		sub_mesh->VAO->Bind();
+		glDrawElements(GL_TRIANGLES, sub_mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 
-		s_RenderStats.Primitives_TriangleCount += 36 / 3;
-		s_RenderStats.Primitives_VerticeCount += 36;
+		s_RenderStats.Individual_DrawCalls++;
 
+		if (is_depth_pass)
+		{
+			s_RenderStats.Geometry_Depth_Rendered++;
+			s_RenderStats.Geometry_Depth_TriangleCount += sub_mesh->VAO->GetIndexBuffer()->GetCount() / 3;
+			s_RenderStats.Geometry_Depth_VerticeCount += sub_mesh->VAO->GetIndexBuffer()->GetCount();
+		}
+		else
+		{
+			s_RenderStats.Geometry_Colour_Rendered++;
+			s_RenderStats.Geometry_Colour_TriangleCount += sub_mesh->VAO->GetIndexBuffer()->GetCount() / 3;
+			s_RenderStats.Geometry_Colour_VerticeCount += sub_mesh->VAO->GetIndexBuffer()->GetCount();
+		}
 	}
 
 	static GLuint s_MeshInstanceBuffers = -1;
-
 	void Renderer::DrawInstancedSubMesh(std::shared_ptr<SubMesh> mesh, std::vector<glm::mat4> transforms) 
 	{
 
@@ -271,12 +302,11 @@ namespace Louron {
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		s_RenderStats.DrawCalls++;
+		s_RenderStats.Instanced_DrawCalls++;
 
-		s_RenderStats.SubMeshes_Instanced += static_cast<GLuint>(transforms.size());
-
-		s_RenderStats.Primitives_TriangleCount += mesh->VAO->GetIndexBuffer()->GetCount() / 3 * static_cast<GLuint>(transforms.size());
-		s_RenderStats.Primitives_VerticeCount += mesh->VAO->GetIndexBuffer()->GetCount() * static_cast<GLuint>(transforms.size());
+		s_RenderStats.Geometry_Colour_Instanced += static_cast<GLuint>(transforms.size());
+		s_RenderStats.Geometry_Colour_TriangleCount += (mesh->VAO->GetIndexBuffer()->GetCount() / 3) * static_cast<GLuint>(transforms.size());
+		s_RenderStats.Geometry_Colour_VerticeCount += mesh->VAO->GetIndexBuffer()->GetCount() * static_cast<GLuint>(transforms.size());
 	}
 
 	void Renderer::CleanupRenderData() 

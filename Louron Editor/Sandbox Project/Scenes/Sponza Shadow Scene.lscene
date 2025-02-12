@@ -6372,7 +6372,7 @@ Entities:
       Active: true
       Colour: [0.327566296, 0.446790844, 0.69607842, 1]
       Intensity: 1
-      Shadow Type: Soft
+      Shadow Type: None
   - Entity: 2006140417
     TagComponent:
       Tag: Main Camera

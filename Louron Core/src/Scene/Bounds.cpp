@@ -169,6 +169,18 @@ namespace Louron {
 		return BoundsContainResult::DoesNotContain;
 	}
 
+	glm::vec3 Bounds_AABB::ClosestPoint(const glm::vec3& point_location) const
+	{
+		glm::vec3 closest_point{};
+
+		// Clamp each component of the point within the AABB's min and max bounds
+		closest_point.x = glm::clamp(point_location.x, BoundsMin.x, BoundsMax.x);
+		closest_point.y = glm::clamp(point_location.y, BoundsMin.y, BoundsMax.y);
+		closest_point.z = glm::clamp(point_location.z, BoundsMin.z, BoundsMax.z);
+
+		return closest_point;
+	}
+
 #pragma endregion
 
 }

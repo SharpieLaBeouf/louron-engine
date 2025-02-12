@@ -10,7 +10,7 @@
 
 extern Louron::Engine* Louron::CreateEngine(Louron::EngineCommandLineArgs args);
 
-#ifdef _DEBUG
+#if true
 
 #pragma comment( linker, "/subsystem:console" )
 int main(int argc, char** argv) {

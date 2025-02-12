@@ -2,10 +2,11 @@
 
 // Louron Core Headers
 #include "../Scene/Components/Components.h"
+#include "../OpenGL/Material.h"
+#include "../OpenGL/Query.h"
 #include "../OpenGL/Vertex Array.h"
 #include "../Scene/Frustum.h"
 #include "../Scene/OctreeBounds.h"
-#include "../OpenGL/Material.h"
 
 // C++ Standard Library Headers
 #include <memory>
@@ -75,9 +76,10 @@ namespace Louron {
 		std::weak_ptr<Louron::Scene> m_Scene;
 	};
 
-	using DepthRenderQueue = std::vector<std::tuple<float, UUID, std::shared_ptr<SubMesh>>>;
+	using DepthRenderQueue = std::vector<std::tuple<float, UUID>>;
 	using OpaqueRenderQueue = std::unordered_map<_MaterialWrapper, std::unordered_map<std::shared_ptr<SubMesh>, std::vector<UUID>>>;
 	using TransparentRenderQueue = std::vector<std::tuple<float, _MaterialWrapper, std::shared_ptr<SubMesh>, UUID>>;
+	using GeometryQueryMap = std::unordered_map<UUID, Query>;
 
 	class ForwardPlusPipeline : public RenderPipeline {
 
@@ -100,6 +102,7 @@ namespace Louron {
 		void UpdateSSBOData();
 		void ConductLightFrustumCull();
 		void ConductRenderableFrustumCull(const glm::vec3& camera_position, const glm::mat4& projection_matrix);
+		void ConductRenderableOcclusionCull();
 		void ConductDepthPass(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 		void ConductTiledBasedLightCull(const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
 		void ConductShadowMapping(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix);
@@ -124,6 +127,9 @@ namespace Louron {
 			GLuint workGroupsX = -1;
 			GLuint workGroupsY = -1;
 
+			GeometryQueryMap EntityOcclusionQueries;
+
+			// TODO: Consider Unordered Set for O(1) opposed to O(n)
 			std::vector<Entity> RenderableEntitiesInFrustum;
 			std::vector<Entity> PLEntitiesInFrustum;
 			std::vector<Entity> SLEntitiesInFrustum;
@@ -140,7 +146,6 @@ namespace Louron {
 			TransparentRenderQueue TransparentRenderables;
 			std::mutex RenderSortingMutex;
 			std::thread RenderQueueSortingThread;
-			std::thread DepthQueueSortingThread;
 
 			// Cached weak ptr's to reduce AssetManager Get Calls
 			std::unordered_map<AssetHandle, std::weak_ptr<AssetMesh>> CachedMeshAssets;

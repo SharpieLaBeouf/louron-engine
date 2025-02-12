@@ -316,6 +316,11 @@ namespace Louron {
 
 			ConductDepthPass(camera_position, projection_matrix, view_matrix);
 
+			// Do After Depth Pass - everything in frustum should be drawn and queried in 
+			// depth pass, we use query information from depth pass to drive occlusion 
+			// culling for colour pass.
+			ConductRenderableOcclusionCull();
+
 			ConductTiledBasedLightCull(projection_matrix, view_matrix);
 
 			glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -524,6 +529,7 @@ namespace Louron {
 
 		}
 
+		FP_Data.EntityOcclusionQueries = {};
 		FP_Data.RenderableEntitiesInFrustum.reserve(1024);
 		FP_Data.OctreeEntitiesInCamera.reserve(1024);
 
@@ -545,9 +551,6 @@ namespace Louron {
 
 		if (FP_Data.RenderQueueSortingThread.joinable())
 			FP_Data.RenderQueueSortingThread.join();
-
-		if (FP_Data.DepthQueueSortingThread.joinable())
-			FP_Data.DepthQueueSortingThread.join();
 
 		glDisable(GL_CULL_FACE);
 		glDisable(GL_DEPTH_TEST);
@@ -869,13 +872,13 @@ namespace Louron {
 			return;
 		}
 
-		size_t total_oct_entities{};
+		size_t entity_counter{};
 		if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
 
 			std::unique_lock lock(oct_ref->GetOctreeMutex());
 			const auto& query_vec = oct_ref->Query(FP_Data.Camera_Frustum);
 
-			total_oct_entities = oct_ref->TotalCount();
+			entity_counter = oct_ref->TotalCount();
 
 			if (query_vec.size() > FP_Data.OctreeEntitiesInCamera.capacity())
 				FP_Data.OctreeEntitiesInCamera.reserve(FP_Data.OctreeEntitiesInCamera.capacity() * 2);
@@ -899,7 +902,9 @@ namespace Louron {
 
 			auto& component = data->Data.GetComponent<MeshRendererComponent>();
 			if (component.Active)
+			{
 				FP_Data.RenderableEntitiesInFrustum.push_back(data->Data);
+			}
 		}
 
 		{
@@ -951,8 +956,69 @@ namespace Louron {
 		}
 
 		FP_Data.OctreeEntitiesInCamera.clear();
+		Renderer::s_RenderStats.Entities_Culled_Frustum = static_cast<GLuint>(entity_counter - FP_Data.RenderableEntitiesInFrustum.size());		
+	}
 
-		Renderer::s_RenderStats.Entities_Culled = static_cast<GLuint>(total_oct_entities - FP_Data.RenderableEntitiesInFrustum.size());
+	static std::unordered_map<UUID, uint8_t> s_visible_history{};
+	void ForwardPlusPipeline::ConductRenderableOcclusionCull()
+	{
+		L_PROFILE_SCOPE("Forward Plus - Occlusion Culling");
+
+		auto scene_ref = m_Scene.lock();
+
+		if (!scene_ref) {
+			L_CORE_ERROR("Invalid Scene!");
+			return;
+		}
+
+		std::unique_lock lock(FP_Data.RenderSortingMutex);
+
+		
+		// Occlusion Culling Checks
+		size_t entity_counter = FP_Data.RenderableEntitiesInFrustum.size();
+		for (auto it = FP_Data.EntityOcclusionQueries.begin(); it != FP_Data.EntityOcclusionQueries.end();)
+		{
+			Entity entity = scene_ref->FindEntityByUUID(it->first);
+			if (!entity)
+			{
+				++it;
+				continue;
+			}
+
+			Query& query = it->second;
+
+			bool result_available = query.IsResultAvailable();
+			if (!result_available && s_visible_history[it->first] > 0)
+			{
+				s_visible_history[it->first] -= 1;
+				++it;
+				continue;
+			}
+
+			bool is_visible = query.GetResult() != GL_FALSE;
+			s_visible_history[it->first] = (is_visible) ? 5 : 0; // Result stays visible for atleast 5 frames
+
+			auto find_in_frustum_culled = std::find_if(
+				FP_Data.RenderableEntitiesInFrustum.begin(),
+				FP_Data.RenderableEntitiesInFrustum.end(),
+				[&](Entity& entity_find) { return entity_find == entity; });
+
+			if (find_in_frustum_culled != FP_Data.RenderableEntitiesInFrustum.end())
+			{
+				if (!is_visible)  // Entity is occluded
+					FP_Data.RenderableEntitiesInFrustum.erase(find_in_frustum_culled);
+			}
+			else
+			{
+				it = FP_Data.EntityOcclusionQueries.erase(it);
+				s_visible_history.erase(it->first);
+				continue;
+			}
+			++it;
+		}
+
+		Renderer::s_RenderStats.Entities_Culled_Occlusion = static_cast<GLuint>(entity_counter - FP_Data.RenderableEntitiesInFrustum.size());
+		Renderer::s_RenderStats.Entities_Culled_Remaining = static_cast<GLuint>(FP_Data.RenderableEntitiesInFrustum.size());
 	}
 
 	/// <summary>
@@ -974,20 +1040,45 @@ namespace Louron {
 			return;
 		}
 
+		std::unique_lock lock(FP_Data.RenderSortingMutex);
+
+		scene_ref->GetSceneFrameBuffer()->ClearEntityPixelData(NULL_UUID);
+
 		{
-			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Clear Entity Pixel Data");
-			scene_ref->GetSceneFrameBuffer()->ClearEntityPixelData(NULL_UUID);
-		}
-		
-		// Wait for Octree Update Thread
-		if (FP_Data.DepthQueueSortingThread.joinable()) {
-			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Sorting Thread Wait");
-			FP_Data.DepthQueueSortingThread.join();
+			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Sorting");
+
+			FP_Data.DepthRenderables.clear();
+
+			if (FP_Data.RenderableEntitiesInFrustum.empty())
+				return;
+
+			for (auto& entity : FP_Data.RenderableEntitiesInFrustum)
+			{
+				if (!scene_ref->ValidEntity(entity)) continue;
+
+				const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+				const Bounds_AABB& object_bounds = entity.GetComponent<MeshFilterComponent>().TransformedAABB;
+
+				// Find distance from closest point of AABB from camera_position
+				float distance = glm::length(camera_position - object_bounds.ClosestPoint(camera_position));
+
+				auto& material_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+				if (material_vector.empty())
+					continue;
+
+				FP_Data.DepthRenderables.emplace_back(distance, entity.GetUUID());
+			}
+
+			// Front-to-Back sorting
+			std::sort(FP_Data.DepthRenderables.begin(), FP_Data.DepthRenderables.end(), [](const auto& a, const auto& b) {
+				return std::get<0>(a) < std::get<0>(b);
+			});
 		}
 
-		if (!FP_Data.DepthRenderables.empty()) {
-
+		if (!FP_Data.DepthRenderables.empty()) 
+		{
 			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Rendering");
+
 			if (auto shader = AssetManager::GetInbuiltShader("FP_Depth"); shader)
 			{
 				shader->Bind();
@@ -1004,85 +1095,76 @@ namespace Louron {
 
 				shader->SetIntVec2("u_ScreenSize", { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
 
-				for (auto& [distance, entity_uuid, sub_mesh] : FP_Data.DepthRenderables) 
+				for (auto& [distance, entity_uuid] : FP_Data.DepthRenderables) 
 				{
+					Entity entity = scene_ref->FindEntityByUUID(entity_uuid);
+					if (!entity) continue;
+
 					shader->SetMat4("u_Model", scene_ref->FindEntityByUUID(entity_uuid).GetComponent<TransformComponent>().GetGlobalTransform());
 					shader->SetUInt("u_EntityID", entity_uuid);
 
-					Renderer::DrawSubMesh(sub_mesh);
-				}
+					auto& mesh_filter_component = entity.GetComponent<MeshFilterComponent>();
+					auto asset_mesh_handle = mesh_filter_component.MeshFilterAssetHandle;
 
+					// Check if Asset Handle is Valid
+					if (!AssetManager::IsAssetHandleValid(asset_mesh_handle))
+						continue;
+
+					// Retrieve Cached Mesh Asset
+					auto mesh_asset = FP_Data.CachedMeshAssets[asset_mesh_handle].lock();
+
+					// Check if Loaded
+					if (!mesh_asset)
+					{
+						// If Not Loaded, Call GetAsset to Load
+						FP_Data.CachedMeshAssets[asset_mesh_handle] = AssetManager::GetAsset<AssetMesh>(asset_mesh_handle);
+						mesh_asset = FP_Data.CachedMeshAssets[asset_mesh_handle].lock();
+						
+						// If Failed to Load - Continue
+						if (!mesh_asset)
+							continue;
+					}
+
+					auto& material_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
+					if (material_vector.empty())
+						continue;
+
+					if (FP_Data.EntityOcclusionQueries.count(entity_uuid) == 0)
+						FP_Data.EntityOcclusionQueries[entity_uuid] = Query(Query::Type::AnySamplesPassed);
+
+					if (s_visible_history.count(entity_uuid) == 0)
+						s_visible_history[entity_uuid] = 5;
+
+					bool conduct_query = !FP_Data.EntityOcclusionQueries[entity_uuid].IsProcessing();
+					if (conduct_query) 
+						FP_Data.EntityOcclusionQueries[entity_uuid].Begin();
+					
+					// Should I draw this to the depth map? How can I determine 
+					// whether to draw this to the depth map or not?
+					for (int i = 0; i < mesh_asset->SubMeshes.size(); i++)
+					{
+						auto asset_material = i < material_vector.size() ? AssetManager::GetAsset<PBRMaterial>(material_vector[i].first) : AssetManager::GetAsset<PBRMaterial>(material_vector.back().first);
+
+						if (!asset_material || asset_material->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT)
+							continue;
+
+						Renderer::DrawSubMesh(mesh_asset->SubMeshes[i], true);
+					}
+										
+					// Render AABB bounding box to determine visibility for occlusion query
+					if (conduct_query)
+						FP_Data.EntityOcclusionQueries[entity_uuid].End();
+
+				}
 				scene_ref->GetSceneFrameBuffer()->UnBindEntitySSBO();
 				shader->UnBind();
+
 			}
 			else 
 			{
 				L_CORE_ERROR("FP Depth Shader Not Found");
 			}
 		}
-
-		FP_Data.DepthQueueSortingThread = std::thread([&]() -> void
-		{
-			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Sorting");
-			std::unique_lock lock(FP_Data.RenderSortingMutex);
-
-			FP_Data.DepthRenderables.clear();
-
-			if (FP_Data.RenderableEntitiesInFrustum.empty())
-				return;
-
-			auto thread_scene_ref = m_Scene.lock();
-			if (!thread_scene_ref)
-				return;
-
-			for (auto& entity : FP_Data.RenderableEntitiesInFrustum)
-			{
-				if (!thread_scene_ref->ValidEntity(entity)) continue;
-
-				auto asset_mesh_handle = entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle;
-
-				// Check if Asset Handle is Valid
-				if (!AssetManager::IsAssetHandleValid(asset_mesh_handle))
-					continue;
-
-				// Retrieve Cached Mesh Asset
-				auto mesh_asset = FP_Data.CachedMeshAssets[asset_mesh_handle].lock();
-
-				// Check if Loaded
-				if (!mesh_asset)
-				{
-					// If Not Loaded, Call GetAsset to Load
-					mesh_asset = AssetManager::GetAsset<AssetMesh>(asset_mesh_handle);
-
-					// If Failed to Load - Continue
-					if (!mesh_asset)
-						continue;
-				}
-
-				const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
-				float distance = glm::length(objectPosition - camera_position);
-
-				auto& material_vector = entity.GetComponent<MeshRendererComponent>().MeshRendererMaterialHandles;
-				if (material_vector.empty())
-					continue;
-
-				for (int i = 0; i < mesh_asset->SubMeshes.size(); i++)
-				{
-					auto asset_material = i < material_vector.size() ? AssetManager::GetAsset<PBRMaterial>(material_vector[i].first) : AssetManager::GetAsset<PBRMaterial>(material_vector.back().first);
-
-					if (!asset_material || asset_material->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT)
-						continue;
-
-					FP_Data.DepthRenderables.emplace_back(distance, entity.GetUUID(), mesh_asset->SubMeshes[i]);
-				}
-
-			}
-
-			// Front-to-Back sorting
-			std::sort(FP_Data.DepthRenderables.begin(), FP_Data.DepthRenderables.end(), [](const auto& a, const auto& b) {
-				return std::get<0>(a) < std::get<0>(b);
-			});
-		});
 
 		glFlush();
 	}
@@ -1158,6 +1240,9 @@ namespace Louron {
 		std::vector<Entity> dl_shadow_renderable_entities;
 		std::vector<glm::mat4> dl_shadow_light_space_matricies;
 
+		FP_Data.DL_Shadow_LightSpaceMatrixIndex.clear();
+		FP_Data.DL_Shadow_LightShadowCascadeDistances.clear();
+
 		// 1. Gather Directional Lights
 			
 		{
@@ -1218,8 +1303,6 @@ namespace Louron {
 			{
 				L_PROFILE_SCOPE("Directional Shadow Mapping 3. Calculate Cascade Light Matricies");
 				dl_shadow_light_space_matricies.reserve(dl_shadow_casting_vec.size() * 5);
-				FP_Data.DL_Shadow_LightSpaceMatrixIndex.clear();
-				FP_Data.DL_Shadow_LightShadowCascadeDistances.clear();
 
 				for (int light_index = 0; light_index < dl_shadow_casting_vec.size(); light_index++)
 				{
@@ -1305,6 +1388,8 @@ namespace Louron {
 		std::vector<glm::mat4> sl_shadow_light_space_matricies;
 		sl_shadow_light_space_matricies.reserve(30);
 		std::unordered_map<UUID, std::vector<Entity>> sl_shadow_renderable_entities;
+
+		FP_Data.SL_Shadow_LightIndexMap.clear();
 
 		// 1. Gather Spot Lights
 
@@ -1392,8 +1477,6 @@ namespace Louron {
 
 				glViewport(0, 0, FP_Data.SL_Shadow_Map_Res, FP_Data.SL_Shadow_Map_Res);
 				glClear(GL_DEPTH_BUFFER_BIT);
-
-				FP_Data.SL_Shadow_LightIndexMap.clear();
 
 				auto shader = AssetManager::GetInbuiltShader("FP_Shadow_Spot");
 				shader->Bind();
@@ -1878,7 +1961,8 @@ namespace Louron {
 				if (!mesh_asset)
 				{
 					// If Not Loaded, Call GetAsset to Load
-					mesh_asset = AssetManager::GetAsset<AssetMesh>(mesh_filter_component.MeshFilterAssetHandle);
+					FP_Data.CachedMeshAssets[mesh_filter_component.MeshFilterAssetHandle] = AssetManager::GetAsset<AssetMesh>(mesh_filter_component.MeshFilterAssetHandle);
+					mesh_asset = FP_Data.CachedMeshAssets[mesh_filter_component.MeshFilterAssetHandle].lock();
 
 					// If Failed to Load - Continue
 					if (!mesh_asset)
@@ -1911,7 +1995,8 @@ namespace Louron {
 					if (!material_asset)
 					{
 						// If Not Loaded, Call GetAsset to Load
-						material_asset = AssetManager::GetAsset<PBRMaterial>(mesh_renderer_material_pair.first);
+						FP_Data.CachedMaterialAssets[mesh_renderer_material_pair.first] = AssetManager::GetAsset<PBRMaterial>(mesh_renderer_material_pair.first);
+						material_asset = FP_Data.CachedMaterialAssets[mesh_renderer_material_pair.first].lock();
 
 						// If Failed to Load - Continue
 						if (!material_asset)

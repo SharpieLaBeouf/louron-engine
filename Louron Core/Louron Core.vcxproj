@@ -116,6 +116,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\OpenGL\Query.cpp" />
     <ClCompile Include="src\OpenGL\Compute Shader Asset.cpp" />
     <ClCompile Include="src\Renderer\Camera.cpp" />
     <ClCompile Include="include\glm\detail\glm.cpp" />
@@ -178,6 +179,7 @@
     <ClCompile Include="src\Scripting\Script Manager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\OpenGL\Query.h" />
     <ClInclude Include="src\Asset\Asset Manager API.h" />
     <ClInclude Include="src\OpenGL\Compute Shader Asset.h" />
     <ClInclude Include="src\Renderer\Camera.h" />

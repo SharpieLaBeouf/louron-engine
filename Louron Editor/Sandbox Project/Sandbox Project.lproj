@@ -1,6 +1,6 @@
 Project Name: Sandbox Project
 Project Config:
-  StartScene: Scenes\Sponza Shadow Scene.lscene
+  StartScene: Scenes\Occlusion Culling Test.lscene
   AssetDirectory: Assets\
   AssetRegistry: AssetRegistry.lassetreg
   CoreScriptModulePath: Scripts\Binaries\Louron Script Core.dll

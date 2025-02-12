@@ -1567,6 +1567,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 		ImGui::Text("Materials Inspector");
 		ImGui::Dummy({ 0.0f, 5.0f });
 
+		int counter = 0;
 		for (const auto& asset_handle : material_list) {
 
 			auto& metadata_material = Project::GetStaticEditorAssetManager()->GetMetadata(asset_handle);
@@ -1586,7 +1587,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				bool immutable_material = metadata_material.IsCustomAsset || metadata_material.ParentAssetHandle != NULL_UUID;
 				bool material_modified = false;
 
-				if (ImGui::TreeNode(std::string("Material: " + metadata_material.AssetName).c_str())) {
+				if (ImGui::TreeNode(std::string("Material: " + metadata_material.AssetName + "##" + std::to_string(counter)).c_str())) {
 
 					ImGui::Dummy({ 0.0f, 5.0f });
 
@@ -1753,7 +1754,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 				auto asset_material = AssetManager::GetAsset<SkyboxMaterial>(asset_handle);
 
-				if (ImGui::TreeNode(std::string("Skybox Material: " + metadata_material.AssetName).c_str())) {
+				if (ImGui::TreeNode(std::string("Skybox Material: " + metadata_material.AssetName + "##" + std::to_string(counter)).c_str())) {
 
 					ImGui::Dummy({ 0.0f, 5.0f });
 
@@ -1837,7 +1838,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 			}
 
-
+			counter++;
 			ImGui::Dummy({ 0.0f, 5.0f });
 		}
 	}
