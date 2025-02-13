@@ -169,6 +169,7 @@ namespace Louron {
 
 		std::string type = (ShadowFlag == ShadowTypeFlag::HardShadows) ? "Hard" : (ShadowFlag == ShadowTypeFlag::SoftShadows) ? "Soft" : "None";
 		out << YAML::Key << "Shadow Type" << YAML::Value << type;
+		out << YAML::Key << "Max Shadow Visible Distance" << YAML::Value << MaxShadowVisibleDistance;
 
 		out << YAML::EndMap;
 	}
@@ -192,7 +193,7 @@ namespace Louron {
 		}
 
 		if (data["Intensity"]) {
-			Intensity = data["Intensity"].as<GLfloat>();
+			Intensity = data["Intensity"].as<float>();
 		}
 
 		if (data["Shadow Type"]) {
@@ -207,6 +208,11 @@ namespace Louron {
 		}
 		else {
 			ShadowFlag = ShadowTypeFlag::NoShadows;
+		}
+
+		if (data["Max Shadow Visible Distance"])
+		{
+			MaxShadowVisibleDistance = glm::clamp<float>(data["Max Shadow Visible Distance"].as<float>(), 0.0f, 1.0f);
 		}
 
 		return true;

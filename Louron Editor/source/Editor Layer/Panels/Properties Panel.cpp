@@ -1530,6 +1530,22 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 			}
 			ImGui::NextColumn();
 
+			if (component.ShadowFlag != ShadowTypeFlag::NoShadows)
+			{
+				ImGui::TextWrapped("Max Visible Shadow Distance");
+				if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
+					ImGui::SetTooltip("This is the normalised threshold distance between the camera position to the far plane. \n\nFor Example: If the far plane of the camera is 1000, and the threshold is 0.10, this max shadow distance be 100 units away.", ImGui::GetStyle().HoverDelayNormal);
+
+				ImGui::NextColumn();
+
+				ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+				ImGui::DragFloat("##DirectionalLightMaxVisibleShadowDistance", &component.MaxShadowVisibleDistance, 0.01f, 0.0f, 1.0f, "%.2f", ImGuiSliderFlags_AlwaysClamp);
+				if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_NoSharedDelay))
+					ImGui::SetTooltip("This is the normalised threshold distance between the camera position to the far plane. \n\nFor Example: If the far plane of the camera is 1000, and the threshold is 0.10, this max shadow distance be 100 units away.", ImGui::GetStyle().HoverDelayNormal);
+
+				ImGui::NextColumn();
+			}
+
 			ImGui::Columns(1);
 
 			ImGui::TreePop();

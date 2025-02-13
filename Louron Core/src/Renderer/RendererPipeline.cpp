@@ -529,7 +529,6 @@ namespace Louron {
 
 		}
 
-		FP_Data.EntityOcclusionQueries = {};
 		FP_Data.RenderableEntitiesInFrustum.reserve(1024);
 		FP_Data.OctreeEntitiesInCamera.reserve(1024);
 
@@ -539,6 +538,9 @@ namespace Louron {
 
 		FP_Data.OpaqueRenderables = {};
 		FP_Data.TransparentRenderables = {};
+
+		FP_Data.EntityOcclusionQueries = {};
+		FP_Data.EntityOcclusionHistory = {};
 	}
 
 	/// <summary>
@@ -959,7 +961,6 @@ namespace Louron {
 		Renderer::s_RenderStats.Entities_Culled_Frustum = static_cast<GLuint>(entity_counter - FP_Data.RenderableEntitiesInFrustum.size());		
 	}
 
-	static std::unordered_map<UUID, uint8_t> s_visible_history{};
 	void ForwardPlusPipeline::ConductRenderableOcclusionCull()
 	{
 		L_PROFILE_SCOPE("Forward Plus - Occlusion Culling");
@@ -973,7 +974,6 @@ namespace Louron {
 
 		std::unique_lock lock(FP_Data.RenderSortingMutex);
 
-		
 		// Occlusion Culling Checks
 		size_t entity_counter = FP_Data.RenderableEntitiesInFrustum.size();
 		for (auto it = FP_Data.EntityOcclusionQueries.begin(); it != FP_Data.EntityOcclusionQueries.end();)
@@ -988,15 +988,15 @@ namespace Louron {
 			Query& query = it->second;
 
 			bool result_available = query.IsResultAvailable();
-			if (!result_available && s_visible_history[it->first] > 0)
+			if (!result_available && FP_Data.EntityOcclusionHistory[it->first] > 0)
 			{
-				s_visible_history[it->first] -= 1;
+				FP_Data.EntityOcclusionHistory[it->first] -= 1;
 				++it;
 				continue;
 			}
 
 			bool is_visible = query.GetResult() != GL_FALSE;
-			s_visible_history[it->first] = (is_visible) ? 5 : 0; // Result stays visible for atleast 5 frames
+			FP_Data.EntityOcclusionHistory[it->first] = (is_visible) ? 5 : 0; // Result stays visible for atleast 5 frames
 
 			auto find_in_frustum_culled = std::find_if(
 				FP_Data.RenderableEntitiesInFrustum.begin(),
@@ -1010,8 +1010,10 @@ namespace Louron {
 			}
 			else
 			{
+				if (FP_Data.EntityOcclusionHistory.count(it->first) != 0)
+					FP_Data.EntityOcclusionHistory.erase(it->first);
+
 				it = FP_Data.EntityOcclusionQueries.erase(it);
-				s_visible_history.erase(it->first);
 				continue;
 			}
 			++it;
@@ -1079,28 +1081,22 @@ namespace Louron {
 		{
 			L_PROFILE_SCOPE("Forward Plus - Depth Pass::Rendering");
 
+			glm::ivec2 screen_size = { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height };
+
 			if (auto shader = AssetManager::GetInbuiltShader("FP_Depth"); shader)
 			{
 				shader->Bind();
 				scene_ref->GetSceneFrameBuffer()->BindEntitySSBO();
 				shader->SetMat4("u_Proj", projection_matrix);
 				shader->SetMat4("u_View", view_matrix);
-
-				float A = projection_matrix[2][2];
-				float B = projection_matrix[3][2];
-				float near_plane = B / (A - 1.0f);
-				float far_plane = B / (A + 1.0f);
-				shader->SetFloat("u_Near", near_plane);
-				shader->SetFloat("u_Far", far_plane);
-
-				shader->SetIntVec2("u_ScreenSize", { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
+				shader->SetIntVec2("u_ScreenSize", screen_size);
 
 				for (auto& [distance, entity_uuid] : FP_Data.DepthRenderables) 
 				{
 					Entity entity = scene_ref->FindEntityByUUID(entity_uuid);
 					if (!entity) continue;
 
-					shader->SetMat4("u_Model", scene_ref->FindEntityByUUID(entity_uuid).GetComponent<TransformComponent>().GetGlobalTransform());
+					shader->SetMat4("u_Model", entity.GetComponent<TransformComponent>().GetGlobalTransform());
 					shader->SetUInt("u_EntityID", entity_uuid);
 
 					auto& mesh_filter_component = entity.GetComponent<MeshFilterComponent>();
@@ -1132,8 +1128,8 @@ namespace Louron {
 					if (FP_Data.EntityOcclusionQueries.count(entity_uuid) == 0)
 						FP_Data.EntityOcclusionQueries[entity_uuid] = Query(Query::Type::AnySamplesPassed);
 
-					if (s_visible_history.count(entity_uuid) == 0)
-						s_visible_history[entity_uuid] = 5;
+					if (FP_Data.EntityOcclusionHistory.count(entity_uuid) == 0)
+						FP_Data.EntityOcclusionHistory[entity_uuid] = 5;
 
 					bool conduct_query = !FP_Data.EntityOcclusionQueries[entity_uuid].IsProcessing();
 					if (conduct_query) 
@@ -1145,10 +1141,13 @@ namespace Louron {
 					{
 						auto asset_material = i < material_vector.size() ? AssetManager::GetAsset<PBRMaterial>(material_vector[i].first) : AssetManager::GetAsset<PBRMaterial>(material_vector.back().first);
 
-						if (!asset_material || asset_material->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT)
-							continue;
+						// If Transparent - Render for occlusion testing and mouse picking, but don't let depth be written
+						bool disable_depth = (!asset_material || asset_material->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT);
+						if (disable_depth) glDepthMask(GL_FALSE);
 
 						Renderer::DrawSubMesh(mesh_asset->SubMeshes[i], true);
+
+						if (disable_depth) glDepthMask(GL_TRUE);
 					}
 										
 					// Render AABB bounding box to determine visibility for occlusion query
@@ -1222,8 +1221,8 @@ namespace Louron {
 		L_PROFILE_SCOPE("Forward Plus - Shadow Mapping Total");
 
 		// Calculate every other frame
-		static bool conduct_shadow_pass = false;
-		conduct_shadow_pass = !conduct_shadow_pass;
+		static bool conduct_shadow_pass = true;
+		//conduct_shadow_pass = !conduct_shadow_pass;
 
 		if (!conduct_shadow_pass)
 			return;
@@ -1243,8 +1242,15 @@ namespace Louron {
 		FP_Data.DL_Shadow_LightSpaceMatrixIndex.clear();
 		FP_Data.DL_Shadow_LightShadowCascadeDistances.clear();
 
+		// Decompose Camera Projection Matrix
+		float fov = 2.0f * atan(1.0f / projection_matrix[1][1]);
+		float aspect = projection_matrix[1][1] / projection_matrix[0][0];
+		float A = projection_matrix[2][2];
+		float B = projection_matrix[3][2];
+		float near_plane = B / (A - 1.0f);
+		float far_plane = B / (A + 1.0f);
+
 		// 1. Gather Directional Lights
-			
 		{
 			L_PROFILE_SCOPE("Directional Shadow Mapping 1. Gathering");
 			dl_shadow_casting_vec.reserve(FP_Data.DLEntities.size());
@@ -1270,8 +1276,7 @@ namespace Louron {
 				L_PROFILE_SCOPE("Directional Shadow Mapping 2a. Calculate Light Space Bounds");
 
 				world_light_bounds.BoundsCentre = camera_position;
-				world_light_bounds.BoundsRadius = 250.0f; // 500 diameter
-
+				world_light_bounds.BoundsRadius = far_plane;
 			}
 
 			{
@@ -1310,9 +1315,10 @@ namespace Louron {
 					if (!entity)
 						continue;
 
+					auto& component = entity.GetComponent<DirectionalLightComponent>();
 					std::array<float, 5>& shadow_cascade_distances = FP_Data.DL_Shadow_LightShadowCascadeDistances[entity.GetUUID()];
-					std::array<glm::mat4, 5> light_space_matrices = Frustum::CalculateCascadeLightSpaceMatrices(projection_matrix, view_matrix, entity.GetComponent<TransformComponent>().GetForwardDirection(), shadow_cascade_distances);
-
+					std::array<glm::mat4, 5> light_space_matrices = Frustum::CalculateCascadeLightSpaceMatrices(fov, aspect, near_plane, glm::max(near_plane * 1.1f, far_plane * component.MaxShadowVisibleDistance), view_matrix, entity.GetComponent<TransformComponent>().GetForwardDirection(), shadow_cascade_distances);
+					
 					dl_shadow_light_space_matricies.insert(dl_shadow_light_space_matricies.end(), light_space_matrices.begin(), light_space_matrices.end());
 					FP_Data.DL_Shadow_LightSpaceMatrixIndex[entity.GetUUID()] = light_index;
 				}
@@ -1826,10 +1832,6 @@ namespace Louron {
 		{
 			L_PROFILE_SCOPE("Forward Plus - Render Pass::Transparent Pass");
 
-			// Disable Depth Writing During Transparent Pass
-			// Depth Already Written During Depth/Colour Pass
-			// We do not want to override during colour pass...
-			glDepthMask(GL_FALSE);
 			glDisable(GL_CULL_FACE);
 
 			// Enable Blending During Transparency Pass
@@ -1853,6 +1855,11 @@ namespace Louron {
 				auto shader = material_asset->GetShader();
 				if (shader->IsValid())
 				{
+					// Check to Disable Depth Writing During Transparent Pass
+					// Depth Already Written During Depth/Colour Pass
+					// We may not want to override current depth during transparent pass
+					glDepthMask(material_asset->GetWriteDepth());
+
 					material_asset->UpdateUniforms(camera_position, projection_matrix, view_matrix, material_wrapper_pair.uniform_block); // Change
 
 					// Update Specific Forward Plus Uniforms
@@ -2065,8 +2072,24 @@ namespace Louron {
 			}
 
 			// Back-to-Front Sorting - Transparent Objects
-			std::sort(FP_Data.TransparentRenderables.begin(), FP_Data.TransparentRenderables.end(), [](const auto& a, const auto& b) {
-				return std::get<0>(a) > std::get<0>(b);
+
+			std::sort(FP_Data.TransparentRenderables.begin(), FP_Data.TransparentRenderables.end(), [](const auto& a, const auto& b) 
+			{    
+				// Check if either material should be rendered first (before sorting by distance)
+				bool aRenderFirst = std::get<1>(a).material->GetWriteDepth();
+				bool bRenderFirst = std::get<1>(b).material->GetWriteDepth();
+
+				if (aRenderFirst && !bRenderFirst) {
+					// If 'a' should be rendered first, put it in front
+					return true;
+				}
+				else if (!aRenderFirst && bRenderFirst) {
+					// If 'b' should be rendered first, put it in front
+					return false;
+				}
+
+				// If neither or both materials should be rendered first, perform the standard back-to-front sorting by distance
+				return std::get<0>(a) > std::get<0>(b); // Sort by distance, back-to-front
 			});
 		});
 

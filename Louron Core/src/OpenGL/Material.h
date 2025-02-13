@@ -217,6 +217,8 @@ namespace Louron {
 		float m_MetallicScale = 0.0f;
 		glm::vec4 m_AlbedoTint = glm::vec4(1.0f);
 
+		bool m_WriteDepth = true;
+
 		AssetHandle m_AlbedoTexture = NULL_UUID;
 		AssetHandle m_MetallicTexture = NULL_UUID;
 		AssetHandle m_NormalTexture = NULL_UUID;
@@ -248,6 +250,9 @@ namespace Louron {
 		AssetHandle GetAlbedoTextureAssetHandle() const;
 		AssetHandle GetMetallicTextureAssetHandle() const;
 		AssetHandle GetNormalTextureAssetHandle() const;
+
+		void SetWriteDepth(bool write_depth) { m_WriteDepth = write_depth; }
+		bool GetWriteDepth() { return m_WriteDepth; }
 
 		float GetRoughness() const;
 		float GetMetallic() const;

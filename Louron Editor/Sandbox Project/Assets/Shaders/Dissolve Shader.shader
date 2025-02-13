@@ -249,7 +249,7 @@ void main()
 
     // Apply time-based animation to the dissolve threshold
     float dissolve_threshold = smoothstep(1.0, 0.0, dissolve_factor - u_MaterialUniforms.Time);
-
+    
     // If the dissolve factor is below the threshold, discard the pixel and reset depth
     if (dissolve_threshold < 0.5) 
         discard;
@@ -410,10 +410,8 @@ float DirectionalLightShadowCalculation(vec3 normal, vec3 light_direction, uint 
     if (current_depth > 1.00) 
         return 0.0; 
 
-    // Calculate bias (based on normal and light direction)
-    float bias = max(0.05 * (1.0 - dot(normal, light_direction)), 0.005);
-    const float bias_mod = 0.5;
-    bias *= 1 / (cascade_plane_distances[cascade_layer] * bias_mod);
+    // Calc Bias
+    float bias = 0.0001 + (0.0001 * cascade_layer);
 
     // Percentage Closer Filtering (PCF)
     float shadow = 0.0;
@@ -441,7 +439,7 @@ float DirectionalLightShadowCalculation(vec3 normal, vec3 light_direction, uint 
     return shadow;
 }
 
-float SpotLightShadowCalculation(vec3 normal, vec3 light_pos, vec3 light_direction, uint shadow_light_index, bool soft_shadow)
+float SpotLightShadowCalculation(uint shadow_light_index, bool soft_shadow)
 {
     // Transform fragment position to light space
     vec4 frag_pos_light_space = SL_Shadow_LightSpaceMatrices_Buffer_Data.data[int(shadow_light_index)] * vec4(fragment_in.FragPos, 1.0);
@@ -528,6 +526,7 @@ float PointLightShadowCalculation(vec3 light_pos, float point_light_far_plane, u
 vec3 LouronCalculatePBR_Lighting_Directional(vec3 normal, vec3 view_direction, vec3 albedo, float metallic, float roughness) {
     
     vec3 directional_result = vec3(0.0);
+    vec3 shadow_normal = transpose(fragment_in.TBN_Matrix) * normal;
 
     for (int i = 0; i < DL_Buffer_Data.data.length() && !DL_Buffer_Data.data[i].lastLight; i++) {
 
@@ -545,7 +544,7 @@ vec3 LouronCalculatePBR_Lighting_Directional(vec3 normal, vec3 view_direction, v
         float shadow_factor = 1.0;
         
         if(light.shadowLightIndex != -1)
-            shadow_factor -= DirectionalLightShadowCalculation(normal, -light.direction.xyz, light.shadowLightIndex, light.shadowCascadePlaneDistances, (light.shadowCastingType == 2));
+            shadow_factor -= DirectionalLightShadowCalculation(shadow_normal, -light.direction.xyz, light.shadowLightIndex, light.shadowCascadePlaneDistances, (light.shadowCastingType == 2));
 
         directional_result += CalculatePBR(normal, radiance, shadow_factor, light_direction, view_direction, albedo, metallic, roughness);
     }
@@ -642,7 +641,7 @@ vec3 LouronCalculatePBR_Lighting_Spot(vec3 normal, vec3 fragPos, vec3 view_direc
             float shadow_factor = 1.0;
             
             if (light.shadowLayerIndex != -1) 
-                shadow_factor -= SpotLightShadowCalculation(normal, light.position.xyz, -light.direction.xyz, light.shadowLayerIndex, (light.shadowCastingType == 2));
+                shadow_factor -= SpotLightShadowCalculation(light.shadowLayerIndex, (light.shadowCastingType == 2));
             
             spot_result += CalculatePBR(normal, radiance, shadow_factor, light_direction, view_direction, albedo, metallic, roughness);
             

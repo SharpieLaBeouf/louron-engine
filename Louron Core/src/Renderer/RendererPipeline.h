@@ -128,6 +128,7 @@ namespace Louron {
 			GLuint workGroupsY = -1;
 
 			GeometryQueryMap EntityOcclusionQueries;
+			std::unordered_map<UUID, uint8_t> EntityOcclusionHistory;
 
 			// TODO: Consider Unordered Set for O(1) opposed to O(n)
 			std::vector<Entity> RenderableEntitiesInFrustum;

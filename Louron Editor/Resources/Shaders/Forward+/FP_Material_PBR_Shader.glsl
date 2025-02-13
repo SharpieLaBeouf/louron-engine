@@ -370,6 +370,11 @@ float DirectionalLightShadowCalculation(vec3 normal, vec3 light_direction, uint 
 
     // Find the active cascade layer and compute blend factor
     int cascade_layer = 4; // Default to the last cascade
+    
+    // Check if we are outside of the cascades
+    if (depth_value > cascade_plane_distances[cascade_layer])
+        return 0.0;
+    
     for (int i = 0; i < 5; ++i)
     {
         if (depth_value < cascade_plane_distances[i])
@@ -378,7 +383,7 @@ float DirectionalLightShadowCalculation(vec3 normal, vec3 light_direction, uint 
             break;
         }
     }
-    
+
     vec4 frag_pos_light_space = DL_Shadow_LightSpaceMatrices_Buffer_Data.data[int(shadow_light_index * 5) + cascade_layer] * vec4(fragment_in.FragPos, 1.0);
 
     // Perform perspective divide and transform to [0,1] range
@@ -388,15 +393,12 @@ float DirectionalLightShadowCalculation(vec3 normal, vec3 light_direction, uint 
     // Get depth of current fragment from light's perspective
     float current_depth = projection_coords.z;
 
-    // Prevent gaps by relaxing the out-of-bounds check
-    if (current_depth > 1.00) 
-        return 0.0; 
+    // Ensure valid shadow sampling
+    if (current_depth > 1.0)
+        return 0.0;
 
-    // Calculate bias (based on normal and light direction)
-    float bias = max(0.05 * (1.0 - dot(normal, light_direction)), 0.005);
-    const float bias_mod = 0.5;
-    bias *= 1 / (cascade_plane_distances[cascade_layer] * bias_mod);
-
+    // Calc Bias
+    float bias = 0.0001 + (0.0001 * cascade_layer);
     // Percentage Closer Filtering (PCF)
     float shadow = 0.0;
 
@@ -420,10 +422,25 @@ float DirectionalLightShadowCalculation(vec3 normal, vec3 light_direction, uint 
         shadow = (current_depth - bias) > shadow_depth ? 1.0 : 0.0;  // If current depth is greater than shadow depth, it's in shadow
     }
 
+    if(cascade_layer == 4)
+    {
+        float fade_factor;
+
+        // Get previous cascade start at cascade_layer 3 for near, and this layer
+        float near = cascade_plane_distances[3]; // example 500
+        float far = cascade_plane_distances[4];  // example 1000
+        
+        // Normalise depth between last cascade near and far
+        float normalized_depth = (depth_value - near) / (far - near);
+        fade_factor = smoothstep(1.0, 0.75, normalized_depth); // 0.75 is where fading starts
+
+        return shadow * fade_factor;
+    }
+
     return shadow;
 }
 
-float SpotLightShadowCalculation(vec3 normal, vec3 light_pos, vec3 light_direction, uint shadow_light_index, bool soft_shadow)
+float SpotLightShadowCalculation(uint shadow_light_index, bool soft_shadow)
 {
     // Transform fragment position to light space
     vec4 frag_pos_light_space = SL_Shadow_LightSpaceMatrices_Buffer_Data.data[int(shadow_light_index)] * vec4(fragment_in.FragPos, 1.0);
@@ -510,6 +527,7 @@ float PointLightShadowCalculation(vec3 light_pos, float point_light_far_plane, u
 vec3 LouronCalculatePBR_Lighting_Directional(vec3 normal, vec3 view_direction, vec3 albedo, float metallic, float roughness) {
     
     vec3 directional_result = vec3(0.0);
+    vec3 shadow_normal = transpose(fragment_in.TBN_Matrix) * normal;
 
     for (int i = 0; i < DL_Buffer_Data.data.length() && !DL_Buffer_Data.data[i].lastLight; i++) {
 
@@ -527,7 +545,7 @@ vec3 LouronCalculatePBR_Lighting_Directional(vec3 normal, vec3 view_direction, v
         float shadow_factor = 1.0;
         
         if(light.shadowLightIndex != -1)
-            shadow_factor -= DirectionalLightShadowCalculation(normal, -light.direction.xyz, light.shadowLightIndex, light.shadowCascadePlaneDistances, (light.shadowCastingType == 2));
+            shadow_factor -= DirectionalLightShadowCalculation(shadow_normal, -light.direction.xyz, light.shadowLightIndex, light.shadowCascadePlaneDistances, (light.shadowCastingType == 2));
 
         directional_result += CalculatePBR(normal, radiance, shadow_factor, light_direction, view_direction, albedo, metallic, roughness);
     }
@@ -586,6 +604,8 @@ vec3 LouronCalculatePBR_Lighting_Point(vec3 normal, vec3 fragPos, vec3 view_dire
 vec3 LouronCalculatePBR_Lighting_Spot(vec3 normal, vec3 fragPos, vec3 view_direction, vec3 albedo, float metallic, float roughness) {
 
     vec3 spot_result = vec3(0.0);
+
+    vec3 shadow_normal = transpose(fragment_in.TBN_Matrix) * normal;
     
     ivec2 location = ivec2(gl_FragCoord.xy);
     ivec2 tileID = location / ivec2(16, 16);
@@ -624,7 +644,7 @@ vec3 LouronCalculatePBR_Lighting_Spot(vec3 normal, vec3 fragPos, vec3 view_direc
             float shadow_factor = 1.0;
             
             if (light.shadowLayerIndex != -1) 
-                shadow_factor -= SpotLightShadowCalculation(normal, light.position.xyz, -light.direction.xyz, light.shadowLayerIndex, (light.shadowCastingType == 2));
+                shadow_factor -= SpotLightShadowCalculation(light.shadowLayerIndex, (light.shadowCastingType == 2));
             
             spot_result += CalculatePBR(normal, radiance, shadow_factor, light_direction, view_direction, albedo, metallic, roughness);
             

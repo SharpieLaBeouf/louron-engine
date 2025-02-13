@@ -47,7 +47,7 @@ namespace Louron {
 
 		static Bounds_AABB GetWorldSpaceTightBoundingBox(const glm::mat4& view_proj_matrix);
 		static Bounds_AABB CalculateLightSpaceBoundingBox(const glm::mat4& view_proj_matrix, glm::mat4& light_view_matrix, const glm::vec3& light_direction);
-		static std::array<glm::mat4, 5> CalculateCascadeLightSpaceMatrices(const glm::mat4& projection_matrix, const glm::mat4& view_matrix, const glm::vec3& light_direction, std::array<float, 5>& shadow_cascade_plane_distances);
+		static std::array<glm::mat4, 5> CalculateCascadeLightSpaceMatrices(float fov, float aspect_ratio, float near_plane, float far_plane, const glm::mat4& view_matrix, const glm::vec3& light_direction, std::array<float, 5>& shadow_cascade_plane_distances);
 
 		FrustumContainResult Contains(const Bounds_AABB& bounds) const;
 	};

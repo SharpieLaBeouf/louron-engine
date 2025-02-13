@@ -2,157 +2,138 @@ Scene Name: Occlusion Culling Test
 Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
 Scene Pipeline Type: 1
 Entities:
-  - Entity: 3398955800
-    TagComponent:
-      Tag: Scene Objects
-    HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        - 1978880884
-        - 1212079890
-        - 2495088744
-        - 2176090567
-        - 188215683
-        - 2072960319
-        - 698528362
-        - 3399250042
-        - 3219411298
-        - 4157200827
-    TransformComponent:
-      Translation: [0, 0, 0]
-      Rotation: [0, 0, 0]
-      Scale: [1, 1, 1]
-  - Entity: 1978880884
-    TagComponent:
-      Tag: Cube
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [18.0417633, 0, 0]
-      Rotation: [0, -0, 0]
-      Scale: [1, 19.6409912, 28.4839001]
-    MeshFilterComponent:
-      MeshAssetHandle: 2903028380
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 1468248674
-  - Entity: 1212079890
-    TagComponent:
-      Tag: Cube (1)
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [-19.427557, 5.60461521, 10.6606331]
-      Rotation: [0, -0, 0]
-      Scale: [1, 7.94188261, 11.467104]
-    MeshFilterComponent:
-      MeshAssetHandle: 2903028380
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 1468248674
-  - Entity: 2495088744
-    TagComponent:
-      Tag: AK47 (1)
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [-23.5017242, 4.15469599, 0.133859873]
-      Rotation: [180, -48.5210114, -180]
-      Scale: [14.6462765, 14.6454773, 14.6454535]
-    MeshFilterComponent:
-      MeshAssetHandle: 4252061964
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 2
-      MaterialAssetHandles:
-        - 4014579669
-        - 4014579669
-  - Entity: 2176090567
+  - Entity: 1534835613
     TagComponent:
       Tag: Sphere
     HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [-11.3135262, 6.13943577, 3.03725147]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 1346696148
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 2082684130
-  - Entity: 188215683
-    TagComponent:
-      Tag: Sphere (1)
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [-15.5797577, 5.35051537, -5.34590816]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 1346696148
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 2082684130
-  - Entity: 2072960319
-    TagComponent:
-      Tag: Cube (2)
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [-5.50662422, 4.03381872, -8.96949863]
-      Rotation: [0, -0, 0]
-      Scale: [1, 32.6059723, 6.22602034]
-    MeshFilterComponent:
-      MeshAssetHandle: 2903028380
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 1468248674
-  - Entity: 58269921
-    TagComponent:
-      Tag: Directional Light
-    HierarchyComponent:
       Parent: 4294967295
       Children:
         []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [-30, 150, 0]
+      Rotation: [0, -0, 0]
+      Scale: [6.64289951, 6.64289951, 6.64289951]
+    MeshFilterComponent:
+      MeshAssetHandle: 1346696148
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 253957993
+  - Entity: 1611540586
+    TagComponent:
+      Tag: Untitled Entity
+    HierarchyComponent:
+      Parent: 3990415205
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 1]
+      Rotation: [10, -0, 0]
       Scale: [1, 1, 1]
-    DirectionalLightComponent:
+    SpotLightComponent:
       Active: true
-      Colour: [1, 1, 1, 1]
-      Intensity: 1
+      Colour: [1, 0, 0, 1]
+      Range: 90.5
+      Angle: 45
+      Intensity: 10
       Shadow Type: None
+  - Entity: 3610102685
+    TagComponent:
+      Tag: Suzanne (1)
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, -3.40202665, -5.80438328]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 25272252
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2534630670
+  - Entity: 4157200827
+    TagComponent:
+      Tag: Capsule
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [-12.1698151, -2.67670131, -1.34765792]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 2652383782
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1434222671
+  - Entity: 3219411298
+    TagComponent:
+      Tag: Suzanne
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [-0.386319041, 4.18492794, -2.01951981]
+      Rotation: [0, -0, 0]
+      Scale: [3.64999962, 3.64999962, 3.64999962]
+    MeshFilterComponent:
+      MeshAssetHandle: 25272252
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1793164658
+  - Entity: 3399250042
+    TagComponent:
+      Tag: Cube (3)
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [6.02446795, 4.45368671, 8.06387615]
+      Rotation: [0, -0, 0]
+      Scale: [1, 4.81945896, 6.33820963]
+    MeshFilterComponent:
+      MeshAssetHandle: 2903028380
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1468248674
+  - Entity: 698528362
+    TagComponent:
+      Tag: Cube (1) (1)
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [-8.31187248, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [20, 0.100000001, 10]
+    MeshFilterComponent:
+      MeshAssetHandle: 2903028380
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1468248674
   - Entity: 3990415205
     TagComponent:
       Tag: Main Camera
@@ -179,116 +160,155 @@ Entities:
       Primary: true
       ClearFlag: Colour
       ClearColour: [0.176400006, 0.329400003, 0.560699999, 1]
-  - Entity: 698528362
+  - Entity: 58269921
     TagComponent:
-      Tag: Cube (1) (1)
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [-8.31187248, 0, 0]
-      Rotation: [0, -0, 0]
-      Scale: [20, 0.100000001, 10]
-    MeshFilterComponent:
-      MeshAssetHandle: 2903028380
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 1468248674
-  - Entity: 3399250042
-    TagComponent:
-      Tag: Cube (3)
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [6.02446795, 4.45368671, 8.06387615]
-      Rotation: [0, -0, 0]
-      Scale: [1, 4.81945896, 6.33820963]
-    MeshFilterComponent:
-      MeshAssetHandle: 2903028380
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 1468248674
-  - Entity: 3219411298
-    TagComponent:
-      Tag: Suzanne
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 4.53636265, 5.05259657]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 25272252
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 2534630670
-  - Entity: 4157200827
-    TagComponent:
-      Tag: Capsule
-    HierarchyComponent:
-      Parent: 3398955800
-      Children:
-        []
-    TransformComponent:
-      Translation: [-12.1698151, -2.67670131, -1.34765792]
-      Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 2652383782
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 1434222671
-  - Entity: 3610102685
-    TagComponent:
-      Tag: Suzanne
+      Tag: Directional Light
     HierarchyComponent:
       Parent: 4294967295
       Children:
         []
     TransformComponent:
-      Translation: [0, -3.40202665, -5.80438328]
-      Rotation: [0, -0, 0]
+      Translation: [0, 0, 0]
+      Rotation: [-30, 150, 0]
       Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 25272252
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 2534630670
-  - Entity: 1611540586
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Intensity: 1
+      Shadow Type: Soft
+      Max Shadow Visible Distance: 1
+  - Entity: 2072960319
     TagComponent:
-      Tag: Untitled Entity
+      Tag: Cube (2)
     HierarchyComponent:
-      Parent: 3990415205
+      Parent: 3398955800
       Children:
         []
     TransformComponent:
-      Translation: [0, 0, 1]
-      Rotation: [10, -0, 0]
+      Translation: [-5.50662422, 4.03381872, -8.96949863]
+      Rotation: [0, -0, 0]
+      Scale: [1, 32.6059723, 6.22602034]
+    MeshFilterComponent:
+      MeshAssetHandle: 2903028380
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1468248674
+  - Entity: 188215683
+    TagComponent:
+      Tag: Sphere (1)
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [-15.5797577, 5.35051537, -5.34590816]
+      Rotation: [0, -0, 0]
       Scale: [1, 1, 1]
-    SpotLightComponent:
-      Active: true
-      Colour: [1, 0, 0, 1]
-      Range: 90.5
-      Angle: 45
-      Intensity: 10
-      Shadow Type: None
+    MeshFilterComponent:
+      MeshAssetHandle: 1346696148
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2082684130
+  - Entity: 2176090567
+    TagComponent:
+      Tag: Sphere (2)
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [-11.3135262, 6.13943577, 3.03725147]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 1346696148
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 2082684130
+  - Entity: 2495088744
+    TagComponent:
+      Tag: AK47 (1)
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [-23.5017242, 4.15469599, 0.133859873]
+      Rotation: [180, -48.5210114, -180]
+      Scale: [14.6462765, 14.6454773, 14.6454535]
+    MeshFilterComponent:
+      MeshAssetHandle: 4252061964
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 4014579669
+        - 4014579669
+  - Entity: 1212079890
+    TagComponent:
+      Tag: Cube (1)
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [-19.427557, 5.60461521, 10.6606331]
+      Rotation: [0, -0, 0]
+      Scale: [1, 7.94188261, 11.467104]
+    MeshFilterComponent:
+      MeshAssetHandle: 2903028380
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1468248674
+  - Entity: 1978880884
+    TagComponent:
+      Tag: Cube
+    HierarchyComponent:
+      Parent: 3398955800
+      Children:
+        []
+    TransformComponent:
+      Translation: [18.0417633, 0, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 19.6409912, 28.4839001]
+    MeshFilterComponent:
+      MeshAssetHandle: 2903028380
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: true
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1468248674
+  - Entity: 3398955800
+    TagComponent:
+      Tag: Scene Objects
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 1978880884
+        - 1212079890
+        - 2495088744
+        - 2176090567
+        - 188215683
+        - 2072960319
+        - 698528362
+        - 3399250042
+        - 3219411298
+        - 4157200827
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 1, 1]

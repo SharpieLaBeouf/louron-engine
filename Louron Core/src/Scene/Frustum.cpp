@@ -122,32 +122,62 @@ namespace Louron {
         return bounding_box;
 	}
 
-    std::array<glm::mat4, 5> Frustum::CalculateCascadeLightSpaceMatrices(const glm::mat4& projection_matrix, const glm::mat4& view_matrix, const glm::vec3& light_direction, std::array<float, 5>& shadow_cascade_plane_distances)
+    static std::array<float, 5> CalculateHybridCascadeSplits(float nearPlane, float farPlane)
+    {
+        std::array<float, 5> cascadeSplits{};
+
+        // Calculate the logarithmic factor for depth distribution
+        float logFactor = log2(farPlane / nearPlane);
+
+        for (int i = 0; i < 5; i++)
+        {
+            // Fraction of total range (0.0 to 1.0) for the current cascade
+            float fraction = (i + 1) / 5.0f;
+
+            // Logarithmic split for more depth precision at the far end
+            float logSplit = nearPlane * pow(farPlane / nearPlane, fraction);
+
+            // Uniform split for evenly distributed cascades
+            float uniformSplit = nearPlane + (farPlane - nearPlane) * fraction;
+
+            // Weighted average of both logarithmic and uniform splits
+            cascadeSplits[i] = (logSplit * 0.75f + uniformSplit * 0.25f); // 75% log, 25% uniform blend
+        }
+
+        return cascadeSplits;
+    }
+
+    std::array<glm::mat4, 5> Frustum::CalculateCascadeLightSpaceMatrices(float fov, float aspect_ratio, float near_plane, float far_plane, const glm::mat4& view_matrix, const glm::vec3& light_direction, std::array<float, 5>& shadow_cascade_plane_distances)
     {
         std::array<glm::mat4, 5> light_space_matrices{};
-
-        // Decompose Camera Projection Matrix
-        float fov = 2.0f * atan(1.0f / projection_matrix[1][1]);
-        float aspect = projection_matrix[1][1] / projection_matrix[0][0];
-        float A = projection_matrix[2][2];
-        float B = projection_matrix[3][2];
-        float near_plane = B / (A - 1.0f);
-        float far_plane = B / (A + 1.0f);
-        
-        // cascade planes - 5%/20%/40%/100% -> 5%/15%/20%/60%
-        shadow_cascade_plane_distances = { far_plane / 50.0f, far_plane / 15.0f, far_plane / 5.0f, far_plane / 2.5f, far_plane };
+                
+        shadow_cascade_plane_distances = CalculateHybridCascadeSplits(near_plane, far_plane);
 
         for (int i = 0; i < 5; i++) 
         {
             glm::mat4 light_proj = glm::mat4(1.0f), light_view = glm::mat4(1.0f);
 
-            glm::mat4 segmented_projection = glm::perspective(fov, aspect, i == 0 ? near_plane : shadow_cascade_plane_distances[i-1], shadow_cascade_plane_distances[i]);
+            glm::mat4 segmented_projection = glm::perspective(fov, aspect_ratio, i == 0 ? near_plane : shadow_cascade_plane_distances[i-1], shadow_cascade_plane_distances[i]);
             Bounds_AABB light_view_bounds = Frustum::CalculateLightSpaceBoundingBox(segmented_projection * view_matrix, light_view, light_direction);
             
             // Dynamic depth scaling - ensures no cutoff between cascades
-            float depth_range_multiplier = 5.0f;
-            light_view_bounds.BoundsMin.z *= (light_view_bounds.BoundsMin.z < 0) ? depth_range_multiplier : 1.0f / depth_range_multiplier;
-            light_view_bounds.BoundsMax.z *= (light_view_bounds.BoundsMax.z < 0) ? 1.0f / depth_range_multiplier : depth_range_multiplier;
+            constexpr float zMult = 10.0f;
+            if (light_view_bounds.BoundsMin.z < 0)
+            {
+                light_view_bounds.BoundsMin.z *= zMult;
+            }
+            else
+            {
+                light_view_bounds.BoundsMin.z /= zMult;
+            }
+            if (light_view_bounds.BoundsMax.z < 0)
+            {
+                light_view_bounds.BoundsMax.z /= zMult;
+            }
+            else
+            {
+                light_view_bounds.BoundsMax.z *= zMult;
+            }
 
             light_proj = glm::ortho(
                 light_view_bounds.BoundsMin.x, light_view_bounds.BoundsMax.x,

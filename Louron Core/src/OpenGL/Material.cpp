@@ -401,6 +401,8 @@ namespace Louron {
 		out << YAML::Key << "MetallicTextureAsset" << YAML::Value << m_MetallicTexture;
 		out << YAML::Key << "NormalTextureAsset" << YAML::Value << m_NormalTexture;
 
+		out << YAML::Key << "WriteDepth" << YAML::Value << m_WriteDepth;
+
 		if (m_UniformBlock)
 			m_UniformBlock->Serialize(out);
 	}
@@ -463,6 +465,10 @@ namespace Louron {
 
 		if (data["NormalTextureAsset"]) {
 			m_NormalTexture = data["NormalTextureAsset"].as<uint32_t>();
+		}
+
+		if (data["WriteDepth"]) {
+			m_WriteDepth = data["WriteDepth"].as<bool>();
 		}
 
 		if (data["Material Uniform Block"])

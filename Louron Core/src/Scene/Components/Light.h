@@ -79,6 +79,7 @@ namespace Louron {
 
 		float Intensity = 1.0f;
 
+		float MaxShadowVisibleDistance = 1.0f; // Normalised 0 == near plane of camera, 1 == far plane of camera
 		ShadowTypeFlag ShadowFlag = ShadowTypeFlag::NoShadows;
 
 		DirectionalLightComponent() = default;
