@@ -207,36 +207,42 @@ namespace Louron {
 		s_RenderStats.Geometry_Colour_VerticeCount += 36;
 	}
 
-	void Renderer::DrawSubMesh(std::shared_ptr<SubMesh> sub_mesh, bool is_depth_pass)
+	void Renderer::DrawSubMesh(const VertexArray& sub_mesh, bool is_depth_pass)
 	{
-		sub_mesh->VAO->Bind();
-		glDrawElements(GL_TRIANGLES, sub_mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
+		sub_mesh.Bind();
+		glDrawElements(GL_TRIANGLES, sub_mesh.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0);
 
 		s_RenderStats.Individual_DrawCalls++;
 
 		if (is_depth_pass)
 		{
 			s_RenderStats.Geometry_Depth_Rendered++;
-			s_RenderStats.Geometry_Depth_TriangleCount += sub_mesh->VAO->GetIndexBuffer()->GetCount() / 3;
-			s_RenderStats.Geometry_Depth_VerticeCount += sub_mesh->VAO->GetIndexBuffer()->GetCount();
+			s_RenderStats.Geometry_Depth_TriangleCount += sub_mesh.GetIndexBuffer()->GetCount() / 3;
+			s_RenderStats.Geometry_Depth_VerticeCount += sub_mesh.GetIndexBuffer()->GetCount();
 		}
 		else
 		{
 			s_RenderStats.Geometry_Colour_Rendered++;
-			s_RenderStats.Geometry_Colour_TriangleCount += sub_mesh->VAO->GetIndexBuffer()->GetCount() / 3;
-			s_RenderStats.Geometry_Colour_VerticeCount += sub_mesh->VAO->GetIndexBuffer()->GetCount();
+			s_RenderStats.Geometry_Colour_TriangleCount += sub_mesh.GetIndexBuffer()->GetCount() / 3;
+			s_RenderStats.Geometry_Colour_VerticeCount += sub_mesh.GetIndexBuffer()->GetCount();
 		}
+
+	}
+
+	void Renderer::DrawSubMesh(std::shared_ptr<SubMesh> sub_mesh, bool is_depth_pass)
+	{
+		DrawSubMesh(*sub_mesh->VAO, is_depth_pass);
 	}
 
 	static GLuint s_MeshInstanceBuffers = -1;
-	void Renderer::DrawInstancedSubMesh(std::shared_ptr<SubMesh> mesh, std::vector<glm::mat4> transforms) 
-	{
 
+	void Renderer::DrawInstancedSubMesh(const VertexArray& sub_mesh, std::vector<glm::mat4> transforms)
+	{
 		if (transforms.empty())
 			return;
 
 		if (s_MeshInstanceBuffers == -1) {
-			
+
 			glGenBuffers(1, &s_MeshInstanceBuffers);
 			glBindBuffer(GL_ARRAY_BUFFER, s_MeshInstanceBuffers);
 			glBufferData(GL_ARRAY_BUFFER, transforms.size() * sizeof(glm::mat4), transforms.data(), GL_DYNAMIC_DRAW);
@@ -264,7 +270,7 @@ namespace Louron {
 			return;
 		}
 
-		mesh->VAO->Bind();
+		sub_mesh.Bind();
 
 		// Set vertex attributes
 		std::size_t vec4Size = sizeof(glm::vec4);
@@ -286,7 +292,7 @@ namespace Louron {
 		glVertexAttribDivisor(8, 1);
 
 		// DRAW CALL
-		glDrawElementsInstanced(GL_TRIANGLES, mesh->VAO->GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, static_cast<GLuint>(transforms.size()));
+		glDrawElementsInstanced(GL_TRIANGLES, sub_mesh.GetIndexBuffer()->GetCount(), GL_UNSIGNED_INT, 0, static_cast<GLuint>(transforms.size()));
 
 		// Reset state after drawing
 		glDisableVertexAttribArray(5);
@@ -305,8 +311,13 @@ namespace Louron {
 		s_RenderStats.Instanced_DrawCalls++;
 
 		s_RenderStats.Geometry_Colour_Instanced += static_cast<GLuint>(transforms.size());
-		s_RenderStats.Geometry_Colour_TriangleCount += (mesh->VAO->GetIndexBuffer()->GetCount() / 3) * static_cast<GLuint>(transforms.size());
-		s_RenderStats.Geometry_Colour_VerticeCount += mesh->VAO->GetIndexBuffer()->GetCount() * static_cast<GLuint>(transforms.size());
+		s_RenderStats.Geometry_Colour_TriangleCount += (sub_mesh.GetIndexBuffer()->GetCount() / 3) * static_cast<GLuint>(transforms.size());
+		s_RenderStats.Geometry_Colour_VerticeCount += sub_mesh.GetIndexBuffer()->GetCount() * static_cast<GLuint>(transforms.size());
+	}
+
+	void Renderer::DrawInstancedSubMesh(std::shared_ptr<SubMesh> sub_mesh, std::vector<glm::mat4> transforms)
+	{
+		DrawInstancedSubMesh(*sub_mesh->VAO, transforms);
 	}
 
 	void Renderer::CleanupRenderData() 

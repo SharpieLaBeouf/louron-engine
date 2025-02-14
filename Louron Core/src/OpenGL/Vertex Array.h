@@ -43,6 +43,8 @@ namespace Louron {
 		VertexArray(VertexArray&&) = default;
 		VertexArray& operator=(VertexArray&& other) = default;
 
+		bool operator==(const VertexArray& other) { return m_VAO == other.m_VAO; }
+
 		void Bind() const;
 		void UnBind() const;
 
@@ -52,11 +54,15 @@ namespace Louron {
 		const std::vector<VertexBuffer*> GetVertexBuffers() const { return m_VertexBuffers; }
 		const IndexBuffer* GetIndexBuffer() const { return m_IndexBuffer; }
 
+		void SetDeleteOnDestroy(bool should_delete) { m_DeleteOnObjectDestroy = should_delete; }
+
 	private:
 		GLuint m_VAO = NULL;
 		GLuint m_VertexBufferIndex = 0;
 
 		IndexBuffer* m_IndexBuffer = nullptr;
 		std::vector<VertexBuffer*> m_VertexBuffers;
+
+		bool m_DeleteOnObjectDestroy = true;
 	};
 }

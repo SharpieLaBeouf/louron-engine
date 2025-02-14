@@ -1,14 +1,13 @@
 Material Asset Name: Dissolve Material
 Material Asset Type: AssetType::Material_Standard
 Shader Handle: 2472172739
-Render Type: Transparent
+Render Type: TransparentWriteDepth
 Roughness: 0.159999996
-Metallic: 0.0700000003
+Metallic: 0.0500000007
 Albedo Tint: [0.992156863, 1, 1, 1]
 AlbedoTextureAsset: 4294967295
 MetallicTextureAsset: 4294967295
 NormalTextureAsset: 4294967295
-WriteDepth: true
 Material Uniform Block:
   - Name: NoiseMap
     Type: sampler2D

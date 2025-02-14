@@ -10,7 +10,7 @@ Entities:
       Children:
         []
     TransformComponent:
-      Translation: [0, 0, 0]
+      Translation: [0, 0.050254941, 0]
       Rotation: [0, -0, 0]
       Scale: [6.64289951, 6.64289951, 6.64289951]
     MeshFilterComponent:
@@ -43,7 +43,7 @@ Entities:
     TagComponent:
       Tag: Suzanne (1)
     HierarchyComponent:
-      Parent: 4294967295
+      Parent: 3398955800
       Children:
         []
     TransformComponent:
@@ -81,7 +81,7 @@ Entities:
     TagComponent:
       Tag: Suzanne
     HierarchyComponent:
-      Parent: 3398955800
+      Parent: 4294967295
       Children:
         []
     TransformComponent:
@@ -158,8 +158,10 @@ Entities:
         Near: 0.00999999978
         Far: 1000
       Primary: true
-      ClearFlag: Colour
+      ClearFlag: Skybox
       ClearColour: [0.176400006, 0.329400003, 0.560699999, 1]
+    SkyboxComponent:
+      MaterialAssetHandle: 4158978962
   - Entity: 58269921
     TagComponent:
       Tag: Directional Light
@@ -176,7 +178,7 @@ Entities:
       Colour: [1, 1, 1, 1]
       Intensity: 1
       Shadow Type: Soft
-      Max Shadow Visible Distance: 1
+      Max Shadow Visible Distance: 0.300000012
   - Entity: 2072960319
     TagComponent:
       Tag: Cube (2)
@@ -306,8 +308,8 @@ Entities:
         - 2072960319
         - 698528362
         - 3399250042
-        - 3219411298
         - 4157200827
+        - 3610102685
     TransformComponent:
       Translation: [0, 0, 0]
       Rotation: [0, 0, 0]

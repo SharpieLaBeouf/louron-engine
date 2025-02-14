@@ -28,9 +28,12 @@ namespace Louron {
 	/// <summary>
 	/// Initialise the Skybox Material in OpenGL.
 	/// </summary>
-	SkyboxMaterial::SkyboxMaterial() { 
+	SkyboxMaterial::SkyboxMaterial() 
+	{
+		SetShader(AssetManager::GetInbuiltShader("Skybox")->Handle);
+
 		glGenTextures(1, &m_SkyboxID); 
-		ConstructSkyboxCubeMap(); 
+		ConstructSkyboxCubeMap();
 	}
 
 	SkyboxMaterial::~SkyboxMaterial() { glDeleteTextures(1, &m_SkyboxID); }
@@ -44,19 +47,16 @@ namespace Louron {
 		ConstructSkyboxCubeMap();
 	}
 
-	void SkyboxMaterial::UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block) {
+	void SkyboxMaterial::UpdateUniforms(std::shared_ptr<MaterialUniformBlock> custom_uniform_block) {
 
-		if (m_MaterialShader) {
-
+		if (auto shader_ref = GetShader(); shader_ref)
+		{
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, m_SkyboxID);
-			m_MaterialShader->SetInt("u_Skybox", 0);
-
-			m_MaterialShader->SetMat4("u_VertexIn.Proj", projection_matrix);
-			glm::mat4 view = glm::mat4(glm::mat3(view_matrix));
-			m_MaterialShader->SetMat4("u_VertexIn.View", view);
+			shader_ref->SetInt("u_Skybox", 0);
 		}
-		else {
+		else 
+		{
 			L_CORE_ERROR("Error Updating Uniforms - Shader Not Found for Skybox Material.");
 		}
 	}
@@ -65,38 +65,19 @@ namespace Louron {
 	/// This will serialise the data of the Skybox Material into a file.
 	/// </summary>
 	/// <param name="path">If you pass a value, it will serialise this into a folder INSIDE the asset directory. If empty, it will get the metadata of the Asset and serialise to that filepath.</param>
-	void SkyboxMaterial::Serialize(const std::filesystem::path& path) {
-
-		std::filesystem::path out_path;
-
-		const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(Handle);
-
-		if (path.empty())
-			out_path = Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath;
-		else
-			out_path = path;
-
-		YAML::Emitter out_file;
-		out_file << YAML::BeginMap;
-		std::string asset_name = (meta_data.AssetName.empty()) ? path.filename().replace_extension().string() : meta_data.AssetName;
-		out_file << YAML::Key << "Material Asset Name" << YAML::Value << asset_name;
-		out_file << YAML::Key << "Material Asset Type" << YAML::Value << AssetUtils::AssetTypeToString(AssetType::Material_Skybox);
-		out_file << YAML::Key << "Skybox Asset Handles" << YAML::Value;
+	void SkyboxMaterial::Serialize(YAML::Emitter& out) const
+	{
+		out << YAML::Key << "Material Asset Name" << YAML::Value << GetName();
+		out << YAML::Key << "Material Asset Type" << YAML::Value << AssetUtils::AssetTypeToString(AssetType::Material_Skybox);
+		out << YAML::Key << "Skybox Asset Handles" << YAML::Value;
 
 		{
-			out_file << YAML::BeginSeq;
+			out << YAML::BeginSeq;
 			for (const auto& handle : m_TextureAssetHandles) {
-				out_file << (uint32_t)handle;
+				out << (uint32_t)handle;
 			}
-			out_file << YAML::EndSeq;
+			out << YAML::EndSeq;
 		}
-
-		out_file << YAML::EndMap;
-
-		std::filesystem::create_directories(out_path.parent_path());
-
-		std::ofstream fout(out_path);
-		fout << out_file.c_str();
 	}
 
 	bool SkyboxMaterial::Deserialize(const std::filesystem::path& path)
@@ -133,6 +114,9 @@ namespace Louron {
 			return false;
 		}
 
+		std::string name = node["Material Asset Name"].as<std::string>();
+		SetName(name);
+
 		int i = 0;
 		for (const auto& handleNode : node["Skybox Asset Handles"]) 
 		{
@@ -144,19 +128,19 @@ namespace Louron {
 		return true;
 	}
 
-	GLboolean SkyboxMaterial::Bind() {
-
-		if (m_MaterialShader) {
-			m_MaterialShader->Bind();
-			return GL_TRUE;
+	bool SkyboxMaterial::Bind() const
+	{
+		if (auto shader_ref = GetShader(); shader_ref) {
+			shader_ref->Bind();
+			return true;
 		}
 
 		L_CORE_ERROR("Shader Not Found for Material: {0}", this->GetName());
-		return GL_FALSE;
+		return false;
 	}
 
-	void SkyboxMaterial::UnBind() {
-		
+	void SkyboxMaterial::UnBind() const
+	{
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 		glActiveTexture(GL_TEXTURE0);
 		glUseProgram(0);
@@ -181,10 +165,12 @@ namespace Louron {
 		const std::filesystem::path asset_directory = Project::GetActiveProject()->GetConfig().AssetDirectory;
 		const int desired_size = 1024; // Desired size for all faces
 
-		for (int i = 0; i < m_TextureAssetHandles.size(); i++) {
+		for (int i = 0; i < m_TextureAssetHandles.size(); i++) 
+		{
 			bool texture_valid = false; // Use this to check if the texture has been successfully loaded this iteration of the cube_map build
 
-			if (AssetManager::IsAssetHandleValid(m_TextureAssetHandles[i])) {
+			if (AssetManager::IsAssetHandleValid(m_TextureAssetHandles[i])) 
+			{
 				int width, height, nrChannels;
 				const std::filesystem::path& texture_file_path = Project::GetActiveProject()->GetAssetDirectory() / Project::GetStaticEditorAssetManager()->GetMetadata(m_TextureAssetHandles[i]).FilePath;
 				unsigned char* data = stbi_load(texture_file_path.string().c_str(), &width, &height, &nrChannels, 0);
@@ -203,7 +189,8 @@ namespace Louron {
 
 						delete[] resized_data;
 					}
-					else {
+					else 
+					{
 						glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, desired_size, desired_size, 0, format, GL_UNSIGNED_BYTE, data);
 					}
 
@@ -234,7 +221,7 @@ namespace Louron {
 
 	SkyboxComponent::SkyboxComponent() {
 
-		float skyboxVertices[] = {
+		static float skyboxVertices[] = {
 			// positions          
 			-1.0f,  1.0f, -1.0f,
 			-1.0f, -1.0f, -1.0f,
@@ -288,54 +275,26 @@ namespace Louron {
 		m_VAO->AddVertexBuffer(vbo);
 	}
 
-	void SkyboxComponent::Serialize(YAML::Emitter& out) {
+	void SkyboxComponent::Serialize(YAML::Emitter& out) const
+	{
 
 		out << YAML::Key << "SkyboxComponent";
 		out << YAML::BeginMap;
 
 		out << YAML::Key << "MaterialAssetHandle" << YAML::Value << (uint32_t)SkyboxMaterialAssetHandle;
 
-		if (auto material_ref = AssetManager::GetAsset<SkyboxMaterial>(SkyboxMaterialAssetHandle); material_ref) {
-
-			const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(SkyboxMaterialAssetHandle);
-			material_ref->Serialize(Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
-
-			L_CORE_INFO("Skybox Material ({0}) Saved At: {1}", meta_data.FilePath.stem().string().c_str(), meta_data.FilePath.string().c_str());
-
-		}
 		out << YAML::EndMap;
 	}
 
 	bool SkyboxComponent::Deserialize(const YAML::Node data)
 	{
-
 		YAML::Node component = data;
 
-		if (component["MaterialAssetHandle"]) 
-		{
-			SkyboxMaterialAssetHandle = component["MaterialAssetHandle"].as<uint32_t>();
-		}
-		else 
-		{
+		if (!component["MaterialAssetHandle"])
 			return false;
-		}
 
-		auto material_ref = AssetManager::GetAsset<SkyboxMaterial>(SkyboxMaterialAssetHandle);
-		if (material_ref) {
-			const AssetMetaData& meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(SkyboxMaterialAssetHandle);
-			std::filesystem::path material_path = Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath;
-
-			try 
-			{
-				material_ref->Deserialize(material_path);
-			}
-			catch (const std::exception& e) 
-			{
-				L_CORE_ERROR("Failed to deserialize Skybox Material from {0}: {1}", material_path.string(), e.what());
-				return false;
-			}
-		}
-
+		SkyboxMaterialAssetHandle = component["MaterialAssetHandle"].as<uint32_t>();
 		return true;
 	}
+
 }

@@ -75,9 +75,11 @@ namespace Louron {
 		static void DrawDebugSphereLines();
 		static void DrawInstancedDebugCube(std::vector<glm::mat4> transforms);
 
+		static void DrawSubMesh(const VertexArray& sub_mesh, bool is_depth_pass = false);
 		static void DrawSubMesh(std::shared_ptr<SubMesh> sub_mesh, bool is_depth_pass = false);
 		static void DrawSkybox(SkyboxComponent& skybox);
-		static void DrawInstancedSubMesh(std::shared_ptr<SubMesh> mesh, std::vector<glm::mat4> transforms);
+		static void DrawInstancedSubMesh(const VertexArray& sub_mesh, std::vector<glm::mat4> transforms);
+		static void DrawInstancedSubMesh(std::shared_ptr<SubMesh> sub_mesh, std::vector<glm::mat4> transforms);
 
 		static void CleanupRenderData();
 

@@ -17,172 +17,104 @@
 
 namespace Louron {
 
-#pragma region Base Class Material
-
-	GLboolean Material::Bind() {
-		if (auto shader = AssetManager::GetAsset<Shader>(m_ShaderAssetHandle); shader) {
-			shader->Bind();
-			return GL_TRUE;
-		}
-		L_CORE_ERROR("Shader Not Found for Material: {0}", GetName());
-		return GL_FALSE;
-	}
-
-	void Material::UnBind() {
-
-		for (int i = 0; i < m_Textures.size(); i++) {
-			if (m_Textures[i]) {
-				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, 0);
-			}
-		}
-		glActiveTexture(GL_TEXTURE0); 
-		glUseProgram(0);
-	}
-
-	void Material::UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block) {
-
-		if (auto shader = AssetManager::GetAsset<Shader>(m_ShaderAssetHandle); shader) {
-			shader->SetFloat("u_Material.shine", m_Shine);
-			shader->SetFloatVec4("u_Material.diffuse", m_Diffuse);
-			shader->SetFloatVec4("u_Material.specular", m_Specular);
-
-			for (int i = 0; i < L20_TOTAL_ELEMENTS; i++) {
-
-				shader->SetInt(std::string("u_Material." + m_TextureUniformNames[i]).c_str(), i);
-				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, m_Textures[i]->GetID());
-			}
-
-			shader->SetMat4("u_VertexIn.Proj", projection_matrix);
-			shader->SetMat4("u_VertexIn.View", view_matrix);
-			shader->SetFloatVec3("u_CameraPos", camera_position);
-		}
-		else {
-			L_CORE_ERROR("Shader Not Found for Material: {0}", GetName());
-		}
-	}
-
-	void Material::SetShader(AssetHandle shader_handle) {
-		m_ShaderAssetHandle = shader_handle;
-	}
-	void Material::SetTexture(std::shared_ptr<Texture> texture, TextureMapType textureType) {
-		m_Textures[textureType] = texture; 
-	}
-
-	std::shared_ptr<Shader> Material::GetShader() {
-		return AssetManager::GetAsset<Shader>(m_ShaderAssetHandle);
-	}
-
-	AssetHandle Material::GetShaderHandle()
-	{
-		return m_ShaderAssetHandle;
-	}
-
-	/// <summary>
-	/// DEFAULT CONSTRUCTOR - Initialise Material with NO SHADER and BLANK TEXTURE
-	/// </summary>
-	Material::Material() : m_ShaderAssetHandle(AssetManager::GetInbuiltShader("Default Shader")->Handle) {
-		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
-			m_Textures[i] = Engine::Get().GetTextureLibrary().GetDefaultTexture();
-	}
-
-	/// <summary>
-	/// Initialise Material with BLANK TEXTURE and CUSTOM NAME
-	/// </summary>
-	/// <param name="name"></param>
-	/// <param name="shader"></param>
-	Material::Material(const std::string& name, std::shared_ptr<Shader> shader) : m_Name(name), m_ShaderAssetHandle(shader->Handle) {
-		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
-			m_Textures[i] = Engine::Get().GetTextureLibrary().GetDefaultTexture();
-	}
-
-	/// <summary>
-	/// Initialise Material with BLANK TEXTURE
-	/// </summary>
-	Material::Material(AssetHandle shader) : m_ShaderAssetHandle(shader) {
-		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
-			m_Textures[i] = Engine::Get().GetTextureLibrary().GetDefaultTexture();
-	}
-
-	/// <summary>
-	/// Initialise Material with NO SHADER and TEXTURE PARAMETER
-	/// </summary>
-	Material::Material(std::shared_ptr<Texture> texture) : m_ShaderAssetHandle(AssetManager::GetInbuiltShader("Default Shader")->Handle) {
-		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
-			m_Textures[i] = texture;
-	}
-
-	/// <summary>
-	/// Initialise Material with SHADER and TEXTURE PARAMETER
-	/// </summary>
-	Material::Material(AssetHandle shader, std::shared_ptr<Texture> texture) : m_ShaderAssetHandle(shader) {
-		for (int i = 0; i < TextureMapType::L20_TOTAL_ELEMENTS; i++)
-			m_Textures[i] = texture;
-	}
-
-	/// <summary>
-	/// Initialise Material with SHADER and TEXTURE UNORDERED MAP PARAMETER
-	/// </summary>
-	Material::Material(AssetHandle shader, std::unordered_map<GLint, std::shared_ptr<Texture>>& textures) : m_ShaderAssetHandle(shader) {
-		for (int i = 0; i < textures.size(); i++)
-			m_Textures[i] = textures[i];
-	}
-
-	float Material::GetShine() const { return m_Shine; }
-	glm::vec4* Material::GetDiffuse() { return &m_Diffuse; }
-	glm::vec4* Material::GetSpecular() { return &m_Specular; }
-
-	void Material::SetShine(float shine) { m_Shine = shine; }
-	void Material::SetDiffuse(const glm::vec4& val) { m_Diffuse = val; }
-	void Material::SetSpecular(const glm::vec4& val) { m_Specular = val; }
-
-	void Material::AddTextureMap(GLint type, std::shared_ptr<Texture> val) {
-		if (auto shader = AssetManager::GetAsset<Shader>(m_ShaderAssetHandle); shader) {
-			shader->Bind();
-			shader->SetInt(std::string("u_Material." + m_TextureUniformNames[type]).c_str(), type);
-			shader->UnBind();
-		}
-		else
-			L_CORE_WARN("Shader Not Linked to Material - Cannot Set Texture Unit"); 
-
-		if (type < m_Textures.size() && type > -1) {
-			m_Textures[type] = val;
-		}
-		else
-			L_CORE_WARN("Texture Slot Out of Bounds"); 
-	}
-
-	std::shared_ptr<Texture> Material::GetTextureMap(GLint type) {
-		return m_Textures[type];
-	}
-
-#pragma endregion
-
 #pragma region PBR Materials
 
-	PBRMaterial::PBRMaterial()
+	Material::Material()
 	{
 		SetShader(AssetManager::GetInbuiltShader("FP_Material_PBR_Shader")->Handle);
 	}
 
-	PBRMaterial::PBRMaterial(AssetHandle shader_handle)
+	Material::Material(AssetHandle shader_handle)
 	{
 		SetShader(shader_handle);
 	}
 
-	GLboolean PBRMaterial::Bind()  {
+	Material::Material(const Material& other)
+	{
+		Handle = other.Handle;
 
-		if(auto shader_ref = AssetManager::GetAsset<Shader>(m_ShaderAssetHandle); shader_ref) {
-			shader_ref->Bind();
-			return GL_TRUE;
-		}
-		L_CORE_ERROR("Shader Not Found for PBR Material: {0}", m_MaterialName);
-		return GL_FALSE;
+		m_MaterialName = other.m_MaterialName;
+		m_UniformBlock = other.m_UniformBlock;
+		m_AlbedoTint = other.m_AlbedoTint;
+		m_AlbedoTexture = other.m_AlbedoTexture;
+		m_MetallicTexture = other.m_MetallicTexture;
+		m_NormalTexture = other.m_NormalTexture;
+		m_Roughness = other.m_Roughness;
+		m_MetallicScale = other.m_MetallicScale;
+		m_ShaderAssetHandle = other.m_ShaderAssetHandle;
+		m_RenderType = other.m_RenderType;
 	}
 
-	void PBRMaterial::UnBind() {
+	Material::Material(Material&& other) noexcept
+	{
+		Handle = other.Handle; other.Handle = NULL_UUID;
 
+		m_MaterialName = other.m_MaterialName;				other.m_MaterialName = "New Material";
+		m_UniformBlock = other.m_UniformBlock;				other.m_UniformBlock = nullptr;
+		m_AlbedoTint = other.m_AlbedoTint;					other.m_AlbedoTint = glm::vec4(1.0f);
+		m_AlbedoTexture = other.m_AlbedoTexture;			other.m_AlbedoTexture = NULL_UUID;
+		m_MetallicTexture = other.m_MetallicTexture;		other.m_MetallicTexture = NULL_UUID;
+		m_NormalTexture = other.m_NormalTexture;			other.m_NormalTexture = NULL_UUID;
+		m_Roughness = other.m_Roughness;					other.m_Roughness = 0.5f;
+		m_MetallicScale = other.m_MetallicScale;			other.m_MetallicScale = 0.0f;
+		m_ShaderAssetHandle = other.m_ShaderAssetHandle;	other.m_ShaderAssetHandle = AssetManager::GetInbuiltShader("FP_Material_PBR_Shader")->Handle;
+		m_RenderType = other.m_RenderType;					other.m_RenderType = RenderType::L_MATERIAL_OPAQUE;
+	}
+
+	Material& Material::operator=(const Material& other)
+	{
+		if (this == &other)
+			return *this;
+
+		Handle = other.Handle;
+
+		m_MaterialName = other.m_MaterialName;
+		m_UniformBlock = other.m_UniformBlock;
+		m_AlbedoTint = other.m_AlbedoTint;
+		m_AlbedoTexture = other.m_AlbedoTexture;
+		m_MetallicTexture = other.m_MetallicTexture;
+		m_NormalTexture = other.m_NormalTexture;
+		m_Roughness = other.m_Roughness;
+		m_MetallicScale = other.m_MetallicScale;
+		m_ShaderAssetHandle = other.m_ShaderAssetHandle;
+		m_RenderType = other.m_RenderType;
+
+		return *this;
+	}
+
+	Material& Material::operator=(Material&& other) noexcept
+	{
+		if (this == &other)
+			return *this;
+
+		Handle = other.Handle; other.Handle = NULL_UUID;
+
+		m_MaterialName = other.m_MaterialName;				other.m_MaterialName = "New Material";
+		m_UniformBlock = other.m_UniformBlock;				other.m_UniformBlock = nullptr;
+		m_AlbedoTint = other.m_AlbedoTint;					other.m_AlbedoTint = glm::vec4(1.0f);
+		m_AlbedoTexture = other.m_AlbedoTexture;			other.m_AlbedoTexture = NULL_UUID;
+		m_MetallicTexture = other.m_MetallicTexture;		other.m_MetallicTexture = NULL_UUID;
+		m_NormalTexture = other.m_NormalTexture;			other.m_NormalTexture = NULL_UUID;
+		m_Roughness = other.m_Roughness;					other.m_Roughness = 0.5f;
+		m_MetallicScale = other.m_MetallicScale;			other.m_MetallicScale = 0.0f;
+		m_ShaderAssetHandle = other.m_ShaderAssetHandle;	other.m_ShaderAssetHandle = AssetManager::GetInbuiltShader("FP_Material_PBR_Shader")->Handle;
+		m_RenderType = other.m_RenderType;					other.m_RenderType = RenderType::L_MATERIAL_OPAQUE;
+
+		return *this;
+	}
+
+	bool Material::Bind() const 
+	{
+		if(auto shader_ref = AssetManager::GetAsset<Shader>(m_ShaderAssetHandle); shader_ref) {
+			shader_ref->Bind();
+			return true;
+		}
+		L_CORE_ERROR("Shader Not Found for PBR Material: {0}", m_MaterialName);
+		return false;
+	}
+
+	void Material::UnBind() const
+	{
 		for (int i = 0; i < 3; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -192,42 +124,120 @@ namespace Louron {
 		glUseProgram(0);
 	}
 
-	void PBRMaterial::UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block) {
+	static void SetUniforms(const UniformBlock& uniform_block, const Shader& shader_ref, uint8_t texture_unit, uint8_t max_texture_units)
+	{
+		for (const auto& uniform : uniform_block)
+		{
+			std::string name = "u_MaterialUniforms." + uniform.first;
+			const GLSLType& type = uniform.second.first;
+			const UniformValue& value = uniform.second.second;
 
+			switch (type)
+
+			{
+			case GLSLType::Bool:	shader_ref.SetBool(name.c_str(), std::get<bool>(value)); break;
+			case GLSLType::BVec2:	shader_ref.SetBoolVec2(name.c_str(), std::get<glm::bvec2>(value)); break;
+			case GLSLType::BVec3:	shader_ref.SetBoolVec3(name.c_str(), std::get<glm::bvec3>(value)); break;
+			case GLSLType::BVec4:	shader_ref.SetBoolVec4(name.c_str(), std::get<glm::bvec4>(value)); break;
+
+			case GLSLType::Int:		shader_ref.SetInt(name.c_str(), std::get<int>(value)); break;
+			case GLSLType::IVec2:	shader_ref.SetIntVec2(name.c_str(), std::get<glm::ivec2>(value)); break;
+			case GLSLType::IVec3:	shader_ref.SetIntVec3(name.c_str(), std::get<glm::ivec3>(value)); break;
+			case GLSLType::IVec4:	shader_ref.SetIntVec4(name.c_str(), std::get<glm::ivec4>(value)); break;
+
+			case GLSLType::Uint:	shader_ref.SetUInt(name.c_str(), std::get<GLuint>(value)); break;
+			case GLSLType::UVec2:	shader_ref.SetUIntVec2(name.c_str(), std::get<glm::uvec2>(value)); break;
+			case GLSLType::UVec3:	shader_ref.SetUIntVec3(name.c_str(), std::get<glm::uvec3>(value)); break;
+			case GLSLType::UVec4:	shader_ref.SetUIntVec4(name.c_str(), std::get<glm::uvec4>(value)); break;
+
+			case GLSLType::Float:	shader_ref.SetFloat(name.c_str(), std::get<float>(value)); break;
+			case GLSLType::Vec2:	shader_ref.SetFloatVec2(name.c_str(), std::get<glm::vec2>(value)); break;
+			case GLSLType::Vec3:	shader_ref.SetFloatVec3(name.c_str(), std::get<glm::vec3>(value)); break;
+			case GLSLType::Vec4:	shader_ref.SetFloatVec4(name.c_str(), std::get<glm::vec4>(value)); break;
+
+			case GLSLType::Double:	shader_ref.SetDouble(name.c_str(), std::get<double>(value)); break;
+			case GLSLType::DVec2:	shader_ref.SetDoubleVec2(name.c_str(), std::get<glm::dvec2>(value)); break;
+			case GLSLType::DVec3:	shader_ref.SetDoubleVec3(name.c_str(), std::get<glm::dvec3>(value)); break;
+			case GLSLType::DVec4:	shader_ref.SetDoubleVec4(name.c_str(), std::get<glm::dvec4>(value)); break;
+
+			case GLSLType::Mat2:	shader_ref.SetMat2(name.c_str(), std::get<glm::mat2>(value)); break;
+			case GLSLType::Mat3:	shader_ref.SetMat3(name.c_str(), std::get<glm::mat3>(value)); break;
+			case GLSLType::Mat4:	shader_ref.SetMat4(name.c_str(), std::get<glm::mat4>(value)); break;
+
+			case GLSLType::Sampler2D:
+			case GLSLType::Sampler2DShadow:
+			{
+				AssetHandle texture_handle = std::get<AssetHandle>(value);
+
+				if (auto texture_ref = AssetManager::GetAsset<Texture>(texture_handle); texture_ref && *texture_ref && texture_unit < max_texture_units) {
+					glActiveTexture(GL_TEXTURE0 + texture_unit);
+					shader_ref.SetInt(name.c_str(), texture_unit);
+					texture_ref->Bind();
+					texture_unit++;
+				}
+				else
+				{
+					glActiveTexture(GL_TEXTURE0 + texture_unit);
+					shader_ref.SetInt(name.c_str(), texture_unit);
+					Engine::Get().GetTextureLibrary().GetDefaultTexture()->Bind();
+					texture_unit++;
+				}
+
+
+				break;
+			}
+
+			case GLSLType::Sampler1D:
+			case GLSLType::Sampler1DShadow:
+			case GLSLType::Sampler1DArray:
+			case GLSLType::Sampler1DArrayShadow:
+			case GLSLType::Sampler2DArray:
+			case GLSLType::Sampler2DArrayShadow:
+			case GLSLType::Sampler3D:
+			case GLSLType::SamplerCube:
+			case GLSLType::SamplerCubeArray:
+			case GLSLType::SamplerCubeShadow:
+			case GLSLType::SamplerCubeArrayShadow:
+			default:
+				// Handle unknown type case
+				break;
+			}
+
+		}
+	}
+
+	void Material::UpdateUniforms(std::shared_ptr<MaterialUniformBlock> custom_uniform_block) 
+	{
 		if (auto shader_ref = AssetManager::GetAsset<Shader>(m_ShaderAssetHandle); shader_ref) {
 
 			shader_ref->SetFloatVec4("u_Material.albedoTint", m_AlbedoTint);
 			shader_ref->SetFloat("u_Material.roughness", m_Roughness);
 			shader_ref->SetFloat("u_Material.metallicScale", IsMetallicTextureSet() ? 1.0f : m_MetallicScale);
 
-			GLint maxTextureUnits = 3;
-			glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+			GLint max_texture_units = 3;
+			glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_texture_units);
 
 			GLint texture_unit = 0;
-			if (auto texture_ref = (m_AlbedoTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : AssetManager::GetAsset<Texture>(m_AlbedoTexture); texture_ref && *texture_ref && texture_unit < maxTextureUnits) {
+			if (auto texture_ref = (m_AlbedoTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : AssetManager::GetAsset<Texture>(m_AlbedoTexture); texture_ref && *texture_ref && texture_unit < max_texture_units) {
 				glActiveTexture(GL_TEXTURE0 + texture_unit);
 				shader_ref->SetInt("u_Material.albedoTexture", texture_unit);
 				texture_ref->Bind();
 				texture_unit++;
 			}
 
-			if (auto texture_ref = (m_MetallicTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : AssetManager::GetAsset<Texture>(m_MetallicTexture); texture_ref && *texture_ref && texture_unit < maxTextureUnits) {
+			if (auto texture_ref = (m_MetallicTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : AssetManager::GetAsset<Texture>(m_MetallicTexture); texture_ref && *texture_ref && texture_unit < max_texture_units) {
 				glActiveTexture(GL_TEXTURE0 + texture_unit);
 				shader_ref->SetInt("u_Material.metallicTexture", texture_unit);
 				texture_ref->Bind();
 				texture_unit++;
 			}
 
-			if (auto texture_ref = (m_NormalTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultNormalTexture() : AssetManager::GetAsset<Texture>(m_NormalTexture); texture_ref && *texture_ref && texture_unit < maxTextureUnits) {
+			if (auto texture_ref = (m_NormalTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultNormalTexture() : AssetManager::GetAsset<Texture>(m_NormalTexture); texture_ref && *texture_ref && texture_unit < max_texture_units) {
 				glActiveTexture(GL_TEXTURE0 + texture_unit);
 				shader_ref->SetInt("u_Material.normalTexture", texture_unit);
 				texture_ref->Bind();
 				texture_unit++;
 			}
-
-			shader_ref->SetMat4("u_VertexIn.Proj", projection_matrix);
-			shader_ref->SetMat4("u_VertexIn.View", view_matrix);
-			shader_ref->SetFloatVec3("u_CameraPos", camera_position);
 
 			if (!m_UniformBlock)
 				return;
@@ -236,84 +246,7 @@ namespace Louron {
 			texture_unit = 7;
 
 			const auto& uniforms = (custom_uniform_block) ? custom_uniform_block->GetUniforms() : m_UniformBlock->GetUniforms();
-			for (const auto& uniform : uniforms)
-			{
-				std::string name = "u_MaterialUniforms." + uniform.first;
-				const GLSLType& type = uniform.second.first;
-				const UniformValue& value = uniform.second.second;
-
-				switch (type)
-
-				{
-					case GLSLType::Bool:	shader_ref->SetBool(name.c_str(), std::get<bool>(value)); break;
-					case GLSLType::BVec2:	shader_ref->SetBoolVec2(name.c_str(), std::get<glm::bvec2>(value)); break;
-					case GLSLType::BVec3:	shader_ref->SetBoolVec3(name.c_str(), std::get<glm::bvec3>(value)); break;
-					case GLSLType::BVec4:	shader_ref->SetBoolVec4(name.c_str(), std::get<glm::bvec4>(value)); break;
-
-					case GLSLType::Int:		shader_ref->SetInt(name.c_str(), std::get<int>(value)); break;
-					case GLSLType::IVec2:	shader_ref->SetIntVec2(name.c_str(), std::get<glm::ivec2>(value)); break;
-					case GLSLType::IVec3:	shader_ref->SetIntVec3(name.c_str(), std::get<glm::ivec3>(value)); break;
-					case GLSLType::IVec4:	shader_ref->SetIntVec4(name.c_str(), std::get<glm::ivec4>(value)); break;
-
-					case GLSLType::Uint:	shader_ref->SetUInt(name.c_str(), std::get<GLuint>(value)); break;
-					case GLSLType::UVec2:	shader_ref->SetUIntVec2(name.c_str(), std::get<glm::uvec2>(value)); break;
-					case GLSLType::UVec3:	shader_ref->SetUIntVec3(name.c_str(), std::get<glm::uvec3>(value)); break;
-					case GLSLType::UVec4:	shader_ref->SetUIntVec4(name.c_str(), std::get<glm::uvec4>(value)); break;
-
-					case GLSLType::Float:	shader_ref->SetFloat(name.c_str(), std::get<float>(value)); break;
-					case GLSLType::Vec2:	shader_ref->SetFloatVec2(name.c_str(), std::get<glm::vec2>(value)); break;
-					case GLSLType::Vec3:	shader_ref->SetFloatVec3(name.c_str(), std::get<glm::vec3>(value)); break;
-					case GLSLType::Vec4:	shader_ref->SetFloatVec4(name.c_str(), std::get<glm::vec4>(value)); break;
-
-					case GLSLType::Double:	shader_ref->SetDouble(name.c_str(), std::get<double>(value)); break;
-					case GLSLType::DVec2:	shader_ref->SetDoubleVec2(name.c_str(), std::get<glm::dvec2>(value)); break;
-					case GLSLType::DVec3:	shader_ref->SetDoubleVec3(name.c_str(), std::get<glm::dvec3>(value)); break;
-					case GLSLType::DVec4:	shader_ref->SetDoubleVec4(name.c_str(), std::get<glm::dvec4>(value)); break;
-
-					case GLSLType::Mat2:	shader_ref->SetMat2(name.c_str(), std::get<glm::mat2>(value)); break;
-					case GLSLType::Mat3:	shader_ref->SetMat3(name.c_str(), std::get<glm::mat3>(value)); break;
-					case GLSLType::Mat4:	shader_ref->SetMat4(name.c_str(), std::get<glm::mat4>(value)); break;
-
-					case GLSLType::Sampler2D:
-					case GLSLType::Sampler2DShadow:
-					{
-						AssetHandle texture_handle = std::get<AssetHandle>(value);
-
-						if (auto texture_ref = AssetManager::GetAsset<Texture>(texture_handle); texture_ref && *texture_ref && texture_unit < maxTextureUnits) {
-							glActiveTexture(GL_TEXTURE0 + texture_unit);
-							shader_ref->SetInt(name.c_str(), texture_unit);
-							texture_ref->Bind();
-							texture_unit++;
-						}
-						else
-						{
-							glActiveTexture(GL_TEXTURE0 + texture_unit);
-							shader_ref->SetInt(name.c_str(), texture_unit);
-							Engine::Get().GetTextureLibrary().GetDefaultTexture()->Bind();
-							texture_unit++;
-						}
-
-
-						break;
-					}
-
-					case GLSLType::Sampler1D:
-					case GLSLType::Sampler1DShadow:
-					case GLSLType::Sampler1DArray:
-					case GLSLType::Sampler1DArrayShadow:
-					case GLSLType::Sampler2DArray:
-					case GLSLType::Sampler2DArrayShadow:
-					case GLSLType::Sampler3D:
-					case GLSLType::SamplerCube:
-					case GLSLType::SamplerCubeArray:
-					case GLSLType::SamplerCubeShadow:
-					case GLSLType::SamplerCubeArrayShadow:
-					default:
-						// Handle unknown type case
-						break;
-				}
-
-			}
+			Louron::SetUniforms(uniforms, *shader_ref, texture_unit, max_texture_units);
 
 		}
 		else {
@@ -322,22 +255,63 @@ namespace Louron {
 
 	}
 
-	bool PBRMaterial::IsAlbedoTextureSet() const { return m_AlbedoTexture != NULL_UUID; }
-	bool PBRMaterial::IsMetallicTextureSet() const { return m_MetallicTexture != NULL_UUID; }
-	bool PBRMaterial::IsNormalTextureSet() const { return m_NormalTexture != NULL_UUID; }
+
+	void Material::UpdateUniforms(const MaterialUniformBlock& custom_uniform_block, const Shader& shader)
+	{
+		shader.SetFloatVec4("u_Material.albedoTint", m_AlbedoTint);
+		shader.SetFloat("u_Material.roughness", m_Roughness);
+		shader.SetFloat("u_Material.metallicScale", IsMetallicTextureSet() ? 1.0f : m_MetallicScale);
+
+		GLint max_texture_units = 3;
+		glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &max_texture_units);
+
+		GLint texture_unit = 0;
+		if (auto texture_ref = (m_AlbedoTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : AssetManager::GetAsset<Texture>(m_AlbedoTexture); texture_ref && *texture_ref && texture_unit < max_texture_units) {
+			glActiveTexture(GL_TEXTURE0 + texture_unit);
+			shader.SetInt("u_Material.albedoTexture", texture_unit);
+			texture_ref->Bind();
+			texture_unit++;
+		}
+
+		if (auto texture_ref = (m_MetallicTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultTexture() : AssetManager::GetAsset<Texture>(m_MetallicTexture); texture_ref && *texture_ref && texture_unit < max_texture_units) {
+			glActiveTexture(GL_TEXTURE0 + texture_unit);
+			shader.SetInt("u_Material.metallicTexture", texture_unit);
+			texture_ref->Bind();
+			texture_unit++;
+		}
+
+		if (auto texture_ref = (m_NormalTexture == NULL_UUID) ? Engine::Get().GetTextureLibrary().GetDefaultNormalTexture() : AssetManager::GetAsset<Texture>(m_NormalTexture); texture_ref && *texture_ref && texture_unit < max_texture_units) {
+			glActiveTexture(GL_TEXTURE0 + texture_unit);
+			shader.SetInt("u_Material.normalTexture", texture_unit);
+			texture_ref->Bind();
+			texture_unit++;
+		}
+
+		if (!m_UniformBlock)
+			return;
+
+		// All other texture units are pre-dedicated to other things such as depth map and shadow maps. 
+		texture_unit = 7;
+
+		Louron::SetUniforms(custom_uniform_block.GetUniforms(), shader, texture_unit, max_texture_units);
+	}
+
+	bool Material::IsAlbedoTextureSet() const { return m_AlbedoTexture != NULL_UUID; }
+	bool Material::IsMetallicTextureSet() const { return m_MetallicTexture != NULL_UUID; }
+	bool Material::IsNormalTextureSet() const { return m_NormalTexture != NULL_UUID; }
 
 	#pragma region Getters and Setters
 
-	void PBRMaterial::SetAlbedoTexture(AssetHandle texture) { m_AlbedoTexture = texture; }
-	void PBRMaterial::SetMetallicTexture(AssetHandle texture) { m_MetallicTexture = texture; }
-	void PBRMaterial::SetNormalTexture(AssetHandle texture) { m_NormalTexture = texture; }
+	void Material::SetAlbedoTexture(AssetHandle texture) { m_AlbedoTexture = texture; }
+	void Material::SetMetallicTexture(AssetHandle texture) { m_MetallicTexture = texture; }
+	void Material::SetNormalTexture(AssetHandle texture) { m_NormalTexture = texture; }
 
-	void PBRMaterial::SetRoughness(float roughness) { m_Roughness = roughness; }
-	void PBRMaterial::SetMetallic(float metallic) { m_MetallicScale = metallic; }
-	void PBRMaterial::SetAlbedoTintColour(const glm::vec4& albedo_colour) { m_AlbedoTint = albedo_colour; }
+	void Material::SetRoughness(float roughness) { m_Roughness = roughness; }
+	void Material::SetMetallic(float metallic) { m_MetallicScale = metallic; }
+	void Material::SetAlbedoTintColour(const glm::vec4& albedo_colour) { m_AlbedoTint = albedo_colour; }
 
-	void PBRMaterial::SetName(const std::string& name) { m_MaterialName = name; }
-	void PBRMaterial::SetShader(AssetHandle shader_handle) 
+	void Material::SetName(const std::string& name) { m_MaterialName = name; }
+	void Material::SetShader(AssetHandle shader_handle) 
 	{
 		if (shader_handle == NULL_UUID)
 			return;
@@ -357,28 +331,41 @@ namespace Louron {
 
 	}
 
-	AssetHandle PBRMaterial::GetAlbedoTextureAssetHandle() const { return m_AlbedoTexture; }
+	AssetHandle Material::GetAlbedoTextureAssetHandle() const { return m_AlbedoTexture; }
 
-	AssetHandle PBRMaterial::GetMetallicTextureAssetHandle() const { return m_MetallicTexture; }
+	AssetHandle Material::GetMetallicTextureAssetHandle() const { return m_MetallicTexture; }
 
-	AssetHandle PBRMaterial::GetNormalTextureAssetHandle() const { return m_NormalTexture; }
+	AssetHandle Material::GetNormalTextureAssetHandle() const { return m_NormalTexture; }
 
-	float PBRMaterial::GetRoughness() const { return m_Roughness; }
-	float PBRMaterial::GetMetallic() const { return m_MetallicScale; }
-	const glm::vec4& PBRMaterial::GetAlbedoTintColour() const { return m_AlbedoTint; }
+	void Material::SetTransparencyWriteDepth(bool write_depth)
+	{
+		if (m_RenderType == L_MATERIAL_TRANSPARENT || m_RenderType == L_MATERIAL_TRANSPARENT_WRITE_DEPTH)
+		{
+			m_RenderType = (write_depth) ? L_MATERIAL_TRANSPARENT_WRITE_DEPTH : L_MATERIAL_TRANSPARENT;
+		}
+	}
 
-	std::shared_ptr<Shader> PBRMaterial::GetShader() {
+	bool Material::IsTransparencyWriteDepth() const
+	{
+		return (m_RenderType == L_MATERIAL_TRANSPARENT_WRITE_DEPTH);
+	}
+
+	float Material::GetRoughness() const { return m_Roughness; }
+	float Material::GetMetallic() const { return m_MetallicScale; }
+	const glm::vec4& Material::GetAlbedoTintColour() const { return m_AlbedoTint; }
+
+	std::shared_ptr<Shader> Material::GetShader() const {
 		return AssetManager::GetAsset<Shader>(m_ShaderAssetHandle);
 	}
 
-	AssetHandle PBRMaterial::GetShaderHandle()
+	AssetHandle Material::GetShaderHandle()
 	{
 		return m_ShaderAssetHandle;
 	}
 
-	const std::string& PBRMaterial::GetName() const { return m_MaterialName; }
+	const std::string& Material::GetName() const { return m_MaterialName; }
 
-	void PBRMaterial::Serialize(YAML::Emitter& out)
+	void Material::Serialize(YAML::Emitter& out) const
 	{
 		out << YAML::Key << "Material Asset Name" << YAML::Value << m_MaterialName;
 		out << YAML::Key << "Material Asset Type" << YAML::Value << "AssetType::Material_Standard";
@@ -401,13 +388,11 @@ namespace Louron {
 		out << YAML::Key << "MetallicTextureAsset" << YAML::Value << m_MetallicTexture;
 		out << YAML::Key << "NormalTextureAsset" << YAML::Value << m_NormalTexture;
 
-		out << YAML::Key << "WriteDepth" << YAML::Value << m_WriteDepth;
-
 		if (m_UniformBlock)
 			m_UniformBlock->Serialize(out);
 	}
 
-	bool PBRMaterial::Deserialize(const std::filesystem::path& path)
+	bool Material::Deserialize(const std::filesystem::path& path)
 	{
 		YAML::Node data;
 
@@ -435,6 +420,7 @@ namespace Louron {
 
 		if (data["Render Type"]) {
 			m_RenderType = StringToRenderType(data["Render Type"].as<std::string>());
+			SetTransparencyWriteDepth(m_RenderType == L_MATERIAL_TRANSPARENT_WRITE_DEPTH);
 		}
 
 		if (data["Roughness"]) {
@@ -467,10 +453,6 @@ namespace Louron {
 			m_NormalTexture = data["NormalTextureAsset"].as<uint32_t>();
 		}
 
-		if (data["WriteDepth"]) {
-			m_WriteDepth = data["WriteDepth"].as<bool>();
-		}
-
 		if (data["Material Uniform Block"])
 		{
 			if (!m_UniformBlock)
@@ -492,11 +474,35 @@ namespace Louron {
 	MaterialUniformBlock::MaterialUniformBlock(const MaterialUniformBlock& other)
 	{
 		m_Uniforms = other.m_Uniforms;
+		m_UniformBlockID = other.m_UniformBlockID;
 	}
 
-	MaterialUniformBlock::MaterialUniformBlock(MaterialUniformBlock&& other)
+	MaterialUniformBlock::MaterialUniformBlock(MaterialUniformBlock&& other) noexcept
 	{
 		m_Uniforms = other.m_Uniforms; other.m_Uniforms = {};
+		m_UniformBlockID = other.m_UniformBlockID; other.m_UniformBlockID = NULL_UUID;
+	}
+
+	MaterialUniformBlock& Louron::MaterialUniformBlock::operator=(const MaterialUniformBlock& other)
+	{
+		if (this == &other)
+			return *this;
+
+		m_Uniforms = other.m_Uniforms;
+		m_UniformBlockID = other.m_UniformBlockID;
+
+		return *this;
+	}
+
+	MaterialUniformBlock& Louron::MaterialUniformBlock::operator=(MaterialUniformBlock&& other) noexcept
+	{
+		if (this == &other)
+			return *this;
+
+		m_Uniforms = other.m_Uniforms; other.m_Uniforms = {};
+		m_UniformBlockID = other.m_UniformBlockID; other.m_UniformBlockID = NULL_UUID;
+
+		return *this;
 	}
 
 	void MaterialUniformBlock::InitialiseFromShader(std::shared_ptr<Shader> shader)

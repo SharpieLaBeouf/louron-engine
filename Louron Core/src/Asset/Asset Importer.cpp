@@ -64,9 +64,6 @@ namespace Louron {
 
 	std::shared_ptr<Scene> SceneImporter::ImportScene(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory) 
 	{
-		std::string profile_name = "Scene Import: " + meta_data.FilePath.string();
-		L_PROFILE_SCOPE(profile_name.c_str());
-
 		auto project = Project::GetActiveProject();
 		return LoadScene(asset_map, asset_reg, project->GetProjectDirectory() / project->GetConfig().AssetDirectory / meta_data.FilePath);
 	}
@@ -161,9 +158,9 @@ namespace Louron {
 		return nullptr;
 	}
 
-	std::shared_ptr<PBRMaterial> MaterialImporter::LoadMaterialPBR(const std::filesystem::path& path) {
+	std::shared_ptr<Material> MaterialImporter::LoadMaterialPBR(const std::filesystem::path& path) {
 
-		std::shared_ptr<PBRMaterial> material = std::make_shared<PBRMaterial>();
+		std::shared_ptr<Material> material = std::make_shared<Material>();
 
 		if (material->Deserialize(path))
 			return material;
@@ -325,7 +322,7 @@ namespace Louron {
 			material_metadata.ParentAssetHandle = parent_asset_handle;
 			material_metadata.IsCustomAsset = parent_meta_data.IsCustomAsset;
 
-			std::shared_ptr<PBRMaterial> asset_material = std::make_shared<PBRMaterial>();
+			std::shared_ptr<Material> asset_material = std::make_shared<Material>();
 
 			asset_material->SetName(materialName.C_Str());
 

@@ -7,6 +7,10 @@ namespace Louron {
 	}
 
 	VertexArray::~VertexArray() {
+
+		if (!m_DeleteOnObjectDestroy)
+			return;
+
 		glDeleteVertexArrays(1, &m_VAO);
 
 		delete m_IndexBuffer;

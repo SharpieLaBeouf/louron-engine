@@ -1139,7 +1139,7 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 	}
 
 	ImGui::Dummy({ 0.0f, 5.0f });
-	if (auto material_ref = AssetManager::GetAsset<PBRMaterial>(m_MaterialContext); material_ref)
+	if (auto material_ref = AssetManager::GetAsset<Material>(m_MaterialContext); material_ref)
 	{
 		AssetMetaData meta_data = Project::GetStaticEditorAssetManager()->GetMetadata(m_MaterialContext);
 		bool material_modified = false;
@@ -1175,13 +1175,11 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 		ImGui::NextColumn();
 		
 		// Combo Box for Render Type
-		const char* render_types[] = { "Opaque", "Transparent" };
+		const char* render_types[] = { "Opaque", "Transparent", "Transparent Write Depth"};
 		static int selected_render_type = static_cast<int>(material_ref->GetRenderType());  // Assuming GetRenderType returns an enum value
 
 		if (ImGui::Combo("##RenderType", &selected_render_type, render_types, IM_ARRAYSIZE(render_types)))
 		{
-			if (selected_render_type == L_MATERIAL_OPAQUE) material_ref->SetWriteDepth(true);
-
 			// Set the selected render type
 			material_ref->SetRenderType(static_cast<RenderType>(selected_render_type));
 			material_modified = true;
@@ -1491,21 +1489,6 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 		{
 			material_ref->SetRoughness(roughness_temp);
 			material_modified = true;
-		}
-
-		ImGui::NextColumn();
-
-		if(material_ref->GetRenderType() == L_MATERIAL_TRANSPARENT)
-		{
-			ImGui::Dummy({ 0.0f, 5.0f });
-			ImGui::Text("Write Depth");
-			ImGui::NextColumn();
-			bool write_depth = material_ref->GetWriteDepth();
-			if (ImGui::Checkbox("##Write Depth Check Box", &write_depth))
-			{
-				material_ref->SetWriteDepth(write_depth);
-				material_modified = true;
-			}
 		}
 
 		ImGui::Columns(1);

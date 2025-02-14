@@ -16,7 +16,7 @@
 
 // So we can Key a Pair of Material and Uniform Block
 struct _MaterialWrapper {
-	std::shared_ptr<Louron::PBRMaterial> material;
+	std::shared_ptr<Louron::Material> material;
 	std::shared_ptr<Louron::MaterialUniformBlock> uniform_block;
 
 	// Compare the actual contents, not just pointers
@@ -29,7 +29,7 @@ namespace std {
 	template <>
 	struct hash<_MaterialWrapper> {
 		std::size_t operator()(const _MaterialWrapper& mw) const {
-			return std::hash<std::shared_ptr<Louron::PBRMaterial>>{}(mw.material) ^ (std::hash<std::shared_ptr<Louron::MaterialUniformBlock>>{}(mw.uniform_block) << 1);
+			return std::hash<std::shared_ptr<Louron::Material>>{}(mw.material) ^ (std::hash<std::shared_ptr<Louron::MaterialUniformBlock>>{}(mw.uniform_block) << 1);
 		}
 	};
 }
@@ -150,7 +150,7 @@ namespace Louron {
 
 			// Cached weak ptr's to reduce AssetManager Get Calls
 			std::unordered_map<AssetHandle, std::weak_ptr<AssetMesh>> CachedMeshAssets;
-			std::unordered_map<AssetHandle, std::weak_ptr<PBRMaterial>> CachedMaterialAssets;
+			std::unordered_map<AssetHandle, std::weak_ptr<Material>> CachedMaterialAssets;
 
 			std::thread OctreeUpdateThread;
 			std::vector<std::shared_ptr<OctreeDataSource<Entity>>> OctreeEntitiesInCamera;

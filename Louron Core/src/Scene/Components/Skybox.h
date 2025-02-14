@@ -22,11 +22,11 @@ namespace Louron {
 
 	enum L_SKYBOX_BINDING : uint8_t {
 		RIGHT = 0,
-		LEFT = 1,
-		TOP = 2,
-		BOTTOM = 3,
-		BACK = 4,
-		FRONT = 5
+		LEFT,
+		TOP,
+		BOTTOM,
+		BACK,
+		FRONT
 	};
 
 	class SkyboxMaterial : public Material {
@@ -40,16 +40,16 @@ namespace Louron {
 
 		void SetSkyboxFaceTexture(const L_SKYBOX_BINDING& binding, const AssetHandle& texture_asset_handle);
 
-		void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr) override;
+		void UpdateUniforms(std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr) override;
 
 		virtual AssetType GetType() const override { return AssetType::Material_Skybox; }
 
-		void Serialize(const std::filesystem::path& path = "");
-		bool Deserialize(const std::filesystem::path& path = "");
+		void Serialize(YAML::Emitter& out) const override;
+		bool Deserialize(const std::filesystem::path& path = "") override;
 
 		// Bind and Unbinding
-		GLboolean Bind();
-		void UnBind();
+		bool Bind() const override;
+		void UnBind() const override;
 
 		void ConstructSkyboxCubeMap();
 
@@ -58,10 +58,7 @@ namespace Louron {
 	private:
 
 		GLuint m_SkyboxID = -1;
-
 		std::array<AssetHandle, 6> m_TextureAssetHandles{ NULL_UUID };
-
-		std::shared_ptr<Shader> m_MaterialShader = AssetManager::GetInbuiltShader("Skybox");
 
 	};
 
@@ -80,7 +77,7 @@ namespace Louron {
 		void Bind() { m_VAO->Bind(); }
 		void UnBind() { glBindVertexArray(0); }
 
-		void Serialize(YAML::Emitter& out);
+		void Serialize(YAML::Emitter& out) const;
 		bool Deserialize(const YAML::Node data);
 
 	private:

@@ -8,7 +8,6 @@ Albedo Tint: [1, 1, 1, 1]
 AlbedoTextureAsset: 4294967295
 MetallicTextureAsset: 4294967295
 NormalTextureAsset: 4294967295
-WriteDepth: false
 Material Uniform Block:
   - Name: BubbleColour
     Type: vec4

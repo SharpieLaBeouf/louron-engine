@@ -1100,7 +1100,7 @@ namespace Louron {
 					shader->SetUInt("u_EntityID", entity_uuid);
 
 					auto& mesh_filter_component = entity.GetComponent<MeshFilterComponent>();
-					auto asset_mesh_handle = mesh_filter_component.MeshFilterAssetHandle;
+					auto& asset_mesh_handle = mesh_filter_component.MeshFilterAssetHandle;
 
 					// Check if Asset Handle is Valid
 					if (!AssetManager::IsAssetHandleValid(asset_mesh_handle))
@@ -1139,10 +1139,21 @@ namespace Louron {
 					// whether to draw this to the depth map or not?
 					for (int i = 0; i < mesh_asset->SubMeshes.size(); i++)
 					{
-						auto asset_material = i < material_vector.size() ? AssetManager::GetAsset<PBRMaterial>(material_vector[i].first) : AssetManager::GetAsset<PBRMaterial>(material_vector.back().first);
+						auto& material_asset_handle = i < material_vector.size() ? material_vector[i].first : material_vector.back().first;
+						auto asset_material = FP_Data.CachedMaterialAssets[material_asset_handle].lock();
 
-						// If Transparent - Render for occlusion testing and mouse picking, but don't let depth be written
-						bool disable_depth = (!asset_material || asset_material->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT);
+						if (!asset_material)
+						{
+							// If Not Loaded, Call GetAsset to Load
+							FP_Data.CachedMaterialAssets[material_asset_handle] = AssetManager::GetAsset<Material>(material_asset_handle);
+							asset_material = FP_Data.CachedMaterialAssets[material_asset_handle].lock();
+
+							// If Failed to Load - Continue
+							if (!asset_material)
+								continue;
+						}
+						
+						bool disable_depth = (asset_material->GetRenderType() != RenderType::L_MATERIAL_OPAQUE);
 						if (disable_depth) glDepthMask(GL_FALSE);
 
 						Renderer::DrawSubMesh(mesh_asset->SubMeshes[i], true);
@@ -1697,9 +1708,13 @@ namespace Louron {
 							// Change depth function to GL_ALWAYS for the skybox
 							glDepthFunc(GL_ALWAYS);
 
-							if (mat_ref->Bind())
+							if (auto shader_ref = mat_ref->GetShader(); shader_ref && mat_ref->Bind())
 							{
-								mat_ref->UpdateUniforms(camera_position, projection_matrix, view_matrix);
+								shader_ref->SetMat4("u_VertexIn.Proj", projection_matrix);
+								glm::mat4 view = glm::mat4(glm::mat3(view_matrix));
+								shader_ref->SetMat4("u_VertexIn.View", view);
+
+								mat_ref->UpdateUniforms();
 								Renderer::DrawSkybox(skybox);
 								mat_ref->UnBind();
 							}
@@ -1743,7 +1758,7 @@ namespace Louron {
 				auto shader = material_asset->GetShader();
 				if (shader->IsValid())
 				{
-					material_asset->UpdateUniforms(camera_position, projection_matrix, view_matrix, material_wrapper_pair.uniform_block); // Change
+					material_asset->UpdateUniforms(material_wrapper_pair.uniform_block); // Change
 
 					// Update Specific Forward Plus Uniforms
 					shader->SetInt("u_TilesX", FP_Data.workGroupsX);
@@ -1751,6 +1766,10 @@ namespace Louron {
 
 					shader->SetFloat("u_Near", near_plane);
 					shader->SetFloat("u_Far", far_plane);
+
+					shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+					shader->SetMat4("u_VertexIn.View", view_matrix);
+					shader->SetFloatVec3("u_CameraPos", camera_position);
 
 					shader->SetIntVec2("u_ScreenSize", { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
 
@@ -1858,9 +1877,9 @@ namespace Louron {
 					// Check to Disable Depth Writing During Transparent Pass
 					// Depth Already Written During Depth/Colour Pass
 					// We may not want to override current depth during transparent pass
-					glDepthMask(material_asset->GetWriteDepth());
+					glDepthMask(material_asset->IsTransparencyWriteDepth());
 
-					material_asset->UpdateUniforms(camera_position, projection_matrix, view_matrix, material_wrapper_pair.uniform_block); // Change
+					material_asset->UpdateUniforms(material_wrapper_pair.uniform_block);
 
 					// Update Specific Forward Plus Uniforms
 					shader->SetInt("u_TilesX", FP_Data.workGroupsX);
@@ -1868,6 +1887,10 @@ namespace Louron {
 
 					shader->SetFloat("u_Near", near_plane);
 					shader->SetFloat("u_Far", far_plane);
+
+					shader->SetMat4("u_VertexIn.Proj", projection_matrix);
+					shader->SetMat4("u_VertexIn.View", view_matrix);
+					shader->SetFloatVec3("u_CameraPos", camera_position);
 
 					shader->SetIntVec2("u_ScreenSize", { scene_ref->GetSceneFrameBuffer()->GetConfig().Width, scene_ref->GetSceneFrameBuffer()->GetConfig().Height });
 
@@ -2002,7 +2025,7 @@ namespace Louron {
 					if (!material_asset)
 					{
 						// If Not Loaded, Call GetAsset to Load
-						FP_Data.CachedMaterialAssets[mesh_renderer_material_pair.first] = AssetManager::GetAsset<PBRMaterial>(mesh_renderer_material_pair.first);
+						FP_Data.CachedMaterialAssets[mesh_renderer_material_pair.first] = AssetManager::GetAsset<Material>(mesh_renderer_material_pair.first);
 						material_asset = FP_Data.CachedMaterialAssets[mesh_renderer_material_pair.first].lock();
 
 						// If Failed to Load - Continue
@@ -2013,8 +2036,9 @@ namespace Louron {
 					// Opaque Sorting
 					if (material_asset->GetRenderType() == RenderType::L_MATERIAL_OPAQUE)
 					{
+
 						// Retrieve the Uniform Block Associated w/ This Mesh Renderer Material
-						auto uniform_block = (mesh_renderer_material_pair.second) ? mesh_renderer_material_pair.second : material_asset->GetUniformBlock();
+						const auto& uniform_block = (mesh_renderer_material_pair.second) ? mesh_renderer_material_pair.second : material_asset->GetUniformBlock();
 
 						// Key the Material Wrapper to Secure Placement in Opaque Queue
 						auto& sub_mesh_map = FP_Data.OpaqueRenderables[{ material_asset, uniform_block}]; // Keys this to the opaque renderables
@@ -2032,9 +2056,10 @@ namespace Louron {
 							entity_vector.reserve(entity_vector.size() < 64 ? entity_vector.capacity() * 2 : entity_vector.capacity() + 8);
 
 						entity_vector.push_back(entity.GetUUID());
+
 					}
 					// Transparent Sorting
-					else if (material_asset->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT)
+					else if (material_asset->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT || material_asset->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT_WRITE_DEPTH)
 					{
 						const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
 						float distance = glm::length(objectPosition - camera_position);
@@ -2072,12 +2097,11 @@ namespace Louron {
 			}
 
 			// Back-to-Front Sorting - Transparent Objects
-
 			std::sort(FP_Data.TransparentRenderables.begin(), FP_Data.TransparentRenderables.end(), [](const auto& a, const auto& b) 
 			{    
 				// Check if either material should be rendered first (before sorting by distance)
-				bool aRenderFirst = std::get<1>(a).material->GetWriteDepth();
-				bool bRenderFirst = std::get<1>(b).material->GetWriteDepth();
+				bool aRenderFirst = std::get<1>(a).material->IsTransparencyWriteDepth();
+				bool bRenderFirst = std::get<1>(b).material->IsTransparencyWriteDepth();
 
 				if (aRenderFirst && !bRenderFirst) {
 					// If 'a' should be rendered first, put it in front

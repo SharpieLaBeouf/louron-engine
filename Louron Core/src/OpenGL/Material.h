@@ -25,26 +25,20 @@ namespace YAML {
 
 namespace Louron {
 
-	enum TextureMapType {
-		L20_TOTAL_ELEMENTS = 3,
-		L20_TEXTURE_DIFFUSE_MAP = 0,
-		L20_TEXTURE_SPECULAR_MAP = 1,
-		L20_TEXTURE_NORMAL_MAP = 2
-	};
-
-	enum RenderType {
+	enum RenderType : uint8_t {
 		L_MATERIAL_OPAQUE = 0,
-		L_MATERIAL_TRANSPARENT = 1,
-		L_MATERIAL_INVALID = 2
+		L_MATERIAL_TRANSPARENT,
+		L_MATERIAL_TRANSPARENT_WRITE_DEPTH,
+		L_MATERIAL_INVALID
 	};
 
 	static std::string RenderTypeToString(RenderType type) {
 
-		switch (type) {
-
+		switch (type)
+		{
 			case RenderType::L_MATERIAL_OPAQUE: return "Opaque";
 			case RenderType::L_MATERIAL_TRANSPARENT: return "Transparent";
-
+			case RenderType::L_MATERIAL_TRANSPARENT_WRITE_DEPTH: return "TransparentWriteDepth";
 		}
 
 		return "Invalid";
@@ -58,12 +52,17 @@ namespace Louron {
 		if (type_string == "Transparent") 
 			return RenderType::L_MATERIAL_TRANSPARENT;
 
+		if (type_string == "TransparentWriteDepth")
+			return RenderType::L_MATERIAL_TRANSPARENT_WRITE_DEPTH;
+
 		return RenderType::L_MATERIAL_INVALID;
 
 	}
 
 	class CameraBase;
 
+	// TODO: Change to void* opposed to variant? We can then cast to 
+	// the type based on the GLSLType stored alongside the Uniform?
 	using UniformValue = std::variant<
 
 		bool,
@@ -92,9 +91,12 @@ namespace Louron {
 
 	public:
 
-		MaterialUniformBlock() = default;
+		MaterialUniformBlock() { m_UniformBlockID = UUID(); }
 		MaterialUniformBlock(const MaterialUniformBlock& other);
-		MaterialUniformBlock(MaterialUniformBlock&& other);
+		MaterialUniformBlock(MaterialUniformBlock&& other) noexcept;
+
+		MaterialUniformBlock& operator=(const MaterialUniformBlock& other);
+		MaterialUniformBlock& operator=(MaterialUniformBlock&& other) noexcept;
 
 		void SetUniform(const std::string& name, GLSLType type, UniformValue value) {
 			m_Uniforms[name] = { type, value };
@@ -117,120 +119,72 @@ namespace Louron {
 		void Serialize(YAML::Emitter& out);
 		void Deserialize(YAML::Node data);
 
+		bool operator==(const MaterialUniformBlock& other) const { 
+			return m_UniformBlockID == other.m_UniformBlockID; 
+		}
+
+		bool operator<(const MaterialUniformBlock& other) const { return m_UniformBlockID < other.m_UniformBlockID; }
+
+		void GenerateNewBlockID() {
+			m_UniformBlockID = UUID();
+		}
+
 	private:
 		UniformBlock m_Uniforms;
+		UUID m_UniformBlockID = NULL_UUID;
 
 		friend class Material;
-		friend class PBRMaterial;
 	};
-
 
 	class Material : public Asset {
 
 	public:
 
 		Material();
-		Material(const std::string& name, std::shared_ptr<Shader> shader);
-		Material(AssetHandle shader);
-		Material(std::shared_ptr<Texture> texture);
-		Material(AssetHandle shader, std::shared_ptr<Texture> texture);
-		Material(AssetHandle shader, std::unordered_map<GLint, std::shared_ptr<Texture>>& textures);
+		Material(AssetHandle shader_handle);
+		Material(const Material& other);
+		Material(Material&& other) noexcept;
+
+		Material& operator=(const Material& other);
+		Material& operator=(Material&& other) noexcept;
 
 		virtual AssetType GetType() const override { return AssetType::Material_Standard; }
 
-	public:
-
-		// Bind and Unbing
-		virtual GLboolean Bind();
-		virtual void UnBind();
-
-		// Update Material Shader Uniforms
-		virtual void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr);
-
-		std::shared_ptr<MaterialUniformBlock> GetUniformBlock() { return m_UniformBlock; }
-
-		// Getters and Setters
-
-		void SetTexture(std::shared_ptr<Texture> texture, TextureMapType textureType);
-
-		virtual std::shared_ptr<Shader> GetShader();
-		virtual AssetHandle GetShaderHandle();
-		void SetShader(AssetHandle shader);
-
-		float GetShine() const;
-		void SetShine(float shine);
-
-		glm::vec4* GetDiffuse(); 
-		void SetDiffuse(const glm::vec4& val);
-
-		glm::vec4* GetSpecular();
-		void SetSpecular(const glm::vec4& val);
-
-		void AddTextureMap(GLint type, std::shared_ptr<Texture> val);
-		std::shared_ptr<Texture> GetTextureMap(GLint type);
-
-		std::string GetName() const { return m_Name; }
-		void SetName(const std::string& name) { m_Name = name; }
-
-		RenderType GetRenderType() const { return m_RenderType; }
-		void SetRenderType(RenderType type) { m_RenderType = type; }
-
 	private:
 
-		std::string m_Name;
-
-		GLfloat m_Shine = 32.0f;
-		glm::vec4 m_Diffuse = glm::vec4(1.0f);
-		glm::vec4 m_Specular = glm::vec4(0.5f);
-
-		std::unordered_map<GLint, std::shared_ptr<Texture>> m_Textures;
-
-		std::string m_TextureUniformNames[3] = {
-			"diffuseMap",
-			"specularMap",
-			"normalMap"
-		};
-
-	protected:
-
-		AssetHandle m_ShaderAssetHandle;
-		RenderType m_RenderType = RenderType::L_MATERIAL_OPAQUE;
+		std::string m_MaterialName = "New Material";
 
 		std::shared_ptr<MaterialUniformBlock> m_UniformBlock = nullptr;
 
-	};
-
-	class PBRMaterial : public Material {
-
-	public:
-
-		PBRMaterial();
-		PBRMaterial(AssetHandle shader_handle);
-
-		virtual AssetType GetType() const override { return AssetType::Material_Standard; }
-
-	private:
-
-		std::string m_MaterialName = "New PBR Material";
-		
-		float m_Roughness = 0.5f;
-		float m_MetallicScale = 0.0f;
 		glm::vec4 m_AlbedoTint = glm::vec4(1.0f);
-
-		bool m_WriteDepth = true;
 
 		AssetHandle m_AlbedoTexture = NULL_UUID;
 		AssetHandle m_MetallicTexture = NULL_UUID;
 		AssetHandle m_NormalTexture = NULL_UUID;
 
+		float m_Roughness = 0.5f;
+		float m_MetallicScale = 0.0f;
+
+	protected: // Alignment purposes
+
+		AssetHandle m_ShaderAssetHandle;
+
+	private: // Alignment purposes
+
+		RenderType m_RenderType = RenderType::L_MATERIAL_OPAQUE;
+
 	public:
 
 		// Bind and Unbing
-		GLboolean Bind() override;
-		void UnBind() override;
+		virtual bool Bind() const;
+		virtual void UnBind() const;
 
 		// Update Material Shader Uniforms
-		void UpdateUniforms(const glm::vec3& camera_position, const glm::mat4& projection_matrix, const glm::mat4& view_matrix, std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr) override;
+		virtual void UpdateUniforms(std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr);
+		virtual void UpdateUniforms(const MaterialUniformBlock& uniform_block, const Shader& shader);
+
+		void SetUniformBlock(std::shared_ptr<MaterialUniformBlock> uniform_block) { m_UniformBlock = uniform_block; }
+		std::shared_ptr<MaterialUniformBlock> GetUniformBlock() { return m_UniformBlock; }
 
 		bool IsAlbedoTextureSet() const;
 		bool IsMetallicTextureSet() const;
@@ -251,19 +205,22 @@ namespace Louron {
 		AssetHandle GetMetallicTextureAssetHandle() const;
 		AssetHandle GetNormalTextureAssetHandle() const;
 
-		void SetWriteDepth(bool write_depth) { m_WriteDepth = write_depth; }
-		bool GetWriteDepth() { return m_WriteDepth; }
+		RenderType GetRenderType() const { return m_RenderType; }
+		void SetRenderType(RenderType type) { m_RenderType = type; }
+
+		void SetTransparencyWriteDepth(bool write_depth);
+		bool IsTransparencyWriteDepth() const;
 
 		float GetRoughness() const;
 		float GetMetallic() const;
 		const glm::vec4& GetAlbedoTintColour() const;
 
-		std::shared_ptr<Shader> GetShader() override;
-		AssetHandle GetShaderHandle() override;
+		std::shared_ptr<Shader> GetShader() const;
+		AssetHandle GetShaderHandle();
 		const std::string& GetName() const;
 
-		void Serialize(YAML::Emitter& out);
-		bool Deserialize(const std::filesystem::path& path);
+		virtual void Serialize(YAML::Emitter& out) const;
+		virtual bool Deserialize(const std::filesystem::path& path);
 
 	};
 

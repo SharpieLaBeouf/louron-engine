@@ -561,8 +561,8 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 									counter++;
 								}
 
-								PBRMaterial material = PBRMaterial{};
-								material.SetName(file_path.stem().string());
+								Material material = Material{};
+								material.SetName(file_path.stem().string().c_str());
 
 								YAML::Emitter out;
 								out << YAML::BeginMap;

@@ -1634,13 +1634,13 @@ namespace Louron {
 
 	AssetHandle ScriptConnector::Material_Create(MonoString* name)
 	{
-		std::shared_ptr<PBRMaterial> material = std::make_shared<PBRMaterial>();
-		return AssetManager::AddRuntimeAsset<PBRMaterial>(material, ScriptingUtils::MonoStringToString(name));
+		std::shared_ptr<Material> material = std::make_shared<Material>();
+		return AssetManager::AddRuntimeAsset<Material>(material, ScriptingUtils::MonoStringToString(name));
 	}
 
 	void ScriptConnector::Material_SetShader(AssetHandle asset_handle, AssetHandle shader_handle)
 	{
-		AssetManager::GetAsset<PBRMaterial>(asset_handle)->SetShader(shader_handle);
+		AssetManager::GetAsset<Material>(asset_handle)->SetShader(shader_handle);
 	}
 
 	void ScriptConnector::Material_Destroy(AssetHandle asset_handle)
@@ -1768,13 +1768,16 @@ namespace Louron {
 		if (material_index >= material_handle_vector.size())
 			return;
 
-		auto material_asset = AssetManager::GetAsset<PBRMaterial>(material_handle_vector[material_index].first);
+		auto material_asset = AssetManager::GetAsset<Material>(material_handle_vector[material_index].first);
 
 		if (!material_asset)
 			return;
 
 		if (!material_handle_vector[material_index].second)
+		{
 			material_handle_vector[material_index].second = std::make_shared<MaterialUniformBlock>(*material_asset->GetUniformBlock());
+			material_handle_vector[material_index].second->GenerateNewBlockID();
+		}
 
 		return;
 	}
@@ -1839,7 +1842,7 @@ namespace Louron {
 
 		for(auto& [material_handle, uniform_block] : material_handle_vector)
 		{
-			auto material_asset = AssetManager::GetAsset<PBRMaterial>(material_handle);
+			auto material_asset = AssetManager::GetAsset<Material>(material_handle);
 
 			if (!material_asset)
 				continue;

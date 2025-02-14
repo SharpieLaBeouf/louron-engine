@@ -9,7 +9,7 @@
 // External Vendor Library Headers
 
 
-#define NULL_UUID UINT32_MAX
+constexpr uint32_t NULL_UUID = UINT32_MAX;
 
 namespace Louron {
 

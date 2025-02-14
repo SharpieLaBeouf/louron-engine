@@ -1595,7 +1595,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 				if (!AssetManager::IsAssetHandleValid(asset_handle))
 					continue;
 
-				auto asset_material = AssetManager::GetAsset<PBRMaterial>(asset_handle);
+				auto asset_material = AssetManager::GetAsset<Material>(asset_handle);
 				if (!asset_material)
 					continue;
 
@@ -1746,18 +1746,19 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 						ImGui::EndDisabled();
 					}
 
-					if (material_modified)
-					{
-						YAML::Emitter out;
-						out << YAML::BeginMap;
-						asset_material->Serialize(out);
-						out << YAML::EndMap;
-
-						std::ofstream fout(Project::GetActiveProject()->GetProjectDirectory() / "Assets" / metadata_material.FilePath); // Create the file
-						fout << out.c_str();
-					}
 
 					ImGui::TreePop();
+				}
+				
+				if (material_modified)
+				{
+					YAML::Emitter out;
+					out << YAML::BeginMap;
+					asset_material->Serialize(out);
+					out << YAML::EndMap;
+
+					std::ofstream fout(Project::GetActiveProject()->GetAssetDirectory() / metadata_material.FilePath); // Create the file
+					fout << out.c_str();
 				}
 
 				break;
@@ -1769,7 +1770,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 					continue;
 
 				auto asset_material = AssetManager::GetAsset<SkyboxMaterial>(asset_handle);
-
+				bool material_modified = false;
 				if (ImGui::TreeNode(std::string("Skybox Material: " + metadata_material.AssetName + "##" + std::to_string(counter)).c_str())) {
 
 					ImGui::Dummy({ 0.0f, 5.0f });
@@ -1781,7 +1782,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 						GLuint texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(sb_texture_asset_handles[i]) ? AssetManager::GetAsset<Texture>(sb_texture_asset_handles[i])->GetID() : 0;
 
-						static std::array<std::string, 6> skybox_binding_names = {
+						static const std::array<std::string, 6> skybox_binding_names = {
 							"Right",
 							"Left",
 							"Top",
@@ -1791,7 +1792,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 						};
 
 						// Texture and text alignment
-						std::string label = "##" + skybox_binding_names[i] + "_Texture";
+						std::string label = "##" + metadata_material.AssetName + "_" + skybox_binding_names[i] + "_Texture";
 						ImGui::ImageButton(label.c_str(), (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
 
 						if (texture_id == 0 && ImGui::IsItemHovered()) {
@@ -1807,7 +1808,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 								if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
 									asset_material->SetSkyboxFaceTexture(static_cast<L_SKYBOX_BINDING>(i), dropped_asset_handle);
-									asset_material->Serialize();
+									material_modified = true;
 								}
 								else {
 									L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
@@ -1825,7 +1826,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 									if (Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Texture2D) {
 										asset_material->SetSkyboxFaceTexture(static_cast<L_SKYBOX_BINDING>(i), dropped_asset_handle);
-										asset_material->Serialize();
+										material_modified = true;
 									}
 									else {
 										L_APP_WARN("Invalid Asset Type Dropped on Skybox Material Target.");
@@ -1847,6 +1848,17 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 
 					ImGui::TreePop();
+				}
+
+				if (material_modified)
+				{
+					YAML::Emitter out;
+					out << YAML::BeginMap;
+					asset_material->Serialize(out);
+					out << YAML::EndMap;
+
+					std::ofstream fout(Project::GetActiveProject()->GetAssetDirectory() / metadata_material.FilePath); // Create the file
+					fout << out.c_str();
 				}
 
 				break;
