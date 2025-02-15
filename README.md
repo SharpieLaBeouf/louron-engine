@@ -15,7 +15,7 @@ This engine utilises OpenGL 4.5 and C++20.
 At this point there are an array of features utilised in this project:
 - Forward Plus Tile-Basee Rendering
   - Automatic instancing of meshes
-  - Octree spatial partitioning system primarily for frustum culling (StackExchangePost)[https://gamedev.stackexchange.com/questions/211647/octree-query-frustum-search-and-recursive-vector-inserts]
+  - Octree spatial partitioning system primarily for frustum culling [StackExchangePost](https://gamedev.stackexchange.com/questions/211647/octree-query-frustum-search-and-recursive-vector-inserts)
   - Occlusion queries and culling
   - LOD mesh grouping
   - Shadow mapping (cascaded shadow maps, point light maps and spot light maps)
