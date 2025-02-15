@@ -1,6 +1,6 @@
 # LouronEngine
 
-##Overview
+## Overview
 
 I started Louron Engine way way back in 2020 with an idea of having a layered system where each scene or context would be a state stacked into a vector, and the back would be the one that updates and renders, etc.
 
@@ -10,7 +10,7 @@ It is still currently just a MSVC solution that utilises C++20. I will be lookin
 
 This engine utilises OpenGL 4.5 and C++20.
 
-##Features
+## Features
 
 At this point there are an array of features utilised in this project:
 - Forward Plus Tile-Basee Rendering
@@ -49,7 +49,7 @@ At this point there are an array of features utilised in this project:
 - Skyboxes
 - Multisampling
 
-##Goals
+## Goals
 
 There is no doubt this can make a game at its current state, but it would most likely be less popular and less performance than Shrek 2 on PS2... Here is a list of goals I would like to achieve:
 - Particle systems
@@ -70,7 +70,7 @@ There is no doubt this can make a game at its current state, but it would most l
 - Reflections (probes and screen space)
 - Refraction
 
-##Dependencies
+## Dependencies
 - GLFW
 - GLAD
 - PhysX
@@ -86,10 +86,10 @@ There is no doubt this can make a game at its current state, but it would most l
 - ENTT
 - GLM
 
-##Acknowledgements
+## Acknowledgements
 
 Many of my systems have been designed with the support of various publicly available resources sought through YouTube, GitHub, and the general web. Honourable mentions go to LearnOpenGL for OpenGL API learnings, bcrusco for their Forward Plus Render design, Cherno for engine architecture design choices, and ChatGPT for teaching me when I hit brick walls!
 
-##License
+## License
 
 Louron Engine is released under the MIT License.
