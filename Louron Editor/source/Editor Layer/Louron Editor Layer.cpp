@@ -23,11 +23,11 @@ std::atomic_bool LouronEditorLayer::m_ScriptsNeedCompiling = false;
 static efsw::WatchID m_ScriptFileWatchID;
 
 LouronEditorLayer::LouronEditorLayer() {
-	L_APP_INFO("Opening Main Menu");
+	L_APP_INFO("Opening Louron Editor");
 }
 
-void LouronEditorLayer::OnAttach() {
-
+void LouronEditorLayer::OnAttach() 
+{
 	Engine::Get().GetWindow().SetVSync(false);
 	
 	const EngineConfig& engine_config = Engine::Get().GetSpecification();
@@ -64,7 +64,6 @@ void LouronEditorLayer::OnAttach() {
 	}
 
 	auto scene = Project::GetActiveScene();
-	//scene->SetDisplayOctree(true);
 
 	FrameBufferConfig fbo_config;
 	fbo_config.Width = m_ViewportWindowSize.x;
@@ -120,6 +119,7 @@ void LouronEditorLayer::OnAttach() {
 
 	m_EditorCamera = std::make_unique<EditorCamera>();
 	m_EditorCamera->OnUpdate();
+
 }
 
 void LouronEditorLayer::OnDetach() {
@@ -1268,7 +1268,7 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 
 		ImGui::NextColumn();
 
-		GLuint texture_id = AssetManager::IsAssetHandleValid(material_ref->GetAlbedoTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(material_ref->GetAlbedoTextureAssetHandle())->GetID() : 0;
+		GLuint texture_id = AssetManager::IsAssetHandleValid(material_ref->GetAlbedoTextureAssetHandle()) ? AssetManager::GetAsset<Texture2D>(material_ref->GetAlbedoTextureAssetHandle())->GetID() : 0;
 
 		// Texture and text alignment
 		ImGui::Dummy({ 0.0f, 5.0f });
@@ -1346,7 +1346,7 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 
 		ImGui::NextColumn();
 
-		texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(material_ref->GetMetallicTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(material_ref->GetMetallicTextureAssetHandle())->GetID() : 0;
+		texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(material_ref->GetMetallicTextureAssetHandle()) ? AssetManager::GetAsset<Texture2D>(material_ref->GetMetallicTextureAssetHandle())->GetID() : 0;
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 		ImGui::Text("Metallic Texture");
@@ -1419,7 +1419,7 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 
 		ImGui::NextColumn();
 
-		texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(material_ref->GetNormalTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(material_ref->GetNormalTextureAssetHandle())->GetID() : 0;
+		texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(material_ref->GetNormalTextureAssetHandle()) ? AssetManager::GetAsset<Texture2D>(material_ref->GetNormalTextureAssetHandle())->GetID() : 0;
 
 		ImGui::Dummy({ 0.0f, 5.0f });
 		ImGui::Text("Normal Texture");
@@ -1745,7 +1745,7 @@ void LouronEditorLayer::DisplayMaterialPropertiesWindow()
 				{
 					AssetHandle& texture_handle = std::get<AssetHandle>(value);
 
-					if (auto texture_asset = AssetManager::GetAsset<Texture>(texture_handle); texture_asset)
+					if (auto texture_asset = AssetManager::GetAsset<Texture2D>(texture_handle); texture_asset)
 					{
 						texture_id = texture_asset->GetID();
 					}

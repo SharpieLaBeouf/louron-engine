@@ -48,9 +48,6 @@ namespace Louron {
         // Renderer Init Debug VAOs
         Renderer::Init();
 
-        // TODO: Do we even use this anymore?
-        m_TextureLibrary = std::make_unique<TextureLibrary>();
-
         // Init Input Manager
         m_Input = std::make_unique<InputManager>();
         m_Input->Init((GLFWwindow*)m_Window->GetNativeWindow());

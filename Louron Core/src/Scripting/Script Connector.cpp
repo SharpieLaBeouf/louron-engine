@@ -174,6 +174,20 @@ namespace Louron {
 		mono_add_internal_call("Louron.EngineCallbacks::MeshRenderer_DisableAllUniformBlocks", MeshRenderer_DisableAllUniformBlocks);
 
 		mono_add_internal_call("Louron.EngineCallbacks::MaterialUniformBlock_SetUniform", MaterialUniformBlock_SetUniform);
+		
+		mono_add_internal_call("Louron.EngineCallbacks::MaterialUniformBlock_OverrideAlbedoMap", MaterialUniformBlock_OverrideAlbedoMap);
+		mono_add_internal_call("Louron.EngineCallbacks::MaterialUniformBlock_OverrideMetallicMap", MaterialUniformBlock_OverrideMetallicMap);
+		mono_add_internal_call("Louron.EngineCallbacks::MaterialUniformBlock_OverrideNormalMap", MaterialUniformBlock_OverrideNormalMap);
+		mono_add_internal_call("Louron.EngineCallbacks::MaterialUniformBlock_OverrideAlbedoTint", MaterialUniformBlock_OverrideAlbedoTint);
+		mono_add_internal_call("Louron.EngineCallbacks::MaterialUniformBlock_OverrideMetallic", MaterialUniformBlock_OverrideMetallic);
+		mono_add_internal_call("Louron.EngineCallbacks::MaterialUniformBlock_OverrideRoughness", MaterialUniformBlock_OverrideRoughness);
+		
+		mono_add_internal_call("Louron.EngineCallbacks::Texture2D_Create", Texture2D_Create);
+		mono_add_internal_call("Louron.EngineCallbacks::Texture2D_CreateWithData", Texture2D_CreateWithData);
+		mono_add_internal_call("Louron.EngineCallbacks::Texture2D_SetPixel", Texture2D_SetPixel);
+		mono_add_internal_call("Louron.EngineCallbacks::Texture2D_SetPixelData", Texture2D_SetPixelData);
+		mono_add_internal_call("Louron.EngineCallbacks::Texture2D_SubmitTextureChanges", Texture2D_SubmitTextureChanges);
+		mono_add_internal_call("Louron.EngineCallbacks::Texture2D_Destroy", Texture2D_Destroy);
 
 	}
 
@@ -1653,7 +1667,7 @@ namespace Louron {
 #pragma region MeshRendererComponent
 
 
-	AssetHandle ScriptConnector::MeshRendererComponent_GetMaterial(UUID entityID)
+	uint32_t ScriptConnector::MeshRendererComponent_GetMaterial(UUID entityID)
 	{
 		Scene* scene = ScriptManager::GetSceneContext();
 		L_CORE_ASSERT(scene, "Scene Not Valid.");
@@ -1878,7 +1892,6 @@ namespace Louron {
 
 #pragma endregion
 
-
 #pragma region MaterialUniformBlock
 
 	void ScriptConnector::MaterialUniformBlock_SetUniform(MaterialUniformBlock* uniform_block, MonoString* uniform_name, uint32_t type, void* value)
@@ -1942,6 +1955,111 @@ namespace Louron {
 
 		}
 		return;
+	}
+
+	void ScriptConnector::MaterialUniformBlock_OverrideAlbedoMap(MaterialUniformBlock* uniform_block, AssetHandle value)
+	{
+		if (!uniform_block)
+			return;
+
+		uniform_block->OverrideAlbedoMap(value);
+	}
+
+	void ScriptConnector::MaterialUniformBlock_OverrideMetallicMap(MaterialUniformBlock* uniform_block, AssetHandle value)
+	{
+		if (!uniform_block)
+			return;
+
+		uniform_block->OverrideMetallicMap(value);
+	}
+
+	void ScriptConnector::MaterialUniformBlock_OverrideNormalMap(MaterialUniformBlock* uniform_block, AssetHandle value)
+	{
+		if (!uniform_block)
+			return;
+
+		uniform_block->OverrideNormalMap(value);
+	}
+
+	void ScriptConnector::MaterialUniformBlock_OverrideAlbedoTint(MaterialUniformBlock* uniform_block, glm::vec4 value)
+	{
+		if (!uniform_block)
+			return;
+
+		uniform_block->OverrideAlbedoTint(value);
+	}
+
+	void ScriptConnector::MaterialUniformBlock_OverrideMetallic(MaterialUniformBlock* uniform_block, float value)
+	{
+		if (!uniform_block)
+			return;
+
+		uniform_block->OverrideMetallic(value);
+	}
+
+	void ScriptConnector::MaterialUniformBlock_OverrideRoughness(MaterialUniformBlock* uniform_block, float value)
+	{
+		if (!uniform_block)
+			return;
+
+		uniform_block->OverrideRoughness(value);
+	}
+
+#pragma endregion
+
+#pragma region Texture2D
+
+	uint32_t ScriptConnector::Texture2D_Create(int width, int height, Texture2D::TextureFormat internal_format)
+	{
+		std::shared_ptr<Texture2D> texture = std::make_shared<Texture2D>(width, height, internal_format, true);
+		return AssetManager::AddRuntimeAsset(texture, "Runtime Texture");
+	}
+
+	uint32_t ScriptConnector::Texture2D_CreateWithData(unsigned char* data, int width, int height, uint8_t internal_format, uint8_t data_format)
+	{
+		std::shared_ptr<Texture2D> texture = std::make_shared<Texture2D>(data, width, height, static_cast<Texture2D::TextureFormat>(internal_format), static_cast<Texture2D::TextureFormat>(data_format), true);
+		return AssetManager::AddRuntimeAsset(texture, "Runtime Texture");
+	}
+
+	void ScriptConnector::Texture2D_SetPixel(uint32_t asset_handle, glm::vec4 colour, glm::ivec2 pixel_coord)
+	{
+		if (!AssetManager::IsAssetHandleValid(asset_handle))
+			return;
+
+		const auto& texture_ref = AssetManager::GetAsset<Texture2D>(asset_handle);
+		if (!texture_ref)
+			return;
+
+		texture_ref->SetPixel(colour, pixel_coord);
+	}
+
+	void ScriptConnector::Texture2D_SetPixelData(uint32_t asset_handle, unsigned char* pixel_data, int pixel_data_size, uint8_t pixel_data_format)
+	{
+		if (!AssetManager::IsAssetHandleValid(asset_handle))
+			return;
+
+		const auto& texture_ref = AssetManager::GetAsset<Texture2D>(asset_handle);
+		if (!texture_ref)
+			return;
+
+		texture_ref->SetPixelData(pixel_data, pixel_data_size, static_cast<Texture2D::TextureFormat>(pixel_data_format));
+	}
+
+	void ScriptConnector::Texture2D_SubmitTextureChanges(uint32_t asset_handle)
+	{
+		if (!AssetManager::IsAssetHandleValid(asset_handle))
+			return;
+
+		const auto& texture_ref = AssetManager::GetAsset<Texture2D>(asset_handle);
+		if (!texture_ref)
+			return;
+
+		texture_ref->SubmitTextureChanges();
+	}
+
+	void ScriptConnector::Texture2D_Destroy(AssetHandle handle)
+	{
+		AssetManager::RemoveRuntimeAsset(handle);
 	}
 
 #pragma endregion

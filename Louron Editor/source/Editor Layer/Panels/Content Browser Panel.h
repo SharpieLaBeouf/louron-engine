@@ -41,8 +41,8 @@ private:
     efsw::FileWatcher* m_AssetFileWatcher = new efsw::FileWatcher();
     AssetFileListener* m_AssetFileListener = new AssetFileListener();
 
-	std::shared_ptr<Louron::Texture> m_DirectoryTexture = nullptr;
-	std::shared_ptr<Louron::Texture> m_FileTexture = nullptr;
+	std::shared_ptr<Louron::Texture2D> m_DirectoryTexture = nullptr;
+	std::shared_ptr<Louron::Texture2D> m_FileTexture = nullptr;
 
 	Louron::Entity m_NewFocalEntity = {};
 

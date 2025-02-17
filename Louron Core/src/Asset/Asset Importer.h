@@ -18,7 +18,7 @@ namespace Louron {
 
 	class Scene;
 	class Prefab;
-	class Texture;
+	class Texture2D;
 
 	using AssetMap = std::map<AssetHandle, std::shared_ptr<Asset>>;
 	using AssetRegistry = std::map<AssetHandle, AssetMetaData>;
@@ -53,8 +53,8 @@ namespace Louron {
 
 	public:
 
-		static std::shared_ptr<Texture> ImportTexture2D(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory);
-		static std::shared_ptr<Texture> LoadTexture2D(const std::filesystem::path& path);
+		static std::shared_ptr<Texture2D> ImportTexture2D(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory);
+		static std::shared_ptr<Texture2D> LoadTexture2D(const std::filesystem::path& path);
 	};
 
 	class ModelImporter {

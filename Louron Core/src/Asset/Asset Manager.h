@@ -31,12 +31,14 @@ namespace Louron {
 
 		virtual void AddRuntimeAsset(std::shared_ptr<Asset> asset, AssetHandle asset_handle, AssetMetaData asset_meta_data) = 0;
 		virtual void RemoveRuntimeAsset(AssetHandle asset_handle) = 0;
+
+		virtual void ClearRuntimeAssets() = 0;
 	};
 
 	struct AssetMesh;
 
 	class Prefab;
-	class Texture;
+	class Texture2D;
 	class Material;
 	class SkyboxMaterial;
 	class ComputeShaderAsset;
@@ -141,7 +143,7 @@ namespace Louron {
 		std::shared_ptr<TAssetType> GetAsset(const AssetHandle& asset_handle) {
 			// Determine the expected AssetType based on TAssetType
 			AssetType expectedType;
-			if constexpr (std::is_same_v<TAssetType, Texture>) {
+			if constexpr (std::is_same_v<TAssetType, Texture2D>) {
 				expectedType = AssetType::Texture2D;
 			}
 			else if constexpr (std::is_same_v<TAssetType, AssetMesh>) {
@@ -181,6 +183,7 @@ namespace Louron {
 
 		virtual void AddRuntimeAsset(std::shared_ptr<Asset> asset, AssetHandle asset_handle, AssetMetaData asset_meta_data) override;
 		virtual void RemoveRuntimeAsset(AssetHandle asset_handle) override;
+		virtual void ClearRuntimeAssets() override;
 
 		/// <summary>
 		/// Get an asset of no particular type. This will need to be static_pointer_cast'd to 

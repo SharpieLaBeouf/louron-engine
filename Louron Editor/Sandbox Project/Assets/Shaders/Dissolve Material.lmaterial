@@ -14,7 +14,7 @@ Material Uniform Block:
     Value: 3250776506
   - Name: Time
     Type: float
-    Value: 0
+    Value: -0.100000001
   - Name: GlowColour
     Type: vec3
     Value: [1, 0, 0]

@@ -77,7 +77,7 @@ namespace Louron {
 			AssetType expectedType = type;
 			if (expectedType == AssetType::None)
 			{
-				if constexpr (std::is_same_v<TAssetType, Texture>) {
+				if constexpr (std::is_same_v<TAssetType, Texture2D>) {
 					expectedType = AssetType::Texture2D;
 				}
 				else if constexpr (std::is_same_v<TAssetType, AssetMesh>) {
@@ -136,7 +136,7 @@ namespace Louron {
 		template <typename TAssetType>
 		static AssetType GetAssetTypeFromTypeName()
 		{
-			if constexpr (std::is_same_v<TAssetType, Texture>) {
+			if constexpr (std::is_same_v<TAssetType, Texture2D>) {
 				return AssetType::Texture2D;
 			}
 			else if constexpr (std::is_same_v<TAssetType, AssetMesh>) {
@@ -182,7 +182,9 @@ namespace Louron {
 				meta_data.AssetName = asset_name + "_" + std::to_string(index);
 				handle = static_cast<uint32_t>(std::hash<std::string>{}(
 					AssetUtils::AssetTypeToString(meta_data.Type) + "RunTimeAsset" + meta_data.AssetName
-					));
+				));
+
+				index++;
 			}
 
 			meta_data.IsCustomAsset = true;
@@ -200,6 +202,15 @@ namespace Louron {
 				return;
 
 			project_ref->GetAssetManager()->RemoveRuntimeAsset(asset_handle);
+		}
+
+		static void ClearRuntimeAssets()
+		{
+			auto project_ref = Project::GetActiveProject();
+			if (!project_ref)
+				return;
+
+			project_ref->GetAssetManager()->ClearRuntimeAssets();
 		}
 	};
 }

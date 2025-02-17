@@ -45,6 +45,13 @@ namespace SandboxProject
 
 		public Component ComponentField;
 
+		public IVector2 TextureSize;
+		public uint NoiseSeed;
+		
+		private FastNoiseLite noise;
+
+		private Texture2D noiseTexture;
+
 		public void OnStart()
 		{
 

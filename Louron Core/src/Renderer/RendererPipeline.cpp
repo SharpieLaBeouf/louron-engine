@@ -1810,7 +1810,7 @@ namespace Louron {
 					shader->Bind();
 
 					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, AssetManager::GetInbuiltAsset<Texture>("Invalid Checkered Texture")->GetID());
+					glBindTexture(GL_TEXTURE_2D, AssetManager::GetInbuiltAsset<Texture2D>("Invalid Checkered Texture")->GetID());
 					shader->SetInt("u_InvalidTexture", 0);
 					shader->SetMat4("u_VertexIn.Proj", projection_matrix);
 					shader->SetMat4("u_VertexIn.View", view_matrix);
@@ -1932,7 +1932,7 @@ namespace Louron {
 					shader->Bind();
 
 					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, AssetManager::GetInbuiltAsset<Texture>("Invalid Checkered Texture")->GetID());
+					glBindTexture(GL_TEXTURE_2D, AssetManager::GetInbuiltAsset<Texture2D>("Invalid Checkered Texture")->GetID());
 					shader->SetInt("u_InvalidTexture", 0);
 					shader->SetMat4("u_VertexIn.Proj", projection_matrix);
 					shader->SetMat4("u_VertexIn.View", view_matrix);

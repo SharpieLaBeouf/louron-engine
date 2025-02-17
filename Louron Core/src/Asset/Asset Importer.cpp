@@ -100,15 +100,15 @@ namespace Louron {
 
 #pragma endregion
 
-#pragma region Texture Import
+#pragma region Texture2D Import
 
-	std::shared_ptr<Texture> TextureImporter::ImportTexture2D(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory) 
+	std::shared_ptr<Texture2D> TextureImporter::ImportTexture2D(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory) 
 	{
 		return LoadTexture2D(meta_data.IsCustomAsset ? meta_data.FilePath : Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
 	}
 
-	std::shared_ptr<Texture> TextureImporter::LoadTexture2D(const std::filesystem::path& path) {
-		return std::make_shared<Texture>(path);
+	std::shared_ptr<Texture2D> TextureImporter::LoadTexture2D(const std::filesystem::path& path) {
+		return std::make_shared<Texture2D>(path);
 	}
 
 
@@ -356,7 +356,7 @@ namespace Louron {
 
 					AssetHandle texture_handle;
 					AssetMetaData texture_meta_data;
-					std::shared_ptr<Texture> texture_asset = nullptr;
+					std::shared_ptr<Texture2D> texture_asset = nullptr;
 
 					if (std::filesystem::exists(absolute_texture_path))
 					{
@@ -377,9 +377,9 @@ namespace Louron {
 
 						// Check if texture file already loaded.
 						if (asset_map->count(texture_handle) == 0)
-							texture_asset = std::make_shared<Texture>(absolute_texture_path);
+							texture_asset = std::make_shared<Texture2D>(absolute_texture_path);
 						else
-							texture_asset = static_pointer_cast<Texture>(asset_map->at(texture_handle));
+							texture_asset = static_pointer_cast<Texture2D>(asset_map->at(texture_handle));
 					}
 					else if (auto assimp_texture_ref = scene->GetEmbeddedTexture(assimp_texture_string.C_Str()))
 					{
@@ -397,13 +397,13 @@ namespace Louron {
 
 
 						glm::ivec2 texture_size = { assimp_texture_ref->mWidth, assimp_texture_ref->mHeight };
-						GLubyte* texture_data = reinterpret_cast<GLubyte*>(assimp_texture_ref->pcData);
+						unsigned char* texture_data = reinterpret_cast<unsigned char*>(assimp_texture_ref->pcData);
 
 						// Check if texture file already loaded.
 						if (asset_map->count(texture_handle) == 0)
-							texture_asset = std::make_shared<Texture>(texture_data, texture_size, GL_BGRA);
+							texture_asset = std::make_shared<Texture2D>(texture_data, texture_size.x, texture_size.y, Texture2D::TextureFormat::RED_GREEN_BLUE_ALPHA_8, Texture2D::TextureFormat::BLUE_GREEN_RED_ALPHA_8);
 						else
-							texture_asset = static_pointer_cast<Texture>(asset_map->at(texture_handle));
+							texture_asset = static_pointer_cast<Texture2D>(asset_map->at(texture_handle));
 					}
 					else if (!absolute_texture_path.empty())
 					{

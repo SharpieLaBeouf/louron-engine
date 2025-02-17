@@ -735,6 +735,7 @@ namespace Louron {
 		m_IsRunning = false;
 		m_IsSimulating = false;
 
+		AssetManager::ClearRuntimeAssets();
 		ScriptManager::OnRuntimeStop();
 		OnPhysicsStop();
 	}

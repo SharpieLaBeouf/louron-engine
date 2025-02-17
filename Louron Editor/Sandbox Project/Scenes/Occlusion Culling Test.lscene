@@ -84,6 +84,12 @@ Entities:
       Parent: 4294967295
       Children:
         []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.MaterialUniformsTest
+        Fields:
+          []
     TransformComponent:
       Translation: [-0.386319041, 4.18492794, -2.01951981]
       Rotation: [0, -0, 0]
@@ -125,7 +131,7 @@ Entities:
     TransformComponent:
       Translation: [-8.31187248, 0, 0]
       Rotation: [0, -0, 0]
-      Scale: [20, 0.100000001, 10]
+      Scale: [20, 0.100000001, 20]
     MeshFilterComponent:
       MeshAssetHandle: 2903028380
     MeshRendererComponent:
@@ -134,6 +140,11 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1468248674
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [2.98023224e-08, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
   - Entity: 3990415205
     TagComponent:
       Tag: Main Camera
@@ -143,14 +154,14 @@ Entities:
         - 1611540586
     ScriptComponent:
       Script_1:
-        Active: true
+        Active: false
         Script Name: SandboxProject.CameraMoveScript
         Fields:
           []
     TransformComponent:
-      Translation: [0, 5, 20]
-      Rotation: [-10, 0, 0]
-      Scale: [1, 1, 1]
+      Translation: [0, 15, 0]
+      Rotation: [0, 0, 0]
+      Scale: [1, 0.999998033, 0.999998033]
     CameraComponent:
       Camera:
         Projection Type: Perspective
@@ -171,7 +182,7 @@ Entities:
         []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [-30, 150, 0]
+      Rotation: [-30, 8.89999962, 0]
       Scale: [1, 1, 1]
     DirectionalLightComponent:
       Active: true
@@ -186,10 +197,21 @@ Entities:
       Parent: 3398955800
       Children:
         []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.OverrideMaterialTest
+        Fields:
+          - Name: scale
+            Type: Float
+            Data: 10
+          - Name: offset
+            Type: Vector2
+            Data: [0, 0]
     TransformComponent:
-      Translation: [-5.50662422, 4.03381872, -8.96949863]
-      Rotation: [0, -0, 0]
-      Scale: [1, 32.6059723, 6.22602034]
+      Translation: [0, 15, -26.256134]
+      Rotation: [89.9999771, -0, 0]
+      Scale: [10, 0.0999999195, 9.9999876]
     MeshFilterComponent:
       MeshAssetHandle: 2903028380
     MeshRendererComponent:
@@ -236,6 +258,20 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 2082684130
+    RigidbodyComponent:
+      Mass: 1
+      Drag: 0
+      AngularDrag: 0.0500000007
+      AutomaticCentreOfMass: true
+      UseGravity: true
+      IsKinematic: false
+      PositionConstraint: [false, false, false]
+      RotationConstraint: [false, false, false]
+    SphereColliderComponent:
+      IsTrigger: false
+      Radius: 1
+      Centre: [0, 0, 0]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
   - Entity: 2495088744
     TagComponent:
       Tag: AK47 (1)
@@ -275,6 +311,11 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1468248674
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, -2.98023224e-08, 2.98023224e-08]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
   - Entity: 1978880884
     TagComponent:
       Tag: Cube
@@ -294,6 +335,11 @@ Entities:
       MaterialAssetCount: 1
       MaterialAssetHandles:
         - 1468248674
+    BoxColliderComponent:
+      IsTrigger: false
+      Centre: [0, 0, 0]
+      Size: [1, 1, 1]
+      MaterialProperties: [0.600000024, 0.600000024, 0]
   - Entity: 3398955800
     TagComponent:
       Tag: Scene Objects

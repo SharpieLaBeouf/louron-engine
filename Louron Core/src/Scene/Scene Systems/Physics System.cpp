@@ -92,7 +92,6 @@ namespace Louron {
 			if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && *rb_ref)
 				rb_ref->DetachShape(collider.GetShape());
 
-			L_CORE_INFO(entity.GetName());
 			collider.CreateStaticRigidbody();
 
 			collider.AddFlag(ColliderFlag_ShapePropsUpdated);
@@ -147,7 +146,6 @@ namespace Louron {
 						shape_entity.GetComponent<SphereColliderComponent>().AddFlag(ColliderFlag_RigidbodyUpdated);
 					}
 					if (shape_entity.HasComponent<BoxColliderComponent>()) {
-						L_CORE_INFO(shape_entity.GetName());
 						shape_entity.GetComponent<BoxColliderComponent>().ResetRigidbody();
 						shape_entity.GetComponent<BoxColliderComponent>().AddFlag(ColliderFlag_RigidbodyUpdated);
 					}

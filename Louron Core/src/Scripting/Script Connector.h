@@ -242,7 +242,6 @@ namespace Louron {
 
 #pragma endregion
 
-
 #pragma region Compute Shader
 
 		static void ComputeShader_SetBuffer(AssetHandle asset_handle, ComputeBuffer* buffer, uint32_t binding_index);
@@ -277,7 +276,7 @@ namespace Louron {
 
 #pragma region MeshRendererComponent
 
-		static AssetHandle MeshRendererComponent_GetMaterial(UUID entityID);
+		static uint32_t MeshRendererComponent_GetMaterial(UUID entityID);
 		static void MeshRendererComponent_SetMaterial(UUID entityID, AssetHandle material_handle);
 		static uint32_t* MeshRendererComponent_GetMaterials(UUID entityID);
 		static void MeshRendererComponent_SetMaterials(UUID entityID, uint32_t* material_handles, uint32_t num_elements);
@@ -294,8 +293,28 @@ namespace Louron {
 
 #pragma region MaterialUniformBlock
 
-		// IMPLEMENT CALLBACKS SO WE CAN SET PROPERTIES FROM SCRIPTS! E.g., MaterialUniformBlock::SetUniform("myFloat", GLSLType::Float, 69.0f);
 		static void MaterialUniformBlock_SetUniform(MaterialUniformBlock* uniform_block, MonoString* uniform_name, uint32_t type, void* value);
+
+		static void MaterialUniformBlock_OverrideAlbedoMap(MaterialUniformBlock* uniform_block, AssetHandle value);
+		static void MaterialUniformBlock_OverrideMetallicMap(MaterialUniformBlock* uniform_block, AssetHandle value);
+		static void MaterialUniformBlock_OverrideNormalMap(MaterialUniformBlock* uniform_block, AssetHandle value);
+
+		static void MaterialUniformBlock_OverrideAlbedoTint(MaterialUniformBlock* uniform_block, glm::vec4 value);
+		static void MaterialUniformBlock_OverrideMetallic(MaterialUniformBlock* uniform_block, float value);
+		static void MaterialUniformBlock_OverrideRoughness(MaterialUniformBlock* uniform_block, float value);
+
+#pragma endregion
+
+#pragma region Texture2D
+
+		static uint32_t Texture2D_Create(int width, int height, Texture2D::TextureFormat internal_format);
+		static uint32_t Texture2D_CreateWithData(unsigned char* data, int width, int height, uint8_t internal_format, uint8_t data_format);
+
+		static void Texture2D_SetPixel(uint32_t asset_handle, glm::vec4 colour, glm::ivec2 pixel_coord);
+		static void Texture2D_SetPixelData(uint32_t asset_handle, unsigned char* pixel_data, int pixel_data_size, uint8_t pixel_data_format);
+		static void Texture2D_SubmitTextureChanges(uint32_t asset_handle);
+
+		static void Texture2D_Destroy(AssetHandle handle);
 
 #pragma endregion
 

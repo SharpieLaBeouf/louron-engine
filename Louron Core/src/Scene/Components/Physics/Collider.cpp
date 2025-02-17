@@ -302,9 +302,6 @@ namespace Louron {
         }
 
         m_Shape->SetLocalPose({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 0.0f });
-
-        Entity entity = GetEntity();
-        SetRadius(glm::compMax(entity.GetComponent<TransformComponent>().GetGlobalScale()) / 2.0f);
     }
 
     // GETTERS

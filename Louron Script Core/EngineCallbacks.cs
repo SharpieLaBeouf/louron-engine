@@ -432,11 +432,54 @@ namespace Louron
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void MeshRenderer_DisableAllUniformBlocks(uint entityID);
 
+        #endregion
+
+        #region Material Uniform Block
+
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void MaterialUniformBlock_SetUniform(IntPtr uniform_block, string uniform_name, uint type, IntPtr value);
 
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MaterialUniformBlock_OverrideAlbedoMap(IntPtr uniform_block, uint asset_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MaterialUniformBlock_OverrideMetallicMap(IntPtr uniform_block, uint asset_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MaterialUniformBlock_OverrideNormalMap(IntPtr uniform_block, uint asset_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MaterialUniformBlock_OverrideAlbedoTint(IntPtr uniform_block, Vector4 value);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MaterialUniformBlock_OverrideMetallic(IntPtr uniform_block, float value);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MaterialUniformBlock_OverrideRoughness(IntPtr uniform_block, float value);
+
         #endregion
 
+        #region Texture2D
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint Texture2D_Create(int width, int height, byte internal_format);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint Texture2D_CreateWithData(IntPtr data, int width, int height, byte internal_format, byte data_format);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Texture2D_Destroy(uint asset_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Texture2D_SetPixel(uint asset_handle, Vector4 pixel_colour, IVector2 texture_coord);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Texture2D_SetPixelData(uint asset_handle, IntPtr pixel_data, uint pixel_data_size, byte pixel_data_format);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Texture2D_SubmitTextureChanges(uint asset_handle);
+
+        #endregion
 
     }
 }

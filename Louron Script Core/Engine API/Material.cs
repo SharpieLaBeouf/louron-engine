@@ -45,6 +45,36 @@ namespace Louron
             NativePtr = ptr;
         }
 
+        public void OverrideAlbedoTexture(Texture2D texture)
+        {
+            EngineCallbacks.MaterialUniformBlock_OverrideAlbedoMap(NativePtr, texture.Asset_Handle);
+        }
+
+        public void OverrideMetallicTexture(Texture2D texture)
+        {
+            EngineCallbacks.MaterialUniformBlock_OverrideMetallicMap(NativePtr, texture.Asset_Handle);
+        }
+
+        public void OverrideNormalTexture(Texture2D texture)
+        {
+            EngineCallbacks.MaterialUniformBlock_OverrideNormalMap(NativePtr, texture.Asset_Handle);
+        }
+
+        public void OverrideAlbedoTint(Vector4 colour)
+        {
+            EngineCallbacks.MaterialUniformBlock_OverrideAlbedoTint(NativePtr, colour);
+        }
+
+        public void OverrideMetallic(float metallic)
+        {
+            EngineCallbacks.MaterialUniformBlock_OverrideMetallic(NativePtr, metallic);
+        }
+
+        public void OverrideRoughness(float roughness)
+        {
+            EngineCallbacks.MaterialUniformBlock_OverrideRoughness(NativePtr, roughness);
+        }
+
         // Bool
         public void SetBool(string uniform_name, bool value)
         {
@@ -295,4 +325,5 @@ namespace Louron
 		Sampler3D,
 		SamplerCube, SamplerCubeArray, SamplerCubeShadow, SamplerCubeArrayShadow
     };
+
 }

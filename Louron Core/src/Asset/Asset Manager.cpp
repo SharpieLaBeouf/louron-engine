@@ -591,6 +591,20 @@ namespace Louron {
 		m_RuntimeCreatedAssetRegistry.erase(std::remove(m_RuntimeCreatedAssetRegistry.begin(), m_RuntimeCreatedAssetRegistry.end(), asset_handle), m_RuntimeCreatedAssetRegistry.end());
 	}
 
+	void EditorAssetManager::ClearRuntimeAssets()
+	{
+		for (const auto& handle : m_RuntimeCreatedAssetRegistry)
+		{
+			if(m_LoadedAssets.contains(handle))
+				m_LoadedAssets.erase(handle);
+
+			if (m_AssetRegistry.contains(handle))
+				m_AssetRegistry.erase(handle);
+		}
+
+		m_RuntimeCreatedAssetRegistry.clear();
+	}
+
 	std::shared_ptr<Shader> EditorAssetManager::GetInbuiltShader(const std::string& default_shader_name, bool is_compute)
 	{
 		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
@@ -667,6 +681,32 @@ namespace Louron {
 
 			ImportCustomAsset(handle, meta_data);
 		}
+
+		meta_data.AssetName = "Default_White_Texture";
+		meta_data.Type = AssetType::Texture2D;
+		meta_data.FilePath = "";
+		meta_data.IsComposite = false;
+
+		unsigned char texture_data[] = { 255, 255, 255, 255 };
+		std::shared_ptr<Texture2D> default_texture = std::make_shared<Texture2D>(texture_data, 1, 1, Texture2D::TextureFormat::RED_GREEN_BLUE_ALPHA_8, Texture2D::TextureFormat::RED_GREEN_BLUE_ALPHA_8);
+
+		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+			AssetUtils::AssetTypeToString(meta_data.Type) + "InBuiltAsset" + meta_data.AssetName
+		));
+
+		AddCustomAsset(default_texture, handle, meta_data);
+
+		texture_data[0] = 128;
+		texture_data[1] = 128;
+
+		std::shared_ptr<Texture2D> default_normal_texture = std::make_shared<Texture2D>(texture_data, 1, 1, Texture2D::TextureFormat::RED_GREEN_BLUE_ALPHA_8, Texture2D::TextureFormat::RED_GREEN_BLUE_ALPHA_8);
+
+		meta_data.AssetName = "Default_Normal_Texture";
+		handle = static_cast<uint32_t>(std::hash<std::string>{}(
+			AssetUtils::AssetTypeToString(meta_data.Type) + "InBuiltAsset" + meta_data.AssetName
+		));
+
+		AddCustomAsset(default_normal_texture, handle, meta_data);
 	}
 
 	bool EditorAssetManager::IsAssetHandleValid(const AssetHandle& asset_handle) const {

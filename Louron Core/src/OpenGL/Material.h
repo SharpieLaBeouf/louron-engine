@@ -106,12 +106,25 @@ namespace Louron {
 			return m_Uniforms;
 		}
 
+		const UniformBlock& GetMaterialOverideUniforms() const {
+			return m_MaterialOveriddes;
+		}
+
 		void SetUniforms(const UniformBlock& uniforms) {
 			m_Uniforms = uniforms;
 		}
 
+		void OverrideAlbedoMap(const AssetHandle& new_albedo);
+		void OverrideMetallicMap(const AssetHandle& new_metallic);
+		void OverrideNormalMap(const AssetHandle& new_normal);
+
+		void OverrideAlbedoTint(const glm::vec4& new_albedo_tint);
+		void OverrideMetallic(float new_metallic_scale);
+		void OverrideRoughness(float new_roughness);
+
 		void Clear() {
 			m_Uniforms.clear();
+			m_MaterialOveriddes.clear();
 		}
 
 		void InitialiseFromShader(std::shared_ptr<Shader> shader);
@@ -131,6 +144,7 @@ namespace Louron {
 
 	private:
 		UniformBlock m_Uniforms;
+		UniformBlock m_MaterialOveriddes;
 		UUID m_UniformBlockID = NULL_UUID;
 
 		friend class Material;
@@ -181,7 +195,6 @@ namespace Louron {
 
 		// Update Material Shader Uniforms
 		virtual void UpdateUniforms(std::shared_ptr<MaterialUniformBlock> custom_uniform_block = nullptr);
-		virtual void UpdateUniforms(const MaterialUniformBlock& uniform_block, const Shader& shader);
 
 		void SetUniformBlock(std::shared_ptr<MaterialUniformBlock> uniform_block) { m_UniformBlock = uniform_block; }
 		std::shared_ptr<MaterialUniformBlock> GetUniformBlock() { return m_UniformBlock; }

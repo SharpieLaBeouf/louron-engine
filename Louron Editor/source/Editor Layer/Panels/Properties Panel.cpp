@@ -1611,7 +1611,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 						ImGui::BeginDisabled();
 					}
 
-					GLuint texture_id = AssetManager::IsAssetHandleValid(asset_material->GetAlbedoTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(asset_material->GetAlbedoTextureAssetHandle())->GetID() : 0;
+					GLuint texture_id = AssetManager::IsAssetHandleValid(asset_material->GetAlbedoTextureAssetHandle()) ? AssetManager::GetAsset<Texture2D>(asset_material->GetAlbedoTextureAssetHandle())->GetID() : 0;
 
 					// Texture and text alignment
 					ImGui::ImageButton("##Albedo Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
@@ -1662,7 +1662,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 					ImGui::Text("Albedo Colour");
 
-					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetMetallicTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(asset_material->GetMetallicTextureAssetHandle())->GetID() : 0;
+					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetMetallicTextureAssetHandle()) ? AssetManager::GetAsset<Texture2D>(asset_material->GetMetallicTextureAssetHandle())->GetID() : 0;
 
 					ImGui::ImageButton("##Metallic Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
 
@@ -1712,7 +1712,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 						material_modified = true;
 					}
 
-					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetNormalTextureAssetHandle()) ? AssetManager::GetAsset<Texture>(asset_material->GetNormalTextureAssetHandle())->GetID() : 0;
+					texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(asset_material->GetNormalTextureAssetHandle()) ? AssetManager::GetAsset<Texture2D>(asset_material->GetNormalTextureAssetHandle())->GetID() : 0;
 
 					ImGui::ImageButton("##Normal Texture", (ImTextureID)(uintptr_t)texture_id, { 32.0f, 32.0f });
 
@@ -1780,7 +1780,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 					for (int i = 0; i < sb_texture_asset_handles.size(); i++) {
 
 
-						GLuint texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(sb_texture_asset_handles[i]) ? AssetManager::GetAsset<Texture>(sb_texture_asset_handles[i])->GetID() : 0;
+						GLuint texture_id = Project::GetStaticEditorAssetManager()->IsAssetHandleValid(sb_texture_asset_handles[i]) ? AssetManager::GetAsset<Texture2D>(sb_texture_asset_handles[i])->GetID() : 0;
 
 						static const std::array<std::string, 6> skybox_binding_names = {
 							"Right",

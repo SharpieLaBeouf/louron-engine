@@ -53,7 +53,6 @@ namespace Louron {
 		GuiLayer* GetImGuiLayer() { return m_GuiLayer; }
 
 		InputManager& GetInput() { return *m_Input; }
-		TextureLibrary& GetTextureLibrary() { return *m_TextureLibrary; }
 
 		static Engine& Get() { return *s_Instance; }
 		void Close();
@@ -86,7 +85,6 @@ namespace Louron {
 
 		// Resource Management Systems
 		std::unique_ptr<InputManager> m_Input;
-		std::unique_ptr<TextureLibrary> m_TextureLibrary;
 
 		std::vector<std::function<void()>> m_MainThreadQueue;
 		std::mutex m_MainThreadQueueMutex;

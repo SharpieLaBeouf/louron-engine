@@ -385,7 +385,7 @@ void ContentBrowserPanel::OnImGuiRender(LouronEditorLayer& editor_layer) {
 
 						if (AssetManager::IsExtensionSupported(entry.path().extension()) && AssetManager::GetAssetTypeFromFileExtension(entry.path().extension()) == AssetType::Texture2D)
 						{
-							auto texture_asset = AssetManager::GetAsset<Texture>(Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(entry.path(), Project::GetActiveProject()->GetAssetDirectory()));
+							auto texture_asset = AssetManager::GetAsset<Texture2D>(Project::GetStaticEditorAssetManager()->GetHandleFromFilePath(entry.path(), Project::GetActiveProject()->GetAssetDirectory()));
 							if (texture_asset)
 								texture_id = texture_asset->GetID();
 						}
