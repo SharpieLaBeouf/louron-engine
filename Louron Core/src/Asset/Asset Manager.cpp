@@ -693,6 +693,7 @@ namespace Louron {
 		AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
 			AssetUtils::AssetTypeToString(meta_data.Type) + "InBuiltAsset" + meta_data.AssetName
 		));
+		default_texture->Handle = handle;
 
 		AddCustomAsset(default_texture, handle, meta_data);
 
@@ -705,8 +706,20 @@ namespace Louron {
 		handle = static_cast<uint32_t>(std::hash<std::string>{}(
 			AssetUtils::AssetTypeToString(meta_data.Type) + "InBuiltAsset" + meta_data.AssetName
 		));
+		default_normal_texture->Handle = handle;
 
 		AddCustomAsset(default_normal_texture, handle, meta_data);
+
+		std::shared_ptr<Material> default_material = std::make_shared<Material>();
+
+		meta_data.AssetName = "Default_Material";
+		meta_data.Type = AssetType::Material_Standard;
+		handle = static_cast<uint32_t>(std::hash<std::string>{}(
+			AssetUtils::AssetTypeToString(meta_data.Type) + "InBuiltAsset" + meta_data.AssetName
+		));
+		default_material->Handle = handle;
+
+		AddCustomAsset(default_material, handle, meta_data);
 	}
 
 	bool EditorAssetManager::IsAssetHandleValid(const AssetHandle& asset_handle) const {

@@ -46,6 +46,7 @@ namespace Louron {
 		RigidbodyComponent,
 		BoxColliderComponent,
 		SphereColliderComponent,
+		MeshFilterComponent,
 		MeshRendererComponent,
 		Component,
 		Prefab,
@@ -358,6 +359,7 @@ namespace Louron {
 				case ScriptFieldType::RigidbodyComponent:			return "RigidbodyComponent";
 				case ScriptFieldType::BoxColliderComponent:			return "BoxColliderComponent";
 				case ScriptFieldType::SphereColliderComponent:		return "SphereColliderComponent";
+				case ScriptFieldType::MeshFilterComponent:			return "MeshFilterComponent";
 				case ScriptFieldType::MeshRendererComponent:		return "MeshRendererComponent";
 				case ScriptFieldType::Component:					return "Component";
 				case ScriptFieldType::Prefab:						return "Prefab";
@@ -398,6 +400,7 @@ namespace Louron {
 			if (fieldType == "RigidbodyComponent")			return ScriptFieldType::RigidbodyComponent;
 			if (fieldType == "BoxColliderComponent")		return ScriptFieldType::BoxColliderComponent;
 			if (fieldType == "SphereColliderComponent")		return ScriptFieldType::SphereColliderComponent;
+			if (fieldType == "MeshFilterComponent")			return ScriptFieldType::MeshFilterComponent;
 			if (fieldType == "MeshRendererComponent")		return ScriptFieldType::MeshRendererComponent;
 			if (fieldType == "Component")					return ScriptFieldType::Component;
 			if (fieldType == "Prefab")						return ScriptFieldType::Prefab;

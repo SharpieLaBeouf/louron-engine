@@ -231,7 +231,7 @@ namespace Louron {
 
 	void Renderer::DrawSubMesh(std::shared_ptr<SubMesh> sub_mesh, bool is_depth_pass)
 	{
-		DrawSubMesh(*sub_mesh->VAO, is_depth_pass);
+		DrawSubMesh(*sub_mesh->GetVAO(), is_depth_pass);
 	}
 
 	static GLuint s_MeshInstanceBuffers = -1;
@@ -317,7 +317,7 @@ namespace Louron {
 
 	void Renderer::DrawInstancedSubMesh(std::shared_ptr<SubMesh> sub_mesh, std::vector<glm::mat4> transforms)
 	{
-		DrawInstancedSubMesh(*sub_mesh->VAO, transforms);
+		DrawInstancedSubMesh(*sub_mesh->GetVAO(), transforms);
 	}
 
 	void Renderer::CleanupRenderData() 

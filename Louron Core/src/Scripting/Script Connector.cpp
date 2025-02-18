@@ -35,6 +35,7 @@ namespace Louron {
 		mono_add_internal_call("Louron.EngineCallbacks::Entity_HasComponent", Entity_HasComponent);
 
 		mono_add_internal_call("Louron.EngineCallbacks::Entity_Instantiate", Entity_Instantiate);
+		mono_add_internal_call("Louron.EngineCallbacks::Entity_Instantiate_POS_ROT_SCALE", Entity_Instantiate_POS_ROT_SCALE);
 
 		mono_add_internal_call("Louron.EngineCallbacks::Entity_GetParent", Entity_GetParent);
 		mono_add_internal_call("Louron.EngineCallbacks::Entity_SetParent", Entity_SetParent);
@@ -189,6 +190,28 @@ namespace Louron {
 		mono_add_internal_call("Louron.EngineCallbacks::Texture2D_SubmitTextureChanges", Texture2D_SubmitTextureChanges);
 		mono_add_internal_call("Louron.EngineCallbacks::Texture2D_Destroy", Texture2D_Destroy);
 
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_CreateNewMesh",				Mesh_CreateNewMesh);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_SubmitChanges",				Mesh_SubmitChanges);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_CopyBufferDataToCPU",			Mesh_CopyBufferDataToCPU);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_ClearBufferDataFromCPU",		Mesh_ClearBufferDataFromCPU);
+		
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_SetTriangles",					Mesh_SetTriangles);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_GetTriangles",					Mesh_GetTriangles);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_RecalculateNormals",			Mesh_RecalculateNormals);
+		
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_SetVertices",					Mesh_SetVertices);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_SetNormals",					Mesh_SetNormals);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_SetTextureCoords",				Mesh_SetTextureCoords);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_SetTangents",					Mesh_SetTangents);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_SetBitangents",				Mesh_SetBitangents);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_GetVertices",					Mesh_GetVertices);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_GetNormals",					Mesh_GetNormals);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_GetTextureCoords",				Mesh_GetTextureCoords);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_GetTangents",					Mesh_GetTangents);
+		mono_add_internal_call("Louron.EngineCallbacks::Mesh_GetBitangents",				Mesh_GetBitangents);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshFilterComponent_SharedMesh",	MeshFilterComponent_SharedMesh);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshFilterComponent_CopyMesh",		MeshFilterComponent_CopyMesh);
+		mono_add_internal_call("Louron.EngineCallbacks::MeshFilterComponent_SetMesh",		MeshFilterComponent_SetMesh);
 	}
 
 #pragma endregion
@@ -254,6 +277,13 @@ namespace Louron {
 		}
 		if (component_name == "Louron.SphereColliderComponent") {
 			entity.AddComponent<SphereColliderComponent>();
+		}
+		if (component_name == "Louron.MeshFilterComponent") {
+			entity.AddComponent<MeshFilterComponent>();
+		}
+		if (component_name == "Louron.MeshRendererComponent") {
+			auto& component = entity.AddComponent<MeshRendererComponent>();
+			component.MeshRendererMaterialHandles.push_back({ AssetManager::GetInbuiltAsset<Material>("Default_Material", AssetType::Material_Standard)->Handle, nullptr });
 		}
 	}
 
@@ -321,6 +351,28 @@ namespace Louron {
 		auto prefab_asset = AssetManager::GetAsset<Prefab>(*handle);
 
 		Entity prefab_clone = scene->InstantiatePrefab(prefab_asset);
+		if (prefab_clone) {
+			prefab_clone.GetComponent<TagComponent>().SetUniqueName(prefab_asset->GetPrefabName());
+			*prefab_clone_uuid = prefab_clone.GetUUID();
+		}
+	}
+
+	void ScriptConnector::Entity_Instantiate_POS_ROT_SCALE(UUID entityID, uint32_t* handle, glm::vec3* position, glm::vec3* rotation, glm::vec3* scale, uint32_t* prefab_clone_uuid)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityID);
+		if (!entity)
+			return;
+
+		auto prefab_asset = AssetManager::GetAsset<Prefab>(*handle);
+
+		TransformComponent transform{};
+		transform.m_Position = *position;
+		transform.m_Rotation = *rotation;
+		transform.m_Scale = *scale;
+
+		Entity prefab_clone = scene->InstantiatePrefab(prefab_asset, transform);
 		if (prefab_clone) {
 			prefab_clone.GetComponent<TagComponent>().SetUniqueName(prefab_asset->GetPrefabName());
 			*prefab_clone_uuid = prefab_clone.GetUUID();
@@ -2060,6 +2112,347 @@ namespace Louron {
 	void ScriptConnector::Texture2D_Destroy(AssetHandle handle)
 	{
 		AssetManager::RemoveRuntimeAsset(handle);
+	}
+
+#pragma endregion
+
+#pragma region Mesh & MeshFilter
+
+	uint32_t ScriptConnector::Mesh_CreateNewMesh()
+	{
+
+		std::shared_ptr<SubMesh> sub_mesh = std::make_shared<SubMesh>();
+
+		sub_mesh->SetVAO(std::make_unique<VertexArray>());
+
+		VertexBuffer* vbo_verts = new VertexBuffer(3);
+		vbo_verts->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aPos"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_verts);
+
+		VertexBuffer* vbo_norms = new VertexBuffer(3);
+		vbo_norms->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aNormal"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_norms);
+
+		VertexBuffer* vbo_texcoords = new VertexBuffer(2);
+		vbo_texcoords->SetLayout(BufferLayout{ {ShaderDataType::Float2, "aTexCoord"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_texcoords);
+
+		VertexBuffer* vbo_tangents = new VertexBuffer(3);
+		vbo_tangents->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aTangent"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_tangents);
+
+		VertexBuffer* vbo_bitangents = new VertexBuffer(3);
+		vbo_bitangents->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aBitangent"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_bitangents);
+
+		IndexBuffer* ebo = new IndexBuffer();
+		sub_mesh->GetVAO()->SetIndexBuffer(ebo);
+
+		std::shared_ptr<AssetMesh> mesh = std::make_shared<AssetMesh>();
+
+		mesh->SubMeshes.push_back(std::move(sub_mesh));
+
+		return AssetManager::AddRuntimeAsset(mesh, "New Runtime Mesh");
+	}
+
+	void ScriptConnector::Mesh_SubmitChanges(AssetHandle assetHandle, bool clearCPUData)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+			
+		mesh->SubMeshes.front()->SubmitChangesToGPU(clearCPUData);
+	}
+
+	void ScriptConnector::Mesh_CopyBufferDataToCPU(AssetHandle assetHandle)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+			
+		mesh->SubMeshes.front()->CopyGPUData();
+	}
+
+	void ScriptConnector::Mesh_ClearBufferDataFromCPU(AssetHandle assetHandle)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+		
+		mesh->SubMeshes.front()->ClearCPUData();
+	}
+
+	void ScriptConnector::Mesh_SetVertices(AssetHandle assetHandle, float* data, uint32_t dataLength)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle) || data == nullptr || dataLength == 0)
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		mesh->SubMeshes.front()->SetVertices(data, dataLength);
+
+		for (uint32_t i = 0; i < dataLength; i += 3) // Assuming (x, y, z) ordering!!
+		{
+			glm::vec3 v(data[i], data[i + 1], data[i + 2]);
+			mesh->MeshBounds.BoundsMin = glm::min(mesh->MeshBounds.BoundsMin, v);
+			mesh->MeshBounds.BoundsMax = glm::max(mesh->MeshBounds.BoundsMax, v);
+		}
+
+		mesh->ModifiedAABB = true;
+	}
+
+	void ScriptConnector::Mesh_SetNormals(AssetHandle assetHandle, float* data, uint32_t dataLength)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+			
+		mesh->SubMeshes.front()->SetNormals(data, dataLength);
+	}
+
+	void ScriptConnector::Mesh_SetTextureCoords(AssetHandle assetHandle, float* data, uint32_t dataLength)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		mesh->SubMeshes.front()->SetTextureCoords(data, dataLength);
+	}
+
+	void ScriptConnector::Mesh_SetTangents(AssetHandle assetHandle, float* data, uint32_t dataLength)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		mesh->SubMeshes.front()->SetTangents(data, dataLength);
+	}
+
+	void ScriptConnector::Mesh_SetBitangents(AssetHandle assetHandle, float* data, uint32_t dataLength)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+		
+		mesh->SubMeshes.front()->SetBiTangents(data, dataLength);
+	}
+
+	void ScriptConnector::Mesh_GetVertices(AssetHandle assetHandle, const float** data, int* count)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		size_t temp_count = 0;
+		*data = mesh->SubMeshes.front()->GetVertices(&temp_count);
+		*count = static_cast<int>(temp_count);
+	}
+
+	void ScriptConnector::Mesh_GetNormals(AssetHandle assetHandle, const float** data, int* count)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		size_t temp_count = 0;
+		*data = mesh->SubMeshes.front()->GetNormals(&temp_count);
+		*count = static_cast<int>(temp_count);
+	}
+
+	void ScriptConnector::Mesh_GetTextureCoords(AssetHandle assetHandle, const float** data, int* count)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		size_t temp_count = 0;
+		*data = mesh->SubMeshes.front()->GetTextureCoords(&temp_count);
+		*count = static_cast<int>(temp_count);
+	}
+
+	void ScriptConnector::Mesh_GetTangents(AssetHandle assetHandle, const float** data, int* count)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		size_t temp_count = 0;
+		*data = mesh->SubMeshes.front()->GetTangents(&temp_count);
+		*count = static_cast<int>(temp_count);
+	}
+
+	void ScriptConnector::Mesh_GetBitangents(AssetHandle assetHandle, const float** data, int* count)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		size_t temp_count = 0;
+		*data = mesh->SubMeshes.front()->GetBiTangents(&temp_count);
+		*count = static_cast<int>(temp_count);
+	}
+
+	uint32_t ScriptConnector::MeshFilterComponent_SharedMesh(uint32_t entityUUID)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityUUID);
+		if (!entity) return NULL_UUID;
+
+		if (!entity.HasComponent<MeshFilterComponent>())
+			return NULL_UUID;
+
+		AssetHandle handle = entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle;
+		if (!AssetManager::IsAssetHandleValid(handle))
+			return NULL_UUID;
+
+		return handle;
+	}
+
+	uint32_t ScriptConnector::MeshFilterComponent_CopyMesh(uint32_t entityUUID)
+	{
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityUUID);
+		if (!entity) return NULL_UUID;
+
+		if (!entity.HasComponent<MeshFilterComponent>())
+			return NULL_UUID;
+
+		auto asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
+
+		if (asset_mesh && asset_mesh->SubMeshes.size() >= 1 && asset_mesh->SubMeshes.front())
+		{
+			auto copy_asset_mesh = std::make_shared<AssetMesh>();
+			copy_asset_mesh->SubMeshes.push_back(std::make_shared<SubMesh>(*asset_mesh->SubMeshes.front()));
+			copy_asset_mesh->MeshBounds = asset_mesh->MeshBounds;
+
+			return AssetManager::AddRuntimeAsset<AssetMesh>(copy_asset_mesh, "New Runtime Mesh");
+		}
+
+		std::shared_ptr<SubMesh> sub_mesh = std::make_shared<SubMesh>();
+
+		sub_mesh->SetVAO(std::make_unique<VertexArray>());
+
+		VertexBuffer* vbo_verts = new VertexBuffer(3);
+		vbo_verts->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aPos"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_verts);
+
+		VertexBuffer* vbo_norms = new VertexBuffer(3);
+		vbo_norms->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aNormal"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_norms);
+
+		VertexBuffer* vbo_texcoords = new VertexBuffer(2);
+		vbo_texcoords->SetLayout(BufferLayout{ {ShaderDataType::Float2, "aTexCoord"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_texcoords);
+
+		VertexBuffer* vbo_tangents = new VertexBuffer(3);
+		vbo_tangents->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aTangent"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_tangents);
+
+		VertexBuffer* vbo_bitangents = new VertexBuffer(3);
+		vbo_bitangents->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aBitangent"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_bitangents);
+
+		IndexBuffer* ebo = new IndexBuffer();
+		sub_mesh->GetVAO()->SetIndexBuffer(ebo);
+
+		asset_mesh = std::make_shared<AssetMesh>();
+
+		asset_mesh->SubMeshes.push_back(std::move(sub_mesh));
+
+		AssetHandle handle = AssetManager::AddRuntimeAsset(asset_mesh, "New Runtime Mesh");
+		entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle = handle;
+
+		return handle;
+	}
+
+	void ScriptConnector::MeshFilterComponent_SetMesh(uint32_t entityUUID, uint32_t assetHandle)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		Scene* scene = ScriptManager::GetSceneContext();
+		L_CORE_ASSERT(scene, "Scene Not Valid.");
+		Entity entity = scene->FindEntityByUUID(entityUUID);
+		if (!entity) return;
+
+		if (!entity.HasComponent<MeshFilterComponent>())
+			return;
+
+		entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle = assetHandle;
+	}
+
+	void ScriptConnector::Mesh_SetTriangles(AssetHandle assetHandle, uint32_t* data, uint32_t dataLength)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		mesh->SubMeshes.front()->SetTriangles(data, dataLength);
+	}
+
+	void ScriptConnector::Mesh_GetTriangles(AssetHandle assetHandle, const uint32_t** data, int* count)
+	{
+		if (!AssetManager::IsAssetHandleValid(assetHandle))
+			return;
+
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		size_t temp_count = 0;
+		*data = mesh->SubMeshes.front()->GetTriangles(&temp_count);
+		*count = static_cast<int>(temp_count);
+	}
+
+	void ScriptConnector::Mesh_RecalculateNormals(AssetHandle assetHandle)
+	{
+		const auto& mesh = AssetManager::GetAsset<AssetMesh>(assetHandle);
+
+		if (!mesh || mesh->SubMeshes.empty() || !mesh->SubMeshes.front()) return;
+
+		mesh->SubMeshes.front()->RecalculateNormals();
 	}
 
 #pragma endregion

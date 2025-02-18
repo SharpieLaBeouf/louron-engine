@@ -283,9 +283,20 @@ namespace Louron {
 						if (component.MeshFilterAssetHandle == NULL_UUID)
 							continue;
 
-						if (component.AABBNeedsUpdate) {
-							component.UpdateTransformedAABB();
+						bool update_AABB = component.AABBNeedsUpdate;
+
+						if(!update_AABB) 
+						{
+							if (auto asset_mesh = AssetManager::GetAsset<AssetMesh>(component.MeshFilterAssetHandle); asset_mesh)
+							{
+								update_AABB = asset_mesh->ModifiedAABB;
+								if(update_AABB) 
+									asset_mesh->ModifiedAABB = false;
+							}
 						}
+
+						if (update_AABB) 
+							component.UpdateTransformedAABB();
 
 						if (component.OctreeNeedsUpdate) {
 							if (oct_ref->Update({ entity_handle, oct_scene_ref.get() }, component.TransformedAABB))

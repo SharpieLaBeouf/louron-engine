@@ -270,23 +270,48 @@ namespace Louron {
 	void ModelImporter::ProcessMesh(const aiScene* scene, aiMesh* mesh, std::shared_ptr<Prefab> model_prefab, entt::entity current_entity_handle, std::shared_ptr<AssetMesh> asset_mesh, AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle parent_asset_handle, const AssetMetaData& parent_meta_data, const std::filesystem::path& path)
 	{
 		// 1. Process Vertices
-		std::vector<Vertex> mesh_vertices;
+		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec3> normals;
+		std::vector<glm::vec2> texcoords;
+		std::vector<glm::vec3> tangents;
+		std::vector<glm::vec3> bitangents;
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
 
-			Vertex vertex{};
-			vertex.position = glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z);
-			vertex.normal = glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z);
+			vertices.push_back(glm::vec3(mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z));
+			normals.push_back(glm::vec3(mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z));
 
-			if (mesh->mTextureCoords[0])
-				vertex.texCoords = glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y);
+			if (mesh->mTextureCoords[0]) texcoords.push_back(glm::vec2(mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y));
+			if (mesh->mTangents) tangents.push_back(glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z));
+			if (mesh->mBitangents) bitangents.push_back(glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z));
+		}
 
-			if (mesh->mTangents)
-				vertex.tangent = glm::vec3(mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z);
+		std::shared_ptr<SubMesh> sub_mesh = std::make_shared<SubMesh>();
 
-			if (mesh->mBitangents)
-				vertex.bitangent = glm::vec3(mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z);
+		sub_mesh->SetVAO(std::make_unique<VertexArray>());
 
-			mesh_vertices.push_back(vertex);
+		// Separate VBOs so that vertex data is separate for runtime modification
+		VertexBuffer* vbo_verts = new VertexBuffer(&vertices[0][0],		(GLuint)vertices.size() * 3);
+		vbo_verts->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aPos"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_verts);
+
+		VertexBuffer* vbo_norms = new VertexBuffer(&normals[0][0],		(GLuint)normals.size() * 3);
+		vbo_norms->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aNormal"} });
+		sub_mesh->GetVAO()->AddVertexBuffer(vbo_norms);
+
+		if (!texcoords.empty()) {
+			VertexBuffer* vbo_texcoords = new VertexBuffer(&texcoords[0][0], (GLuint)texcoords.size() * 2);
+			vbo_texcoords->SetLayout(BufferLayout{ {ShaderDataType::Float2, "aTexCoord"} });
+			sub_mesh->GetVAO()->AddVertexBuffer(vbo_texcoords);
+		}
+		if (!tangents.empty()) {
+			VertexBuffer* vbo_tangents = new VertexBuffer(&tangents[0][0], (GLuint)tangents.size() * 3);
+			vbo_tangents->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aTangent"} });
+			sub_mesh->GetVAO()->AddVertexBuffer(vbo_tangents);
+		}
+		if(!bitangents.empty()){
+			VertexBuffer* vbo_bitangents = new VertexBuffer(&bitangents[0][0], (GLuint)bitangents.size() * 3);
+			vbo_bitangents->SetLayout(BufferLayout{ {ShaderDataType::Float3, "aBitangent"} });
+			sub_mesh->GetVAO()->AddVertexBuffer(vbo_bitangents);
 		}
 
 		// 2. Process Indices
@@ -296,9 +321,11 @@ namespace Louron {
 			for (unsigned int j = 0; j < face.mNumIndices; j++)
 				mesh_indices.push_back(face.mIndices[j]);
 		}
+		IndexBuffer* ebo = new IndexBuffer(mesh_indices, (GLuint)mesh_indices.size());
+		sub_mesh->GetVAO()->SetIndexBuffer(ebo);
 
-		// 3. Create Individual Sub Mesh and Push to Mesh Asset vector
-		asset_mesh->SubMeshes.push_back(std::make_shared<SubMesh>(mesh_vertices, mesh_indices));
+		// 3. Push SubMesh to Mesh Asset vector
+		asset_mesh->SubMeshes.push_back(std::move(sub_mesh));
 
 		// 4. Create Material Asset
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];

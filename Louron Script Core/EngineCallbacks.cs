@@ -26,6 +26,9 @@ namespace Louron
         internal extern static void Entity_Instantiate(uint entityID, ref uint prefab_asset_handle, out uint prefab_clone_entity_id); // Returns UUID of new entity!
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Entity_Instantiate_POS_ROT_SCALE(uint entityID, ref uint prefab_asset_handle, ref Vector3 position, ref Vector3 rotation, ref Vector3 scale, out uint prefab_clone_entity_id); // Returns UUID of new entity!
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static uint Entity_GetParent(uint entityID);
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
@@ -478,6 +481,71 @@ namespace Louron
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         internal extern static void Texture2D_SubmitTextureChanges(uint asset_handle);
+
+        #endregion
+
+        #region Mesh & Mesh Filter
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint Mesh_CreateNewMesh();
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_SubmitChanges(uint asset_handle, bool clear_cpu_data);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_CopyBufferDataToCPU(uint asset_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_ClearBufferDataFromCPU(uint asset_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_SetVertices(uint asset_handle, IntPtr data, uint data_length);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_SetNormals(uint asset_handle, IntPtr data, uint data_length);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_SetTextureCoords(uint asset_handle, IntPtr data, uint data_length);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_SetTangents(uint asset_handle, IntPtr data, uint data_length);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_SetBitangents(uint asset_handle, IntPtr data, uint data_length);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_GetVertices(uint asset_handle, out IntPtr data, out int count);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_GetNormals(uint asset_handle, out IntPtr data, out int count);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_GetTextureCoords(uint asset_handle, out IntPtr data, out int count);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_GetTangents(uint asset_handle, out IntPtr data, out int count);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_GetBitangents(uint asset_handle, out IntPtr data, out int count);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint MeshFilterComponent_SharedMesh(uint entity_uuid);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static uint MeshFilterComponent_CopyMesh(uint entity_uuid);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void MeshFilterComponent_SetMesh(uint entity_uuid, uint asset_handle);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_SetTriangles(uint asset_handle, IntPtr data, uint data_length);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_GetTriangles(uint asset_handle, out IntPtr data, out int count);
+
+        [MethodImplAttribute(MethodImplOptions.InternalCall)]
+        internal extern static void Mesh_RecalculateNormals(uint asset_handle);
+
 
         #endregion
 

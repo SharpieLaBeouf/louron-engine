@@ -57,8 +57,8 @@ uniform bool u_UseInstanceData = false;
 // The Engine will bind all uniforms in this block, using this name as the key. 
 uniform MaterialUniforms u_MaterialUniforms;
 
-void main() {
-    
+void main() 
+{
     mat4 model_matrix = (u_UseInstanceData ? aInstanceMatrix : u_VertexIn.Model);
     gl_Position = u_VertexIn.Proj * u_VertexIn.View * model_matrix * vec4(aPos, 1.0);
 
@@ -68,7 +68,8 @@ void main() {
     mat3 normal_matrix = transpose(inverse(mat3(model_matrix))); 
 
     // Normal Mapping Functions - Construct TBN Matrix
-	vec3 T = normalize(normal_matrix * aTangent);
+
+	vec3 T = normalize(normal_matrix * ((aTangent != vec3(0.0)) ? aTangent : vec3(1.0)));
 	vec3 N = normalize(normal_matrix * aNormal);
     
     // Gram-Schmidt process

@@ -412,6 +412,7 @@ namespace Louron {
 
         friend class Scene;
         friend class SceneSerializer;
+        friend class ScriptConnector;
         friend class TransformSystem;
         friend class PhysicsSystem;
 

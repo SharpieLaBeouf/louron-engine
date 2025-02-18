@@ -48,6 +48,9 @@ At this point there are an array of features utilised in this project:
 - Automatic instancing
 - Skyboxes
 - Multisampling
+- Runtime Asset creation through scripting
+  - Can create textures on the fly through scripting
+  - Can create meshes on the fly through scripting
 
 ## Goals
 
@@ -60,7 +63,7 @@ There is no doubt this can make a game at its current state, but it would most l
 - Better memory management using custom allocators
 - Caching optimisations
 - Better renderer sorting algorithms for real time rendering
-- Runtime assets that can be dynamically created and modified through scripting, e.g. meshes, textures, etc.
+- Refactor runtime texture and mesh asset workflow
 - Post processing effects such as bloom, and custom FX designed by users
 - Animation system
 - Thorough documentation

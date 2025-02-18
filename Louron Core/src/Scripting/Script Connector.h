@@ -49,6 +49,7 @@ namespace Louron {
 		static void Entity_RemoveComponent(UUID entityID, MonoReflectionType* componentType);
 		static bool Entity_HasComponent(UUID entityID, MonoReflectionType* componentType);
 		static void Entity_Instantiate(UUID entityID, uint32_t* handle, uint32_t* prefab_clone_uuid);
+		static void Entity_Instantiate_POS_ROT_SCALE(UUID entityID, uint32_t* handle, glm::vec3* position, glm::vec3* rotation, glm::vec3* scale, uint32_t* prefab_clone_uuid);
 		static UUID Entity_GetParent(UUID entityID);
 		static void Entity_SetParent(UUID entityID, UUID parentID);
 
@@ -315,6 +316,39 @@ namespace Louron {
 		static void Texture2D_SubmitTextureChanges(uint32_t asset_handle);
 
 		static void Texture2D_Destroy(AssetHandle handle);
+
+#pragma endregion
+
+#pragma region Mesh & MeshFilter
+
+		// Mesh Functions
+		static uint32_t Mesh_CreateNewMesh();
+		
+		static void Mesh_SubmitChanges(AssetHandle assetHandle, bool clearCPUData);
+		static void Mesh_CopyBufferDataToCPU(AssetHandle assetHandle);
+		static void Mesh_ClearBufferDataFromCPU(AssetHandle assetHandle);
+		
+		static void Mesh_SetVertices(AssetHandle assetHandle, float* data, uint32_t dataLength);
+		static void Mesh_SetNormals(AssetHandle assetHandle, float* data, uint32_t dataLength);
+		static void Mesh_SetTextureCoords(AssetHandle assetHandle, float* data, uint32_t dataLength);
+		static void Mesh_SetTangents(AssetHandle assetHandle, float* data, uint32_t dataLength);
+		static void Mesh_SetBitangents(AssetHandle assetHandle, float* data, uint32_t dataLength);
+		
+		static void Mesh_GetVertices(AssetHandle assetHandle, const float** data, int* count);
+		static void Mesh_GetNormals(AssetHandle assetHandle, const float** data, int* count);
+		static void Mesh_GetTextureCoords(AssetHandle assetHandle, const float** data, int* count);
+		static void Mesh_GetTangents(AssetHandle assetHandle, const float** data, int* count);
+		static void Mesh_GetBitangents(AssetHandle assetHandle, const float** data, int* count);
+
+		// MeshFilterComponent Functions
+		static uint32_t MeshFilterComponent_SharedMesh(uint32_t entityUUID);
+		static uint32_t MeshFilterComponent_CopyMesh(uint32_t entityUUID);
+		static void MeshFilterComponent_SetMesh(uint32_t entityUUID, uint32_t assetHandle);
+
+		static void Mesh_SetTriangles(AssetHandle assetHandle, uint32_t* data, uint32_t dataLength);
+		static void Mesh_GetTriangles(AssetHandle assetHandle, const uint32_t** data, int* count);
+
+		static void Mesh_RecalculateNormals(AssetHandle assetHandle);
 
 #pragma endregion
 

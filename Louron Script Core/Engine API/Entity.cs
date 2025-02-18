@@ -89,27 +89,21 @@ namespace Louron
         }
         public Entity Instantiate(Prefab prefab, Vector3 position)
         {
-            EngineCallbacks.Entity_Instantiate(ID, ref prefab.Asset_Handle, out uint prefab_clone_entity_id);
-            Entity ent = new Entity(prefab_clone_entity_id);
-            ent.transform.position = position;
-            return ent;
+            Vector3 rotation = new Vector3(0.0f);
+            Vector3 scale = new Vector3(1.0f);
+            EngineCallbacks.Entity_Instantiate_POS_ROT_SCALE(ID, ref prefab.Asset_Handle, ref position, ref rotation, ref scale, out uint prefab_clone_entity_id);
+            return new Entity(prefab_clone_entity_id);
         }
         public Entity Instantiate(Prefab prefab, Vector3 position, Vector3 rotation)
         {
-            EngineCallbacks.Entity_Instantiate(ID, ref prefab.Asset_Handle, out uint prefab_clone_entity_id);
-            Entity ent = new Entity(prefab_clone_entity_id);
-            ent.transform.position = position;
-            ent.transform.rotation = rotation;
-            return ent;
+            Vector3 scale = new Vector3(1.0f);
+            EngineCallbacks.Entity_Instantiate_POS_ROT_SCALE(ID, ref prefab.Asset_Handle, ref position, ref rotation, ref scale, out uint prefab_clone_entity_id);
+            return new Entity(prefab_clone_entity_id);
         }
         public Entity Instantiate(Prefab prefab, Vector3 position, Vector3 rotation, Vector3 scale)
         {
-            EngineCallbacks.Entity_Instantiate(ID, ref prefab.Asset_Handle, out uint prefab_clone_entity_id);
-            Entity ent = new Entity(prefab_clone_entity_id);
-            ent.transform.position = position;
-            ent.transform.rotation = rotation;
-            ent.transform.scale = scale;
-            return ent;
+            EngineCallbacks.Entity_Instantiate_POS_ROT_SCALE(ID, ref prefab.Asset_Handle, ref position, ref rotation, ref scale, out uint prefab_clone_entity_id);
+            return new Entity(prefab_clone_entity_id);
         }
 
         public T AddComponent<T>() where T : Component, new()

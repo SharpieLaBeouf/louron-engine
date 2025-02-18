@@ -96,8 +96,9 @@ namespace Louron {
 	class VertexBuffer {
 
 	public:
-		VertexBuffer(GLuint size);
-		VertexBuffer(float* vertices, GLuint count);
+		VertexBuffer();
+		VertexBuffer(GLuint count);
+		VertexBuffer(const float* data, GLuint count);
 		VertexBuffer(const std::vector<Vertex>& vertices, GLuint size);
 		~VertexBuffer();
 
@@ -105,29 +106,53 @@ namespace Louron {
 		void Unbind() const;
 
 		void SetData(const void* data, GLuint size);
+		const void* GetData();
+		void ClearData();
+		void ResizeData(size_t data_size);
+
+		void SubmitData();
 
 		const BufferLayout& GetLayout() { return m_Layout; }
 		void SetLayout(const BufferLayout& layout) { m_Layout = layout; }
 
+		const size_t& GetSize() const { return m_BufferSize; }
+
 	private:
-		GLuint m_VBO;
-		BufferLayout m_Layout;
+		BufferLayout m_Layout = {};
+
+		size_t m_BufferSize = 0;
+		std::vector<char> m_BufferData = {};
+
+		GLuint m_VBO = -1;
+
+		bool m_Modified = false;
 	};
 
 	class IndexBuffer {
 
 	public:
-		IndexBuffer(GLuint* indices, GLuint count);
+		IndexBuffer();
+		IndexBuffer(GLuint count);
+		IndexBuffer(const GLuint* indices, GLuint count);
 		IndexBuffer(const std::vector<GLuint>& indices, GLuint count);
 		~IndexBuffer();
 
 		void Bind() const;
 		void Unbind() const;
 
+		void SetData(const void* data, GLuint size);
+		const void* GetData();
+		void ClearData();
+
+		void SubmitData();
+
 		GLuint GetCount() const { return m_Count; }
 	private:
-		GLuint m_IBO;
-		GLuint m_Count;
+		GLuint m_IBO = -1;
+		GLuint m_Count = 0;
+		bool m_Modified = false;
+
+		std::vector<char> m_BufferData = {};
 	};
 
 	static GLuint ShaderDataTypeSize(ShaderDataType type)

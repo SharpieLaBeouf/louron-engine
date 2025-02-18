@@ -54,6 +54,7 @@ namespace Louron {
 		{ "Louron.RigidbodyComponent",			ScriptFieldType::RigidbodyComponent },
 		{ "Louron.BoxColliderComponent",		ScriptFieldType::BoxColliderComponent },
 		{ "Louron.SphereColliderComponent",		ScriptFieldType::SphereColliderComponent },
+		{ "Louron.MeshFilterComponent",			ScriptFieldType::MeshFilterComponent },
 		{ "Louron.MeshRendererComponent",		ScriptFieldType::MeshRendererComponent },
 		{ "Louron.Component",					ScriptFieldType::Component },
 		{ "Louron.Prefab",						ScriptFieldType::Prefab },

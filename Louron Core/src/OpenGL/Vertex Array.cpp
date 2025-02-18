@@ -8,15 +8,99 @@ namespace Louron {
 
 	VertexArray::~VertexArray() {
 
-		if (!m_DeleteOnObjectDestroy)
-			return;
-
 		glDeleteVertexArrays(1, &m_VAO);
 
 		delete m_IndexBuffer;
 
 		for (auto vertex : m_VertexBuffers)
 			delete vertex;
+	}
+
+	VertexArray::VertexArray(const VertexArray& other)
+	{
+		glCreateVertexArrays(1, &m_VAO);
+
+		const std::vector<VertexBuffer*>& old_vertex_buffer_vec = other.GetVertexBuffers();
+
+		for (const auto& buffer : old_vertex_buffer_vec)
+		{
+			size_t size = buffer->GetSize();
+			const float* data = static_cast<const float*>(buffer->GetData());
+			size /= sizeof(float); // Convert from size in bytes to count of float's
+
+			VertexBuffer* new_buffer = new VertexBuffer(data, static_cast<GLuint>(size));
+			new_buffer->SetLayout(buffer->GetLayout());
+
+			AddVertexBuffer(new_buffer);
+
+			buffer->ClearData();
+		}
+
+		if (other.m_IndexBuffer)
+		{
+			const GLuint* data = static_cast<const GLuint*>(other.m_IndexBuffer->GetData());
+			
+			IndexBuffer* ebo = new IndexBuffer(data, other.m_IndexBuffer->GetCount());
+			SetIndexBuffer(ebo);
+		}
+
+	}
+
+	VertexArray& VertexArray::operator=(const VertexArray& other)
+	{
+		if (this == &other)
+			return *this;
+
+		glCreateVertexArrays(1, &m_VAO);
+
+		const std::vector<VertexBuffer*>& old_vertex_buffer_vec = other.GetVertexBuffers();
+
+		for (const auto& buffer : old_vertex_buffer_vec)
+		{
+			size_t size = buffer->GetSize();
+			const float* data = static_cast<const float*>(buffer->GetData());
+			size /= sizeof(float); // Convert from size in bytes to count of float's
+
+			VertexBuffer* new_buffer = new VertexBuffer(data, static_cast<GLuint>(size));
+			new_buffer->SetLayout(buffer->GetLayout());
+
+			AddVertexBuffer(new_buffer);
+
+			buffer->ClearData();
+		}
+
+		if (other.m_IndexBuffer)
+		{
+			const GLuint* data = static_cast<const GLuint*>(other.m_IndexBuffer->GetData());
+
+			IndexBuffer* ebo = new IndexBuffer(data, other.m_IndexBuffer->GetCount());
+			SetIndexBuffer(ebo);
+		}
+
+		return *this;
+	}
+
+	VertexArray::VertexArray(VertexArray&& other) noexcept
+	{
+		m_VAO = other.m_VAO; other.m_VAO = -1;
+		m_VertexBufferIndex = other.m_VertexBufferIndex; other.m_VertexBufferIndex = 0;
+
+		m_IndexBuffer = other.m_IndexBuffer; other.m_IndexBuffer = nullptr;
+		m_VertexBuffers = other.m_VertexBuffers; other.m_VertexBuffers.clear();
+	}
+
+	VertexArray& VertexArray::operator=(VertexArray&& other) noexcept
+	{
+		if (this == &other)
+			return *this;
+
+		m_VAO = other.m_VAO; other.m_VAO = -1;
+		m_VertexBufferIndex = other.m_VertexBufferIndex; other.m_VertexBufferIndex = 0;
+
+		m_IndexBuffer = other.m_IndexBuffer; other.m_IndexBuffer = nullptr;
+		m_VertexBuffers = other.m_VertexBuffers; other.m_VertexBuffers.clear();
+
+		return *this;
 	}
 
 	void VertexArray::Bind() const {
