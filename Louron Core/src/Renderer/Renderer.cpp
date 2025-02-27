@@ -12,8 +12,8 @@ namespace Louron {
 
 	void Renderer::Init() 
 	{
-
-		if (!s_DebugCubeVAO) {
+		if (!s_DebugCubeVAO) 
+		{
 
 			// Define the vertices of the cube
 			GLfloat cubeVertices[] = {

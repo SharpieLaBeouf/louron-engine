@@ -428,7 +428,7 @@ namespace Louron {
             for (const auto& child_uuid : entity.GetComponent<HierarchyComponent>().GetChildren()) {
                 Entity child_entity = entity.GetScene()->FindEntityByUUID(child_uuid);
 
-                child_entity.GetComponent<TransformComponent>().OnTransformUpdated();
+                child_entity.GetTransform().OnTransformUpdated();
             }
         }
 
@@ -572,10 +572,11 @@ namespace Louron {
         glm::vec3 globalForward = globalRotation * global_up;
         return glm::normalize(globalForward);
     }
-    const glm::mat4& TransformComponent::GetGlobalTransform() { 
 
-        if (CheckFlag(TransformFlag_GlobalTransformUpdated)) {
-
+    const glm::mat4& TransformComponent::GetGlobalTransform() 
+    { 
+        if (CheckFlag(TransformFlag_GlobalTransformUpdated)) 
+        {
             glm::vec3 old_global_scale = glm::vec3(
                 glm::length(m_GlobalTransform[0]),
                 glm::length(m_GlobalTransform[1]),
@@ -585,7 +586,7 @@ namespace Louron {
             Entity entity = GetEntity();
 
             if (entity && entity.GetScene() && entity.GetComponent<HierarchyComponent>().HasParent())
-                m_GlobalTransform = entity.GetComponent<HierarchyComponent>().GetParentEntity().GetComponent<TransformComponent>().GetGlobalTransform() * GetLocalTransform();
+                m_GlobalTransform = entity.GetComponent<HierarchyComponent>().GetParentEntity().GetTransform().GetGlobalTransform() * GetLocalTransform();
             else
                 m_GlobalTransform = m_LocalTransform;
 
@@ -783,8 +784,8 @@ namespace Louron {
     template AudioListener*                 Component::GetComponent<AudioListener>();
     template AudioEmitter*                  Component::GetComponent<AudioEmitter>();
     template TransformComponent*            Component::GetComponent<TransformComponent>();
-    template MeshFilterComponent*               Component::GetComponent<MeshFilterComponent>();
-    template MeshRendererComponent*             Component::GetComponent<MeshRendererComponent>();
+    template MeshFilterComponent*           Component::GetComponent<MeshFilterComponent>();
+    template MeshRendererComponent*         Component::GetComponent<MeshRendererComponent>();
     template LODMeshComponent*              Component::GetComponent<LODMeshComponent>();
     template PointLightComponent*           Component::GetComponent<PointLightComponent>();
     template SpotLightComponent*            Component::GetComponent<SpotLightComponent>();
@@ -918,7 +919,7 @@ namespace Louron {
             for (auto& child_uuid : children_vector) {
 
                 Entity child_entity = entity.GetScene()->FindEntityByUUID(child_uuid);
-                T* component_found = child_entity.GetComponent<TransformComponent>().GetComponentInChildren<T>();
+                T* component_found = child_entity.GetTransform().GetComponentInChildren<T>();
 
                 if (component_found)
                     return component_found;
@@ -969,7 +970,7 @@ namespace Louron {
                     components.push_back(&(child_entity.GetComponent<T>()));
                 }
 
-                auto child_components = child_entity.GetComponent<TransformComponent>().GetComponentsInChildren<T>();
+                auto child_components = child_entity.GetTransform().GetComponentsInChildren<T>();
                 components.insert(components.end(), child_components.begin(), child_components.end());
 
             }
@@ -1065,8 +1066,8 @@ namespace Louron {
 
         // 2. Convert Current Global Transform to Local Transform relative to newParent
         // Get references to the relevant components
-        auto& entity_transform = entity.GetComponent<TransformComponent>();
-        auto& parent_transform = new_parent_entity.GetComponent<TransformComponent>();
+        auto& entity_transform = entity.GetTransform();
+        auto& parent_transform = new_parent_entity.GetTransform();
 
         // Calculate the local transform relative to the new parent
         glm::mat4 localTransform = glm::inverse(parent_transform.GetGlobalTransform()) * entity_transform.GetGlobalTransform();
@@ -1078,7 +1079,7 @@ namespace Louron {
             glm::length(localTransform[2])
         ));
         entity_transform.m_LocalTransform = localTransform;
-        entity_transform.m_GlobalTransform = new_parent_entity.GetComponent<TransformComponent>().GetGlobalTransform() * localTransform;
+        entity_transform.m_GlobalTransform = new_parent_entity.GetTransform().GetGlobalTransform() * localTransform;
 
         if (!entity.HasComponent<RigidbodyComponent>()) {
 
@@ -1118,7 +1119,7 @@ namespace Louron {
         }
 
         // 1. Calculate the child's global transform
-        auto& entityTransform = entity.GetComponent<TransformComponent>();
+        auto& entityTransform = entity.GetTransform();
         glm::mat4 globalTransform = entityTransform.GetGlobalTransform();
 
         // 2. Update the child's local transform to match the global transform

@@ -102,7 +102,7 @@ namespace Louron {
 
 		if (scene && (scene->IsRunning() || scene->IsSimulating()))
 		{
-			Init(&GetEntity().GetComponent<TransformComponent>(), scene->GetPhysScene());
+			Init(&GetEntity().GetTransform(), scene->GetPhysScene());
 		}
 		else {
 
@@ -166,7 +166,7 @@ namespace Louron {
 
 		if (scene->IsRunning() || scene->IsSimulating())
 		{
-			Init(&GetEntity().GetComponent<TransformComponent>(), scene->GetPhysScene());
+			Init(&GetEntity().GetTransform(), scene->GetPhysScene());
 		}
 		else {
 

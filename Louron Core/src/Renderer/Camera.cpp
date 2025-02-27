@@ -116,7 +116,7 @@ namespace Louron {
 		}
 		else 
 		{
-			position_to_look_at = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+			position_to_look_at = entity.GetTransform().GetGlobalPosition();
 		}
 
 		SetFocalPoint(position_to_look_at);

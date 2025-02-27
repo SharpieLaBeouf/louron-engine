@@ -10,34 +10,40 @@
 
 extern Louron::Engine* Louron::CreateEngine(Louron::EngineCommandLineArgs args);
 
-#if true
+namespace Louron {
 
-#pragma comment( linker, "/subsystem:console" )
+	int Main_Entry(int argc, char** argv)
+	{
+		Louron::LoggingSystem::Init();
+
+		auto app = CreateEngine({ argc, argv });
+
+		if (!app)
+			return -1;
+
+		app->Run();
+
+		delete app;
+
+		return 0;
+	}
+}
+
+#if _DEBUG
+
+#pragma comment(linker, "/subsystem:console")
 int main(int argc, char** argv) {
 
-	Louron::LoggingSystem::Init();
-
-	auto app = Louron::CreateEngine({ argc, argv });
+	return Louron::Main_Entry(argc, argv);
+}
 
 #else
 
 #include <Windows.h>
-#pragma comment( linker, "/subsystem:windows" )
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
-
-	Louron::LoggingSystem::Init();
-
-    // Pass arguments to the engine
-    auto app = Louron::CreateEngine({});
+#pragma comment(linker, "/subsystem:windows")
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) 
+{
+	return Louron::Main_Entry(__argc, __argv);
+}
 
 #endif
-
-    if (!app)
-        return -1;
-
-	app->Run();
-
-	delete app;
-
-	return 0;
-}

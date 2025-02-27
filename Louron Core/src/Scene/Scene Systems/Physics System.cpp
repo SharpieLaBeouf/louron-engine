@@ -104,7 +104,7 @@ namespace Louron {
 			if (auto rb_ref = collider.GetShape()->GetRigidbody(); rb_ref && *rb_ref)
 				rb_ref->AddFlag(RigidbodyFlag_TransformUpdated);
 
-			collider.UpdateTransform(entity.GetComponent<TransformComponent>(), entity.GetScene()->FindEntityByUUID(collider.GetRigidbodyUUID()).GetComponent<TransformComponent>());
+			collider.UpdateTransform(entity.GetTransform(), entity.GetScene()->FindEntityByUUID(collider.GetRigidbodyUUID()).GetTransform());
 		}
 
 		collider.ClearFlags();
@@ -365,7 +365,7 @@ namespace Louron {
 					}
 
 					if (rigidbody.GetActor()->CheckFlag(RigidbodyFlag_TransformUpdated)) {
-						rigidbody.GetActor()->SetGlobalPose(rigidbody.GetEntity().GetComponent<TransformComponent>());
+						rigidbody.GetActor()->SetGlobalPose(rigidbody.GetEntity().GetTransform());
 					}
 
 					rigidbody.GetActor()->ClearFlags();
@@ -408,7 +408,7 @@ namespace Louron {
 			
 			if(start_entity && start_entity.HasComponent<RigidbodyComponent>()) {
 
-				auto& transform = start_entity.GetComponent<TransformComponent>();
+				auto& transform = start_entity.GetTransform();
 				auto& rigidbody = start_entity.GetComponent<RigidbodyComponent>();
 
 				if(rigidbody.GetActor()) {

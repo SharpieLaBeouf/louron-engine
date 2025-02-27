@@ -169,7 +169,7 @@ void LouronEditorLayer::OnUpdate() {
 						auto& component = m_SelectedEntity.GetComponent<BoxColliderComponent>();
 
 						// Start with the entity's global transform
-						glm::mat4 collider_cube_transform = m_SelectedEntity.GetComponent<TransformComponent>().GetGlobalTransform();
+						glm::mat4 collider_cube_transform = m_SelectedEntity.GetTransform().GetGlobalTransform();
 
 						// Apply the collider's center offset (local space to world space)
 						glm::vec3 collider_center = component.GetCentre();
@@ -902,7 +902,7 @@ void LouronEditorLayer::DisplaySceneViewportWindow() {
 			glm::mat4 cameraView = m_EditorCamera->GetViewMatrix();
 
 			// Entity transform
-			auto& transform_component = selectedEntity.GetComponent<TransformComponent>();
+			auto& transform_component = selectedEntity.GetTransform();
 			glm::mat4 transform = transform_component.GetGlobalTransform();
 
 			// Snapping

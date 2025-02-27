@@ -1,29 +1,43 @@
-Scene Name: Occlusion Culling Test
+Scene Name: Mesh Generation Test Scene
 Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
 Scene Pipeline Type: 1
 Entities:
-  - Entity: 1718483339
+  - Entity: 1343044258
     TagComponent:
-      Tag: Terrain
+      Tag: Capsule
     HierarchyComponent:
       Parent: 4294967295
       Children:
         []
-    ScriptComponent:
-      Script_1:
-        Active: true
-        Script Name: SandboxProject.GenerateMeshTest
-        Fields:
-          - Name: SizeX
-            Type: Int
-            Data: 1000
-          - Name: SizeZ
-            Type: Int
-            Data: 1000
+    TransformComponent:
+      Translation: [0, 150, 0]
+      Rotation: [0, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 2652383782
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 1
+      MaterialAssetHandles:
+        - 1434222671
+  - Entity: 58269921
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [0, -0, 0]
-      Scale: [1, 0.999999881, 0.999999881]
+      Rotation: [-30, 8.89999962, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Intensity: 1
+      Shadow Type: Soft
+      Max Shadow Visible Distance: 0.300000012
   - Entity: 3990415205
     TagComponent:
       Tag: Main Camera
@@ -52,39 +66,25 @@ Entities:
       ClearColour: [0.176400006, 0.329400003, 0.560699999, 1]
     SkyboxComponent:
       MaterialAssetHandle: 4158978962
-  - Entity: 58269921
+  - Entity: 1718483339
     TagComponent:
-      Tag: Directional Light
+      Tag: Terrain
     HierarchyComponent:
       Parent: 4294967295
       Children:
         []
+    ScriptComponent:
+      Script_1:
+        Active: true
+        Script Name: SandboxProject.GenerateMeshTest
+        Fields:
+          - Name: SizeX
+            Type: Int
+            Data: 1000
+          - Name: SizeZ
+            Type: Int
+            Data: 1000
     TransformComponent:
       Translation: [0, 0, 0]
-      Rotation: [-30, 8.89999962, 0]
-      Scale: [1, 1, 1]
-    DirectionalLightComponent:
-      Active: true
-      Colour: [1, 1, 1, 1]
-      Intensity: 1
-      Shadow Type: Soft
-      Max Shadow Visible Distance: 0.300000012
-  - Entity: 1343044258
-    TagComponent:
-      Tag: Capsule
-    HierarchyComponent:
-      Parent: 4294967295
-      Children:
-        []
-    TransformComponent:
-      Translation: [0, 150, 0]
       Rotation: [0, -0, 0]
-      Scale: [1, 1, 1]
-    MeshFilterComponent:
-      MeshAssetHandle: 2652383782
-    MeshRendererComponent:
-      MeshActive: true
-      CastShadows: false
-      MaterialAssetCount: 1
-      MaterialAssetHandles:
-        - 1434222671
+      Scale: [1, 0.999999881, 0.999999881]

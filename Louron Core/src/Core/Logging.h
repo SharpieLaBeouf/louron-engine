@@ -12,8 +12,6 @@
 
 namespace Louron {
 
-	// TODO: implement logging system to engine.
-
 	class LoggingSystem {
 
 	public:

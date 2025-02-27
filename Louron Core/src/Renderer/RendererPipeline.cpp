@@ -223,6 +223,7 @@ namespace Louron {
 		Renderer::ClearRenderStats();
 
 		// 1. SCENE FRUSTUM CULLING
+		// TODO: Think about abstracting this into a standalone class that specifically is tasked to cull and sort geometry defined by a range of inputs
 		{
 			L_PROFILE_SCOPE("Forward Plus - Frustum Culling");
 
@@ -230,80 +231,109 @@ namespace Louron {
 			FP_Data.Camera_Frustum.RecalculateFrustum(projection_matrix * view_matrix);
 
 			// Wait for Octree Update Thread
-			if (FP_Data.OctreeUpdateThread.joinable()) {
+			if (FP_Data.OctreeUpdateThread.joinable()) 
+			{
 				L_PROFILE_SCOPE("Forward Plus - Octree Thread Wait");
 				FP_Data.OctreeUpdateThread.join();
 			}
 
 			// Gather All Point and Spot Lights Visible in Camera Frustum
-			FP_Data.PLEntitiesInFrustum.clear();
-			FP_Data.SLEntitiesInFrustum.clear();
-			FP_Data.DLEntities.clear();
 			ConductLightFrustumCull();
 
 			// Gather All Meshes Visible in Camera Frustum
 			ConductRenderableFrustumCull(camera_position, projection_matrix);
 
 			// Dispatch Thread
-			FP_Data.OctreeUpdateThread = std::thread([&]() -> void {
-
-				auto oct_scene_ref = m_Scene.lock();
-
+			FP_Data.OctreeUpdateThread = std::thread([&]() -> void 
+			{
 				L_PROFILE_SCOPE("Forward Plus - Octree Update");
-					
-				if (auto oct_ref = oct_scene_ref->GetOctree().lock(); oct_ref) {
 
+				auto thread_scene_ref = m_Scene.lock();
+				if (auto oct_ref = thread_scene_ref->GetOctree().lock(); oct_ref) {
+
+					// Lock the Octree Mutex
 					std::unique_lock lock(oct_ref->GetOctreeMutex());
 						
-					// Check which objects are no longer in the scene
+					// 1. Check which objects are no longer in the scene
 					const auto& octree_data_sources = oct_ref->GetAllOctreeDataSources();
 					std::vector<Entity> remove_entities{};
-					for (const auto& data_source : octree_data_sources) {
-
-						if (oct_scene_ref->HasEntity(data_source->Data)) {
+					for (const auto& data_source : octree_data_sources) 
+					{
+						// Check if Scene has Entity
+						if (thread_scene_ref->HasEntity(data_source->Data)) 
+						{
+							// Check if Entity still has a MeshFilterComponent && MeshRendererComponent
 							Entity entity = data_source->Data;
-							if (!entity.HasComponent<MeshFilterComponent>() || !entity.HasComponent<MeshRendererComponent>()) {
-								remove_entities.push_back(entity);
+							if (!entity.HasComponent<MeshFilterComponent>() || !entity.HasComponent<MeshRendererComponent>()) 
+							{
+								remove_entities.push_back(entity); // Remove if no longer has MeshFilter or MeshRenderer
 							}
 						}
-						else {
+						else // Remove as No Longer in Scene
+						{
 							remove_entities.push_back(data_source->Data);
 						}
 					}
 
+					// 2. Remove all references from Octree that no longer exist in the scene
 					for (const auto& entity : remove_entities) 
 						oct_ref->Remove(entity);
 
+					// 3. Try to Shrink the Octree
 					oct_ref->TryShrinkOctree();
-					auto mesh_view = oct_scene_ref->GetAllEntitiesWith<MeshRendererComponent, MeshFilterComponent>();
-					for (const auto& entity_handle : mesh_view) {
 
-						auto& component = mesh_view.get<MeshFilterComponent>(entity_handle);
+					// 4. Update All AABB's that have changed since last processing - for example, if the transform was altered, it will flag to be updated
+					auto mesh_view = thread_scene_ref->GetAllEntitiesWith<MeshFilterComponent, MeshRendererComponent>();
+					for (const auto& entity_handle : mesh_view) 
+					{
+						auto& mesh_filter_component = mesh_view.get<MeshFilterComponent>(entity_handle);
 
-						if (component.MeshFilterAssetHandle == NULL_UUID)
+						if (mesh_filter_component.MeshFilterAssetHandle == NULL_UUID)
+						{
 							continue;
+						}
 
-						bool update_AABB = component.AABBNeedsUpdate;
+						// Check if the AABB of this MeshFilter needs to be updated
+						bool update_AABB = mesh_filter_component.AABBNeedsUpdate;
 
+						// Check if the underlying mesh has been updated, therefore requiring an update to this MeshFilter's AABB - for example, a mesh is altered by C# code, we will then need to update the AABB for this MeshFilter
 						if(!update_AABB) 
 						{
-							if (auto asset_mesh = AssetManager::GetAsset<AssetMesh>(component.MeshFilterAssetHandle); asset_mesh)
+							if (auto asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_filter_component.MeshFilterAssetHandle); asset_mesh)
 							{
-								update_AABB = asset_mesh->ModifiedAABB;
-								if(update_AABB) 
+								if(asset_mesh->ModifiedAABB)
+								{
+									// Set Flags for Updates
+									mesh_filter_component.AABBNeedsUpdate = true;
+									mesh_filter_component.OctreeNeedsUpdate = true;
+									
+									// Ensure processed in this frame
+									update_AABB = mesh_filter_component.AABBNeedsUpdate;
+									
+									// Reset flag on AssetMesh
 									asset_mesh->ModifiedAABB = false;
+								}
 							}
 						}
 
+						// Update the MeshFilter AABB if required
 						if (update_AABB) 
-							component.UpdateTransformedAABB();
+						{
+							mesh_filter_component.UpdateTransformedAABB();
+						}
 
-						if (component.OctreeNeedsUpdate) {
-							if (oct_ref->Update({ entity_handle, oct_scene_ref.get() }, component.TransformedAABB))
-								component.OctreeNeedsUpdate = false;
-							else {
-								L_CORE_WARN("Could Not Be Inserted Into Octree - Deleting Entity: {0}", component.GetEntity().GetName());
-								oct_scene_ref->DestroyEntity({ entity_handle, oct_scene_ref.get() });
+						// If MeshFilterComponent requires the Octree to be Updated, we will do this here
+						if (mesh_filter_component.OctreeNeedsUpdate) 
+						{
+							// Try to update the data source in the Octree
+							if (oct_ref->Update({ entity_handle, thread_scene_ref.get() }, mesh_filter_component.TransformedAABB))
+							{
+								mesh_filter_component.OctreeNeedsUpdate = false;
+							}
+							else // If we failed, we will remove this Entity from the Scene TODO: maybe think about if we want to entirely remove from scene in this case? Or just force render it if it doesn't fit in the Octree?
+							{
+								L_CORE_WARN("Could Not Be Inserted Into Octree - Deleting Entity: {0}", mesh_filter_component.GetEntity().GetName());
+								thread_scene_ref->DestroyEntity({ entity_handle, thread_scene_ref.get() });
 							}
 						}
 					}
@@ -311,41 +341,44 @@ namespace Louron {
 			});
 		}
 
+		// TODO:	I want to have a render command system, and need to think about how I can integrate that to my current design
+		//			this will involve having multiple render queues for each pass, e.g., depth pass will contain all geometry
+		//			required to do the depth pass, colour pass will contain all geometry to do colour pass.
+		//			Additionally, it would be nice to have sorting incorporated into this so I can sort render commands based on
+		//			first their material, second their mesh, and then finally their transform (instanced or individually drawn).
+		//			This is useful to dramatically reduce OpenGL state changes as it currently does, but it would be nice if it was
+		//			in a well designed render command system that isn't just a whole bunch of random functions thrown together.
+
 		// 2. RENDERING
 		{
 			L_PROFILE_SCOPE("Forward Plus - Total Rendering");
 
+			// 1. First we do shadow pass for lights
 			ConductShadowMapping(camera_position, projection_matrix, view_matrix);
 
-			UpdateSSBOData();
+			// 2. Then we update the light data SSBO, including data received from the shadow pass, light matricies, light indices, etc.
+			UpdateLightSSBO();
 
-			// Bind FBO and clear color and depth buffers for the new frame
+			// 3. Bind the Scene Framebuffer, Clear and Set Polygon Mode
 			scene_ref->GetSceneFrameBuffer()->Bind();
 			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-				
 			glPolygonMode(GL_FRONT_AND_BACK, FP_Data.Debug_ShowWireframe ? GL_LINE : GL_FILL);
 
+			// 4. Conduct a depth pass by drawing everything one by one to fill out the depth texture, this will also create occlusion queries for drawn objects
 			ConductDepthPass(camera_position, projection_matrix, view_matrix);
 
-			// Do After Depth Pass - everything in frustum should be drawn and queried in 
-			// depth pass, we use query information from depth pass to drive occlusion 
-			// culling for colour pass.
+			// 5. Do After Depth Pass - we use query information from depth pass to drive occlusion culling for colour pass
 			ConductRenderableOcclusionCull();
 
+			// 6. Cull all the scene lights for each tile in the forward plus rendering design
 			ConductTiledBasedLightCull(projection_matrix, view_matrix);
-
-			glDrawBuffer(GL_COLOR_ATTACHMENT0);
-
-			Entity camera_entity = scene_ref->GetPrimaryCameraEntity();
-			Renderer::ClearColour(camera_entity ? camera_entity.GetComponent<CameraComponent>().ClearColour : glm::vec4(49.0f, 77.0f, 121.0f, 1.0f));
-			Renderer::ClearBuffer(GL_COLOR_BUFFER_BIT);
 			
+			// 7. Conduct Final Colour Pass
 			ConductRenderPass(camera_position, projection_matrix, view_matrix);
 			
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-			// Unbind FBO to render to the screen
+			// 8. Unbind Scene FrameBuffer and Reset Polygon Mode
 			scene_ref->GetSceneFrameBuffer()->Unbind();
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		}
 	}
@@ -654,7 +687,7 @@ namespace Louron {
 	/// <summary>
 	/// Updates all Light Data in SSBOs
 	/// </summary>
-	void ForwardPlusPipeline::UpdateSSBOData() {
+	void ForwardPlusPipeline::UpdateLightSSBO() {
 
 		auto scene_ref = m_Scene.lock();
 
@@ -692,7 +725,7 @@ namespace Louron {
 
 					if(point_light.Active)
 					{
-						s_PointLightVector.push_back({ point_light, entity.GetComponent<TransformComponent>() });
+						s_PointLightVector.push_back({ point_light, entity.GetTransform() });
 						s_PointLightVector.back().radius *= 2.0f;
 
 						if(FP_Data.PL_Shadow_LightIndexMap.find(entity.GetUUID()) != FP_Data.PL_Shadow_LightIndexMap.end()) {
@@ -730,7 +763,7 @@ namespace Louron {
 					auto& spot_light = entity.GetComponent<SpotLightComponent>();
 					if (spot_light.Active)
 					{
-						s_SpotLightVector.push_back({ spot_light, entity.GetComponent<TransformComponent>() });
+						s_SpotLightVector.push_back({ spot_light, entity.GetTransform() });
 
 						if (FP_Data.SL_Shadow_LightIndexMap.find(entity.GetUUID()) != FP_Data.SL_Shadow_LightIndexMap.end()) {
 							s_SpotLightVector.back().shadowLightIndex = FP_Data.SL_Shadow_LightIndexMap.at(entity.GetUUID());
@@ -765,7 +798,7 @@ namespace Louron {
 					auto& directional_light = entity.GetComponent<DirectionalLightComponent>();
 					if (directional_light.Active)
 					{
-						s_DirectionalLightVector.push_back({ directional_light, entity.GetComponent<TransformComponent>() });
+						s_DirectionalLightVector.push_back({ directional_light, entity.GetTransform() });
 
 						if (FP_Data.DL_Shadow_LightSpaceMatrixIndex.find(entity.GetUUID()) != FP_Data.DL_Shadow_LightSpaceMatrixIndex.end())
 							s_DirectionalLightVector.back().shadowLightIndex = FP_Data.DL_Shadow_LightSpaceMatrixIndex.at(entity.GetUUID());
@@ -797,14 +830,18 @@ namespace Louron {
 	/// </summary>
 	void ForwardPlusPipeline::ConductLightFrustumCull() {
 
+		L_PROFILE_SCOPE("Forward Plus - Frustum Culling (LIGHTS)");
+
+		FP_Data.PLEntitiesInFrustum.clear();
+		FP_Data.SLEntitiesInFrustum.clear();
+		FP_Data.DLEntities.clear();
+
 		auto scene_ref = m_Scene.lock();
 
 		if (!scene_ref) {
 			L_CORE_ERROR("Invalid Scene!");
 			return;
 		}
-
-		L_PROFILE_SCOPE("Forward Plus - Frustum Culling (LIGHTS)");
 
 		auto pl_view = scene_ref->GetAllEntitiesWith<PointLightComponent>();
 		for (const auto& entity_handle : pl_view) {
@@ -816,7 +853,7 @@ namespace Louron {
 				continue;
 
 			Entity entity = { entity_handle, scene_ref.get() };
-			if (IsSphereInsideFrustum({ entity.GetComponent<TransformComponent>().GetGlobalPosition(), entity.GetComponent<PointLightComponent>().Radius }, FP_Data.Camera_Frustum)) {
+			if (IsSphereInsideFrustum({ entity.GetTransform().GetGlobalPosition(), entity.GetComponent<PointLightComponent>().Radius }, FP_Data.Camera_Frustum)) {
 				FP_Data.PLEntitiesInFrustum.push_back(entity);
 			}
 
@@ -833,7 +870,7 @@ namespace Louron {
 
 			Entity entity = { entity_handle, scene_ref.get() };
 
-			auto& transform = entity.GetComponent<TransformComponent>();
+			auto& transform = entity.GetTransform();
 			auto& light = entity.GetComponent<SpotLightComponent>();
 
 			float half_angle = glm::radians(light.Angle * 0.5f);
@@ -933,7 +970,7 @@ namespace Louron {
 				Entity lod_entity = { entity_handle, scene_ref.get() };
 				auto& lod_component = lod_entity.GetComponent<LODMeshComponent>();
 
-				glm::vec3 position = lod_entity.GetComponent<TransformComponent>().GetGlobalPosition();
+				glm::vec3 position = lod_entity.GetTransform().GetGlobalPosition();
 				float distance_to_lod_entity = glm::distance(camera_position, position);
 
 				// Normalise the distance within the frustum (0.0 = near plane, 1.0 = far plane)
@@ -1069,7 +1106,7 @@ namespace Louron {
 			{
 				if (!scene_ref->ValidEntity(entity)) continue;
 
-				const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+				const glm::vec3& objectPosition = entity.GetTransform().GetGlobalPosition();
 				const Bounds_AABB& object_bounds = entity.GetComponent<MeshFilterComponent>().TransformedAABB;
 
 				// Find distance from closest point of AABB from camera_position
@@ -1107,7 +1144,7 @@ namespace Louron {
 					Entity entity = scene_ref->FindEntityByUUID(entity_uuid);
 					if (!entity) continue;
 
-					shader->SetMat4("u_Model", entity.GetComponent<TransformComponent>().GetGlobalTransform());
+					shader->SetMat4("u_Model", entity.GetTransform().GetGlobalTransform());
 					shader->SetUInt("u_EntityID", entity_uuid);
 
 					auto& mesh_filter_component = entity.GetComponent<MeshFilterComponent>();
@@ -1290,6 +1327,7 @@ namespace Louron {
 		{
 
 			// 2. Calculate Light Space World Space AABB - Get Meshes Intersecting with AABB from Octree
+			
 			// TODO: Need to fix this because it is not including objects that are behind camera frustum that 
 			// may cast shadow into frustum. Maybe we do this after generating the cascades and use the 
 			// world space AABB of the light projection to find our meshes?
@@ -1339,7 +1377,7 @@ namespace Louron {
 
 					auto& component = entity.GetComponent<DirectionalLightComponent>();
 					std::array<float, 5>& shadow_cascade_distances = FP_Data.DL_Shadow_LightShadowCascadeDistances[entity.GetUUID()];
-					std::array<glm::mat4, 5> light_space_matrices = Frustum::CalculateCascadeLightSpaceMatrices(fov, aspect, near_plane, glm::max(near_plane * 1.1f, far_plane * component.MaxShadowVisibleDistance), view_matrix, entity.GetComponent<TransformComponent>().GetForwardDirection(), shadow_cascade_distances);
+					std::array<glm::mat4, 5> light_space_matrices = Frustum::CalculateCascadeLightSpaceMatrices(fov, aspect, near_plane, glm::max(near_plane * 1.1f, far_plane * component.MaxShadowVisibleDistance), view_matrix, entity.GetTransform().GetForwardDirection(), shadow_cascade_distances);
 					
 					dl_shadow_light_space_matricies.insert(dl_shadow_light_space_matricies.end(), light_space_matrices.begin(), light_space_matrices.end());
 					FP_Data.DL_Shadow_LightSpaceMatrixIndex[entity.GetUUID()] = light_index;
@@ -1388,7 +1426,7 @@ namespace Louron {
 						if (!mesh_entity)
 							continue;
 
-						glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
+						glm::mat4 transform = mesh_entity.GetTransform().GetGlobalTransform();
 						shader->SetMat4("u_Model", transform);
 
 						std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
@@ -1446,7 +1484,7 @@ namespace Louron {
 					if (!entity)
 						continue;
 
-					auto& transform = entity.GetComponent<TransformComponent>();
+					auto& transform = entity.GetTransform();
 
 					glm::mat4 light_proj = glm::perspective(glm::radians(entity.GetComponent<SpotLightComponent>().Angle), 1.0f, 0.1f, entity.GetComponent<SpotLightComponent>().Range);
 					glm::mat4 light_view = glm::lookAt(transform.GetGlobalPosition(), transform.GetGlobalPosition() + transform.GetForwardDirection(), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1524,7 +1562,7 @@ namespace Louron {
 						if (!mesh_entity)
 							continue;
 
-						glm::mat4 transform = mesh_entity.GetComponent<TransformComponent>().GetGlobalTransform();
+						glm::mat4 transform = mesh_entity.GetTransform().GetGlobalTransform();
 						shader->SetMat4("u_Model", transform);
 
 						std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(mesh_entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
@@ -1561,8 +1599,8 @@ namespace Louron {
 			// Sort array based on distance
 			std::sort(pl_shadow_casting_vec.begin(), pl_shadow_casting_vec.end(),
 				[&camera_position](Entity& a, Entity& b) {
-					glm::vec3 posA = a.GetComponent<TransformComponent>().GetGlobalPosition();
-					glm::vec3 posB = b.GetComponent<TransformComponent>().GetGlobalPosition();
+					glm::vec3 posA = a.GetTransform().GetGlobalPosition();
+					glm::vec3 posB = b.GetTransform().GetGlobalPosition();
 					return glm::length(posA - camera_position) < glm::length(posB - camera_position);
 				});
 
@@ -1579,7 +1617,7 @@ namespace Louron {
 			for (auto& point_light : pl_shadow_casting_vec) {
 
 				Bounds_Sphere sphere{};
-				sphere.BoundsCentre = point_light.GetComponent<TransformComponent>().GetGlobalPosition();
+				sphere.BoundsCentre = point_light.GetTransform().GetGlobalPosition();
 				sphere.BoundsRadius = point_light.GetComponent<PointLightComponent>().Radius;
 
 				if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
@@ -1626,7 +1664,7 @@ namespace Louron {
 
 			for (int lightIndex = 0; lightIndex < pl_shadow_casting_vec.size(); ++lightIndex) {
 
-				glm::vec3 light_pos = pl_shadow_casting_vec[lightIndex].GetComponent<TransformComponent>().GetGlobalPosition();
+				glm::vec3 light_pos = pl_shadow_casting_vec[lightIndex].GetTransform().GetGlobalPosition();
 
 				float near_plane = 0.1f;
 				float far_plane = pl_shadow_casting_vec[lightIndex].GetComponent<PointLightComponent>().Radius * 2.0f;
@@ -1657,7 +1695,7 @@ namespace Louron {
 					if (!entity)
 						continue;
 
-					glm::mat4 transform = entity.GetComponent<TransformComponent>().GetGlobalTransform();
+					glm::mat4 transform = entity.GetTransform().GetGlobalTransform();
 					shader->SetMat4("u_Model", transform);
 
 					std::shared_ptr<AssetMesh> asset_mesh = AssetManager::GetAsset<AssetMesh>(entity.GetComponent<MeshFilterComponent>().MeshFilterAssetHandle);
@@ -1676,7 +1714,6 @@ namespace Louron {
 		if (scene_ref)
 			scene_ref->GetSceneFrameBuffer()->Bind();
 	}
-
 
 	/// <summary>
 	/// Conduct final colour pass. Meshes are sorted by material, then
@@ -1842,7 +1879,7 @@ namespace Louron {
 						transforms.reserve(entity_count);
 
 						for (const auto& entity : entities) {
-							const auto& transform = scene_ref->FindEntityByUUID(entity).GetComponent<TransformComponent>().GetGlobalTransform();
+							const auto& transform = scene_ref->FindEntityByUUID(entity).GetTransform().GetGlobalTransform();
 							transforms.push_back(transform);
 						}
 
@@ -1850,7 +1887,7 @@ namespace Louron {
 					}
 					else 
 					{
-						const auto& transform = scene_ref->FindEntityByUUID(entities[0]).GetComponent<TransformComponent>().GetGlobalTransform();
+						const auto& transform = scene_ref->FindEntityByUUID(entities[0]).GetTransform().GetGlobalTransform();
 						shader->SetMat4("u_VertexIn.Model", transform);
 						Renderer::DrawSubMesh(sub_mesh);
 					}
@@ -1951,7 +1988,7 @@ namespace Louron {
 
 				shader->SetBool("u_UseInstanceData", false);
 
-				const auto& transform = ent.GetComponent<TransformComponent>().GetGlobalTransform();
+				const auto& transform = ent.GetTransform().GetGlobalTransform();
 				shader->SetMat4("u_VertexIn.Model", transform);
 				Renderer::DrawSubMesh(sub_mesh);
 			}
@@ -2072,7 +2109,7 @@ namespace Louron {
 					// Transparent Sorting
 					else if (material_asset->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT || material_asset->GetRenderType() == RenderType::L_MATERIAL_TRANSPARENT_WRITE_DEPTH)
 					{
-						const glm::vec3& objectPosition = entity.GetComponent<TransformComponent>().GetGlobalPosition();
+						const glm::vec3& objectPosition = entity.GetTransform().GetGlobalPosition();
 						float distance = glm::length(objectPosition - camera_position);
 
 						// If First - Set Allocation for 128 entities

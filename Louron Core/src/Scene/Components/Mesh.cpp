@@ -306,7 +306,7 @@ namespace Louron {
 		}
 
 		// Apply new normals
-		SetNormals(new_normals, vertice_count);
+		SetNormals(new_normals, static_cast<GLuint>(vertice_count));
 
 		delete[] new_normals;
 	}

@@ -460,7 +460,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 		_Transform trans{};
 		trans.position = entity_transform.GetGlobalPosition();
 		trans.rotation = entity_transform.GetGlobalRotation();
@@ -478,7 +478,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 		entity_transform.SetGlobalPosition(transform->position);
 		entity_transform.SetGlobalRotation(transform->rotation);
 		entity_transform.SetGlobalScale(transform->scale);
@@ -494,7 +494,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		*ref = entity_transform.GetGlobalPosition();
 	}
@@ -509,7 +509,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		entity_transform.SetGlobalPosition(*ref);
 	}
@@ -525,7 +525,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		*ref = entity_transform.GetGlobalRotation();
 	}
@@ -540,7 +540,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		entity_transform.SetGlobalRotation(*ref);
 	}
@@ -555,7 +555,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		*ref = entity_transform.GetGlobalScale();
 	}
@@ -570,7 +570,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		entity_transform.SetGlobalScale(*ref);
 	}
@@ -585,7 +585,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		entity_transform.SetForwardDirection(*ref);
 	}
@@ -600,7 +600,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		*ref = entity_transform.GetForwardDirection();
 	}
@@ -615,7 +615,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		*ref = entity_transform.GetUpDirection();
 	}
@@ -630,7 +630,7 @@ namespace Louron {
 		if (!entity.HasComponent<TransformComponent>())
 			return;
 
-		TransformComponent& entity_transform = entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = entity.GetTransform();
 
 		*ref = entity_transform.GetRightDirection();
 	}

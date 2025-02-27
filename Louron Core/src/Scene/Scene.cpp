@@ -352,6 +352,16 @@ namespace Louron {
 		return Entity();
 	}
 
+	void Scene::DestroyEntity(const UUID& entity_uuid)
+	{
+		Entity entity = this->FindEntityByUUID(entity_uuid);
+
+		if (!entity)
+			return;
+
+		this->DestroyEntity(entity);
+	}
+
 	// Destroys Entity in Scene
 	void Scene::DestroyEntity(Entity entity, std::unique_lock<std::mutex>* parent_lock) {
 
@@ -535,7 +545,7 @@ namespace Louron {
 				// 1.f. Transform Component
 				if (prefab_registry->has<TransformComponent>(start_prefab_entity)) {
 					auto& component = prefab_registry->get<TransformComponent>(start_prefab_entity);
-					auto& transform_component = instantiated_entity.GetComponent<TransformComponent>();
+					auto& transform_component = instantiated_entity.GetTransform();
 					
 					if (parent_uuid == NULL_UUID) { 
 						// If we are the root entity, we check if the transform 
@@ -603,7 +613,7 @@ namespace Louron {
 					ent_rb_component = component;
 
 					if (IsRunning() || IsSimulating())
-						instantiated_entity.GetComponent<RigidbodyComponent>().Init(&instantiated_entity.GetComponent<TransformComponent>(), m_PhysxScene);
+						instantiated_entity.GetComponent<RigidbodyComponent>().Init(&instantiated_entity.GetTransform(), m_PhysxScene);
 				}
 
 				// 1.n. Sphere Collider
@@ -810,7 +820,7 @@ namespace Louron {
 		for (auto& [uuid, entity] : entities) {
 
 			if (entity.HasComponent<RigidbodyComponent>())
-				entity.GetComponent<RigidbodyComponent>().Init(&entity.GetComponent<TransformComponent>(), m_PhysxScene);
+				entity.GetComponent<RigidbodyComponent>().Init(&entity.GetTransform(), m_PhysxScene);
 			
 			if (entity.HasComponent<BoxColliderComponent>())
 				entity.GetComponent<BoxColliderComponent>().Init();
@@ -912,12 +922,12 @@ namespace Louron {
 
 				case Camera_Type::SceneCamera:
 				{
-					camera_position = GetPrimaryCameraEntity().GetComponent<TransformComponent>().GetGlobalPosition();
+					camera_position = GetPrimaryCameraEntity().GetTransform().GetGlobalPosition();
 					projection_matrix = camera->GetProjection();
 					// If we are using a scene camera which is attached to a 
 					// camera compoennt, it is simple to get the view matrix 
 					// by simply inverting the global transform matrix
-					view_matrix = glm::inverse(GetPrimaryCameraEntity().GetComponent<TransformComponent>().GetGlobalTransform());
+					view_matrix = glm::inverse(GetPrimaryCameraEntity().GetTransform().GetGlobalTransform());
 					break;
 				}
 
@@ -932,6 +942,10 @@ namespace Louron {
 
 			// Always Render
 			m_SceneFrameBuffer->Bind();
+
+			Entity camera_entity = GetPrimaryCameraEntity();
+			Renderer::ClearColour(camera_entity ? camera_entity.GetComponent<CameraComponent>().ClearColour : glm::vec4(49.0f, 77.0f, 121.0f, 1.0f));
+
 			m_SceneConfig.ScenePipeline->OnUpdate(camera_position, projection_matrix, view_matrix);
 			m_SceneFrameBuffer->Unbind();
 

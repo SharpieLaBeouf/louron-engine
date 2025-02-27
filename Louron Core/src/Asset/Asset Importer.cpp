@@ -182,6 +182,47 @@ namespace Louron {
 
 #pragma region Model Import
 
+	namespace AssimpHelpers
+	{
+		static inline glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from)
+		{
+			glm::mat4 to{};
+			//the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
+			to[0][0] = from.a1; to[1][0] = from.a2; to[2][0] = from.a3; to[3][0] = from.a4;
+			to[0][1] = from.b1; to[1][1] = from.b2; to[2][1] = from.b3; to[3][1] = from.b4;
+			to[0][2] = from.c1; to[1][2] = from.c2; to[2][2] = from.c3; to[3][2] = from.c4;
+			to[0][3] = from.d1; to[1][3] = from.d2; to[2][3] = from.d3; to[3][3] = from.d4;
+			return to;
+		}
+		static inline glm::vec3 GetGLMVec(const aiVector3D& vec) { return glm::vec3(vec.x, vec.y, vec.z); }
+		static inline glm::quat GetGLMQuat(const aiQuaternion& pOrientation) { return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z); }
+
+		// Used to compare nodes within an aiScene to identify Linked Duplicates
+		struct MeshInstanceKey
+		{
+			std::vector<uint32_t> mesh_references;
+			bool operator==(const MeshInstanceKey& other) const { return mesh_references == other.mesh_references; }
+			void normalize() { std::sort(mesh_references.begin(), mesh_references.end()); }
+		};
+
+		// Used to compare nodes within an aiScene to identify Linked Duplicates
+		struct MeshInstanceKeyHash
+		{
+			std::size_t operator()(const MeshInstanceKey& node) const
+			{
+				std::size_t seed = node.mesh_references.size();
+				for (uint32_t mesh : node.mesh_references) seed ^= std::hash<uint32_t>{}(mesh)+0x9e3779b9 + (seed << 6) + (seed >> 2);
+				return seed;
+			}
+		};
+
+		// Used to compare nodes within an aiScene to identify Linked Duplicates
+		static std::unordered_map<MeshInstanceKey,
+			std::pair<AssetHandle, // AssetMesh Reference
+			std::vector<std::pair<AssetHandle, std::shared_ptr<MaterialUniformBlock>>>>, // Material Vector
+			MeshInstanceKeyHash> s_LoadedNodes = {};
+	}
+
 	std::shared_ptr<Prefab> ModelImporter::ImportModel(AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle handle, const AssetMetaData& meta_data, const std::filesystem::path& project_asset_directory)
 	{
 		return LoadModel(asset_map, asset_reg, handle, meta_data, meta_data.IsCustomAsset ? meta_data.FilePath : Project::GetActiveProject()->GetAssetDirectory() / meta_data.FilePath);
@@ -244,6 +285,8 @@ namespace Louron {
 
 		ProcessNode(scene, scene->mRootNode, model_prefab, entt::null, asset_map, asset_reg, handle, meta_data, path);
 
+		AssimpHelpers::s_LoadedNodes.clear();
+
 		return model_prefab;
 	}
 
@@ -267,7 +310,7 @@ namespace Louron {
 		return absolute_texture_path;
 	}
 
-	void ModelImporter::ProcessMesh(const aiScene* scene, aiMesh* mesh, std::shared_ptr<Prefab> model_prefab, entt::entity current_entity_handle, std::shared_ptr<AssetMesh> asset_mesh, AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle parent_asset_handle, const AssetMetaData& parent_meta_data, const std::filesystem::path& path)
+	void ModelImporter::ProcessMesh(const aiScene* scene, aiMesh* mesh, std::shared_ptr<AssetMesh> asset_mesh)
 	{
 		// 1. Process Vertices
 		std::vector<glm::vec3> vertices;
@@ -326,21 +369,37 @@ namespace Louron {
 
 		// 3. Push SubMesh to Mesh Asset vector
 		asset_mesh->SubMeshes.push_back(std::move(sub_mesh));
+	}
 
+	void ModelImporter::ProcessMaterial(const aiScene* scene, aiMesh* mesh, std::shared_ptr<Prefab> model_prefab, entt::entity current_entity_handle, std::shared_ptr<AssetMesh> asset_mesh, AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle parent_asset_handle, const AssetMetaData& parent_meta_data, const std::filesystem::path& path)
+	{
 		// 4. Create Material Asset
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 		aiString materialName;
 		material->Get(AI_MATKEY_NAME, materialName);
 
 		auto project = Project::GetActiveProject();
-		AssetHandle asset_material_handle = static_cast<uint32_t>(std::hash<std::string>{}(
-			AssetUtils::AssetTypeToString(AssetType::Material_Standard) + path.filename().string() + materialName.C_Str()
-		));
+		AssetHandle asset_material_handle;
+
+		if (materialName == aiString("DefaultMaterial"))
+		{
+			// If DefaultMaterial set to inbuilt asset Default_Material
+			asset_material_handle = static_cast<uint32_t>(std::hash<std::string>{}(
+				AssetUtils::AssetTypeToString(AssetType::Material_Standard) + "InBuiltAsset" + "Default_Material"
+				));
+		}
+		else
+		{
+			// Unique Material
+			asset_material_handle = static_cast<uint32_t>(std::hash<std::string>{}(
+				AssetUtils::AssetTypeToString(AssetType::Material_Standard) + path.filename().string() + materialName.C_Str()
+				));
+		}
 
 		// If the Material has not already been loaded into the asset map, we 
 		// want to create a new material. Once this is done, we won't need to do this again 
 		// for this material.
-		if (asset_map->count(asset_material_handle) == 0) 
+		if (asset_map->count(asset_material_handle) == 0)
 		{
 			AssetMetaData material_metadata;
 			material_metadata.FilePath = std::filesystem::relative(path, Project::GetActiveProject()->GetAssetDirectory());
@@ -372,7 +431,7 @@ namespace Louron {
 			// Load Material Textures
 
 			auto load_texture = [&](aiTextureType texture_type) -> void
-			{
+				{
 					if (texture_type == aiTextureType_NONE || material->GetTextureCount(texture_type) == 0)
 						return;
 
@@ -400,7 +459,7 @@ namespace Louron {
 
 						texture_handle = static_cast<uint32_t>(std::hash<std::string>{}(
 							AssetUtils::AssetTypeToString(texture_meta_data.Type) + texture_meta_data.FilePath.string()
-						));
+							));
 
 						// Check if texture file already loaded.
 						if (asset_map->count(texture_handle) == 0)
@@ -420,7 +479,7 @@ namespace Louron {
 
 						texture_handle = static_cast<uint32_t>(std::hash<std::string>{}(
 							AssetUtils::AssetTypeToString(texture_meta_data.Type) + path.filename().string() + texture_meta_data.AssetName
-						));
+							));
 
 
 						glm::ivec2 texture_size = { assimp_texture_ref->mWidth, assimp_texture_ref->mHeight };
@@ -434,7 +493,7 @@ namespace Louron {
 					}
 					else if (!absolute_texture_path.empty())
 					{
-						L_CORE_ERROR("ModelImporter::ProcessMesh: Could Not Find Texture. Path:'{}', Assimp Texture String:'{}'.", absolute_texture_path.string(), assimp_texture_string.C_Str());
+						L_CORE_ERROR("ModelImporter::ProcessMaterial: Could Not Find Texture. Path:'{}', Assimp Texture String:'{}'.", absolute_texture_path.string(), assimp_texture_string.C_Str());
 						texture_asset = nullptr;
 					}
 
@@ -443,24 +502,24 @@ namespace Louron {
 
 						switch (texture_type)
 						{
-							case aiTextureType_DIFFUSE:
-							case aiTextureType_BASE_COLOR:
-							{
-								asset_material->SetAlbedoTexture(texture_handle);
-								break;
-							}
+						case aiTextureType_DIFFUSE:
+						case aiTextureType_BASE_COLOR:
+						{
+							asset_material->SetAlbedoTexture(texture_handle);
+							break;
+						}
 
-							case aiTextureType_METALNESS:
-							{
-								asset_material->SetMetallicTexture(texture_handle);
-								break;
-							}
+						case aiTextureType_METALNESS:
+						{
+							asset_material->SetMetallicTexture(texture_handle);
+							break;
+						}
 
-							case aiTextureType_NORMALS:
-							{
-								asset_material->SetNormalTexture(texture_handle);
-								break;
-							}
+						case aiTextureType_NORMALS:
+						{
+							asset_material->SetNormalTexture(texture_handle);
+							break;
+						}
 						}
 
 						texture_asset->Handle = texture_handle;
@@ -469,31 +528,29 @@ namespace Louron {
 						asset_reg->operator[](texture_handle) = texture_meta_data;
 					}
 
-			};
+				};
 
 			aiTextureType texture_base_colour_type = material->GetTextureCount(aiTextureType_BASE_COLOR) > 0 ? aiTextureType_BASE_COLOR : material->GetTextureCount(aiTextureType_DIFFUSE) > 0 ? aiTextureType_DIFFUSE : aiTextureType_NONE;
-			
+
 			load_texture(texture_base_colour_type);
 			load_texture(aiTextureType_METALNESS);
 			load_texture(aiTextureType_NORMALS);
-			
+
 			if (asset_material) {
 
 				auto& component = model_prefab->GetComponent<MeshRendererComponent>(current_entity_handle);
 				component.MeshRendererMaterialHandles.push_back({ asset_material_handle, nullptr });
 
 				asset_material->Handle = asset_material_handle;
-
 				asset_map->operator[](asset_material_handle) = asset_material;
 				asset_reg->operator[](asset_material_handle) = material_metadata;
 			}
 
 		}
-		else 
+		else
 		{
 			model_prefab->GetComponent<MeshRendererComponent>(current_entity_handle).MeshRendererMaterialHandles.push_back({ asset_material_handle, nullptr });
 		}
-
 	}
 
 	void ModelImporter::ProcessNode(const aiScene* scene, aiNode* node, std::shared_ptr<Prefab> model_prefab, entt::entity parent_entity_handle, AssetMap* asset_map, AssetRegistry* asset_reg, AssetHandle parent_asset_handle, const AssetMetaData& parent_meta_data, const std::filesystem::path& path)
@@ -529,40 +586,53 @@ namespace Louron {
 
 			}
 
-			// Generate Sub Asset Handle
-			AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
-				AssetUtils::AssetTypeToString(AssetType::Mesh) + path.filename().string() + node->mName.C_Str()
-			));
+			// Compare the Node to any Instances Already Loaded
+			// This merely compares the meshes contained in the node
+			AssimpHelpers::MeshInstanceKey node_key{};
+			node_key.mesh_references.reserve(node->mNumMeshes);
+			for (unsigned int i = 0; i < node->mNumMeshes; i++)
+				node_key.mesh_references.emplace_back(node->mMeshes[i]);
+			node_key.normalize();
 
-			std::shared_ptr<AssetMesh> asset_mesh = std::make_shared<AssetMesh>();
-			asset_mesh->Handle = handle;
-
-			// If this Sub Asset Has not been loaded yet
-			if (asset_map->count(handle) == 0) 
+			// We have already loaded an instance of this node
+			if (AssimpHelpers::s_LoadedNodes.count(node_key) != 0)
 			{
-				glm::mat4 local_transformation = glm::mat4(
-					node->mTransformation.a1, node->mTransformation.b1, node->mTransformation.c1, node->mTransformation.d1,
-					node->mTransformation.a2, node->mTransformation.b2, node->mTransformation.c2, node->mTransformation.d2,
-					node->mTransformation.a3, node->mTransformation.b3, node->mTransformation.c3, node->mTransformation.d3,
-					node->mTransformation.a4, node->mTransformation.b4, node->mTransformation.c4, node->mTransformation.d4
-				);
-				model_prefab->GetComponent<TransformComponent>(current_entity_handle).SetTransform(local_transformation);
-				model_prefab->AddComponent<MeshFilterComponent>(current_entity_handle).MeshFilterAssetHandle = handle;
-				model_prefab->AddComponent<MeshRendererComponent>(current_entity_handle);
+				model_prefab->GetComponent<TransformComponent>(current_entity_handle).SetTransform(AssimpHelpers::ConvertMatrixToGLMFormat(node->mTransformation));
+
+				auto& mesh_filter_component		= model_prefab->AddComponent<MeshFilterComponent>(current_entity_handle);
+				auto& mesh_renderer_component	= model_prefab->AddComponent<MeshRendererComponent>(current_entity_handle);
+
+				mesh_filter_component.MeshFilterAssetHandle = AssimpHelpers::s_LoadedNodes[node_key].first;
+				mesh_renderer_component.MeshRendererMaterialHandles = AssimpHelpers::s_LoadedNodes[node_key].second;
+			}
+			else
+			{
+				// Generate AssetMesh Handle
+				AssetHandle handle = static_cast<uint32_t>(std::hash<std::string>{}(
+					AssetUtils::AssetTypeToString(AssetType::Mesh) + path.filename().string() + node->mName.C_Str()
+				));
+
+				std::shared_ptr<AssetMesh> asset_mesh = std::make_shared<AssetMesh>();
+				asset_mesh->Handle = handle;
 
 				AssetMetaData metadata;
-
 				metadata.Type = AssetType::Mesh;
 				metadata.AssetName = node->mName.C_Str();
 				metadata.ParentAssetHandle = parent_asset_handle;
 				metadata.FilePath = std::filesystem::relative(path, Project::GetActiveProject()->GetAssetDirectory());
 				metadata.IsCustomAsset = parent_meta_data.IsCustomAsset;
 
-				// Process Meshes of the Node
-				for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+				// Update Prefab Transform and Add Required Components
+				model_prefab->GetComponent<TransformComponent>(current_entity_handle).SetTransform(AssimpHelpers::ConvertMatrixToGLMFormat(node->mTransformation));
+				model_prefab->AddComponent<MeshFilterComponent>(current_entity_handle).MeshFilterAssetHandle = handle;
+				model_prefab->AddComponent<MeshRendererComponent>(current_entity_handle);
 
+				// Process Meshes of the Node
+				for (unsigned int i = 0; i < node->mNumMeshes; i++) 
+				{
 					aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-					ProcessMesh(scene, mesh, model_prefab, current_entity_handle, asset_mesh, asset_map, asset_reg, parent_asset_handle, parent_meta_data, path);
+					ProcessMesh(scene, mesh, asset_mesh);
+					ProcessMaterial(scene, mesh, model_prefab, current_entity_handle, asset_mesh, asset_map, asset_reg, parent_asset_handle, parent_meta_data, path);
 
 					// Calculate the the AABB of the mesh including any sub meshes
 					// Update bounds to include the current submesh
@@ -581,11 +651,19 @@ namespace Louron {
 						});
 				}
 
-				if (asset_mesh) {
+				if (asset_mesh) 
+				{
+					// Store instance of node into the loaded node map
+					auto& pair = AssimpHelpers::s_LoadedNodes[node_key];
+					pair.first = model_prefab->AddComponent<MeshFilterComponent>(current_entity_handle).MeshFilterAssetHandle;
+					pair.second = model_prefab->AddComponent<MeshRendererComponent>(current_entity_handle).MeshRendererMaterialHandles;
+
+					// Store instance of AssetMesh in AssetManager registry
 					asset_map->operator[](handle) = asset_mesh;
 					asset_reg->operator[](handle) = metadata;
 				}
-				else {
+				else 
+				{
 					model_prefab->RemoveComponent<MeshFilterComponent>(current_entity_handle);
 					model_prefab->RemoveComponent<MeshRendererComponent>(current_entity_handle);
 				}

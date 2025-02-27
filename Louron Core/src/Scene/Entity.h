@@ -58,7 +58,7 @@ namespace Louron {
 
 			if constexpr (std::is_same_v<T, RigidbodyComponent>) {
 				if ((m_Scene->IsRunning() || m_Scene->IsSimulating()) && m_Scene->GetPhysScene())
-					component.Init(&GetComponent<TransformComponent>(), m_Scene->GetPhysScene());
+					component.Init(&GetTransform(), m_Scene->GetPhysScene());
 
 				if (HasComponent<BoxColliderComponent>())
 				{
@@ -107,7 +107,7 @@ namespace Louron {
 				// Get the Optimal Size and Center for Box Collider Based on MeshFilter
 				if (HasComponent<MeshFilterComponent>())
 				{
-					glm::mat4 global_transform = GetComponent<TransformComponent>().GetGlobalTransform();
+					glm::mat4 global_transform = GetTransform().GetGlobalTransform();
 					Bounds_AABB mesh_bounds = AssetManager::GetAsset<AssetMesh>(GetComponent<MeshFilterComponent>().MeshFilterAssetHandle)->MeshBounds;
 
 					// Create OBB transformation matrix
@@ -166,6 +166,11 @@ namespace Louron {
 			}
 
 			return m_Scene->m_Registry.get<T>(m_EntityHandle);
+		}
+
+		TransformComponent& GetTransform()
+		{
+			return GetComponent<TransformComponent>();
 		}
 
 		// This returns if the Entity has an applicable Component

@@ -1,0 +1,93 @@
+Scene Name: Linked Duplicates
+Scene Asset Directory: E:\Coding\Louron\Louron Editor\Sandbox Project\Assets
+Scene Pipeline Type: 1
+Entities:
+  - Entity: 622596363
+    TagComponent:
+      Tag: Directional Light
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-30, 150, 0]
+      Scale: [1, 1, 1]
+    DirectionalLightComponent:
+      Active: true
+      Colour: [1, 1, 1, 1]
+      Intensity: 1
+      Shadow Type: None
+      Max Shadow Visible Distance: 1
+  - Entity: 824636985
+    TagComponent:
+      Tag: Main Camera
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 5, 20]
+      Rotation: [-10, 0, 0]
+      Scale: [1, 1, 1]
+    CameraComponent:
+      Camera:
+        Projection Type: Perspective
+        FOV: 60.0000038
+        Near: 0.00999999978
+        Far: 1000
+      Primary: true
+      ClearFlag: Colour
+      ClearColour: [0.176400006, 0.329400003, 0.560699999, 1]
+  - Entity: 3981128135
+    TagComponent:
+      Tag: Test Instanced Mesh (1)
+    HierarchyComponent:
+      Parent: 4294967295
+      Children:
+        - 4077608345
+        - 1413034348
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [0, 180, 0]
+      Scale: [1, 1, 1]
+  - Entity: 4077608345
+    TagComponent:
+      Tag: Suzanne
+    HierarchyComponent:
+      Parent: 3981128135
+      Children:
+        []
+    TransformComponent:
+      Translation: [0, 0, 0]
+      Rotation: [-90.0000076, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 3757258278
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 723177154
+        - 2002845819
+  - Entity: 1413034348
+    TagComponent:
+      Tag: Suzanne.001
+    HierarchyComponent:
+      Parent: 3981128135
+      Children:
+        []
+    TransformComponent:
+      Translation: [-1.05177021, 2.20745754, -0.339576602]
+      Rotation: [-90.0000076, -0, 0]
+      Scale: [1, 1, 1]
+    MeshFilterComponent:
+      MeshAssetHandle: 3757258278
+    MeshRendererComponent:
+      MeshActive: true
+      CastShadows: false
+      MaterialAssetCount: 2
+      MaterialAssetHandles:
+        - 723177154
+        - 2002845819

@@ -218,8 +218,8 @@ namespace Louron {
 
         ResetRigidbody();
 
-        const glm::vec3& position = entity.GetComponent<TransformComponent>().GetGlobalPosition();
-        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetComponent<TransformComponent>().GetGlobalRotation()));
+        const glm::vec3& position = entity.GetTransform().GetGlobalPosition();
+        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetTransform().GetGlobalRotation()));
         
         m_Shape->m_StaticBody = std::make_shared<RigidDynamic>();
         m_Shape->m_StaticBody->Init(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));
@@ -670,8 +670,8 @@ namespace Louron {
 
         this->ResetRigidbody();
 
-        const glm::vec3& position = entity.GetComponent<TransformComponent>().GetGlobalPosition();
-        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetComponent<TransformComponent>().GetGlobalRotation()));
+        const glm::vec3& position = entity.GetTransform().GetGlobalPosition();
+        const glm::quat& quaternion = glm::quat(glm::radians(entity.GetTransform().GetGlobalRotation()));
 
         m_Shape->m_StaticBody = std::make_shared<RigidDynamic>();
         m_Shape->m_StaticBody->Init(PxTransform(position.x, position.y, position.z, PxQuat(quaternion.x, quaternion.y, quaternion.z, quaternion.w)));

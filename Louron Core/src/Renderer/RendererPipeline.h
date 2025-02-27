@@ -99,7 +99,7 @@ namespace Louron {
 
 		void UpdateComputeData();
 
-		void UpdateSSBOData();
+		void UpdateLightSSBO();
 		void ConductLightFrustumCull();
 		void ConductRenderableFrustumCull(const glm::vec3& camera_position, const glm::mat4& projection_matrix);
 		void ConductRenderableOcclusionCull();
@@ -130,7 +130,6 @@ namespace Louron {
 			GeometryQueryMap EntityOcclusionQueries;
 			std::unordered_map<UUID, uint8_t> EntityOcclusionHistory;
 
-			// TODO: Consider Unordered Set for O(1) opposed to O(n)
 			std::vector<Entity> RenderableEntitiesInFrustum;
 			std::vector<Entity> PLEntitiesInFrustum;
 			std::vector<Entity> SLEntitiesInFrustum;

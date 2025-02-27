@@ -146,7 +146,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 		ImGui::Dummy({ 0.0f, 5.0f });
 
 		ImGui::Text("Transform Component\n ");
-		TransformComponent& entity_transform = selected_entity.GetComponent<TransformComponent>();
+		TransformComponent& entity_transform = selected_entity.GetTransform();
 
 		ImGui::Columns(2, "transform_columns", false);
 

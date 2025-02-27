@@ -51,7 +51,7 @@ void HierarchyPanel::OnImGuiRender(const std::shared_ptr<Louron::Scene>& scene_r
 								if (parent_uuid != NULL_UUID)
 									entity.GetComponent<HierarchyComponent>().AttachParent(parent_uuid);
 
-								auto& transform = entity.GetComponent<TransformComponent>();
+								auto& transform = entity.GetTransform();
 								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
 								transform.SetPosition({ 0.0f, 0.0f, 0.0f });
 							}

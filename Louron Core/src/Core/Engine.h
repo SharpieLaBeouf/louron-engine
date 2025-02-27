@@ -91,8 +91,7 @@ namespace Louron {
 
 	private:
 		static Engine* s_Instance;
-		friend int ::main(int argc, char** argv);
-		friend int WINAPI ::WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd);
+		friend int Main_Entry(int argc, char** argv);
 	};
 
 	Engine* CreateEngine(EngineCommandLineArgs args);

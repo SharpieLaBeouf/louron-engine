@@ -253,11 +253,13 @@ namespace Louron {
 
     // TODO: Implement Audio Components
 
-    struct AudioListener : public Component {
+    struct AudioListener : public Component 
+    {
 
     };
 
-    struct AudioEmitter : public Component {
+    struct AudioEmitter : public Component 
+    {
 
     };
 

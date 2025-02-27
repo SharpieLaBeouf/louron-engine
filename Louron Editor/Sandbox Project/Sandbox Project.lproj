@@ -1,6 +1,6 @@
 Project Name: Sandbox Project
 Project Config:
-  StartScene: Scenes\Occlusion Culling Test.lscene
+  StartScene: Scenes\Linked Duplicates.lscene
   AssetDirectory: Assets\
   AssetRegistry: AssetRegistry.lassetreg
   CoreScriptModulePath: Scripts\Binaries\Louron Script Core.dll
