@@ -393,7 +393,7 @@ namespace Louron {
 			// Unique Material
 			asset_material_handle = static_cast<uint32_t>(std::hash<std::string>{}(
 				AssetUtils::AssetTypeToString(AssetType::Material_Standard) + path.filename().string() + materialName.C_Str()
-				));
+			));
 		}
 
 		// If the Material has not already been loaded into the asset map, we 
@@ -428,6 +428,15 @@ namespace Louron {
 			if (material->Get(AI_MATKEY_ROUGHNESS_FACTOR, temp) == aiReturn_SUCCESS)
 				asset_material->SetRoughness(temp);
 
+			if (material->Get(AI_MATKEY_TRANSPARENCYFACTOR, temp) == aiReturn_SUCCESS && temp > 0.0f)
+			{
+				glm::vec4 temp_colour = asset_material->GetAlbedoTintColour();
+				temp_colour.a = 1.0f - temp;
+				asset_material->SetAlbedoTintColour(temp_colour);
+
+				asset_material->SetRenderType(RenderType::L_MATERIAL_TRANSPARENT);
+			}
+
 			// Load Material Textures
 
 			auto load_texture = [&](aiTextureType texture_type) -> void
@@ -444,7 +453,7 @@ namespace Louron {
 					AssetMetaData texture_meta_data;
 					std::shared_ptr<Texture2D> texture_asset = nullptr;
 
-					if (std::filesystem::exists(absolute_texture_path))
+					if (std::filesystem::exists(absolute_texture_path) && std::filesystem::is_regular_file(absolute_texture_path))
 					{
 						std::filesystem::path relative_texture_path = std::filesystem::relative(absolute_texture_path, Project::GetActiveProject()->GetAssetDirectory());
 						bool is_relative_to_project = !relative_texture_path.string().starts_with("..");

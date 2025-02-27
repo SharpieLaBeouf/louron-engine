@@ -945,6 +945,7 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 					asset_name_buf[sizeof(asset_name_buf) - 1] = '\0'; // Ensure null-termination
 
 					ImGui::Text("Element %i: ", i);
+
 					ImGui::NextColumn();
 
 					ImGui::PushStyleColor(ImGuiCol_Text, text_colour);
@@ -968,7 +969,8 @@ void PropertiesPanel::OnImGuiRender(const std::shared_ptr<Scene>& scene_ref, Ent
 
 					// Drag target
 					if (ImGui::BeginDragDropTarget()) {
-						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_HANDLE")) {
+						if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ASSET_HANDLE")) 
+						{
 							AssetHandle dropped_asset_handle = *(const AssetHandle*)payload->Data;
 
 							if (Project::GetStaticEditorAssetManager()->IsAssetHandleValid(dropped_asset_handle) && Project::GetStaticEditorAssetManager()->GetAssetType(dropped_asset_handle) == AssetType::Material_Standard) {

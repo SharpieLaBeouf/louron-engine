@@ -266,7 +266,7 @@ void main() {
     result = LouronCalculateHDR_Exposure(result, 5.0);
     result = LouronCalculateGammaCorrection(result, 2.2);
 
-    out_FragColour = vec4(result, 1.0);
+    out_FragColour = vec4(result, u_Material.albedoTint.a);
 }
 
 // -------------------------------------------

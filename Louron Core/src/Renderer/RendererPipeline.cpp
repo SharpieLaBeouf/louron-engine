@@ -1618,7 +1618,7 @@ namespace Louron {
 
 				Bounds_Sphere sphere{};
 				sphere.BoundsCentre = point_light.GetTransform().GetGlobalPosition();
-				sphere.BoundsRadius = point_light.GetComponent<PointLightComponent>().Radius;
+				sphere.BoundsRadius = point_light.GetComponent<PointLightComponent>().Radius * 2.0f;
 
 				if (auto oct_ref = scene_ref->GetOctree().lock(); oct_ref) {
 
